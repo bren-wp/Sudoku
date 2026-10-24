@@ -51,8 +51,8 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-fun SectionTitle(title: String, description: String = "", centered: Boolean = false,
-                 onBack: () -> Unit) {
+fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
+                 centered: Boolean = false) {
     if (!centered) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
