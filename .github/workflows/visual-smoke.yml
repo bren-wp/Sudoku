@@ -39,18 +39,7 @@ jobs:
           emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
           script: |
             gradle --no-daemon :app:connectedDebugAndroidTest
-            mkdir -p "$GITHUB_WORKSPACE/screenshots"
-            for picture in 01-home 02-new-game 03-game 04-settings 05-daily 06-statistics 07-achievements; do
-              adb exec-out run-as com.brendigo.sudoku cat "files/screenshots/$picture.png" > "$GITHUB_WORKSPACE/screenshots/$picture.png" || true
-              if ! test -s "$GITHUB_WORKSPACE/screenshots/$picture.png"; then
-                rm -f "$GITHUB_WORKSPACE/screenshots/$picture.png"
-              fi
-            done
-            if ! find "$GITHUB_WORKSPACE/screenshots" -name "*.png" -size +0c -print -quit | grep -q .; then
-              adb shell am start -n com.brendigo.sudoku/.MainActivity
-              sleep 3
-              adb exec-out screencap -p > "$GITHUB_WORKSPACE/screenshots/01-home-fallback.png"
-            fi
+            bash .github/scripts/export-emulator-screenshots.sh
       - name: Upload actual Android screenshots
         if: always()
         uses: actions/upload-artifact@v4
