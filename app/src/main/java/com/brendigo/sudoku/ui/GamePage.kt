@@ -2,6 +2,9 @@ package com.brendigo.sudoku.ui
 
 import android.view.HapticFeedbackConstants
 import android.view.SoundEffectConstants
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +17,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -97,7 +101,7 @@ fun GamePage(controller: SudokuController) {
                 color = Ink.red, fontSize = 20.sp)
         }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            SudokuBoard(game, controller.options.highlightEquals, Modifier.size(boardSize)) {
+            SudokuBoard(game, controller.options.highlightEquals, controller.options.animations, Modifier.size(boardSize)) {
                 controller.select(it)
                 feedback()
             }
@@ -170,7 +174,7 @@ fun GamePage(controller: SudokuController) {
 }
 
 @Composable
-private fun SudokuBoard(game: Session, highlight: Boolean, modifier: Modifier = Modifier, onSelect: (Int) -> Unit) {
+private fun SudokuBoard(game: Session, highlight: Boolean, animations: Boolean, modifier: Modifier = Modifier, onSelect: (Int) -> Unit) {
     val n = game.size
     val selected = game.selected
     val selectionNumber = if (selected >= 0) game.board[selected] else 0
@@ -203,9 +207,14 @@ private fun SudokuBoard(game: Session, highlight: Boolean, modifier: Modifier = 
                             isPeer -> Ink.blue.copy(alpha = .12f)
                             else -> Color.Transparent
                         }
+                        val highlightColor by animateColorAsState(
+                            targetValue = bg,
+                            animationSpec = if (animations) tween(durationMillis = 150) else snap(),
+                            label = "Sudoku cell highlight"
+                        )
                         Box(
                             Modifier.weight(1f).fillMaxHeight()
-                                .background(bg)
+                                .background(highlightColor)
                                 .border(.35.dp, Ink.line.copy(alpha = .55f))
                                 .semantics {
                                     contentDescription = "Redak ${r + 1}, stupac ${c + 1}: " +

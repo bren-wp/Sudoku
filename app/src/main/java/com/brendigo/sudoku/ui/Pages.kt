@@ -225,7 +225,7 @@ fun DailyPage(controller: SudokuController) {
                 Text("🔥", fontSize = 30.sp)
                 Spacer(Modifier.width(6.dp))
                 Column {
-                    Text("${controller.stats.streak}", color = Ink.gold, fontSize = 30.sp,
+                    Text("${controller.currentStreak()}", color = Ink.gold, fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold)
                     Subtitle("dana u nizu")
                 }
@@ -251,7 +251,7 @@ fun DailyPage(controller: SudokuController) {
                 val latest = runCatching { LocalDate.parse(controller.stats.lastDaily) }.getOrNull()
                 val today = LocalDate.now()
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-                val completedDays = (0 until controller.stats.streak.coerceAtMost(7)).mapNotNull {
+                val completedDays = (0 until controller.currentStreak().coerceAtMost(7)).mapNotNull {
                     latest?.minusDays(it.toLong())
                 }.toSet()
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
