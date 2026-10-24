@@ -37,6 +37,23 @@ class SudokuVisualSmokeTest {
         instrumentation.waitForIdleSync()
         val screenshot = instrumentation.uiAutomation.takeScreenshot()
             ?: error("Emulator did not return a screenshot")
+        // Reject OS crash/ANR dialogs. The tests can pass while system overlays
+        // contaminate screenshot artifacts, so validate representative pixels.
+        val samplePoints = listOf(
+            .35f to .49f, .50f to .45f, .50f to .50f,
+            .50f to .55f, .65f to .49f
+        )
+        val brightSamples = samplePoints.count { (rx, ry) ->
+            val pixel = screenshot.getPixel(
+                (screenshot.width * rx).toInt(), (screenshot.height * ry).toInt()
+            )
+            android.graphics.Color.red(pixel) > 208 &&
+                android.graphics.Color.green(pixel) > 208 &&
+                android.graphics.Color.blue(pixel) > 208
+        }
+        check(brightSamples < 3) {
+            "System overlay or launcher ANR obscures $name: $brightSamples bright pixels"
+        }
         val resolver = rule.activity.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, "$name.png")
