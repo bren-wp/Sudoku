@@ -241,21 +241,21 @@ fun HomePage(controller: SudokuController) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            HomeTile("✚", "Nova igra", "Odaberi težinu", Ink.teal, Modifier.weight(1f)) {
+            HomeTile("Nova igra", "Odaberi težinu", Ink.teal, Modifier.weight(1f)) {
                 controller.go(Screen.NEW_GAME)
             }
-            HomeTile("▣", "Dnevni izazov", "Nova zagonetka svaki dan", Ink.gold, Modifier.weight(1f)) {
+            HomeTile("Dnevni izazov", "Nova zagonetka svaki dan", Ink.gold, Modifier.weight(1f)) {
                 controller.go(Screen.DAILY)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeTile("▥", "Statistika", "Prati napredak", Ink.blue, Modifier.weight(1f), compact = true) {
+            HomeTile("Statistika", "Prati napredak", Ink.blue, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.STATS)
             }
-            HomeTile("★", "Postignuća", "Osvoji nagrade", Ink.purple, Modifier.weight(1f), compact = true) {
+            HomeTile("Postignuća", "Osvoji nagrade", Ink.purple, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.ACHIEVEMENTS)
             }
-            HomeTile("⚙", "Postavke", "Prilagodi igru", Ink.muted, Modifier.weight(1f), compact = true) {
+            HomeTile("Postavke", "Prilagodi igru", Ink.muted, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.SETTINGS)
             }
         }
@@ -299,7 +299,7 @@ fun HomePage(controller: SudokuController) {
 
 @Composable
 private fun HomeTile(
-    icon: String, title: String, subtitle: String, accent: Color,
+    title: String, subtitle: String, accent: Color,
     modifier: Modifier = Modifier, compact: Boolean = false, onClick: () -> Unit,
 ) {
     NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-"))
