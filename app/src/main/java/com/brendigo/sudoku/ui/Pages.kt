@@ -663,7 +663,9 @@ fun AchievementsPage(controller: SudokuController) {
         visible.chunked(2).forEach { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { achievement ->
-                    NeonPanel(Modifier.weight(1f).height(114.dp), achievement.tint) {
+                    NeonPanel(Modifier.weight(1f).height(101.dp)
+                        .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-")),
+                        achievement.tint) {
                         Column(Modifier.fillMaxSize().padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
