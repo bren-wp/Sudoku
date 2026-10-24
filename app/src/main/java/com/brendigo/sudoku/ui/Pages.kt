@@ -309,12 +309,11 @@ fun DailyPage(controller: SudokuController) {
             Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
                 Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white)
-                val latest = runCatching { LocalDate.parse(controller.stats.lastDaily) }.getOrNull()
                 val today = LocalDate.now()
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-                val completedDays = (0 until controller.currentStreak().coerceAtMost(7)).mapNotNull {
-                    latest?.minusDays(it.toLong())
-                }.toSet()
+                val completedDays = controller.stats.completedDailyDates.toHashSet().ifEmpty {
+                    setOf(controller.stats.lastDaily)
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {

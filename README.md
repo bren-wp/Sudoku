@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.3`
+- Version: `1.0.5`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -73,3 +73,11 @@ Do not commit or share the private signing keystore.
 - A screenshot is rejected if representative central pixels indicate a light system dialog; successful tests alone are not accepted as evidence of clean screenshots.
 - Daily challenge completions grant a persisted 50-point reward, including a compatibility migration for existing local save data.
 - True 1:1 pixel-perfect fidelity is still not certified; source screen images remain visual targets.
+
+## Sudoku 1.0.5 — igra i privatnost
+
+- Dnevni izazovi knjiže se pod datumom zagonetke, čak i kada igra prijeđe ponoć, bez dvostrukog dodjeljivanja nagrada.
+- Tjedni niz prikazuje stvarno riješene datume, a postojeći napredak migrira se bez brisanja.
+- Postavke uključuju dostupnu offline obavijest o privatnosti; svi glavni zasloni dobili su ujednačen brendirani podnožak.
+- Dodatni JUnit testovi pokrivaju duple pobjede, promjenu dana i niz dnevnih izazova.
+- GitHub Release sadrži APK i AAB. Bez sigurnog izdavačkog potpisa APK je testni, a AAB nepotpisan.
