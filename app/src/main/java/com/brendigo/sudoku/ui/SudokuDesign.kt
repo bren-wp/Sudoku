@@ -225,17 +225,17 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
 @Composable
 fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-        SudokuLogo(if (compact) 49.dp else 70.dp)
+        SudokuLogo(if (compact) 45.dp else 62.dp)
         Spacer(Modifier.width(14.dp))
         Column {
             Text(
                 text = "Sudoku",
-                fontSize = if (compact) 38.sp else 49.sp,
+                fontSize = if (compact) 36.sp else 42.sp,
                 fontWeight = FontWeight.ExtraBold,
                 style = TextStyle(brush = Brush.horizontalGradient(listOf(Ink.white, Ink.white, Ink.cyan, Ink.blue))),
                 letterSpacing = (-1).sp,
             )
-            Text("by Brendigo", fontSize = 14.sp, color = Ink.muted, letterSpacing = 3.sp)
+            Text("by Brendigo", fontSize = 11.sp, color = Ink.muted, letterSpacing = 3.sp)
         }
     }
 }
@@ -381,7 +381,8 @@ fun AccentText(text: String, size: Int = 38, modifier: Modifier = Modifier) {
 
 @Composable
 fun Subtitle(text: String, modifier: Modifier = Modifier, centered: Boolean = false) {
-    Text(text, modifier = modifier, color = Ink.muted, fontSize = 15.sp,
+    Text(text, modifier = modifier, color = Ink.muted,
+        fontSize = 12.sp, lineHeight = 16.sp,
         textAlign = if (centered) TextAlign.Center else TextAlign.Start)
 }
 
