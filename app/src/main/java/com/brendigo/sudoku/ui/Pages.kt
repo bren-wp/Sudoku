@@ -262,9 +262,15 @@ fun DailyPage(controller: SudokuController) {
             Text("✓ Današnji izazov već je riješen.", color = Ink.teal,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
-        SolidAction(if (controller.isGenerating) "Učitavanje…" else "▶   Pokreni izazov",
+        SolidAction(
+            when {
+                controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
+                controller.isGenerating -> "Učitavanje…"
+                else -> "▶   Pokreni izazov"
+            },
             { scope.launch { controller.startNew(9, 2, daily = true) } },
-            Modifier.fillMaxWidth(), !controller.isGenerating)
+            Modifier.fillMaxWidth(), !controller.isGenerating && !controller.dailyAlreadyCompleted()
+        )
     }
 }
 
@@ -426,7 +432,7 @@ fun AchievementsPage(controller: SudokuController) {
 fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
     PageContent {
-        SectionTitle("Postavke", "Prilagodi igru svojim željama", { controller.go(Screen.HOME) })
+        SectionTitle("Postavke", "Prilagodi igru svojim željama", { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("◉", "Izgled", "Prilagodi vizualni doživljaj igre")
@@ -455,10 +461,10 @@ fun SettingsPage(controller: SudokuController) {
         NeonPanel(Modifier.fillMaxWidth(), Ink.purple) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("♫", "Zvuk i vibracija", "Povratne informacije tijekom igre")
-                SettingToggle("♪", "Zvuk", "Zvučni efekti (nije još dostupno)", opts.sound) {
+                SettingToggle("♪", "Zvuk", "Zvučni efekti pri pritisku gumba", opts.sound) {
                     controller.updateOptions(opts.copy(sound = it))
                 }
-                SettingToggle("◈", "Vibracija", "Taktilna povratna informacija (nije još dostupna)", opts.vibration) {
+                SettingToggle("◈", "Vibracija", "Vibracija pri unosu broja", opts.vibration) {
                     controller.updateOptions(opts.copy(vibration = it))
                 }
             }

@@ -119,6 +119,10 @@ class SudokuController(context: Context) {
         saveGame()
     }
 
+    fun clearToast() {
+        toast = ""
+    }
+
     suspend fun startNew(size: Int, level: Int, daily: Boolean = false) {
         if (isGenerating) return
         val today = LocalDate.now()
