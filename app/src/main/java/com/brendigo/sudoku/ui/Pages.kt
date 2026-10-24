@@ -729,6 +729,7 @@ private data class Achievement(
 fun AchievementsPage(controller: SudokuController) {
     val s = controller.stats
     var showAll by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var selectedAchievement by remember { androidx.compose.runtime.mutableStateOf<Achievement?>(null) }
     // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
     val basic = listOf(
         Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
@@ -777,14 +778,25 @@ fun AchievementsPage(controller: SudokuController) {
         visible.chunked(2).forEach { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { achievement ->
+                    val unlocked = achievement.current >= achievement.goal
                     NeonPanel(Modifier.weight(1f).height(101.dp)
-                        .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-")),
-                        achievement.tint) {
+                        .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-"))
+                        .semantics {
+                            contentDescription = achievement.title +
+                                (if (unlocked) ", otključano" else ", zaključano")
+                            role = Role.Button
+                        }
+                        .clickable { selectedAchievement = achievement },
+                        if (unlocked) achievement.tint else Ink.line.copy(alpha = .50f)) {
                         Column(Modifier.fillMaxSize().padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                BrandIcon(achievementIconFor(achievement.title), Modifier.size(23.dp), achievement.tint)
-                                Text("★ ${achievement.reward}", color = achievement.tint, fontSize = 11.sp)
+                                BrandIcon(if (unlocked) achievementIconFor(achievement.title) else "lock",
+                                    Modifier.size(23.dp),
+                                    if (unlocked) achievement.tint else Ink.muted.copy(alpha = .73f))
+                                Text("★ ${achievement.reward}",
+                                    color = if (unlocked) achievement.tint else Ink.muted,
+                                    fontSize = 11.sp)
                             }
                             Text(achievement.title, color = Ink.white, fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold, lineHeight = 16.sp, maxLines = 1)
@@ -795,7 +807,8 @@ fun AchievementsPage(controller: SudokuController) {
                             Box(Modifier.fillMaxWidth().height(5.dp).background(Ink.blue.copy(alpha = .25f),
                                 RoundedCornerShape(12.dp))) {
                                 Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
-                                    .background(achievement.tint, RoundedCornerShape(12.dp)))
+                                    .background(if (unlocked) achievement.tint else Ink.muted,
+                                    RoundedCornerShape(12.dp)))
                             }
                             Text("${achievement.current.coerceAtMost(achievement.goal)} / ${achievement.goal}",
                                 color = Ink.muted, fontSize = 10.sp)
@@ -812,6 +825,34 @@ fun AchievementsPage(controller: SudokuController) {
                      else "Pogledaj svih 24 postignuća", color = Ink.cyan, fontSize = 13.sp)
             }
         }
+    }
+    selectedAchievement?.let { award ->
+        AlertDialog(
+            onDismissRequest = { selectedAchievement = null },
+            modifier = Modifier.testTag("achievement-detail"),
+            containerColor = Color(0xFF081A41),
+            title = { Text(award.title, color = Ink.white) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(award.text, color = Ink.muted)
+                    Text(
+                        "Napredak: ${award.current.coerceAtMost(award.goal)} / ${award.goal}",
+                        color = Ink.cyan,
+                    )
+                    Text(
+                        if (award.current >= award.goal)
+                            "Postignuće otključano · +${award.reward} bodova"
+                        else "Osvoji postignuće i otključaj ${award.reward} bodova.",
+                        color = Ink.gold,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedAchievement = null }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
 }
 
@@ -890,7 +931,7 @@ fun SettingsPage(controller: SudokuController) {
                 Subtitle("Sudoku by Brendigo")
                 Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 NeonPanel(
-                    Modifier.fillMaxWidth().heightIn(min = 40.dp)
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("privacy-policy").clickable { showPrivacy = true },
                     Ink.blue,
                 ) {
