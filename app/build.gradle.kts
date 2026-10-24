@@ -10,12 +10,32 @@ android {
         applicationId = "com.brendigo.sudoku"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    val signingStore = System.getenv("SUDOKU_SIGNING_STORE_FILE")
+    val signingAlias = System.getenv("SUDOKU_SIGNING_KEY_ALIAS")
+    val signingStorePassword = System.getenv("SUDOKU_SIGNING_STORE_PASSWORD")
+    val signingKeyPassword = System.getenv("SUDOKU_SIGNING_KEY_PASSWORD")
+    val hasPublisherSigning = listOf(
+        signingStore, signingAlias, signingStorePassword, signingKeyPassword
+    ).all { !it.isNullOrBlank() }
+    signingConfigs {
+        if (hasPublisherSigning) {
+            create("publisher") {
+                storeFile = file(signingStore!!)
+                keyAlias = signingAlias!!
+                storePassword = signingStorePassword!!
+                keyPassword = signingKeyPassword!!
+            }
+        }
     }
     buildTypes {
         release {
+            if (hasPublisherSigning) {
+                signingConfig = signingConfigs.getByName("publisher")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -43,8 +63,15 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
+    androidTestImplementation(composeBom)
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

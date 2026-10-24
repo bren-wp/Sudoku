@@ -2,16 +2,22 @@ package com.brendigo.sudoku.ui
 
 import android.view.HapticFeedbackConstants
 import android.view.SoundEffectConstants
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -42,9 +49,20 @@ fun GamePage(controller: SudokuController) {
         if (controller.options.sound) view.playSoundEffect(SoundEffectConstants.CLICK)
         if (controller.options.vibration) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
     }
-    PageContent {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val compact = maxHeight < 730.dp
+        val horizontal = if (compact) 12.dp else 20.dp
+        val boardSize = minOf(maxWidth - horizontal * 2,
+            maxHeight - if (compact) 330.dp else 310.dp).coerceAtLeast(216.dp)
+        val toolHeight = if (compact) 61.dp else 73.dp
+        val numberHeight = if (compact) 49.dp else 62.dp
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(horizontal = horizontal, vertical = if (compact) 6.dp else 12.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp),
+        ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(45.dp).background(Color(0x770B2256), RoundedCornerShape(14.dp))
+            Box(Modifier.size(45.dp).testTag("game-back").background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.HOME) }, contentAlignment = Alignment.Center) {
                 Text("‹", color = Ink.muted, fontSize = 34.sp)
             }
@@ -58,7 +76,7 @@ fun GamePage(controller: SudokuController) {
                 Text("Ⅱ", color = Ink.muted, fontSize = 22.sp)
             }
             Spacer(Modifier.width(8.dp))
-            Box(Modifier.size(43.dp).background(Color(0x770B2256), RoundedCornerShape(14.dp))
+            Box(Modifier.size(43.dp).testTag("game-settings").background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.SETTINGS) }, contentAlignment = Alignment.Center) {
                 Text("⚙", color = Ink.muted, fontSize = 22.sp)
             }
@@ -82,25 +100,30 @@ fun GamePage(controller: SudokuController) {
                 "♡".repeat(game.mistakes.coerceIn(0, 3)),
                 color = Ink.red, fontSize = 20.sp)
         }
-        SudokuBoard(game, controller.options.highlightEquals) {
-            controller.select(it)
-            feedback()
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            SudokuBoard(game, controller.options.highlightEquals, controller.options.animations, Modifier.size(boardSize)) {
+                controller.select(it)
+                feedback()
+            }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             GameTool("✎", "Bilješke", if (game.notesMode) Ink.teal else Ink.line,
-                Modifier.weight(1f), active = game.notesMode) { controller.toggleNotes(); feedback() }
-            GameTool("✧", "Savjet", Ink.cyan, Modifier.weight(1f)) { controller.hint(); feedback() }
-            GameTool("↶", "Poništi", Ink.blue, Modifier.weight(1f)) { controller.undo(); feedback() }
-            GameTool("⌫", "Izbriši", Ink.blue, Modifier.weight(1f)) { controller.erase(); feedback() }
+                Modifier.weight(1f), height = toolHeight, active = game.notesMode) { controller.toggleNotes(); feedback() }
+            GameTool("✧", "Savjet", Ink.cyan, Modifier.weight(1f), height = toolHeight) { controller.hint(); feedback() }
+            GameTool("↶", "Poništi", Ink.blue, Modifier.weight(1f), height = toolHeight) { controller.undo(); feedback() }
+            GameTool("⌫", "Izbriši", Ink.blue, Modifier.weight(1f), height = toolHeight) { controller.erase(); feedback() }
         }
         val numbers = (1..game.size).toList()
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
-        NumberRow(numbers.take(split)) { controller.enter(it); feedback() }
-        if (numbers.size > split) NumberRow(numbers.drop(split)) { controller.enter(it); feedback() }
-        Spacer(Modifier.height(8.dp))
-        Text("B I S T R I J I  U M  ·  B O L J I  D A N", color = Ink.muted,
-            fontSize = 10.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        NumberRow(numbers.take(split), numberHeight) { controller.enter(it); feedback() }
+        if (numbers.size > split) NumberRow(numbers.drop(split), numberHeight) { controller.enter(it); feedback() }
+        if (!compact) {
+            Text("B I S T R I J I  U M  ·  B O L J I  D A N", color = Ink.muted,
+                fontSize = 10.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        }
+        }
     }
+
 
     if (game.paused) {
         AlertDialog(
@@ -151,12 +174,12 @@ fun GamePage(controller: SudokuController) {
 }
 
 @Composable
-private fun SudokuBoard(game: Session, highlight: Boolean, onSelect: (Int) -> Unit) {
+private fun SudokuBoard(game: Session, highlight: Boolean, animations: Boolean, modifier: Modifier = Modifier, onSelect: (Int) -> Unit) {
     val n = game.size
     val selected = game.selected
     val selectionNumber = if (selected >= 0) game.board[selected] else 0
     Box(
-        Modifier.fillMaxWidth().aspectRatio(1f)
+        modifier.aspectRatio(1f).testTag("sudoku-board")
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xF8041336))
             .border(2.dp, Ink.blue, RoundedCornerShape(14.dp))
@@ -184,9 +207,14 @@ private fun SudokuBoard(game: Session, highlight: Boolean, onSelect: (Int) -> Un
                             isPeer -> Ink.blue.copy(alpha = .12f)
                             else -> Color.Transparent
                         }
+                        val highlightColor by animateColorAsState(
+                            targetValue = bg,
+                            animationSpec = if (animations) tween(durationMillis = 150) else snap(),
+                            label = "Sudoku cell highlight"
+                        )
                         Box(
                             Modifier.weight(1f).fillMaxHeight()
-                                .background(bg)
+                                .background(highlightColor)
                                 .border(.35.dp, Ink.line.copy(alpha = .55f))
                                 .semantics {
                                     contentDescription = "Redak ${r + 1}, stupac ${c + 1}: " +
@@ -247,8 +275,8 @@ private fun SudokuBoard(game: Session, highlight: Boolean, onSelect: (Int) -> Un
 
 @Composable
 private fun GameTool(icon: String, name: String, accent: Color, modifier: Modifier,
-                     active: Boolean = false, onClick: () -> Unit) {
-    NeonPanel(modifier.height(73.dp).clickable(onClick = onClick),
+                     height: androidx.compose.ui.unit.Dp = 73.dp, active: Boolean = false, onClick: () -> Unit) {
+    NeonPanel(modifier.height(height).clickable(onClick = onClick),
         if (active) Ink.cyan else accent, corner = 14.dp) {
         Column(Modifier.fillMaxSize().padding(5.dp),
             verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -259,10 +287,10 @@ private fun GameTool(icon: String, name: String, accent: Color, modifier: Modifi
 }
 
 @Composable
-private fun NumberRow(values: List<Int>, onClick: (Int) -> Unit) {
+private fun NumberRow(values: List<Int>, height: androidx.compose.ui.unit.Dp, onClick: (Int) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         values.forEach { value ->
-            NeonPanel(Modifier.weight(1f).height(62.dp).clickable { onClick(value) },
+            NeonPanel(Modifier.weight(1f).height(height).clickable { onClick(value) },
                 highlight = Ink.blue, corner = 13.dp) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(value.toString(), color = Ink.white,

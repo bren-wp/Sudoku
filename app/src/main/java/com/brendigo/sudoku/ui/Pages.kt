@@ -8,6 +8,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -51,7 +54,7 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
 fun SectionTitle(title: String, description: String = "", onBack: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
-            Modifier.size(46.dp)
+            Modifier.size(46.dp).testTag("navigate-back")
                 .background(Color(0x99082150), RoundedCornerShape(14.dp))
                 .clickable(onClick = onBack),
             contentAlignment = Alignment.Center,
@@ -67,7 +70,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit) {
 @Composable
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Box(
-        modifier.heightIn(min = 58.dp)
+        modifier.testTag("primary-action").heightIn(min = 58.dp)
             .background(
                 Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
@@ -129,7 +132,7 @@ fun HomePage(controller: SudokuController) {
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Subtitle("Trenutni niz")
-                    Text("${controller.stats.streak} dana", fontSize = 25.sp,
+                    Text("${controller.currentStreak()} dana", fontSize = 25.sp,
                         color = Ink.gold, fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.weight(1f))
@@ -147,7 +150,7 @@ private fun HomeTile(
     icon: String, title: String, subtitle: String, accent: Color,
     modifier: Modifier = Modifier, compact: Boolean = false, onClick: () -> Unit,
 ) {
-    NeonPanel(modifier.heightIn(min = if (compact) 134.dp else 179.dp).clickable(onClick = onClick), highlight = accent) {
+    NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-")).heightIn(min = if (compact) 134.dp else 179.dp).clickable(onClick = onClick), highlight = accent) {
         Column(Modifier.padding(if (compact) 12.dp else 17.dp),
             verticalArrangement = Arrangement.spacedBy(if (compact) 3.dp else 7.dp)) {
             Text(icon, color = accent, fontWeight = FontWeight.Bold, fontSize = if (compact) 29.sp else 38.sp)
@@ -210,6 +213,7 @@ fun NewGamePage(controller: SudokuController) {
 @Composable
 fun DailyPage(controller: SudokuController) {
     val scope = rememberCoroutineScope()
+    var showRanking by remember { androidx.compose.runtime.mutableStateOf(false) }
     val formattedDate = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
@@ -224,7 +228,7 @@ fun DailyPage(controller: SudokuController) {
                 Text("🔥", fontSize = 30.sp)
                 Spacer(Modifier.width(6.dp))
                 Column {
-                    Text("${controller.stats.streak}", color = Ink.gold, fontSize = 30.sp,
+                    Text("${controller.currentStreak()}", color = Ink.gold, fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold)
                     Subtitle("dana u nizu")
                 }
@@ -247,10 +251,16 @@ fun DailyPage(controller: SudokuController) {
             Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
                 Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white)
+                val latest = runCatching { LocalDate.parse(controller.stats.lastDaily) }.getOrNull()
+                val today = LocalDate.now()
+                val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+                val completedDays = (0 until controller.currentStreak().coerceAtMost(7)).mapNotNull {
+                    latest?.minusDays(it.toLong())
+                }.toSet()
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (i < controller.stats.streak.coerceAtMost(7)) "✓" else "○",
+                            Text(if (monday.plusDays(i.toLong()) in completedDays) "✓" else "○",
                                 color = Ink.cyan, fontSize = 23.sp)
                             Text(label, color = Ink.muted, fontSize = 10.sp)
                         }
@@ -262,15 +272,54 @@ fun DailyPage(controller: SudokuController) {
             Text("✓ Današnji izazov već je riješen.", color = Ink.teal,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
-        SolidAction(if (controller.isGenerating) "Učitavanje…" else "▶   Pokreni izazov",
+        SolidAction(
+            when {
+                controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
+                controller.isGenerating -> "Učitavanje…"
+                else -> "▶   Pokreni izazov"
+            },
             { scope.launch { controller.startNew(9, 2, daily = true) } },
-            Modifier.fillMaxWidth(), !controller.isGenerating)
+            Modifier.fillMaxWidth(), !controller.isGenerating && !controller.dailyAlreadyCompleted()
+        )
+        NeonPanel(Modifier.fillMaxWidth().height(54.dp)
+            .testTag("daily-leaderboard").clickable { showRanking = true }, Ink.purple) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("🏆   Pogledaj rang-listu", color = Ink.white,
+                    fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            }
+        }
+    }
+    if (showRanking) {
+        val records = controller.stats.history.filter { it.daily }.sortedBy { it.seconds }
+        AlertDialog(
+            onDismissRequest = { showRanking = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Osobna rang-lista", color = Ink.white) },
+            text = {
+                Column(Modifier.heightIn(max = 330.dp).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Subtitle("Offline rezultati na ovom uređaju. Nema globalne rang-liste.")
+                    if (records.isEmpty()) Subtitle("Još nema riješenih dnevnih izazova.")
+                    records.take(30).forEachIndexed { index, record ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text("${index + 1}.", color = Ink.gold, modifier = Modifier.width(32.dp))
+                            Text(record.date, color = Ink.white, modifier = Modifier.weight(1f))
+                            Text(formatTime(record.seconds), color = Ink.cyan)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showRanking = false }) { Text("Zatvori", color = Ink.cyan) }
+            },
+        )
     }
 }
 
 @Composable
 fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
+    var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", { controller.go(Screen.HOME) })
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
@@ -280,7 +329,7 @@ fun StatsPage(controller: SudokuController) {
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("◷", "Ukupno vrijeme", formatTime(stats.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
                 Ink.blue, Modifier.weight(1f))
-            StatTile("🔥", "Niz pobjeda", stats.streak.toString(), Ink.gold, Modifier.weight(1f))
+            StatTile("🔥", "Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f))
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(18.dp)) {
@@ -327,7 +376,12 @@ fun StatsPage(controller: SudokuController) {
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(17.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Nedavni napredak", color = Ink.white, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Nedavni napredak", color = Ink.white, fontSize = 18.sp,
+                        modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 12.sp,
+                        modifier = Modifier.testTag("open-game-history").clickable { showHistory = true })
+                }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
                 stats.history.take(6).forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -341,6 +395,32 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
+    }
+    if (showHistory) {
+        AlertDialog(
+            onDismissRequest = { showHistory = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Povijest igara", color = Ink.white) },
+            text = {
+                Column(Modifier.heightIn(max = 380.dp).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Subtitle("Prikaz posljednjih 50 dovršenih igara.")
+                    if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
+                    stats.history.forEach { record ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(difficultyLabels[record.level], color = Ink.white,
+                                modifier = Modifier.weight(1f), fontSize = 13.sp)
+                            Text(formatTime(record.seconds), color = Ink.cyan, fontSize = 13.sp)
+                            Spacer(Modifier.width(9.dp))
+                            Text(record.date, color = Ink.muted, fontSize = 11.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHistory = false }) { Text("Zatvori", color = Ink.cyan) }
+            },
+        )
     }
 }
 
@@ -363,23 +443,35 @@ private data class Achievement(
 @Composable
 fun AchievementsPage(controller: SudokuController) {
     val s = controller.stats
-    val data = listOf(
+    // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
+    val basic = listOf(
         Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
-        Achievement("▣", "Sedam dana zaredom", "Igraj svakog dana tijekom tjedna.", 7, s.streak, 100, Ink.blue),
-        Achievement("✿", "Majstor logike", "Završi 50 teških igara.", 50, s.winsByLevel[3], 150, Ink.teal),
-        Achievement("ϟ", "Bez greške", "Završi igru bez pogreške.", 1, s.flawless, 100, Ink.gold),
-        Achievement("🔥", "Vrući niz", "Igraj 30 dana zaredom.", 30, s.streak, 150, Ink.cyan),
-        Achievement("◷", "Brzinac", "Završi igru za manje od 5 minuta.", 1,
-            s.history.count { it.seconds < 300 }, 75, Ink.purple),
-        Achievement("▦", "Rješavač izazova", "Završi 10 dnevnih izazova.", 10,
-            s.streak.coerceAtMost(10), 100, Ink.blue),
-        Achievement("♛", "Sudoku legenda", "Osvoji 500 bodova iz postignuća.", 500,
-            listOf(50 to (s.finished >= 1), 100 to (s.streak >= 7),
-                150 to (s.winsByLevel[3] >= 50), 100 to (s.flawless >= 1),
-                150 to (s.streak >= 30), 75 to (s.history.any { it.seconds < 300 })).sumOf {
-                if (it.second) it.first else 0
-            }, 200, Ink.muted),
+        Achievement("▣", "Sedam dana zaredom", "Riješi dnevne izazove sedam dana zaredom.", 7, s.bestStreak, 100, Ink.blue),
+        Achievement("✿", "Majstor logike", "Završi 50 igara na teškoj razini.", 50, s.winsByLevel[3], 150, Ink.teal),
+        Achievement("ϟ", "Bez greške", "Završi igru bez ijedne pogreške.", 1, s.flawless, 100, Ink.gold),
+        Achievement("🔥", "Vrući niz", "Riješi dnevni izazov 30 dana zaredom.", 30, s.bestStreak, 150, Ink.cyan),
+        Achievement("◷", "Brzinac", "Završi klasični 9×9 sudoku za manje od 5 minuta.", 1, s.fastWins, 75, Ink.purple),
+        Achievement("▦", "Rješavač izazova", "Završi 10 dnevnih izazova.", 10, s.dailyWins, 100, Ink.blue),
+        Achievement("★", "Prvi korak", "Pokreni svoju prvu igru.", 1, s.played, 25, Ink.teal),
+        Achievement("✦", "Redoviti igrač", "Pokreni 10 Sudoku igara.", 10, s.played, 50, Ink.cyan),
+        Achievement("🎖", "Iskusni igrač", "Završi 50 igara.", 50, s.finished, 100, Ink.gold),
+        Achievement("💯", "Stotka", "Završi 100 igara.", 100, s.finished, 150, Ink.gold),
+        Achievement("✓", "Besprijekoran niz", "Završi 10 igara bez greške.", 10, s.flawless, 125, Ink.teal),
+        Achievement("◇", "Samostalni mislilac", "Završi 10 igara bez savjeta.", 10, s.noHintWins, 100, Ink.purple),
+        Achievement("▣", "Prvi izazov", "Riješi prvi dnevni izazov.", 1, s.dailyWins, 50, Ink.blue),
+        Achievement("☀", "Dnevna rutina", "Završi sedam dnevnih izazova.", 7, s.dailyWins, 80, Ink.cyan),
+        Achievement("◷", "Deset sati logike", "Provedi ukupno 10 sati u riješenim igrama.", 36000, s.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), 120, Ink.blue),
+        Achievement("◴", "Strpljivi mislilac", "Završi igru nakon sat vremena razmišljanja.", 1, s.longWins, 80, Ink.purple),
+        Achievement("♜", "Ekspert", "Završi 10 igara razine Ekspert.", 10, s.winsByLevel[4], 140, Ink.purple),
+        Achievement("♛", "Velemajstor", "Završi pet igara razine Majstor.", 5, s.winsByLevel[5], 180, Ink.red),
+        Achievement("4", "Mala mreža", "Završi 10 igara 4×4.", 10, s.winsBySize[0], 70, Ink.teal),
+        Achievement("6", "Srednja mreža", "Završi 10 igara 6×6.", 10, s.winsBySize[1], 90, Ink.blue),
+        Achievement("9", "Klasična mreža", "Završi 10 igara 9×9.", 10, s.winsBySize[2], 120, Ink.cyan),
+        Achievement("🔥", "Zlatni niz", "Dovrši 14 dnevnih izazova zaredom.", 14, s.bestStreak, 150, Ink.gold),
     )
+    val otherPoints = basic.filter { it.current >= it.goal }.sumOf { it.reward }
+    val data = basic + Achievement("♛", "Sudoku legenda",
+        "Osvoji 1000 bodova iz ostalih postignuća.", 1000, otherPoints, 200, Ink.gold)
     val points = data.filter { it.current >= it.goal }.sumOf { it.reward }
     PageContent {
         SectionTitle("Postignuća", "Skupljaj nagrade rješavanjem", { controller.go(Screen.HOME) })
@@ -426,7 +518,7 @@ fun AchievementsPage(controller: SudokuController) {
 fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
     PageContent {
-        SectionTitle("Postavke", "Prilagodi igru svojim željama", { controller.go(Screen.HOME) })
+        SectionTitle("Postavke", "Prilagodi igru svojim željama", { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("◉", "Izgled", "Prilagodi vizualni doživljaj igre")
@@ -455,10 +547,10 @@ fun SettingsPage(controller: SudokuController) {
         NeonPanel(Modifier.fillMaxWidth(), Ink.purple) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("♫", "Zvuk i vibracija", "Povratne informacije tijekom igre")
-                SettingToggle("♪", "Zvuk", "Zvučni efekti (nije još dostupno)", opts.sound) {
+                SettingToggle("♪", "Zvuk", "Zvučni efekti pri pritisku gumba", opts.sound) {
                     controller.updateOptions(opts.copy(sound = it))
                 }
-                SettingToggle("◈", "Vibracija", "Taktilna povratna informacija (nije još dostupna)", opts.vibration) {
+                SettingToggle("◈", "Vibracija", "Vibracija pri unosu broja", opts.vibration) {
                     controller.updateOptions(opts.copy(vibration = it))
                 }
             }
