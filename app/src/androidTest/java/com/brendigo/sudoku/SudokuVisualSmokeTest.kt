@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performClick
@@ -202,6 +203,32 @@ class SudokuVisualSmokeTest {
         waitFor("screen-postignuća")
         rule.onNodeWithTag("navigate-back").performClick()
         waitFor("home-nova-igra")
+    }
+
+    @Test
+    fun settingsButtonsAreVisibleAndFunctional() {
+        waitFor("home-nova-igra")
+        homeTile("postavke")
+        waitFor("screen-postavke")
+        rule.onNodeWithTag("sound-vibration").assertIsDisplayed()
+        rule.onNodeWithTag("language-settings").assertIsDisplayed()
+        rule.onNodeWithTag("privacy-policy").assertIsDisplayed()
+        rule.onNodeWithTag("language-settings").performClick()
+        rule.onNodeWithText("Aplikacija trenutačno podržava hrvatski jezik.").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("sound-vibration").performClick()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("privacy-policy").performClick()
+        rule.onNodeWithText("Sudoku by Brendigo možeš igrati bez registracije i internetske veze.")
+            .assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("navigate-back").performClick()
+        waitFor("home-nova-igra")
+
+        val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+        check(ctx.packageManager.getApplicationIcon(ctx.packageName) != null) {
+            "Launcher adaptive icon is missing"
+        }
     }
 
     @Test

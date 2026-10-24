@@ -19,6 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -66,42 +70,44 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
     if (!centered) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                Modifier.size(46.dp).testTag("navigate-back")
+                Modifier.size(48.dp).testTag("navigate-back")
+                    .semantics { contentDescription = "Natrag"; role = Role.Button }
                     .background(Color(0x99082150), RoundedCornerShape(14.dp))
                     .clickable(onClick = onBack),
                 contentAlignment = Alignment.Center
             ) {
-                Text("‹", fontSize = 37.sp, color = Ink.muted)
+                BrandIcon("back", Modifier.size(23.dp), Ink.muted)
             }
             Spacer(Modifier.width(9.dp))
             Column(Modifier.weight(1f).testTag(
                 "screen-" + title.lowercase().replace(" ", "-")
             )) {
-                AccentText(title, if (title.length > 16) 29 else 34)
+                AccentText(title, if (title.length > 16) 26 else 30)
                 if (description.isNotBlank()) Subtitle(description)
             }
         }
     } else {
-        Box(Modifier.fillMaxWidth().heightIn(min = 76.dp)) {
+        Box(Modifier.fillMaxWidth().heightIn(min = 63.dp)) {
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = 50.dp)
                     .testTag("screen-" + title.lowercase().replace(" ", "-"))
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AccentText(title, if (title.length > 16) 25 else 33)
+                AccentText(title, if (title.length > 16) 24 else 28)
                 if (description.isNotBlank()) {
                     Subtitle(description, Modifier.fillMaxWidth(), centered = true)
                 }
             }
             Box(
-                Modifier.size(46.dp).testTag("navigate-back")
+                Modifier.size(48.dp).testTag("navigate-back")
+                    .semantics { contentDescription = "Natrag"; role = Role.Button }
                     .align(Alignment.CenterStart)
                     .background(Color(0x99082150), RoundedCornerShape(14.dp))
                     .clickable(onClick = onBack),
                 contentAlignment = Alignment.Center
             ) {
-                Text("‹", fontSize = 37.sp, color = Ink.muted)
+                BrandIcon("back", Modifier.size(23.dp), Ink.muted)
             }
         }
     }
@@ -111,7 +117,9 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier,
                 enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp) {
     Box(
-        modifier.testTag("primary-action").heightIn(min = minHeight)
+        modifier.testTag("primary-action")
+            .semantics { contentDescription = title; role = Role.Button }
+            .heightIn(min = 48.dp).heightIn(min = minHeight)
             .background(
                 Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
@@ -119,20 +127,38 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
-    ) { Text(title, color = Ink.white, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp) }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center) {
+            val glyph = when {
+                title.trimStart().startsWith("▶") -> "play"
+                title.trimStart().startsWith("✓") -> "check"
+                else -> null
+            }
+            if (glyph != null) {
+                BrandIcon(glyph, Modifier.size(21.dp), Ink.white)
+                Spacer(Modifier.width(10.dp))
+            }
+            Text(
+                title.trimStart().removePrefix("▶").removePrefix("✓").trim(),
+                color = Ink.white, fontWeight = FontWeight.ExtraBold,
+                fontSize = 16.sp, maxLines = 1,
+            )
+        }
+    }
 }
 
 @Composable
 fun HomePage(controller: SudokuController) {
     PageContent {
-        Spacer(Modifier.height(1.dp))
+        Spacer(Modifier.height(18.dp))
         BrandHeader(Modifier.fillMaxWidth())
         Text(
             "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
             color = Ink.muted, fontSize = 10.sp, modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(30.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game").clickable { controller.go(Screen.GAME) }
@@ -162,14 +188,14 @@ fun HomePage(controller: SudokuController) {
             ) {
                 Row(Modifier.fillMaxWidth().padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text("▦", fontSize = 28.sp, color = Ink.teal)
+                    BrandIcon("grid", Modifier.size(28.dp), Ink.teal)
                     Spacer(Modifier.width(10.dp))
                     Column(Modifier.weight(1f)) {
                         Text("Nastavi klasičnu igru", color = Ink.white,
                             fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         Subtitle("Vrati se na spremljenu Sudoku partiju")
                     }
-                    Text("›", fontSize = 26.sp, color = Ink.cyan)
+                    BrandIcon("next", Modifier.size(20.dp), Ink.cyan)
                 }
             }
         }
@@ -198,7 +224,7 @@ fun HomePage(controller: SudokuController) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
             ) {
-                Text("🔥", fontSize = 28.sp)
+                BrandIcon("flame", Modifier.size(28.dp), Ink.gold)
                 Column {
                     Text("Trenutni niz", fontSize = 11.sp, color = Ink.muted)
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -222,7 +248,7 @@ fun HomePage(controller: SudokuController) {
                     }
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("🎁", fontSize = 21.sp)
+                    BrandIcon("trophy", Modifier.size(21.dp), Ink.gold)
                     Text("Nagrada", fontSize = 9.sp, color = Ink.muted)
                 }
             }
@@ -236,10 +262,12 @@ private fun HomeTile(
     icon: String, title: String, subtitle: String, accent: Color,
     modifier: Modifier = Modifier, compact: Boolean = false, onClick: () -> Unit,
 ) {
-    NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-")).heightIn(min = if (compact) 81.dp else 126.dp).clickable(onClick = onClick), highlight = accent) {
+    NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-"))
+        .semantics { contentDescription = "$title, $subtitle"; role = Role.Button }
+        .heightIn(min = if (compact) 102.dp else 140.dp).clickable(onClick = onClick), highlight = accent) {
         Column(Modifier.padding(if (compact) 10.dp else 15.dp),
             verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 5.dp)) {
-            Text(icon, color = accent, fontWeight = FontWeight.Bold, fontSize = if (compact) 25.sp else 34.sp)
+            BrandIcon(homeIconFor(title), Modifier.size(if (compact) 25.dp else 34.dp), accent)
             Text(title, color = Ink.white, fontWeight = FontWeight.Bold,
                 fontSize = if (compact) 14.sp else 19.sp, maxLines = 2)
             Text(subtitle, color = Ink.muted, fontSize = if (compact) 10.sp else 12.sp, lineHeight = 17.sp)
@@ -253,26 +281,59 @@ fun NewGamePage(controller: SudokuController) {
     var size by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(9) }
     var level by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(2) }
     PageContent {
-        SectionTitle("Nova igra", "Odaberi težinu", { controller.go(Screen.HOME) })
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(9, 6, 4).forEach { option ->
-                NeonPanel(Modifier.weight(1f).testTag("size-$option").height(43.dp)
-                    .clickable { size = option }, highlight = if (size == option) Ink.cyan else Ink.line) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("$option×$option", color = if (size == option) Ink.white else Ink.muted,
-                            fontSize = 19.sp, fontWeight = FontWeight.Bold)
+        // Reference hierarchy: back + board size on the same first row,
+        // followed by the large title and the six full-width difficulty cards.
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                Modifier.size(48.dp).testTag("navigate-back")
+                    .semantics { contentDescription = "Natrag"; role = Role.Button }
+                    .background(Color(0x99082150), RoundedCornerShape(14.dp))
+                    .clickable { controller.go(Screen.HOME) },
+                contentAlignment = Alignment.Center,
+            ) {
+                BrandIcon("back", Modifier.size(24.dp), Ink.muted)
+            }
+            Row(Modifier.width(204.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                listOf(9, 6, 4).forEach { option ->
+                    NeonPanel(
+                        Modifier.weight(1f).testTag("size-$option")
+                            .heightIn(min = 48.dp)
+                            .semantics {
+                                contentDescription = "Veličina $option puta $option"
+                                role = Role.Button
+                            }
+                            .clickable { size = option },
+                        highlight = if (size == option) Ink.cyan else Ink.line,
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("$option×$option",
+                                color = if (size == option) Ink.white else Ink.muted,
+                                fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
         }
+        Spacer(Modifier.height(25.dp))
+        Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")) {
+            AccentText("Nova igra", 43)
+            Text("Odaberi težinu", color = Ink.muted, fontSize = 18.sp)
+        }
+        Spacer(Modifier.height(5.dp))
         listOf("✿", "★", "★★", "★★★", "♛", "♛").forEachIndexed { i, symbol ->
             NeonPanel(
-                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 55.dp)
+                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 75.dp)
+                    .semantics { contentDescription = "Težina ${difficultyLabels[i]}"; role = Role.Button }
                     .clickable { level = i },
                 highlight = if (level == i) Ink.cyan else difficultyColors[i],
             ) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(symbol, fontSize = 24.sp, color = difficultyColors[i])
+                    BrandIcon(when (i) { 0 -> "sparkles"; 1 -> "star"; 2 -> "star"; 3 -> "trophy"; else -> "crown" },
+                        Modifier.size(27.dp), difficultyColors[i])
                     Spacer(Modifier.width(13.dp))
                     Column(Modifier.weight(1f)) {
                         Text(difficultyLabels[i], fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Ink.white)
@@ -282,7 +343,7 @@ fun NewGamePage(controller: SudokuController) {
                             "Ozbiljan izazov", "Samo za najbolje",
                         )[i])
                     }
-                    Text(if (level == i) "✓" else "›", fontSize = 29.sp, color = difficultyColors[i])
+                    BrandIcon(if (level == i) "check" else "next", Modifier.size(23.dp), difficultyColors[i])
                 }
             }
         }
@@ -311,7 +372,7 @@ fun DailyPage(controller: SudokuController) {
                     Subtitle("DANAS")
                     Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
-                Text("🔥", fontSize = 30.sp)
+                BrandIcon("flame", Modifier.size(30.dp), Ink.gold)
                 Spacer(Modifier.width(6.dp))
                 Column {
                     Text("${controller.currentStreak()}", color = Ink.gold, fontSize = 30.sp,
@@ -379,8 +440,12 @@ fun DailyPage(controller: SudokuController) {
         NeonPanel(Modifier.fillMaxWidth().height(43.dp)
             .testTag("daily-leaderboard").clickable { showRanking = true }, Ink.purple) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("🏆   Pogledaj rang-listu", color = Ink.white,
-                    fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BrandIcon("trophy", Modifier.size(20.dp), Ink.purple)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Pogledaj rang-listu", color = Ink.white,
+                        fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
             }
         }
     }
@@ -414,17 +479,26 @@ fun DailyPage(controller: SudokuController) {
 @Composable
 fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
+    var metricInfo by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true, onBack = { controller.go(Screen.HOME) })
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-            StatTile("◈", "Odigrane igre", stats.finished.toString(), Ink.teal, Modifier.weight(1f))
-            StatTile("◷", "Najbolje vrijeme", formatTime(stats.best), Ink.purple, Modifier.weight(1f))
+            StatTile("◈", "Odigrane igre", stats.finished.toString(), Ink.teal, Modifier.weight(1f)) {
+                metricInfo = "Broj uspješno dovršenih Sudoku partija."
+            }
+            StatTile("◷", "Najbolje vrijeme", formatTime(stats.best), Ink.purple, Modifier.weight(1f)) {
+                metricInfo = "Najbrže vrijeme dovršene Sudoku partije."
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("◷", "Ukupno vrijeme", formatTime(stats.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
-                Ink.blue, Modifier.weight(1f))
-            StatTile("🔥", "Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f))
+                Ink.blue, Modifier.weight(1f)) {
+                metricInfo = "Ukupno vrijeme provedeno u dovršenim Sudoku partijama."
+            }
+            StatTile("🔥", "Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f)) {
+                metricInfo = "Broj uzastopnih dana s riješenim dnevnim izazovom."
+            }
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             if (maxWidth >= 348.dp) {
@@ -450,7 +524,7 @@ fun StatsPage(controller: SudokuController) {
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
                 stats.history.take(3).forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("▦", color = difficultyColors[it.level], fontSize = 22.sp)
+                        BrandIcon("grid", Modifier.size(21.dp), difficultyColors[it.level])
                         Spacer(Modifier.width(9.dp))
                         Text(difficultyLabels[it.level], color = Ink.white, modifier = Modifier.weight(1f))
                         Text(formatTime(it.seconds), color = Ink.muted, fontSize = 13.sp)
@@ -466,8 +540,12 @@ fun StatsPage(controller: SudokuController) {
             Column(Modifier.fillMaxWidth().padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(7.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("🏆  Postignuća", color = Ink.white, fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                        BrandIcon("trophy", Modifier.size(18.dp), Ink.cyan)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Postignuća", color = Ink.white, fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold)
+                    }
                     Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 11.sp)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -483,6 +561,19 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
+    }
+    if (metricInfo != null) {
+        AlertDialog(
+            onDismissRequest = { metricInfo = null },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Statistika", color = Ink.white) },
+            text = { Text(metricInfo ?: "", color = Ink.muted) },
+            confirmButton = {
+                TextButton(onClick = { metricInfo = null }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
     if (showHistory) {
         AlertDialog(
@@ -587,13 +678,22 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
 }
 
 @Composable
-private fun StatTile(icon: String, label: String, value: String, color: Color, modifier: Modifier) {
-    NeonPanel(modifier.heightIn(min = 63.dp), color) {
+private fun StatTile(icon: String, label: String, value: String, color: Color,
+                     modifier: Modifier, onClick: () -> Unit) {
+    NeonPanel(modifier.heightIn(min = 63.dp)
+        .semantics { contentDescription = "$label: $value"; role = Role.Button }
+        .clickable(onClick = onClick), color) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(icon, fontSize = 25.sp, color = color)
+            BrandIcon(when (label) {
+                "Odigrane igre" -> "gamepad"
+                "Najbolje vrijeme" -> "timer"
+                "Ukupno vrijeme" -> "timer"
+                "Dnevni niz" -> "flame"
+                else -> "statistics"
+            }, Modifier.size(25.dp), color)
             Spacer(Modifier.width(7.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(label, color = Ink.muted, fontSize = 11.sp, maxLines = 1)
@@ -669,7 +769,7 @@ fun AchievementsPage(controller: SudokuController) {
                         Column(Modifier.fillMaxSize().padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(achievement.icon, fontSize = 24.sp, lineHeight = 26.sp)
+                                BrandIcon(achievementIconFor(achievement.title), Modifier.size(23.dp), achievement.tint)
                                 Text("★ ${achievement.reward}", color = achievement.tint, fontSize = 11.sp)
                             }
                             Text(achievement.title, color = Ink.white, fontSize = 13.sp,
@@ -690,7 +790,7 @@ fun AchievementsPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().height(40.dp)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 48.dp)
             .testTag("achievements-show-all")
             .clickable { showAll = !showAll }, Ink.blue) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -706,6 +806,7 @@ fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
     var showPrivacy by remember { androidx.compose.runtime.mutableStateOf(false) }
     var showSound by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showLanguage by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -743,25 +844,30 @@ fun SettingsPage(controller: SudokuController) {
                 Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("◖))", fontSize = 25.sp, color = Ink.purple)
+                BrandIcon("speaker", Modifier.size(25.dp), Ink.purple)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text("Zvuk i vibracija", fontSize = 17.sp,
                         fontWeight = FontWeight.Bold, color = Ink.white)
                     Subtitle("Uključi ili isključi efekte", centered = false)
                 }
-                Text("›", fontSize = 27.sp, color = Ink.muted)
+                BrandIcon("next", Modifier.size(20.dp), Ink.muted)
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.teal) {
-            Row(Modifier.padding(11.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("◎", fontSize = 25.sp, color = Ink.teal)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 54.dp)
+            .testTag("language-settings")
+            .semantics { contentDescription = "Jezik aplikacije, hrvatski"; role = Role.Button }
+            .clickable { showLanguage = true }, Ink.teal) {
+            Row(Modifier.fillMaxWidth().padding(11.dp), verticalAlignment = Alignment.CenterVertically) {
+                BrandIcon("globe", Modifier.size(25.dp), Ink.teal)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text("Jezik", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                     Subtitle("Jezik aplikacije")
                 }
-                Text("Hrvatski", color = Ink.muted)
+                Text("Hrvatski", color = Ink.muted, fontSize = 13.sp)
+                Spacer(Modifier.width(6.dp))
+                BrandIcon("next", Modifier.size(16.dp), Ink.teal)
             }
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -778,15 +884,37 @@ fun SettingsPage(controller: SudokuController) {
                         Modifier.fillMaxWidth().padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("♧", color = Ink.cyan, fontSize = 20.sp)
+                        BrandIcon("shield", Modifier.size(20.dp), Ink.cyan)
                         Spacer(Modifier.width(12.dp))
                         Text("Pravila privatnosti", color = Ink.white,
                             fontSize = 15.sp, modifier = Modifier.weight(1f))
-                        Text("›", color = Ink.cyan, fontSize = 20.sp)
+                        BrandIcon("next", Modifier.size(18.dp), Ink.cyan)
                     }
                 }
             }
         }
+    }
+    if (showLanguage) {
+        AlertDialog(
+            onDismissRequest = { showLanguage = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Jezik", color = Ink.white) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        BrandIcon("check", Modifier.size(20.dp), Ink.cyan)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Hrvatski", color = Ink.cyan, fontWeight = FontWeight.Bold)
+                    }
+                    Subtitle("Aplikacija trenutačno podržava hrvatski jezik.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguage = false }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
     if (showSound) {
         AlertDialog(
@@ -846,7 +974,7 @@ fun SettingsPage(controller: SudokuController) {
 @Composable
 private fun SettingHeader(icon: String, title: String, subtitle: String) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(icon, fontSize = 24.sp, color = Ink.cyan)
+        BrandIcon(when (title) { "Izgled" -> "sparkles"; "Igra" -> "gamepad"; else -> "settings" }, Modifier.size(24.dp), Ink.cyan)
         Spacer(Modifier.width(14.dp))
         Column { Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold); Subtitle(subtitle) }
     }
@@ -854,14 +982,20 @@ private fun SettingHeader(icon: String, title: String, subtitle: String) {
 
 @Composable
 private fun SettingToggle(icon: String, title: String, caption: String, checked: Boolean, change: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 46.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(icon, color = Ink.cyan, fontSize = 20.sp)
+    Row(Modifier.fillMaxWidth().heightIn(min = 54.dp), verticalAlignment = Alignment.CenterVertically) {
+        BrandIcon(when (title) {
+            "Tamna tema" -> "moon"; "Animacije" -> "sparkles"
+            "Automatske bilješke" -> "note"; "Provjera greške" -> "warning"
+            "Isticanje brojeva" -> "grid"; "Zvuk" -> "speaker"
+            "Vibracija" -> "sparkles"; else -> "settings"
+        }, Modifier.size(21.dp), Ink.cyan)
         Spacer(Modifier.width(13.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 14.sp, color = Ink.white, fontWeight = FontWeight.SemiBold)
             Text(caption, color = Ink.muted, fontSize = 11.sp, lineHeight = 13.sp)
         }
-        Switch(checked, onCheckedChange = change)
+        Switch(checked = checked, onCheckedChange = change,
+            modifier = Modifier.semantics { contentDescription = "$title, ${if (checked) "uključeno" else "isključeno"}" })
     }
 }
 

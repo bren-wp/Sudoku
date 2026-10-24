@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.7`
+- Version: `1.0.8`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -102,3 +102,24 @@ are accessible without losing navigation.
 The images are **not** passed off as exact screenshots of a finished app.
 Pixel comparison is still necessary; the baseline mismatch in the reference
 emulator captures is documented in docs/visual-parity-report.md.
+
+## Sudoku 1.0.8 — full-screen interface, icons and UX audit
+
+- Rebuilt the adaptive app foreground to keep the branded **7 / 3 / 9** motif
+  inside the Android launcher mask safe zone; both normal and round launcher
+  variants reference the same drawable.
+- Added a consistent Compose vector icon component used by the home screen,
+  difficulty selector, daily awards, statistics, game tool bar and settings.
+  OS-dependent emoji appearance is no longer relied upon for essential controls.
+- Corrected hit targets to at least 48dp where practical, added TalkBack
+  descriptions and button semantics, and reduced oversized reference-screen
+  typography without replacing any functional UI with a screenshot.
+- Settings language selector clearly discloses that Croatian is currently the
+  supported language, instead of presenting an inert label.
+- Interactive statistic tiles now explain their meanings instead of showing
+  nonfunctional navigation chevrons.
+- Emulator QA checks Android icon availability and that settings, language,
+  sound and privacy controls can be opened and closed.
+
+Remaining: reference illustration fidelity, zero-difference pixel QA and
+publisher-signed Google Play AAB are *not* certified by these checks.
