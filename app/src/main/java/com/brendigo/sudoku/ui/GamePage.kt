@@ -20,6 +20,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.brendigo.sudoku.data.Screen
@@ -186,6 +188,15 @@ private fun SudokuBoard(game: Session, highlight: Boolean, onSelect: (Int) -> Un
                             Modifier.weight(1f).fillMaxHeight()
                                 .background(bg)
                                 .border(.35.dp, Ink.line.copy(alpha = .55f))
+                                .semantics {
+                                    contentDescription = "Redak ${r + 1}, stupac ${c + 1}: " +
+                                        when {
+                                            digit == 0 -> "prazno polje"
+                                            fixed -> "zadano ${digit}"
+                                            wrong -> "netočno ${digit}"
+                                            else -> "uneseno ${digit}"
+                                        }
+                                }
                                 .clickable { onSelect(index) },
                             contentAlignment = Alignment.Center,
                         ) {

@@ -12,7 +12,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
 
-enum class Screen { HOME, NEW_GAME, GAME, DAILY, STATS, ACHIEVEMENTS, SETTINGS }
+enum class Screen { SPLASH, HOME, NEW_GAME, GAME, DAILY, STATS, ACHIEVEMENTS, SETTINGS }
 
 data class Options(
     val dark: Boolean = true,
@@ -74,7 +74,7 @@ private data class Move(val cell: Int, val oldValue: Int, val oldNotes: Int)
 class SudokuController(context: Context) {
     private val prefs: SharedPreferences =
         context.applicationContext.getSharedPreferences("sudoku_state_v1", Context.MODE_PRIVATE)
-    var page by mutableStateOf(Screen.HOME)
+    var page by mutableStateOf(Screen.SPLASH)
         private set
     var game by mutableStateOf(readGame())
         private set

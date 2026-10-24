@@ -32,7 +32,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun Application(controller: SudokuController) {
-    BackHandler(enabled = controller.page != Screen.HOME) {
+    LaunchedEffect(Unit) {
+        delay(850)
+        if (controller.page == Screen.SPLASH) controller.go(Screen.HOME)
+    }
+    BackHandler(enabled = controller.page != Screen.HOME && controller.page != Screen.SPLASH) {
         controller.go(Screen.HOME)
     }
     LaunchedEffect(controller.page, controller.game?.paused, controller.game?.completed, controller.game?.failed) {
@@ -47,6 +51,7 @@ private fun Application(controller: SudokuController) {
         ScenicBackdrop(Modifier.fillMaxSize(), bright = !controller.options.dark)
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             when (controller.page) {
+                Screen.SPLASH -> SplashPage()
                 Screen.HOME -> HomePage(controller)
                 Screen.NEW_GAME -> NewGamePage(controller)
                 Screen.GAME -> GamePage(controller)

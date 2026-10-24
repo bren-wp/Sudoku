@@ -507,3 +507,24 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
         Switch(checked, onCheckedChange = change)
     }
 }
+
+@Composable
+fun SplashPage() {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            SudokuLogo(112.dp)
+            Spacer(Modifier.height(30.dp))
+            AccentText("Sudoku", 58)
+            Text("by Brendigo", color = Ink.muted, letterSpacing = 5.sp, fontSize = 16.sp)
+            Spacer(Modifier.height(32.dp))
+            Text("T R E N I R A J   M O Z A K   S V A K I   D A N",
+                color = Ink.cyan, fontSize = 11.sp, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(90.dp))
+            CircularProgressIndicator(color = Ink.cyan, strokeWidth = 3.dp, modifier = Modifier.size(36.dp))
+        }
+    }
+}
