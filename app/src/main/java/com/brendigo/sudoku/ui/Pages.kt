@@ -151,14 +151,14 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
 @Composable
 fun HomePage(controller: SudokuController) {
     PageContent {
-        Spacer(Modifier.height(1.dp))
+        Spacer(Modifier.height(18.dp))
         BrandHeader(Modifier.fillMaxWidth())
         Text(
             "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
             color = Ink.muted, fontSize = 10.sp, modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(30.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game").clickable { controller.go(Screen.GAME) }
@@ -264,7 +264,7 @@ private fun HomeTile(
 ) {
     NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-"))
         .semantics { contentDescription = "$title, $subtitle"; role = Role.Button }
-        .heightIn(min = if (compact) 81.dp else 126.dp).clickable(onClick = onClick), highlight = accent) {
+        .heightIn(min = if (compact) 102.dp else 140.dp).clickable(onClick = onClick), highlight = accent) {
         Column(Modifier.padding(if (compact) 10.dp else 15.dp),
             verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 5.dp)) {
             BrandIcon(homeIconFor(title), Modifier.size(if (compact) 25.dp else 34.dp), accent)
