@@ -305,11 +305,11 @@ fun DailyPage(controller: SudokuController) {
     }
     PageContent {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
-            Row(Modifier.fillMaxWidth().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 76.dp), Ink.gold) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Subtitle("DANAS")
-                    Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 19.sp)
+                    Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
                 Text("🔥", fontSize = 30.sp)
                 Spacer(Modifier.width(6.dp))
@@ -320,23 +320,33 @@ fun DailyPage(controller: SudokuController) {
                 }
             }
         }
-        Spacer(Modifier.height(8.dp))
-        NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
-            Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Spacer(Modifier.height(2.dp))
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 168.dp), Ink.gold) {
+            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("DANAŠNJI IZAZOV", color = Ink.gold, fontSize = 12.sp, letterSpacing = 2.sp)
-                AccentText("Misteriozna planina", 29)
+                AccentText("Misteriozna planina", 25)
                 Subtitle("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!")
-                Spacer(Modifier.height(14.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-                    Column(Modifier.weight(1f)) { Subtitle("TEŽINA"); Text("Srednja", color = Ink.white, fontWeight = FontWeight.Bold) }
-                    Column(Modifier.weight(1f)) { Subtitle("NAGRADA"); Text("50 bodova", color = Ink.gold, fontWeight = FontWeight.Bold) }
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text("▥  TEŽINA", color = Ink.muted, fontSize = 10.sp)
+                        Text("Srednja", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text("◷  VRIJEME", color = Ink.muted, fontSize = 10.sp)
+                        Text("12 min", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text("★  NAGRADA", color = Ink.muted, fontSize = 10.sp)
+                        Text("50 bodova", color = Ink.gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.cyan) {
-            Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 101.dp), Ink.cyan) {
+            Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
-                Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white)
+                Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white, fontSize = 12.sp)
                 val today = LocalDate.now()
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
                 val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
@@ -346,7 +356,7 @@ fun DailyPage(controller: SudokuController) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(if (monday.plusDays(i.toLong()).toString() in completedDays) "✓" else "○",
-                                color = Ink.cyan, fontSize = 23.sp)
+                                color = Ink.cyan, fontSize = 21.sp)
                             Text(label, color = Ink.muted, fontSize = 10.sp)
                         }
                     }
@@ -366,11 +376,11 @@ fun DailyPage(controller: SudokuController) {
             { scope.launch { controller.startNew(9, 2, daily = true) } },
             Modifier.fillMaxWidth(), !controller.isGenerating && !controller.dailyAlreadyCompleted()
         )
-        NeonPanel(Modifier.fillMaxWidth().height(54.dp)
+        NeonPanel(Modifier.fillMaxWidth().height(43.dp)
             .testTag("daily-leaderboard").clickable { showRanking = true }, Ink.purple) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("🏆   Pogledaj rang-listu", color = Ink.white,
-                    fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
         }
     }
