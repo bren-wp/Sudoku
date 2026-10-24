@@ -60,7 +60,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) { Text("‹", fontSize = 37.sp, color = Ink.muted, textAlign = TextAlign.Center) }
         Spacer(Modifier.width(13.dp))
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f).testTag("screen-" + title.lowercase().replace(" ", "-"))) {
             AccentText(title, if (title.length > 16) 29 else 34)
             if (description.isNotBlank()) Subtitle(description)
         }
