@@ -51,18 +51,48 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-fun SectionTitle(title: String, description: String = "", onBack: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            Modifier.size(46.dp).testTag("navigate-back")
-                .background(Color(0x99082150), RoundedCornerShape(14.dp))
-                .clickable(onClick = onBack),
-            contentAlignment = Alignment.Center,
-        ) { Text("‹", fontSize = 37.sp, color = Ink.muted, textAlign = TextAlign.Center) }
-        Spacer(Modifier.width(13.dp))
-        Column(Modifier.weight(1f).testTag("screen-" + title.lowercase().replace(" ", "-"))) {
-            AccentText(title, if (title.length > 16) 29 else 34)
-            if (description.isNotBlank()) Subtitle(description)
+fun SectionTitle(title: String, description: String = "", centered: Boolean = false,
+                 onBack: () -> Unit) {
+    if (!centered) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(46.dp).testTag("navigate-back")
+                    .background(Color(0x99082150), RoundedCornerShape(14.dp))
+                    .clickable(onClick = onBack),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("‹", fontSize = 37.sp, color = Ink.muted)
+            }
+            Spacer(Modifier.width(13.dp))
+            Column(Modifier.weight(1f).testTag(
+                "screen-" + title.lowercase().replace(" ", "-")
+            )) {
+                AccentText(title, if (title.length > 16) 29 else 34)
+                if (description.isNotBlank()) Subtitle(description)
+            }
+        }
+    } else {
+        Box(Modifier.fillMaxWidth().heightIn(min = 76.dp)) {
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 50.dp)
+                    .testTag("screen-" + title.lowercase().replace(" ", "-"))
+                    .align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AccentText(title, if (title.length > 16) 25 else 33)
+                if (description.isNotBlank()) {
+                    Subtitle(description, Modifier.fillMaxWidth(), centered = true)
+                }
+            }
+            Box(
+                Modifier.size(46.dp).testTag("navigate-back")
+                    .align(Alignment.CenterStart)
+                    .background(Color(0x99082150), RoundedCornerShape(14.dp))
+                    .clickable(onClick = onBack),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("‹", fontSize = 37.sp, color = Ink.muted)
+            }
         }
     }
 }
@@ -238,7 +268,7 @@ fun DailyPage(controller: SudokuController) {
         LocalDate.now().format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
     PageContent {
-        SectionTitle("Dnevni izazov", "Današnji izazov", { controller.go(Screen.HOME) })
+        SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
         NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
             Row(Modifier.fillMaxWidth().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -341,7 +371,7 @@ fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
     var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
-        SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", { controller.go(Screen.HOME) })
+        SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true, onBack = { controller.go(Screen.HOME) })
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("◈", "Odigrane igre", stats.finished.toString(), Ink.teal, Modifier.weight(1f))
             StatTile("◷", "Najbolje vrijeme", formatTime(stats.best), Ink.purple, Modifier.weight(1f))
@@ -494,7 +524,7 @@ fun AchievementsPage(controller: SudokuController) {
         "Osvoji 1000 bodova iz ostalih postignuća.", 1000, otherPoints, 200, Ink.gold)
     val points = data.filter { it.current >= it.goal }.sumOf { it.reward } + s.dailyPoints
     PageContent {
-        SectionTitle("Postignuća", "Skupljaj nagrade rješavanjem", { controller.go(Screen.HOME) })
+        SectionTitle("Postignuća", "Skupljaj nagrade rješavanjem", centered = true, onBack = { controller.go(Screen.HOME) })
         NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
             Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
@@ -538,7 +568,7 @@ fun AchievementsPage(controller: SudokuController) {
 fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
     PageContent {
-        SectionTitle("Postavke", "Prilagodi igru svojim željama", { controller.back() })
+        SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("◉", "Izgled", "Prilagodi vizualni doživljaj igre")
