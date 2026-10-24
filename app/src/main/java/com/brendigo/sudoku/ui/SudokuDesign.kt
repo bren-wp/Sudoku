@@ -125,9 +125,9 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             }
             drawPath(path, color)
         }
-        mountains(h * .81f, h * .042f, Color(0xFF0A2A68).copy(alpha = .68f), 2.2f)
-        mountains(h * .85f, h * .055f, Color(0xFF0B2A60), .1f)
-        mountains(h * .89f, h * .038f, Color(0xFF071D49), 1.5f)
+        mountains(h * .835f, h * .039f, Color(0xFF0B3476).copy(alpha = .78f), 2.2f)
+        mountains(h * .862f, h * .050f, Color(0xFF0B2A60), .1f)
+        mountains(h * .902f, h * .033f, Color(0xFF051943), 1.5f)
         drawRect(
             Brush.verticalGradient(
                 listOf(Color(0x00226BD0), Color(0x993A89CD), Color(0xFF03112C)),
@@ -144,31 +144,45 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
                 Offset(x, y), Offset(x + w * .045f, y), 1.2f)
         }
         // Distinctive pagoda on the right, built from paths rather than external art.
-        val cx = w * .87f
-        val by = h * .865f
-        val unit = w * .033f
-        val structure = Path().apply {
-            moveTo(cx - unit * 1.5f, by)
-            lineTo(cx - unit * 1.5f, by - unit * 3.5f)
-            lineTo(cx + unit * 1.5f, by - unit * 3.5f)
-            lineTo(cx + unit * 1.5f, by)
-            close()
-        }
-        drawPath(structure, Color(0xFF020C22))
+        val cx = w * .865f
+        val by = h * .920f
+        val unit = w * .028f
+        // A three-storey lakeside pagoda: tiered roofs, curved eaves, a
+        // narrow spire and two glowing lantern openings, all drawn behind UI.
+        drawRect(Color(0xFF020B24),
+            Offset(cx - unit * 1.45f, by - unit * 4.9f),
+            androidx.compose.ui.geometry.Size(unit * 2.9f, unit * 4.9f))
+        drawRect(Color(0xFF071A35),
+            Offset(cx - unit * .90f, by - unit * 1.85f),
+            androidx.compose.ui.geometry.Size(unit * 1.8f, unit * 1.85f))
         for (tier in 0..2) {
-            val y = by - unit * (3f + tier * 1.6f)
+            val y = by - unit * (1.3f + tier * 1.75f)
+            val reach = unit * (2.75f - tier * .22f)
             val roof = Path().apply {
-                moveTo(cx - unit * (2.8f - tier * .35f), y)
-                quadraticTo(cx, y - unit * 1.4f, cx + unit * (2.8f - tier * .35f), y)
-                lineTo(cx + unit * (2.6f - tier * .35f), y + unit * .36f)
-                quadraticTo(cx, y - unit * .35f, cx - unit * (2.6f - tier * .35f), y + unit * .36f)
+                moveTo(cx - reach, y)
+                quadraticTo(cx - reach * .70f, y + unit * .06f, cx, y - unit * .83f)
+                quadraticTo(cx + reach * .70f, y + unit * .06f, cx + reach, y)
+                lineTo(cx + reach * .90f, y + unit * .38f)
+                quadraticTo(cx, y - unit * .21f, cx - reach * .90f, y + unit * .38f)
                 close()
             }
-            drawPath(roof, Color(0xFF010817))
+            drawPath(roof, Color(0xFF01091B))
+            drawLine(Color(0xFF14528B).copy(alpha = .40f),
+                Offset(cx - reach * .83f, y + unit * .25f),
+                Offset(cx + reach * .83f, y + unit * .25f), strokeWidth = 1.4f)
         }
-        drawRect(Ink.gold.copy(alpha = .82f),
-            Offset(cx - unit * .36f, by - unit * 3f),
-            androidx.compose.ui.geometry.Size(unit * .72f, unit * 1.4f))
+        drawLine(Color(0xFF01091B),
+            Offset(cx, by - unit * 6.1f), Offset(cx, by - unit * 7.0f),
+            strokeWidth = unit * .22f)
+        drawRect(Ink.gold.copy(alpha = .93f),
+            Offset(cx - unit * .38f, by - unit * 3.75f),
+            androidx.compose.ui.geometry.Size(unit * .76f, unit * 1.27f))
+        drawRect(Color(0xFFFFC477).copy(alpha = .92f),
+            Offset(cx - unit * .40f, by - unit * 1.68f),
+            androidx.compose.ui.geometry.Size(unit * .80f, unit * 1.26f))
+        drawRect(Color(0xFF020B24),
+            Offset(cx - unit * 2.1f, by - unit * .23f),
+            androidx.compose.ui.geometry.Size(unit * 4.2f, unit * .34f))
         // Soft amber lantern glow and patterned reflections on the water.
         drawCircle(
             brush = Brush.radialGradient(
@@ -197,14 +211,14 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             moveTo(w * .02f, h * .93f)
             cubicTo(w * .04f, h * .88f, w * .12f, h * .84f, w * .17f, h * .79f)
         }
-        drawPath(branch, Color(0xFF020C26), style = Stroke(width = w * .012f))
-        for (i in 0..130) {
+        drawPath(branch, Color(0xFF010C24), style = Stroke(width = w * .009f))
+        for (i in 0..72) {
             val t = ((i * 53 + 7) % 101) / 100f
-            val x = w * t * .45f
-            val y = h * (.82f + .14f * ((i * 37 % 103) / 103f))
-            val radius = w * (.0035f + (i % 4) * .0013f)
-            val hue = if (i % 3 == 0) Color(0xFF9CA6FB) else Color(0xFF617BCF)
-            val opacity = if (i % 4 == 0) .60f else .37f
+            val x = w * t * .36f
+            val y = h * (.86f + .12f * ((i * 37 % 103) / 103f))
+            val radius = w * (.0028f + (i % 4) * .0012f)
+            val hue = if (i % 3 == 0) Color(0xFF7897E4) else Color(0xFF4B67BA)
+            val opacity = if (i % 4 == 0) .52f else .31f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
@@ -217,7 +231,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
                 )
             }
             drawCircle(
-                Color(0xFFFFDBB0).copy(alpha = opacity * .65f),
+                Color(0xFF91B9EE).copy(alpha = opacity * .55f),
                 radius = radius * .49f,
                 center = Offset(x, y),
             )
