@@ -64,7 +64,7 @@ data class Session(
     val completed: Boolean = false,
     val failed: Boolean = false,
 ) {
-    val emptyCells: Int get() = board.count { it == 0 || board.indexOf(it) < 0 }
+    val emptyCells: Int get() = board.count { it == 0 }
     fun correctCount(): Int = board.indices.count { board[it] == solution[it] }
     fun isEditable(index: Int): Boolean = index in board.indices && givens[index] == 0
 }
@@ -355,7 +355,8 @@ class SudokuController(context: Context) {
         }.toString()).apply()
     }
 
-    private fun readGame(): Session? = try {
+    private fun readGame(): Session? {
+        return try {
         val raw = prefs.getString("game", null) ?: return null
         val j = JSONObject(raw)
         val size = j.getInt("size")
@@ -376,5 +377,6 @@ class SudokuController(context: Context) {
             day = j.optString("day", ""),
             completed = j.optBoolean("completed"), failed = j.optBoolean("failed"),
         ).takeIf { it.boxRows * it.boxColumns == size && it.level in 0..5 }
-    } catch (_: Exception) { null }
+        } catch (_: Exception) { null }
+    }
 }

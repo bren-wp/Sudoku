@@ -371,7 +371,7 @@ fun AchievementsPage(controller: SudokuController) {
             s.history.count { it.seconds < 300 }, 75, Ink.purple),
         Achievement("▦", "Rješavač izazova", "Završi 10 dnevnih izazova.", 10,
             s.streak.coerceAtMost(10), 100, Ink.blue),
-        Achievement("♛", "Sudoku legenda", "Osvoji 1000 bodova iz postignuća.", 1000,
+        Achievement("♛", "Sudoku legenda", "Osvoji 500 bodova iz postignuća.", 500,
             listOf(50 to (s.finished >= 1), 100 to (s.streak >= 7),
                 150 to (s.winsByLevel[3] >= 50), 100 to (s.flawless >= 1),
                 150 to (s.streak >= 30), 75 to (s.history.any { it.seconds < 300 })).sumOf {
