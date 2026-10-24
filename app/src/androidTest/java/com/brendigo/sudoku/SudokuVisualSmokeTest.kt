@@ -33,7 +33,7 @@ class SudokuVisualSmokeTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val screenshot = instrumentation.uiAutomation.takeScreenshot()
             ?: error("Emulator did not return a screenshot")
-        val folder = File(rule.activity.getExternalFilesDir(null), "screenshots")
+        val folder = File(rule.activity.filesDir, "screenshots")
         check(folder.exists() || folder.mkdirs())
         FileOutputStream(File(folder, "$name.png")).use {
             check(screenshot.compress(Bitmap.CompressFormat.PNG, 100, it))

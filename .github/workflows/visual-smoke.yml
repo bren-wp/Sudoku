@@ -40,7 +40,12 @@ jobs:
           script: |
             gradle --no-daemon :app:connectedDebugAndroidTest
             mkdir -p "$GITHUB_WORKSPACE/screenshots"
-            adb pull /sdcard/Android/data/com.brendigo.sudoku/files/screenshots/. "$GITHUB_WORKSPACE/screenshots/"
+            adb exec-out run-as com.brendigo.sudoku tar -cf - -C files screenshots | tar -xf - -C "$GITHUB_WORKSPACE"
+            if ! find "$GITHUB_WORKSPACE/screenshots" -name "*.png" -print -quit | grep -q .; then
+              adb shell am start -n com.brendigo.sudoku/.MainActivity
+              sleep 3
+              adb exec-out screencap -p > "$GITHUB_WORKSPACE/screenshots/01-home-fallback.png"
+            fi
       - name: Upload actual Android screenshots
         if: always()
         uses: actions/upload-artifact@v4
