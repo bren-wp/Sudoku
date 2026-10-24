@@ -65,6 +65,26 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+/** Consistent checked/unchecked weekly calendar marker for home and daily. */
+@Composable
+private fun StreakMarker(checked: Boolean) {
+    Box(
+        Modifier.size(20.dp)
+            .background(
+                if (checked) Ink.cyan.copy(alpha = .18f) else Color(0xFF061D48),
+                RoundedCornerShape(50),
+            )
+            .border(
+                1.5.dp,
+                if (checked) Ink.cyan else Ink.blue.copy(alpha = .65f),
+                RoundedCornerShape(50),
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (checked) BrandIcon("check", Modifier.size(14.dp), Ink.cyan)
+    }
+}
+
 @Composable
 fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                  centered: Boolean = false) {
@@ -242,8 +262,8 @@ fun HomePage(controller: SudokuController) {
                     listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (checked) "✓" else "○", fontSize = 16.sp,
-                                color = if (checked) Ink.cyan else Ink.muted)
+                            StreakMarker(checked)
+                            Spacer(Modifier.height(4.dp))
                             Text(weekday, fontSize = 9.sp, color = Ink.muted)
                         }
                     }
@@ -402,15 +422,27 @@ fun DailyPage(controller: SudokuController) {
                 Spacer(Modifier.height(4.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Column(Modifier.weight(1f)) {
-                        Text("▥  TEŽINA", color = Ink.muted, fontSize = 10.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("statistics", Modifier.size(13.dp), Ink.gold)
+                            Spacer(Modifier.width(4.dp))
+                            Text("TEŽINA", color = Ink.muted, fontSize = 10.sp)
+                        }
                         Text("Srednja", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     Column(Modifier.weight(1f)) {
-                        Text("◷  VRIJEME", color = Ink.muted, fontSize = 10.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("timer", Modifier.size(13.dp), Ink.cyan)
+                            Spacer(Modifier.width(4.dp))
+                            Text("VRIJEME", color = Ink.muted, fontSize = 10.sp)
+                        }
                         Text("12 min", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     Column(Modifier.weight(1f)) {
-                        Text("★  NAGRADA", color = Ink.muted, fontSize = 10.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("star", Modifier.size(13.dp), Ink.gold)
+                            Spacer(Modifier.width(4.dp))
+                            Text("NAGRADA", color = Ink.muted, fontSize = 10.sp)
+                        }
                         Text("50 bodova", color = Ink.gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -428,8 +460,8 @@ fun DailyPage(controller: SudokuController) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (monday.plusDays(i.toLong()).toString() in completedDays) "✓" else "○",
-                                color = Ink.cyan, fontSize = 21.sp)
+                            StreakMarker(monday.plusDays(i.toLong()).toString() in completedDays)
+                            Spacer(Modifier.height(5.dp))
                             Text(label, color = Ink.muted, fontSize = 10.sp)
                         }
                     }
