@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.10`
+- Version: `1.0.11`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -158,3 +158,15 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - Android CI releases a test APK and an unsigned AAB unless publisher
   signing secrets are configured.
 - Pixel-for-pixel parity is **not certified**; see issue #11 and docs/pixel-qa.md.
+
+## Sudoku 1.0.11: date-boundary stability
+
+- Home streak and daily challenge now refresh the local calendar date without
+  requiring the player to leave and re-enter the screen. The date ticker fires
+  at midnight and checks for device date/time-zone changes at most one minute apart.
+- Date formatting and daily completion availability stay tied to real saved
+  progress; no hard-coded screenshot data is used in the actual application.
+- Added unit coverage for local midnight, the Europe/Zagreb daylight-saving
+  transition, New Year's Eve, and clock-change polling.
+- Full 941×1672 design parity is still pending normalized emulator image comparison
+  under issue #11; this patch does not assert a new MAE score.
