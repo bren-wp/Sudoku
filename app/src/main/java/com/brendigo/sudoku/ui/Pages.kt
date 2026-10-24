@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -51,7 +52,7 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
 fun SectionTitle(title: String, description: String = "", onBack: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
-            Modifier.size(46.dp)
+            Modifier.size(46.dp).testTag("navigate-back")
                 .background(Color(0x99082150), RoundedCornerShape(14.dp))
                 .clickable(onClick = onBack),
             contentAlignment = Alignment.Center,
@@ -67,7 +68,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit) {
 @Composable
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Box(
-        modifier.heightIn(min = 58.dp)
+        modifier.testTag("primary-action").heightIn(min = 58.dp)
             .background(
                 Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
@@ -147,7 +148,7 @@ private fun HomeTile(
     icon: String, title: String, subtitle: String, accent: Color,
     modifier: Modifier = Modifier, compact: Boolean = false, onClick: () -> Unit,
 ) {
-    NeonPanel(modifier.heightIn(min = if (compact) 134.dp else 179.dp).clickable(onClick = onClick), highlight = accent) {
+    NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-")).heightIn(min = if (compact) 134.dp else 179.dp).clickable(onClick = onClick), highlight = accent) {
         Column(Modifier.padding(if (compact) 12.dp else 17.dp),
             verticalArrangement = Arrangement.spacedBy(if (compact) 3.dp else 7.dp)) {
             Text(icon, color = accent, fontWeight = FontWeight.Bold, fontSize = if (compact) 29.sp else 38.sp)
