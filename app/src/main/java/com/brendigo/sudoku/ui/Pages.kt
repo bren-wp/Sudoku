@@ -44,11 +44,11 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
         Modifier.fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 28.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(top = 10.dp, bottom = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         content()
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(5.dp))
         Text(
             "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
             color = Ink.muted, fontSize = 9.sp,
@@ -110,35 +110,35 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
 @Composable
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Box(
-        modifier.testTag("primary-action").heightIn(min = 58.dp)
+        modifier.testTag("primary-action").heightIn(min = 49.dp)
             .background(
                 Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
             )
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
-    ) { Text(title, color = Ink.white, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp) }
+    ) { Text(title, color = Ink.white, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp) }
 }
 
 @Composable
 fun HomePage(controller: SudokuController) {
     PageContent {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(1.dp))
         BrandHeader(Modifier.fillMaxWidth())
         Text(
             "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
             color = Ink.muted, fontSize = 10.sp, modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(4.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game").clickable { controller.go(Screen.GAME) }
-                .heightIn(min = 170.dp), highlight = Ink.blue) {
-                Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                .heightIn(min = 148.dp), highlight = Ink.blue) {
+                Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("N A S T A V I  I G R U", color = Ink.cyan, fontSize = 12.sp, letterSpacing = 2.sp)
-                    Text("Prekinuta igra", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 26.sp)
+                    Text("Prekinuta igra", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 24.sp)
                     Subtitle(difficultyLabels[game.level] + " · " + game.size + "×" + game.size)
                     Subtitle("◷ " + formatTime(game.elapsed) + "  ·  Još " +
                         game.board.indices.count { game.board[it] != game.solution[it] } + " polja")
@@ -186,17 +186,39 @@ fun HomePage(controller: SudokuController) {
                 controller.go(Screen.SETTINGS)
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), highlight = Ink.blue) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 77.dp), highlight = Ink.blue) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 11.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+            ) {
                 Text("🔥", fontSize = 28.sp)
-                Spacer(Modifier.width(12.dp))
                 Column {
-                    Subtitle("Trenutni niz")
-                    Text("${controller.currentStreak()} dana", fontSize = 25.sp,
-                        color = Ink.gold, fontWeight = FontWeight.Bold)
+                    Text("Trenutni niz", fontSize = 11.sp, color = Ink.muted)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("${controller.currentStreak()}", fontSize = 26.sp,
+                            color = Ink.gold, fontWeight = FontWeight.Bold)
+                        Text(" dana", fontSize = 12.sp, color = Ink.muted)
+                    }
                 }
-                Spacer(Modifier.weight(1f))
-                Text("PON  UTO  SRI  ČET  PET", fontSize = 10.sp, color = Ink.cyan)
+                Spacer(Modifier.width(5.dp))
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    val today = LocalDate.now()
+                    val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+                    val completed = controller.stats.completedDailyDates.toSet()
+                    listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
+                        val checked = monday.plusDays(index.toLong()).toString() in completed
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(if (checked) "✓" else "○", fontSize = 16.sp,
+                                color = if (checked) Ink.cyan else Ink.muted)
+                            Text(weekday, fontSize = 9.sp, color = Ink.muted)
+                        }
+                    }
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("🎁", fontSize = 21.sp)
+                    Text("Nagrada", fontSize = 9.sp, color = Ink.muted)
+                }
             }
         }
         Spacer(Modifier.height(4.dp))
@@ -208,13 +230,13 @@ private fun HomeTile(
     icon: String, title: String, subtitle: String, accent: Color,
     modifier: Modifier = Modifier, compact: Boolean = false, onClick: () -> Unit,
 ) {
-    NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-")).heightIn(min = if (compact) 134.dp else 179.dp).clickable(onClick = onClick), highlight = accent) {
-        Column(Modifier.padding(if (compact) 12.dp else 17.dp),
-            verticalArrangement = Arrangement.spacedBy(if (compact) 3.dp else 7.dp)) {
-            Text(icon, color = accent, fontWeight = FontWeight.Bold, fontSize = if (compact) 29.sp else 38.sp)
+    NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-")).heightIn(min = if (compact) 81.dp else 126.dp).clickable(onClick = onClick), highlight = accent) {
+        Column(Modifier.padding(if (compact) 10.dp else 15.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 5.dp)) {
+            Text(icon, color = accent, fontWeight = FontWeight.Bold, fontSize = if (compact) 25.sp else 34.sp)
             Text(title, color = Ink.white, fontWeight = FontWeight.Bold,
-                fontSize = if (compact) 16.sp else 21.sp, maxLines = 2)
-            Text(subtitle, color = Ink.muted, fontSize = if (compact) 11.sp else 13.sp, lineHeight = 17.sp)
+                fontSize = if (compact) 14.sp else 19.sp, maxLines = 2)
+            Text(subtitle, color = Ink.muted, fontSize = if (compact) 10.sp else 12.sp, lineHeight = 17.sp)
         }
     }
 }
@@ -239,15 +261,15 @@ fun NewGamePage(controller: SudokuController) {
         }
         listOf("✿", "★", "★★", "★★★", "♛", "♛").forEachIndexed { i, symbol ->
             NeonPanel(
-                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 86.dp)
+                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 65.dp)
                     .clickable { level = i },
                 highlight = if (level == i) Ink.cyan else difficultyColors[i],
             ) {
-                Row(Modifier.fillMaxWidth().padding(17.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(symbol, fontSize = 25.sp, color = difficultyColors[i])
-                    Spacer(Modifier.width(16.dp))
+                Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(symbol, fontSize = 24.sp, color = difficultyColors[i])
+                    Spacer(Modifier.width(13.dp))
                     Column(Modifier.weight(1f)) {
-                        Text(difficultyLabels[i], fontSize = 21.sp, fontWeight = FontWeight.Bold, color = Ink.white)
+                        Text(difficultyLabels[i], fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Ink.white)
                         Subtitle(listOf(
                             "Savršeno za početnike", "Lagani izazov za vježbu",
                             "Uravnotežen izazov", "Za iskusne igrače",
