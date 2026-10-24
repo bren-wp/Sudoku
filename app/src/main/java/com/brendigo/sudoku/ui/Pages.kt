@@ -44,10 +44,20 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
         Modifier.fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 42.dp),
+            .padding(top = 16.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
-        content = content,
-    )
+    ) {
+        content()
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
+            color = Ink.muted, fontSize = 9.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+                .testTag("brand-footer"),
+            maxLines = 1,
+        )
+    }
 }
 
 @Composable
@@ -189,9 +199,7 @@ fun HomePage(controller: SudokuController) {
                 Text("PON  UTO  SRI  ČET  PET", fontSize = 10.sp, color = Ink.cyan)
             }
         }
-        Text("B I S T R I J I  U M  ·  B O L J I  D A N", color = Ink.muted,
-            modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
-            textAlign = TextAlign.Center, fontSize = 10.sp)
+        Spacer(Modifier.height(4.dp))
     }
 }
 
@@ -567,6 +575,7 @@ fun AchievementsPage(controller: SudokuController) {
 @Composable
 fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
+    var showPrivacy by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -622,9 +631,56 @@ fun SettingsPage(controller: SudokuController) {
                 Subtitle("Sudoku by Brendigo")
                 Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 Subtitle("Igra radi potpuno offline; napredak ostaje na uređaju.")
+                NeonPanel(
+                    Modifier.fillMaxWidth().heightIn(min = 52.dp)
+                        .testTag("privacy-policy").clickable { showPrivacy = true },
+                    Ink.blue,
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("♧", color = Ink.cyan, fontSize = 20.sp)
+                        Spacer(Modifier.width(12.dp))
+                        Text("Pravila privatnosti", color = Ink.white,
+                            fontSize = 15.sp, modifier = Modifier.weight(1f))
+                        Text("›", color = Ink.cyan, fontSize = 20.sp)
+                    }
+                }
                 Subtitle("Izvorni kod i uvjeti: MIT licenca u GitHub repozitoriju.")
             }
         }
+    }
+    if (showPrivacy) {
+        AlertDialog(
+            onDismissRequest = { showPrivacy = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Pravila privatnosti", color = Ink.white) },
+            text = {
+                Column(
+                    Modifier.heightIn(max = 370.dp).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(9.dp),
+                ) {
+                    Text(
+                        "Sudoku by Brendigo možeš igrati bez registracije i internetske veze.",
+                        color = Ink.white, fontSize = 14.sp,
+                    )
+                    Subtitle("Podaci o odigranim igrama, postavkama, napretku i postignućima " +
+                        "spremaju se lokalno u privatnu pohranu aplikacije na uređaju.")
+                    Subtitle("Aplikacija ne koristi oglase, analitiku, praćenje korisnika niti " +
+                        "internetsku dozvolu. Podaci se ne šalju na poslužitelj.")
+                    Subtitle("Deinstaliranjem aplikacije lokalni se podaci u pravilu brišu. " +
+                        "Postavke Android sustava mogu utjecati na ponašanje pohrane.")
+                    Subtitle("Izdavač: Brendigo · verzija " +
+                        com.brendigo.sudoku.BuildConfig.VERSION_NAME)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacy = false }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
 }
 
