@@ -317,7 +317,7 @@ fun DailyPage(controller: SudokuController) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (monday.plusDays(i.toLong()) in completedDays) "✓" else "○",
+                            Text(if (monday.plusDays(i.toLong()).toString() in completedDays) "✓" else "○",
                                 color = Ink.cyan, fontSize = 23.sp)
                             Text(label, color = Ink.muted, fontSize = 10.sp)
                         }
@@ -519,7 +519,7 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                     fontWeight = FontWeight.ExtraBold)
             }
             Subtitle("${stats.finished} dovršeno", Modifier.fillMaxWidth(), centered = true)
-            Subtitle("${(stats.played - stats.finished).coerceAtLeast(0)} prekinuto",
+            Subtitle("${(stats.played - stats.finished).coerceAtLeast(0)} nedovršeno",
                 Modifier.fillMaxWidth(), centered = true)
         }
     }
