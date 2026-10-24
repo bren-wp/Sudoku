@@ -62,4 +62,16 @@
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:pathData="M77.5,72.5 C76,68 69,68.8 69.7,74 C70.2,79.5 78.5,77.5 77.5,72.5 C78,84.5 71.5,84.5 69.5,82" />
+    <!-- Compact neon glints, fully inside Android's adaptive safe mask. -->
+    <path
+        android:strokeColor="#A8F7FF"
+        android:strokeAlpha=".77"
+        android:strokeWidth="1.25"
+        android:strokeLineCap="round"
+        android:pathData="M25,39 V34 M22.5,36.5 H27.5 M83,63 V59 M81,61 H85" />
+    <path
+        android:strokeColor="#E4FFFF"
+        android:strokeAlpha=".36"
+        android:strokeWidth="1.5"
+        android:pathData="M28,24 H45 M23,29 V45 M64,84 H77" />
 </vector>
