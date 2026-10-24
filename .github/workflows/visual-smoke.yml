@@ -42,6 +42,10 @@ jobs:
           disable-animations: true
           emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
           script: |
+            # Reference artworks were supplied at 941x1672 pixels.
+            # Set exact device pixel bounds before the screenshot baseline.
+            adb shell wm size 941x1672
+            adb shell wm density 420
             bash .github/scripts/run-visual-smoke.sh
       - name: Upload actual Android screenshots
         if: always()
