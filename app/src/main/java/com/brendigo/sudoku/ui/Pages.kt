@@ -440,15 +440,15 @@ fun StatsPage(controller: SudokuController) {
             }
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(Modifier.padding(17.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Nedavni napredak", color = Ink.white, fontSize = 18.sp,
+                    Text("Nedavni napredak", color = Ink.white, fontSize = 16.sp,
                         modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
                     Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 12.sp,
                         modifier = Modifier.testTag("open-game-history").clickable { showHistory = true })
                 }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
-                stats.history.take(6).forEach {
+                stats.history.take(3).forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("▦", color = difficultyColors[it.level], fontSize = 22.sp)
                         Spacer(Modifier.width(9.dp))
@@ -456,6 +456,29 @@ fun StatsPage(controller: SudokuController) {
                         Text(formatTime(it.seconds), color = Ink.muted, fontSize = 13.sp)
                         Spacer(Modifier.width(8.dp))
                         Text(it.date, color = Ink.muted, fontSize = 11.sp)
+                    }
+                }
+            }
+        }
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 79.dp)
+            .testTag("stats-achievements")
+            .clickable { controller.go(Screen.ACHIEVEMENTS) }, Ink.blue) {
+            Column(Modifier.fillMaxWidth().padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🏆  Postignuća", color = Ink.white, fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 11.sp)
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    listOf(
+                        "★  Početnik" to (stats.finished >= 1),
+                        "◷  Brzi um" to (stats.fastWins >= 1),
+                        "🔥  Pobjednički niz" to (stats.bestStreak >= 7),
+                    ).forEach { (label, unlocked) ->
+                        Text(label, fontSize = 10.sp,
+                            color = if (unlocked) Ink.cyan else Ink.muted,
+                            maxLines = 1)
                     }
                 }
             }
@@ -502,21 +525,21 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
     val colors = listOf(Ink.teal, Ink.blue, Ink.purple, Ink.gold)
     val labels = listOf("Lako", "Srednje", "Teško", "Stručno")
     val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
-    NeonPanel(modifier.heightIn(min = 246.dp), Ink.blue) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 13.dp)) {
+    NeonPanel(modifier.heightIn(min = 172.dp), Ink.blue) {
+        Column(Modifier.fillMaxSize().padding(horizontal = 9.dp, vertical = 10.dp)) {
             Text("Riješene igre po težini", color = Ink.white,
                 fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
-            Spacer(Modifier.height(12.dp))
-            Row(Modifier.fillMaxWidth().height(177.dp),
+            Spacer(Modifier.height(6.dp))
+            Row(Modifier.fillMaxWidth().height(119.dp),
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.Bottom) {
                 counts.forEachIndexed { index, amount ->
                     Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(amount.toString(), color = Ink.white, fontSize = 12.sp)
-                        Spacer(Modifier.height(7.dp))
+                        Spacer(Modifier.height(4.dp))
                         Box(
                             Modifier.fillMaxWidth(.75f)
-                                .height((12 + 100 * amount / ceiling).dp)
+                                .height((8 + 65 * amount / ceiling).dp)
                                 .background(
                                     Brush.verticalGradient(listOf(
                                         colors[index], colors[index].copy(alpha = .35f)
@@ -540,20 +563,20 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
         (stats.finished.toFloat() / stats.played).coerceIn(0f, 1f)
     else 0f
     val percentage = (fraction * 100).toInt()
-    NeonPanel(modifier.heightIn(min = 246.dp), Ink.cyan) {
-        Column(Modifier.fillMaxSize().padding(11.dp),
+    NeonPanel(modifier.heightIn(min = 172.dp), Ink.cyan) {
+        Column(Modifier.fillMaxSize().padding(9.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Postotak dovršenosti", color = Ink.white,
                 fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
-            Spacer(Modifier.height(9.dp))
-            Box(Modifier.fillMaxWidth().height(152.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(115.dp)) {
+            Spacer(Modifier.height(5.dp))
+            Box(Modifier.fillMaxWidth().height(106.dp), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.size(84.dp)) {
                     drawArc(Ink.blue.copy(alpha = .27f), 0f, 360f, false,
-                        style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
+                        style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     drawArc(Ink.cyan, -90f, fraction * 360f, false,
                         style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
                 }
-                Text("$percentage%", fontSize = 27.sp, color = Ink.white,
+                Text("$percentage%", fontSize = 24.sp, color = Ink.white,
                     fontWeight = FontWeight.ExtraBold)
             }
             Subtitle("${stats.finished} dovršeno", Modifier.fillMaxWidth(), centered = true)
@@ -565,14 +588,23 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
 
 @Composable
 private fun StatTile(icon: String, label: String, value: String, color: Color, modifier: Modifier) {
-    NeonPanel(modifier.heightIn(min = 124.dp), color) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(icon, fontSize = 24.sp, color = color)
-            Subtitle(label)
-            Text(value, color = Ink.white, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+    NeonPanel(modifier.heightIn(min = 63.dp), color) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(icon, fontSize = 25.sp, color = color)
+            Spacer(Modifier.width(7.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(label, color = Ink.muted, fontSize = 11.sp, maxLines = 1)
+                Text(value, color = Ink.white, fontSize = 19.sp,
+                    fontWeight = FontWeight.ExtraBold, maxLines = 1)
+            }
+            Text("›", color = color, fontSize = 17.sp)
         }
     }
 }
+
 
 private data class Achievement(
     val icon: String, val title: String, val text: String, val goal: Int,
