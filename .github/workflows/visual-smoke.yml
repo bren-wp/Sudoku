@@ -45,7 +45,11 @@ jobs:
             # Reference artworks were supplied at 941x1672 pixels.
             # Set exact device pixel bounds before the screenshot baseline.
             adb shell wm size 941x1672
-            adb shell wm density 420
+            # At 320 dpi a 48dp tap target is 96px, matching the reference
+            # screen proportions. 420 dpi made all cards ~31% too large.
+            adb shell wm density 320
+            adb shell wm size
+            adb shell wm density
             bash .github/scripts/run-visual-smoke.sh
       - name: Upload actual Android screenshots
         if: always()
