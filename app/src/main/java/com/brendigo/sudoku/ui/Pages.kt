@@ -8,6 +8,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -211,6 +213,7 @@ fun NewGamePage(controller: SudokuController) {
 @Composable
 fun DailyPage(controller: SudokuController) {
     val scope = rememberCoroutineScope()
+    var showRanking by remember { androidx.compose.runtime.mutableStateOf(false) }
     val formattedDate = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
@@ -278,12 +281,45 @@ fun DailyPage(controller: SudokuController) {
             { scope.launch { controller.startNew(9, 2, daily = true) } },
             Modifier.fillMaxWidth(), !controller.isGenerating && !controller.dailyAlreadyCompleted()
         )
+        NeonPanel(Modifier.fillMaxWidth().height(54.dp)
+            .testTag("daily-leaderboard").clickable { showRanking = true }, Ink.purple) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("🏆   Pogledaj rang-listu", color = Ink.white,
+                    fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            }
+        }
+    }
+    if (showRanking) {
+        val records = controller.stats.history.filter { it.daily }.sortedBy { it.seconds }
+        AlertDialog(
+            onDismissRequest = { showRanking = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Osobna rang-lista", color = Ink.white) },
+            text = {
+                Column(Modifier.heightIn(max = 330.dp).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Subtitle("Offline rezultati na ovom uređaju. Nema globalne rang-liste.")
+                    if (records.isEmpty()) Subtitle("Još nema riješenih dnevnih izazova.")
+                    records.take(30).forEachIndexed { index, record ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text("${index + 1}.", color = Ink.gold, modifier = Modifier.width(32.dp))
+                            Text(record.date, color = Ink.white, modifier = Modifier.weight(1f))
+                            Text(formatTime(record.seconds), color = Ink.cyan)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showRanking = false }) { Text("Zatvori", color = Ink.cyan) }
+            },
+        )
     }
 }
 
 @Composable
 fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
+    var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", { controller.go(Screen.HOME) })
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
@@ -340,7 +376,12 @@ fun StatsPage(controller: SudokuController) {
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(17.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Nedavni napredak", color = Ink.white, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Nedavni napredak", color = Ink.white, fontSize = 18.sp,
+                        modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 12.sp,
+                        modifier = Modifier.testTag("open-game-history").clickable { showHistory = true })
+                }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
                 stats.history.take(6).forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -354,6 +395,32 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
+    }
+    if (showHistory) {
+        AlertDialog(
+            onDismissRequest = { showHistory = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Povijest igara", color = Ink.white) },
+            text = {
+                Column(Modifier.heightIn(max = 380.dp).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Subtitle("Prikaz posljednjih 50 dovršenih igara.")
+                    if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
+                    stats.history.forEach { record ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(difficultyLabels[record.level], color = Ink.white,
+                                modifier = Modifier.weight(1f), fontSize = 13.sp)
+                            Text(formatTime(record.seconds), color = Ink.cyan, fontSize = 13.sp)
+                            Spacer(Modifier.width(9.dp))
+                            Text(record.date, color = Ink.muted, fontSize = 11.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHistory = false }) { Text("Zatvori", color = Ink.cyan) }
+            },
+        )
     }
 }
 
