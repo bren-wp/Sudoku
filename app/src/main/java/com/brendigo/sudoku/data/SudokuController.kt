@@ -100,6 +100,28 @@ class SudokuController(context: Context) {
     private val undoHistory = readUndoHistory()
     private var settingsOrigin = Screen.HOME
 
+    init {
+        // Migrate the in-progress classic game created by versions <= 1.0.3
+        // before switching between a normal game and the daily challenge.
+        if (game?.daily == false) saveGame()
+    }
+
+    fun hasSavedRegularGame(): Boolean {
+        val regular = readGame("regular_game") ?: return false
+        return !regular.daily && !regular.completed && !regular.failed
+    }
+
+    fun resumeRegularGame(): Boolean {
+        val saved = readGame("regular_game") ?: return false
+        if (saved.daily || saved.completed || saved.failed) return false
+        game = saved
+        undoHistory.clear()
+        undoHistory.addAll(readUndoHistory("regular_undo", saved))
+        page = Screen.GAME
+        saveGame()
+        return true
+    }
+
     fun go(destination: Screen) {
         if (page == Screen.GAME && destination != Screen.GAME) saveGame()
         if (destination == Screen.SETTINGS) {
@@ -523,7 +545,8 @@ class SudokuController(context: Context) {
                 session.boxRows == (if (size == 9) 3 else 2) &&
                 session.level in 0..5 &&
                 session.selected in -1 until size * size &&
-                session.elapsed >= 0 && session.mistakes >= 0 &&
+                session.elapsed >= 0 && session.mistakes in 0..3 &&
+                session.hints in 0..MAX_HINTS &&
                 SudokuEngine.isValidCompleted(session.solution, size,
                     session.boxRows, session.boxColumns) &&
                 session.givens.indices.all { i ->
