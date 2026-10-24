@@ -1,6 +1,8 @@
 package com.brendigo.sudoku
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.content.ContentValues
 import android.os.Environment
 import android.provider.MediaStore
@@ -192,6 +194,9 @@ class SudokuVisualSmokeTest {
         waitFor("screen-postignuća")
         // The four featured achievement rows must be visible at reference size.
         rule.onNodeWithTag("achievement-sudoku-legenda").assertIsDisplayed()
+        rule.onNodeWithTag("achievement-prva-pobjeda").performClick()
+        rule.onNodeWithTag("achievement-detail").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("achievements-show-all")
             .performScrollTo().performClick()
         rule.onNodeWithTag("achievement-prvi-korak").assertExists()
@@ -244,9 +249,22 @@ class SudokuVisualSmokeTest {
         check(ctx.packageManager.getApplicationIcon(ctx.packageName) != null) {
             "Launcher adaptive icon is missing"
         }
-        check(ctx.resources.getIdentifier(
-            "ic_sudoku_monochrome", "drawable", ctx.packageName) != 0
-        ) { "Android themed adaptive icon is missing" }
+        val monochromeId = ctx.resources.getIdentifier(
+            "ic_sudoku_monochrome", "drawable", ctx.packageName
+        )
+        check(monochromeId != 0) { "Android themed adaptive icon is missing" }
+        val iconDrawable = ctx.getDrawable(monochromeId) ?: error("No themed icon")
+        val sample = Bitmap.createBitmap(108, 108, Bitmap.Config.ARGB_8888)
+        val output = Canvas(sample)
+        iconDrawable.setBounds(0, 0, 108, 108)
+        iconDrawable.draw(output)
+        check(Color.alpha(sample.getPixel(35, 56)) == 0) {
+            "Themed adaptive icon has an opaque background and loses its 7-3-9 design"
+        }
+        check(Color.alpha(sample.getPixel(54, 54)) > 0) {
+            "Center number is missing from the themed icon"
+        }
+        sample.recycle()
     }
 
     @Test

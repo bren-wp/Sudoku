@@ -2,6 +2,7 @@ package com.brendigo.sudoku.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
@@ -62,6 +63,26 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
                 .testTag("brand-footer"),
             maxLines = 1,
         )
+    }
+}
+
+/** Consistent checked/unchecked weekly calendar marker for home and daily. */
+@Composable
+private fun StreakMarker(checked: Boolean) {
+    Box(
+        Modifier.size(20.dp)
+            .background(
+                if (checked) Ink.cyan.copy(alpha = .18f) else Color(0xFF061D48),
+                RoundedCornerShape(50),
+            )
+            .border(
+                1.5.dp,
+                if (checked) Ink.cyan else Ink.blue.copy(alpha = .65f),
+                RoundedCornerShape(50),
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (checked) BrandIcon("check", Modifier.size(14.dp), Ink.cyan)
     }
 }
 
@@ -242,8 +263,8 @@ fun HomePage(controller: SudokuController) {
                     listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (checked) "✓" else "○", fontSize = 16.sp,
-                                color = if (checked) Ink.cyan else Ink.muted)
+                            StreakMarker(checked)
+                            Spacer(Modifier.height(4.dp))
                             Text(weekday, fontSize = 9.sp, color = Ink.muted)
                         }
                     }
@@ -402,15 +423,27 @@ fun DailyPage(controller: SudokuController) {
                 Spacer(Modifier.height(4.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Column(Modifier.weight(1f)) {
-                        Text("▥  TEŽINA", color = Ink.muted, fontSize = 10.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("statistics", Modifier.size(13.dp), Ink.gold)
+                            Spacer(Modifier.width(4.dp))
+                            Text("TEŽINA", color = Ink.muted, fontSize = 10.sp)
+                        }
                         Text("Srednja", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     Column(Modifier.weight(1f)) {
-                        Text("◷  VRIJEME", color = Ink.muted, fontSize = 10.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("timer", Modifier.size(13.dp), Ink.cyan)
+                            Spacer(Modifier.width(4.dp))
+                            Text("VRIJEME", color = Ink.muted, fontSize = 10.sp)
+                        }
                         Text("12 min", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     Column(Modifier.weight(1f)) {
-                        Text("★  NAGRADA", color = Ink.muted, fontSize = 10.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("star", Modifier.size(13.dp), Ink.gold)
+                            Spacer(Modifier.width(4.dp))
+                            Text("NAGRADA", color = Ink.muted, fontSize = 10.sp)
+                        }
                         Text("50 bodova", color = Ink.gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -428,8 +461,8 @@ fun DailyPage(controller: SudokuController) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (monday.plusDays(i.toLong()).toString() in completedDays) "✓" else "○",
-                                color = Ink.cyan, fontSize = 21.sp)
+                            StreakMarker(monday.plusDays(i.toLong()).toString() in completedDays)
+                            Spacer(Modifier.height(5.dp))
                             Text(label, color = Ink.muted, fontSize = 10.sp)
                         }
                     }
@@ -729,6 +762,7 @@ private data class Achievement(
 fun AchievementsPage(controller: SudokuController) {
     val s = controller.stats
     var showAll by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var selectedAchievement by remember { androidx.compose.runtime.mutableStateOf<Achievement?>(null) }
     // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
     val basic = listOf(
         Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
@@ -777,14 +811,25 @@ fun AchievementsPage(controller: SudokuController) {
         visible.chunked(2).forEach { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { achievement ->
+                    val unlocked = achievement.current >= achievement.goal
                     NeonPanel(Modifier.weight(1f).height(101.dp)
-                        .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-")),
-                        achievement.tint) {
+                        .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-"))
+                        .semantics {
+                            contentDescription = achievement.title +
+                                (if (unlocked) ", otključano" else ", zaključano")
+                            role = Role.Button
+                        }
+                        .clickable { selectedAchievement = achievement },
+                        if (unlocked) achievement.tint else Ink.line.copy(alpha = .50f)) {
                         Column(Modifier.fillMaxSize().padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                BrandIcon(achievementIconFor(achievement.title), Modifier.size(23.dp), achievement.tint)
-                                Text("★ ${achievement.reward}", color = achievement.tint, fontSize = 11.sp)
+                                BrandIcon(if (unlocked) achievementIconFor(achievement.title) else "lock",
+                                    Modifier.size(23.dp),
+                                    if (unlocked) achievement.tint else Ink.muted.copy(alpha = .73f))
+                                Text("★ ${achievement.reward}",
+                                    color = if (unlocked) achievement.tint else Ink.muted,
+                                    fontSize = 11.sp)
                             }
                             Text(achievement.title, color = Ink.white, fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold, lineHeight = 16.sp, maxLines = 1)
@@ -795,7 +840,8 @@ fun AchievementsPage(controller: SudokuController) {
                             Box(Modifier.fillMaxWidth().height(5.dp).background(Ink.blue.copy(alpha = .25f),
                                 RoundedCornerShape(12.dp))) {
                                 Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
-                                    .background(achievement.tint, RoundedCornerShape(12.dp)))
+                                    .background(if (unlocked) achievement.tint else Ink.muted,
+                                    RoundedCornerShape(12.dp)))
                             }
                             Text("${achievement.current.coerceAtMost(achievement.goal)} / ${achievement.goal}",
                                 color = Ink.muted, fontSize = 10.sp)
@@ -812,6 +858,34 @@ fun AchievementsPage(controller: SudokuController) {
                      else "Pogledaj svih 24 postignuća", color = Ink.cyan, fontSize = 13.sp)
             }
         }
+    }
+    selectedAchievement?.let { award ->
+        AlertDialog(
+            onDismissRequest = { selectedAchievement = null },
+            modifier = Modifier.testTag("achievement-detail"),
+            containerColor = Color(0xFF081A41),
+            title = { Text(award.title, color = Ink.white) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(award.text, color = Ink.muted)
+                    Text(
+                        "Napredak: ${award.current.coerceAtMost(award.goal)} / ${award.goal}",
+                        color = Ink.cyan,
+                    )
+                    Text(
+                        if (award.current >= award.goal)
+                            "Postignuće otključano · +${award.reward} bodova"
+                        else "Osvoji postignuće i otključaj ${award.reward} bodova.",
+                        color = Ink.gold,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedAchievement = null }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
 }
 
@@ -890,7 +964,7 @@ fun SettingsPage(controller: SudokuController) {
                 Subtitle("Sudoku by Brendigo")
                 Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 NeonPanel(
-                    Modifier.fillMaxWidth().heightIn(min = 40.dp)
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("privacy-policy").clickable { showPrivacy = true },
                     Ink.blue,
                 ) {

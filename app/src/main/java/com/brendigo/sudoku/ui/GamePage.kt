@@ -108,13 +108,24 @@ fun GamePage(controller: SudokuController) {
                 Text("${(percentage * 100).toInt()}%", fontSize = 11.sp, color = Ink.cyan)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    if (controller.options.checkMistakes)
-                        "♥".repeat((3 - game.mistakes).coerceIn(0, 3)) +
-                            "♡".repeat(game.mistakes.coerceIn(0, 3))
-                    else "∞",
-                    color = Ink.red, fontSize = 19.sp,
-                )
+                if (controller.options.checkMistakes) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        modifier = Modifier.semantics {
+                            contentDescription = "${(3 - game.mistakes).coerceIn(0, 3)} života preostalo"
+                        },
+                    ) {
+                        repeat(3) { index ->
+                            BrandIcon(
+                                if (index < (3 - game.mistakes).coerceIn(0, 3)) "heart" else "heart-outline",
+                                Modifier.size(17.dp),
+                                if (index < 3 - game.mistakes) Ink.red else Ink.muted.copy(alpha = .6f),
+                            )
+                        }
+                    }
+                } else {
+                    Text("∞", color = Ink.cyan, fontSize = 20.sp)
+                }
                 Text(if (controller.options.checkMistakes) "Greške: ${game.mistakes}/3"
                     else "Bez ograničenja", color = Ink.muted, fontSize = 10.sp)
             }
@@ -173,7 +184,7 @@ fun GamePage(controller: SudokuController) {
             onDismissRequest = { controller.go(Screen.HOME) },
             containerColor = Color(0xFF081A41),
             title = {
-                Text(if (game.completed) "🏆 Čestitamo!" else "Pokušaj ponovno",
+                Text(if (game.completed) "Čestitamo!" else "Pokušaj ponovno",
                     color = if (game.completed) Ink.gold else Ink.white)
             },
             text = {

@@ -6,12 +6,10 @@ import android.graphics.RectF
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.dp
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -116,6 +114,17 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     line(9f,2f,15f,2f)
                 }
                 "star" -> star()
+                "heart", "heart-outline" -> {
+                    val p = Path().apply {
+                        moveTo(12f, 21f)
+                        cubicTo(10f, 19f, 2f, 13f, 2f, 8.4f)
+                        cubicTo(2f, 1.3f, 9.2f, 1f, 12f, 6f)
+                        cubicTo(14.8f, 1f, 22f, 1.3f, 22f, 8.4f)
+                        cubicTo(22f, 13f, 14f, 19f, 12f, 21f)
+                        close()
+                    }
+                    canvas.drawPath(p, if(kind == "heart") filled else stroke)
+                }
                 "brain" -> {
                     val p=Path();p.moveTo(12f,6f)
                     p.cubicTo(8f,1f,4f,5f,5f,9f)
