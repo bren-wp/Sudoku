@@ -546,7 +546,7 @@ class SudokuController(context: Context) {
                 session.level in 0..5 &&
                 session.selected in -1 until size * size &&
                 session.elapsed >= 0 && session.mistakes in 0..3 &&
-                session.hints in 0..MAX_HINTS &&
+                session.hints >= 0 &&
                 SudokuEngine.isValidCompleted(session.solution, size,
                     session.boxRows, session.boxColumns) &&
                 session.givens.indices.all { i ->

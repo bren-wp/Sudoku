@@ -107,6 +107,26 @@ fun HomePage(controller: SudokuController) {
                 }
             }
         }
+        if (game?.daily == true && controller.hasSavedRegularGame()) {
+            NeonPanel(
+                Modifier.fillMaxWidth().testTag("resume-classic")
+                    .clickable { controller.resumeRegularGame() }
+                    .heightIn(min = 72.dp),
+                highlight = Ink.teal
+            ) {
+                Row(Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text("▦", fontSize = 28.sp, color = Ink.teal)
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Nastavi klasičnu igru", color = Ink.white,
+                            fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Subtitle("Vrati se na spremljenu Sudoku partiju")
+                    }
+                    Text("›", fontSize = 26.sp, color = Ink.cyan)
+                }
+            }
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             HomeTile("✚", "Nova igra", "Odaberi težinu", Ink.teal, Modifier.weight(1f)) {
                 controller.go(Screen.NEW_GAME)
