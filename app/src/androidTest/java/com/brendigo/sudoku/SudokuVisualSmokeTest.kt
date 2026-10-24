@@ -11,6 +11,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,24 +37,44 @@ class SudokuVisualSmokeTest {
         Thread.sleep(500)
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         instrumentation.waitForIdleSync()
-        val screenshot = instrumentation.uiAutomation.takeScreenshot()
+        var screenshot = instrumentation.uiAutomation.takeScreenshot()
             ?: error("Emulator did not return a screenshot")
-        // Reject OS crash/ANR dialogs. The tests can pass while system overlays
-        // contaminate screenshot artifacts, so validate representative pixels.
-        val samplePoints = listOf(
-            .35f to .49f, .50f to .45f, .50f to .50f,
-            .50f to .55f, .65f to .49f
-        )
-        val brightSamples = samplePoints.count { (rx, ry) ->
-            val pixel = screenshot.getPixel(
-                (screenshot.width * rx).toInt(), (screenshot.height * ry).toInt()
+        // The launcher may briefly show an Android ANR dialog even when the app
+        // itself is healthy. Only dismiss a visible system-owned dialog, then
+        // wait and re-capture. Never skip failures inside our own app.
+        fun modalSamples(image: Bitmap): Int {
+            val points = listOf(
+                .35f to .49f, .50f to .45f, .50f to .50f,
+                .50f to .55f, .65f to .49f
             )
-            android.graphics.Color.red(pixel) > 208 &&
-                android.graphics.Color.green(pixel) > 208 &&
-                android.graphics.Color.blue(pixel) > 208
+            return points.count { (rx, ry) ->
+                val pixel = image.getPixel(
+                    (image.width * rx).toInt(), (image.height * ry).toInt()
+                )
+                android.graphics.Color.red(pixel) > 208 &&
+                    android.graphics.Color.green(pixel) > 208 &&
+                    android.graphics.Color.blue(pixel) > 208
+            }
+        }
+        var brightSamples = modalSamples(screenshot)
+        if (brightSamples >= 3) {
+            val device = UiDevice.getInstance(instrumentation)
+            val button = device.findObject(By.text("Close app"))
+                ?: device.findObject(By.textContains("Close app"))
+                ?: device.findObject(By.text("Wait"))
+            check(button != null) {
+                "Light system overlay obscures $name, but no system ANR action was found"
+            }
+            button.click()
+            Thread.sleep(900)
+            instrumentation.waitForIdleSync()
+            screenshot.recycle()
+            screenshot = instrumentation.uiAutomation.takeScreenshot()
+                ?: error("Emulator did not return a screenshot after dialog")
+            brightSamples = modalSamples(screenshot)
         }
         check(brightSamples < 3) {
-            "System overlay or launcher ANR obscures $name: $brightSamples bright pixels"
+            "System overlay or launcher ANR still obscures $name: $brightSamples"
         }
         val resolver = rule.activity.contentResolver
         val values = ContentValues().apply {
