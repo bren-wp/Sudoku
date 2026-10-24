@@ -82,19 +82,19 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
             Column(Modifier.weight(1f).testTag(
                 "screen-" + title.lowercase().replace(" ", "-")
             )) {
-                AccentText(title, if (title.length > 16) 29 else 34)
+                AccentText(title, if (title.length > 16) 26 else 30)
                 if (description.isNotBlank()) Subtitle(description)
             }
         }
     } else {
-        Box(Modifier.fillMaxWidth().heightIn(min = 76.dp)) {
+        Box(Modifier.fillMaxWidth().heightIn(min = 63.dp)) {
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = 50.dp)
                     .testTag("screen-" + title.lowercase().replace(" ", "-"))
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AccentText(title, if (title.length > 16) 25 else 33)
+                AccentText(title, if (title.length > 16) 24 else 28)
                 if (description.isNotBlank()) {
                     Subtitle(description, Modifier.fillMaxWidth(), centered = true)
                 }
@@ -117,7 +117,9 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier,
                 enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp) {
     Box(
-        modifier.testTag("primary-action").heightIn(min = minHeight)
+        modifier.testTag("primary-action")
+            .semantics { contentDescription = title; role = Role.Button }
+            .heightIn(min = 48.dp).heightIn(min = minHeight)
             .background(
                 Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
@@ -125,7 +127,25 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
-    ) { Text(title, color = Ink.white, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp) }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center) {
+            val glyph = when {
+                title.trimStart().startsWith("▶") -> "play"
+                title.trimStart().startsWith("✓") -> "check"
+                else -> null
+            }
+            if (glyph != null) {
+                BrandIcon(glyph, Modifier.size(21.dp), Ink.white)
+                Spacer(Modifier.width(10.dp))
+            }
+            Text(
+                title.trimStart().removePrefix("▶").removePrefix("✓").trim(),
+                color = Ink.white, fontWeight = FontWeight.ExtraBold,
+                fontSize = 16.sp, maxLines = 1,
+            )
+        }
+    }
 }
 
 @Composable
@@ -425,17 +445,26 @@ fun DailyPage(controller: SudokuController) {
 @Composable
 fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
+    var metricInfo by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true, onBack = { controller.go(Screen.HOME) })
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-            StatTile("◈", "Odigrane igre", stats.finished.toString(), Ink.teal, Modifier.weight(1f))
-            StatTile("◷", "Najbolje vrijeme", formatTime(stats.best), Ink.purple, Modifier.weight(1f))
+            StatTile("◈", "Odigrane igre", stats.finished.toString(), Ink.teal, Modifier.weight(1f)) {
+                metricInfo = "Broj uspješno dovršenih Sudoku partija."
+            }
+            StatTile("◷", "Najbolje vrijeme", formatTime(stats.best), Ink.purple, Modifier.weight(1f)) {
+                metricInfo = "Najbrže vrijeme dovršene Sudoku partije."
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("◷", "Ukupno vrijeme", formatTime(stats.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
-                Ink.blue, Modifier.weight(1f))
-            StatTile("🔥", "Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f))
+                Ink.blue, Modifier.weight(1f)) {
+                metricInfo = "Ukupno vrijeme provedeno u dovršenim Sudoku partijama."
+            }
+            StatTile("🔥", "Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f)) {
+                metricInfo = "Broj uzastopnih dana s riješenim dnevnim izazovom."
+            }
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             if (maxWidth >= 348.dp) {
@@ -494,6 +523,19 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
+    }
+    if (metricInfo != null) {
+        AlertDialog(
+            onDismissRequest = { metricInfo = null },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Statistika", color = Ink.white) },
+            text = { Text(metricInfo ?: "", color = Ink.muted) },
+            confirmButton = {
+                TextButton(onClick = { metricInfo = null }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
     if (showHistory) {
         AlertDialog(
@@ -598,13 +640,22 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
 }
 
 @Composable
-private fun StatTile(icon: String, label: String, value: String, color: Color, modifier: Modifier) {
-    NeonPanel(modifier.heightIn(min = 63.dp), color) {
+private fun StatTile(icon: String, label: String, value: String, color: Color,
+                     modifier: Modifier, onClick: () -> Unit) {
+    NeonPanel(modifier.heightIn(min = 63.dp)
+        .semantics { contentDescription = "$label: $value"; role = Role.Button }
+        .clickable(onClick = onClick), color) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(icon, fontSize = 25.sp, color = color)
+            BrandIcon(when (label) {
+                "Odigrane igre" -> "gamepad"
+                "Najbolje vrijeme" -> "timer"
+                "Ukupno vrijeme" -> "timer"
+                "Dnevni niz" -> "flame"
+                else -> "statistics"
+            }, Modifier.size(25.dp), color)
             Spacer(Modifier.width(7.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(label, color = Ink.muted, fontSize = 11.sp, maxLines = 1)
@@ -717,6 +768,7 @@ fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
     var showPrivacy by remember { androidx.compose.runtime.mutableStateOf(false) }
     var showSound by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showLanguage by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -764,15 +816,20 @@ fun SettingsPage(controller: SudokuController) {
                 BrandIcon("next", Modifier.size(20.dp), Ink.muted)
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.teal) {
-            Row(Modifier.padding(11.dp), verticalAlignment = Alignment.CenterVertically) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 54.dp)
+            .testTag("language-settings")
+            .semantics { contentDescription = "Jezik aplikacije, hrvatski"; role = Role.Button }
+            .clickable { showLanguage = true }, Ink.teal) {
+            Row(Modifier.fillMaxWidth().padding(11.dp), verticalAlignment = Alignment.CenterVertically) {
                 BrandIcon("globe", Modifier.size(25.dp), Ink.teal)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text("Jezik", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                     Subtitle("Jezik aplikacije")
                 }
-                Text("Hrvatski", color = Ink.muted)
+                Text("Hrvatski", color = Ink.muted, fontSize = 13.sp)
+                Spacer(Modifier.width(6.dp))
+                BrandIcon("next", Modifier.size(16.dp), Ink.teal)
             }
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -798,6 +855,24 @@ fun SettingsPage(controller: SudokuController) {
                 }
             }
         }
+    }
+    if (showLanguage) {
+        AlertDialog(
+            onDismissRequest = { showLanguage = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Jezik", color = Ink.white) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Text("✓ Hrvatski", color = Ink.cyan, fontWeight = FontWeight.Bold)
+                    Subtitle("Aplikacija trenutačno podržava hrvatski jezik.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguage = false }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
     if (showSound) {
         AlertDialog(
