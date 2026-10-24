@@ -90,7 +90,11 @@ fun GamePage(controller: SudokuController) {
         Spacer(Modifier.height(if (compact) 1.dp else 4.dp))
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)) {
-            Text("◷ ${formatTime(game.elapsed)}", fontSize = if (compact) 14.sp else 16.sp, color = Ink.muted)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                BrandIcon("timer", Modifier.size(18.dp), Ink.muted)
+                Spacer(Modifier.width(5.dp))
+                Text(formatTime(game.elapsed), fontSize = if (compact) 14.sp else 16.sp, color = Ink.muted)
+            }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 val correct = game.correctCount()
                 val percentage = correct.toFloat() / game.board.size

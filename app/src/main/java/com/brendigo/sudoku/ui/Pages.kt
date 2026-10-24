@@ -342,7 +342,7 @@ fun DailyPage(controller: SudokuController) {
                     Subtitle("DANAS")
                     Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
-                Text("🔥", fontSize = 30.sp)
+                BrandIcon("flame", Modifier.size(30.dp), Ink.gold)
                 Spacer(Modifier.width(6.dp))
                 Column {
                     Text("${controller.currentStreak()}", color = Ink.gold, fontSize = 30.sp,
@@ -410,8 +410,12 @@ fun DailyPage(controller: SudokuController) {
         NeonPanel(Modifier.fillMaxWidth().height(43.dp)
             .testTag("daily-leaderboard").clickable { showRanking = true }, Ink.purple) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("🏆   Pogledaj rang-listu", color = Ink.white,
-                    fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BrandIcon("trophy", Modifier.size(20.dp), Ink.purple)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Pogledaj rang-listu", color = Ink.white,
+                        fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
             }
         }
     }
@@ -490,7 +494,7 @@ fun StatsPage(controller: SudokuController) {
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
                 stats.history.take(3).forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("▦", color = difficultyColors[it.level], fontSize = 22.sp)
+                        BrandIcon("grid", Modifier.size(21.dp), difficultyColors[it.level])
                         Spacer(Modifier.width(9.dp))
                         Text(difficultyLabels[it.level], color = Ink.white, modifier = Modifier.weight(1f))
                         Text(formatTime(it.seconds), color = Ink.muted, fontSize = 13.sp)
@@ -506,8 +510,12 @@ fun StatsPage(controller: SudokuController) {
             Column(Modifier.fillMaxWidth().padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(7.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("🏆  Postignuća", color = Ink.white, fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                        BrandIcon("trophy", Modifier.size(18.dp), Ink.cyan)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Postignuća", color = Ink.white, fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold)
+                    }
                     Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 11.sp)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -863,7 +871,11 @@ fun SettingsPage(controller: SudokuController) {
             title = { Text("Jezik", color = Ink.white) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    Text("✓ Hrvatski", color = Ink.cyan, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        BrandIcon("check", Modifier.size(20.dp), Ink.cyan)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Hrvatski", color = Ink.cyan, fontWeight = FontWeight.Bold)
+                    }
                     Subtitle("Aplikacija trenutačno podržava hrvatski jezik.")
                 }
             },
