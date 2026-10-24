@@ -94,7 +94,7 @@ fun HomePage(controller: SudokuController) {
         Spacer(Modifier.height(10.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
-            NeonPanel(Modifier.fillMaxWidth().clickable { controller.go(Screen.GAME) }
+            NeonPanel(Modifier.fillMaxWidth().testTag("resume-game").clickable { controller.go(Screen.GAME) }
                 .heightIn(min = 170.dp), highlight = Ink.blue) {
                 Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("N A S T A V I  I G R U", color = Ink.cyan, fontSize = 12.sp, letterSpacing = 2.sp)
