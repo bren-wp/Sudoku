@@ -4,35 +4,62 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- The Android adaptive foreground reproduces the branded 7 / 3 / 9 motif. -->
-    <path android:fillColor="#031334"
-        android:pathData="M0,0h108v108h-108z"/>
-    <path android:fillColor="#07408D"
-        android:pathData="M30,12 H78 C88,12 96,20 96,30 V78 C96,88 88,96 78,96 H30 C20,96 12,88 12,78 V30 C12,20 20,12 30,12 Z"/>
-    <path android:fillColor="#031B49"
-        android:pathData="M30,16 H78 C85.7,16 92,22.3 92,30 V78 C92,85.7 85.7,92 78,92 H30 C22.3,92 16,85.7 16,78 V30 C16,22.3 22.3,16 30,16 Z"/>
-    <path android:strokeColor="#1389F6" android:strokeWidth="4"
-        android:strokeAlpha="0.35"
-        android:pathData="M29,16 H79 C87,16 92,23 92,30 V78 C92,86 86,92 78,92 H30 C22,92 16,86 16,78 V30 C16,22 22,16 29,16 Z"/>
-    <path android:strokeColor="#20DDFD" android:strokeWidth="1.9"
-        android:pathData="M29,17 H79 C87,17 91,23 91,30 V78 C91,86 86,91 78,91 H30 C22,91 17,86 17,78 V30 C17,23 22,17 29,17 Z"/>
-    <path android:fillColor="#004FA8"
-        android:pathData="M44,44h20v20h-20z"/>
-    <path android:fillColor="#0089D5"
-        android:fillAlpha="0.58"
-        android:pathData="M46,46h16v16h-16z"/>
-    <path android:strokeColor="#00B9FC" android:strokeWidth="1.1"
-        android:pathData="M24,24h60v60h-60z"/>
-    <path android:strokeColor="#12D9FE" android:strokeWidth="1.45"
-        android:pathData="M44,24v60 M64,24v60 M24,44h60 M24,64h60"/>
-    <!-- Legible numerals at Android launcher size. -->
-    <path android:strokeColor="#F5FBFF" android:strokeWidth="3.5"
-        android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M29,30 H39 L31.5,41"/>
-    <path android:strokeColor="#E7FDFF" android:strokeWidth="3.8"
-        android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M50,49 C58,45 61,52 54,54 C62,54 59,63 50,59"/>
-    <path android:strokeColor="#F5FBFF" android:strokeWidth="3.6"
-        android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M79,77 C79,70 70,69 70,75 C70,81 79,80 79,74 C79,87 71,87 70,85"/>
+    <!-- Adaptive-safe foreground: all meaningful strokes stay within the
+         72dp circle centered at 54,54, even under round launcher masks. -->
+    <path
+        android:fillColor="#061944"
+        android:pathData="M33,18 H75 C83.3,18 90,24.7 90,33 V75 C90,83.3 83.3,90 75,90 H33 C24.7,90 18,83.3 18,75 V33 C18,24.7 24.7,18 33,18 Z" />
+    <path
+        android:fillColor="#0B3C96"
+        android:fillAlpha=".55"
+        android:pathData="M33,20 H75 C82,20 88,26 88,33 V75 C88,82 82,88 75,88 H33 C26,88 20,82 20,75 V33 C20,26 26,20 33,20 Z" />
+    <path
+        android:fillColor="#041336"
+        android:pathData="M33,24 H75 C80,24 84,28 84,33 V75 C84,80 80,84 75,84 H33 C28,84 24,80 24,75 V33 C24,28 28,24 33,24 Z" />
+    <!-- Outer electric-blue double rim; no path extends outside 18..90. -->
+    <path
+        android:strokeColor="#075CFF"
+        android:strokeAlpha=".42"
+        android:strokeWidth="3.7"
+        android:pathData="M33,20 H75 C82.5,20 88,25.5 88,33 V75 C88,82.5 82.5,88 75,88 H33 C25.5,88 20,82.5 20,75 V33 C20,25.5 25.5,20 33,20 Z" />
+    <path
+        android:strokeColor="#09DFFF"
+        android:strokeWidth="1.6"
+        android:pathData="M33,22 H75 C81,22 86,27 86,33 V75 C86,81 81,86 75,86 H33 C27,86 22,81 22,75 V33 C22,27 27,22 33,22 Z" />
+    <!-- Glowing central numeral tile. -->
+    <path
+        android:fillColor="#006CA9"
+        android:pathData="M45,45 H63 V63 H45 Z" />
+    <path
+        android:fillColor="#08DBF8"
+        android:fillAlpha=".43"
+        android:pathData="M47,47 H61 V61 H47 Z" />
+    <!-- Balanced 3×3 Sudoku grid and highlights. -->
+    <path
+        android:strokeColor="#079AFF"
+        android:strokeWidth="1.1"
+        android:pathData="M27,27 H81 V81 H27 Z" />
+    <path
+        android:strokeColor="#04D6FF"
+        android:strokeWidth="1.65"
+        android:pathData="M45,27 V81 M63,27 V81 M27,45 H81 M27,63 H81" />
+    <!-- Dedicated 7 / 3 / 9 glyphs at their reference positions. -->
+    <path
+        android:strokeColor="#EAF7FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M30.5,32 H40 L33,41.5" />
+    <path
+        android:strokeColor="#EAFDFF"
+        android:strokeWidth="3.3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M49,49 C56,45.5 60.5,51.5 54,54 C61.5,54 59.5,62.5 49,59.5" />
+    <path
+        android:strokeColor="#EAF7FF"
+        android:strokeWidth="3.1"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M77.5,72.5 C76,68 69,68.8 69.7,74 C70.2,79.5 78.5,77.5 77.5,72.5 C78,84.5 71.5,84.5 69.5,82" />
 </vector>
