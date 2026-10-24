@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
@@ -40,9 +41,26 @@ import com.brendigo.sudoku.data.Screen
 import com.brendigo.sudoku.data.Statistics
 import com.brendigo.sudoku.data.SudokuController
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+/**
+ * Refresh the visible calendar date at local midnight, and within one minute
+ * after manual clock/time-zone changes, without invalidating the UI each tick.
+ */
+@Composable
+private fun rememberToday(): LocalDate {
+    val today by produceState(initialValue = LocalDate.now()) {
+        while (true) {
+            delay(DailyDateTicker.delayUntilDayRefresh(ZonedDateTime.now()))
+            value = LocalDate.now()
+        }
+    }
+    return today
+}
 
 @Composable
 fun PageContent(content: @Composable ColumnScope.() -> Unit) {
@@ -172,6 +190,7 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
 
 @Composable
 fun HomePage(controller: SudokuController) {
+    val today = rememberToday()
     PageContent {
         Spacer(Modifier.height(18.dp))
         BrandHeader(Modifier.fillMaxWidth())
@@ -250,14 +269,13 @@ fun HomePage(controller: SudokuController) {
                 Column {
                     Text("Trenutni niz", fontSize = 11.sp, color = Ink.muted)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("${controller.currentStreak()}", fontSize = 26.sp,
+                        Text("${controller.currentStreak(today)}", fontSize = 26.sp,
                             color = Ink.gold, fontWeight = FontWeight.Bold)
                         Text(" dana", fontSize = 12.sp, color = Ink.muted)
                     }
                 }
                 Spacer(Modifier.width(5.dp))
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    val today = LocalDate.now()
                     val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
                     val completed = controller.stats.completedDailyDates.toSet()
                     listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
@@ -382,10 +400,11 @@ fun NewGamePage(controller: SudokuController) {
 
 @Composable
 fun DailyPage(controller: SudokuController) {
+    val today = rememberToday()
     val scope = rememberCoroutineScope()
     var showRanking by remember { androidx.compose.runtime.mutableStateOf(false) }
-    val formattedDate = remember {
-        LocalDate.now().format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
+    val formattedDate = remember(today) {
+        today.format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
     PageContent {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
@@ -403,7 +422,7 @@ fun DailyPage(controller: SudokuController) {
                 Spacer(Modifier.width(8.dp))
                 BrandIcon("flame", Modifier.size(25.dp), Ink.gold)
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("${controller.currentStreak()}", color = Ink.gold, fontSize = 25.sp,
+                    Text("${controller.currentStreak(today)}", color = Ink.gold, fontSize = 25.sp,
                         fontWeight = FontWeight.ExtraBold, lineHeight = 27.sp)
                     Text("DANA U NIZU", color = Ink.muted, fontSize = 8.sp, maxLines = 1)
                 }
@@ -453,7 +472,6 @@ fun DailyPage(controller: SudokuController) {
             Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
                 Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white, fontSize = 12.sp)
-                val today = LocalDate.now()
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
                 val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
                     setOf(controller.stats.lastDaily)
