@@ -64,11 +64,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableImmersiveMode()
         sudoku = SudokuController(applicationContext)
         setContent {
             SudokuTheme(sudoku.options.dark) { Application(sudoku) }
         }
+        // On Android 15+ the WindowInsetsController must not be queried before
+        // DecorView is attached. Apply full-screen mode once UI is installed.
+        window.decorView.post { enableImmersiveMode() }
     }
 }
 
