@@ -1,0 +1,93 @@
+name: Publish Sudoku release
+
+on:
+  workflow_run:
+    workflows: ["Android CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      RUN_ID: ${{ github.event.workflow_run.id }}
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Checkout successfully tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Identify version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n 1)"
+          test -n "$VERSION"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid release version: $VERSION"
+            exit 1
+          fi
+          echo "RELEASE_TAG=v$VERSION" >> "$GITHUB_ENV"
+      - name: Skip already published version
+        id: existing
+        shell: bash
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Version $RELEASE_TAG already exists."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Retrieve signed or preview Android files
+        if: steps.existing.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-work/assets release-work/raw
+          if gh run download "$RUN_ID" -R "$REPO" -n Sudoku-signed-release-apk -D release-work/raw >/dev/null 2>&1; then
+            APK="$(find release-work/raw -type f -name '*.apk' | head -n 1)"
+            test -n "$APK"
+            cp "$APK" "release-work/assets/Sudoku-$RELEASE_TAG.apk"
+            rm -f release-work/raw/*.apk
+            gh run download "$RUN_ID" -R "$REPO" -n Sudoku-signed-release-aab -D release-work/raw
+            AAB="$(find release-work/raw -type f -name '*.aab' | head -n 1)"
+            test -n "$AAB"
+            cp "$AAB" "release-work/assets/Sudoku-$RELEASE_TAG.aab"
+            echo "PREVIEW=false" >> "$GITHUB_ENV"
+            printf '%s\n'               "Sudoku $RELEASE_TAG • by Brendigo"               ""               "Potpisani release APK i AAB iz uspješne Android CI izgradnje."               "Potrebno je još završno testiranje i provjera certifikata za Google Play."               > release-work/notes.md
+          else
+            gh run download "$RUN_ID" -R "$REPO" -n Sudoku-debug-apk -D release-work/raw
+            APK="$(find release-work/raw -type f -name '*.apk' | head -n 1)"
+            test -n "$APK"
+            cp "$APK" "release-work/assets/Sudoku-$RELEASE_TAG-test.apk"
+            rm -f release-work/raw/*.apk
+            gh run download "$RUN_ID" -R "$REPO" -n Sudoku-unsigned-release-aab -D release-work/raw
+            AAB="$(find release-work/raw -type f -name '*.aab' | head -n 1)"
+            test -n "$AAB"
+            cp "$AAB" "release-work/assets/Sudoku-$RELEASE_TAG-unsigned.aab"
+            echo "PREVIEW=true" >> "$GITHUB_ENV"
+            printf '%s\n'               "Sudoku $RELEASE_TAG • by Brendigo"               ""               "**TESTNO IZDANJE**. APK je debug potpisan i namijenjen instalacijskom testiranju."               "AAB nema izdavački potpis i **nije spreman za učitavanje na Google Play**."               "Za produkcijski potpis potrebne su zaštićene GitHub Actions tajne:"               "SUDOKU_KEYSTORE_BASE64, SUDOKU_SIGNING_KEY_ALIAS,"               "SUDOKU_SIGNING_STORE_PASSWORD i SUDOKU_SIGNING_KEY_PASSWORD."               > release-work/notes.md
+          fi
+          test "$(find release-work/assets -type f | wc -l)" -eq 2
+      - name: Publish GitHub release
+        if: steps.existing.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXTRA=()
+          if [[ "$PREVIEW" == "true" ]]; then EXTRA+=(--prerelease); fi
+          gh release create "$RELEASE_TAG" release-work/assets/* \
+            -R "$REPO" --target "$SOURCE_SHA" --title "Sudoku $RELEASE_TAG" \
+            --notes-file release-work/notes.md "${EXTRA[@]}"
