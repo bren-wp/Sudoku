@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +75,25 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             drawLine(Ink.blue.copy(alpha = .12f), Offset(x, 0f), Offset(x + w * .25f, h * .28f), 2.5f)
             drawLine(Ink.blue.copy(alpha = .10f), Offset(0f, x), Offset(w, x - w * .20f), 2.5f)
         }
+        // Large translucent Sudoku digits are part of the original visual motif.
+        // Native canvas text here is decoration, never interactive content.
+        drawIntoCanvas { canvas ->
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.rgb(24, 101, 209)
+                alpha = 105
+                textSize = w * .084f
+                typeface = android.graphics.Typeface.create(
+                    android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.NORMAL
+                )
+            }
+            listOf(
+                Triple("9", .10f, .034f), Triple("5", .86f, .021f),
+                Triple("3", .20f, .11f), Triple("1", .70f, .095f),
+                Triple("6", .92f, .18f)
+            ).forEach { (digit, x, y) ->
+                canvas.nativeCanvas.drawText(digit, w * x, h * y, paint)
+            }
+        }
         // Stars are deterministic for stable rendering and no flashing/recomposition.
         for (i in 1..60) {
             val x = ((i * 173 + 61) % 991) / 991f * w
@@ -101,6 +122,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             }
             drawPath(path, color)
         }
+        mountains(h * .81f, h * .042f, Color(0xFF0A2A68).copy(alpha = .68f), 2.2f)
         mountains(h * .85f, h * .055f, Color(0xFF0B2A60), .1f)
         mountains(h * .89f, h * .038f, Color(0xFF071D49), 1.5f)
         drawRect(
@@ -111,16 +133,17 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             topLeft = Offset(0f, h * .88f),
             size = androidx.compose.ui.geometry.Size(w, h * .12f),
         )
-        for (i in 0..35) {
-            val y = h * (.90f + (i / 35f) * .10f)
+        // Fine moonlit ripples across the lake.
+        for (i in 0..70) {
+            val y = h * (.90f + (i / 70f) * .10f)
             val x = (i * 83 % 100) / 100f * w
             drawLine(Ink.cyan.copy(alpha = .04f + i % 5 * .02f),
                 Offset(x, y), Offset(x + w * .045f, y), 1.2f)
         }
         // Distinctive pagoda on the right, built from paths rather than external art.
-        val cx = w * .91f
-        val by = h * .87f
-        val unit = w * .021f
+        val cx = w * .87f
+        val by = h * .865f
+        val unit = w * .033f
         val structure = Path().apply {
             moveTo(cx - unit * 1.5f, by)
             lineTo(cx - unit * 1.5f, by - unit * 3.5f)
@@ -172,7 +195,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             cubicTo(w * .04f, h * .88f, w * .12f, h * .84f, w * .17f, h * .79f)
         }
         drawPath(branch, Color(0xFF020C26), style = Stroke(width = w * .012f))
-        for (i in 0..90) {
+        for (i in 0..130) {
             val t = ((i * 53 + 7) % 101) / 100f
             val x = w * t * .45f
             val y = h * (.82f + .14f * ((i * 37 % 103) / 103f))
@@ -266,12 +289,21 @@ fun NeonPanel(
             val h = size.height
             drawCircle(
                 Brush.radialGradient(
-                    listOf(highlight.copy(alpha = .23f), Color.Transparent),
+                    listOf(highlight.copy(alpha = .32f), Color.Transparent),
                     center = Offset(w * .82f, h * .14f),
-                    radius = w * .35f,
+                    radius = w * .48f,
                 ),
-                radius = w * .35f,
+                radius = w * .48f,
                 center = Offset(w * .82f, h * .14f),
+            )
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(highlight.copy(alpha = .13f), Color.Transparent),
+                    center = Offset(w * .08f, h * .76f),
+                    radius = w * .41f,
+                ),
+                radius = w * .41f,
+                center = Offset(w * .08f, h * .76f),
             )
             val mountain = Path().apply {
                 moveTo(w * .38f, h)
