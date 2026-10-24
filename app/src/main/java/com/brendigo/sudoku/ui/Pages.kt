@@ -45,7 +45,7 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
             .padding(top = 10.dp, bottom = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         content()
         Spacer(Modifier.height(5.dp))
@@ -256,7 +256,7 @@ fun NewGamePage(controller: SudokuController) {
         SectionTitle("Nova igra", "Odaberi težinu", { controller.go(Screen.HOME) })
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(9, 6, 4).forEach { option ->
-                NeonPanel(Modifier.weight(1f).testTag("size-$option").height(53.dp)
+                NeonPanel(Modifier.weight(1f).testTag("size-$option").height(43.dp)
                     .clickable { size = option }, highlight = if (size == option) Ink.cyan else Ink.line) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("$option×$option", color = if (size == option) Ink.white else Ink.muted,
@@ -267,7 +267,7 @@ fun NewGamePage(controller: SudokuController) {
         }
         listOf("✿", "★", "★★", "★★★", "♛", "♛").forEachIndexed { i, symbol ->
             NeonPanel(
-                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 65.dp)
+                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 55.dp)
                     .clickable { level = i },
                 highlight = if (level == i) Ink.cyan else difficultyColors[i],
             ) {
