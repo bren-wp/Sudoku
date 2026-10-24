@@ -281,22 +281,52 @@ fun NewGamePage(controller: SudokuController) {
     var size by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(9) }
     var level by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(2) }
     PageContent {
-        SectionTitle("Nova igra", "Odaberi težinu", { controller.go(Screen.HOME) })
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(9, 6, 4).forEach { option ->
-                NeonPanel(Modifier.weight(1f).testTag("size-$option").heightIn(min = 48.dp)
-                    .semantics { contentDescription = "Veličina $option puta $option"; role = Role.Button }
-                    .clickable { size = option }, highlight = if (size == option) Ink.cyan else Ink.line) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("$option×$option", color = if (size == option) Ink.white else Ink.muted,
-                            fontSize = 19.sp, fontWeight = FontWeight.Bold)
+        // Reference hierarchy: back + board size on the same first row,
+        // followed by the large title and the six full-width difficulty cards.
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                Modifier.size(48.dp).testTag("navigate-back")
+                    .semantics { contentDescription = "Natrag"; role = Role.Button }
+                    .background(Color(0x99082150), RoundedCornerShape(14.dp))
+                    .clickable { controller.go(Screen.HOME) },
+                contentAlignment = Alignment.Center,
+            ) {
+                BrandIcon("back", Modifier.size(24.dp), Ink.muted)
+            }
+            Row(Modifier.width(204.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                listOf(9, 6, 4).forEach { option ->
+                    NeonPanel(
+                        Modifier.weight(1f).testTag("size-$option")
+                            .heightIn(min = 48.dp)
+                            .semantics {
+                                contentDescription = "Veličina $option puta $option"
+                                role = Role.Button
+                            }
+                            .clickable { size = option },
+                        highlight = if (size == option) Ink.cyan else Ink.line,
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("$option×$option",
+                                color = if (size == option) Ink.white else Ink.muted,
+                                fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
         }
+        Spacer(Modifier.height(25.dp))
+        Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")) {
+            AccentText("Nova igra", 43)
+            Text("Odaberi težinu", color = Ink.muted, fontSize = 18.sp)
+        }
+        Spacer(Modifier.height(5.dp))
         listOf("✿", "★", "★★", "★★★", "♛", "♛").forEachIndexed { i, symbol ->
             NeonPanel(
-                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 58.dp)
+                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 75.dp)
                     .semantics { contentDescription = "Težina ${difficultyLabels[i]}"; role = Role.Button }
                     .clickable { level = i },
                 highlight = if (level == i) Ink.cyan else difficultyColors[i],
