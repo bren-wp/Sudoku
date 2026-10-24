@@ -48,6 +48,7 @@ data class Statistics(
     val history: List<Completed> = emptyList(),
     val dailyWins: Int = 0,
     val dailyPoints: Int = 0,
+    val completedDailyDates: List<String> = emptyList(),
     val noHintWins: Int = 0,
     val fastWins: Int = 0,
     val longWins: Int = 0,
@@ -369,18 +370,27 @@ class SudokuController(context: Context) {
     }
 
     private fun recordWin(s: Session) {
-        val today = LocalDate.now()
+        val completedDate = if (s.daily) {
+            runCatching { LocalDate.parse(s.day) }.getOrNull() ?: return
+        } else LocalDate.now()
+        val date = completedDate.toString()
+        // An unfinished yesterday challenge must never consume today's reward.
+        val newDailyWin = s.daily && date !in stats.completedDailyDates &&
+            date != stats.lastDaily
+        if (s.daily && !newDailyWin) return
         var streak = stats.streak
         var lastDaily = stats.lastDaily
-        if (s.daily && stats.lastDaily != today.toString()) {
-            streak = if (stats.lastDaily == today.minusDays(1).toString()) stats.streak + 1 else 1
-            lastDaily = today.toString()
+        if (newDailyWin) {
+            val previous = runCatching { LocalDate.parse(stats.lastDaily) }.getOrNull()
+            if (previous == null || completedDate.isAfter(previous)) {
+                streak = if (previous == completedDate.minusDays(1)) streak + 1 else 1
+                lastDaily = date
+            }
         }
         val levels = stats.winsByLevel.toMutableList()
         levels[s.level]++
         val sizes = stats.winsBySize.toMutableList()
         sizes[listOf(4, 6, 9).indexOf(s.size)]++
-        val newDailyWin = s.daily && stats.lastDaily != today.toString()
         stats = stats.copy(
             finished = stats.finished + 1,
             totalSeconds = stats.totalSeconds + s.elapsed,
@@ -392,12 +402,15 @@ class SudokuController(context: Context) {
             winsByLevel = levels,
             dailyWins = stats.dailyWins + if (newDailyWin) 1 else 0,
             dailyPoints = stats.dailyPoints + if (newDailyWin) 50 else 0,
+            completedDailyDates = if (newDailyWin)
+                (stats.completedDailyDates + date).distinct().takeLast(4000)
+                else stats.completedDailyDates,
             noHintWins = stats.noHintWins + if (s.hints == 0) 1 else 0,
             fastWins = stats.fastWins + if (s.size == 9 && s.elapsed < 300) 1 else 0,
             longWins = stats.longWins + if (s.elapsed >= 3600) 1 else 0,
             winsBySize = sizes,
             history = (listOf(Completed(s.level, s.size, s.elapsed,
-                today.toString(), s.daily, s.hints)) + stats.history).take(50),
+                date, s.daily, s.hints)) + stats.history).take(50),
         )
         saveStats()
     }
@@ -408,7 +421,9 @@ class SudokuController(context: Context) {
         return if (latest == today || latest == today.minusDays(1)) stats.streak else 0
     }
 
-    fun dailyAlreadyCompleted(): Boolean = stats.lastDaily == LocalDate.now().toString()
+    fun dailyAlreadyCompleted(): Boolean =
+        LocalDate.now().toString() in stats.completedDailyDates ||
+            stats.lastDaily == LocalDate.now().toString()
 
     private fun readOptions(): Options = try {
         val j = JSONObject(prefs.getString("options", "{}") ?: "{}")
@@ -443,6 +458,13 @@ class SudokuController(context: Context) {
             },
             dailyWins = j.optInt("dailyWins"),
             dailyPoints = j.optInt("dailyPoints", j.optInt("dailyWins", 0) * 50),
+            completedDailyDates = j.optJSONArray("completedDailyDates")?.let { dates ->
+                (0 until dates.length()).mapNotNull { index ->
+                    dates.optString(index).takeIf { day ->
+                        runCatching { LocalDate.parse(day) }.isSuccess
+                    }
+                }.distinct()
+            } ?: listOfNotNull(j.optString("lastDaily").takeIf { it.isNotBlank() }),
             noHintWins = j.optInt("noHintWins"),
             fastWins = j.optInt("fastWins"),
             longWins = j.optInt("longWins"),
@@ -462,6 +484,7 @@ class SudokuController(context: Context) {
             put("flawless", stats.flawless)
             put("dailyWins", stats.dailyWins)
             put("dailyPoints", stats.dailyPoints)
+            put("completedDailyDates", JSONArray(stats.completedDailyDates))
             put("noHintWins", stats.noHintWins)
             put("fastWins", stats.fastWins)
             put("longWins", stats.longWins)
@@ -547,6 +570,7 @@ class SudokuController(context: Context) {
                 session.selected in -1 until size * size &&
                 session.elapsed >= 0 && session.mistakes in 0..3 &&
                 session.hints >= 0 &&
+                (!session.daily || runCatching { LocalDate.parse(session.day) }.isSuccess) &&
                 SudokuEngine.isValidCompleted(session.solution, size,
                     session.boxRows, session.boxColumns) &&
                 session.givens.indices.all { i ->
