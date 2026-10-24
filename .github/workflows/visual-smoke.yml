@@ -7,6 +7,10 @@ on:
       - ".github/workflows/visual-smoke.yml"
   workflow_dispatch:
 
+concurrency:
+  group: emulator-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -38,8 +42,7 @@ jobs:
           disable-animations: true
           emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
           script: |
-            gradle --no-daemon :app:connectedDebugAndroidTest
-            bash .github/scripts/export-emulator-screenshots.sh
+            bash .github/scripts/run-visual-smoke.sh
       - name: Upload actual Android screenshots
         if: always()
         uses: actions/upload-artifact@v4

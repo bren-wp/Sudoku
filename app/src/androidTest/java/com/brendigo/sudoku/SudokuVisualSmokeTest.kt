@@ -5,6 +5,8 @@ import android.content.ContentValues
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -106,6 +108,66 @@ class SudokuVisualSmokeTest {
     private fun homeTile(title: String) {
         rule.onNodeWithTag("home-$title").performScrollTo().performClick()
         rule.waitForIdle()
+    }
+
+    @Test
+    fun fourAndSixCellGridModesArePlayable() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("size-4").performClick()
+        rule.onNodeWithTag("difficulty-1").performClick()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("sudoku-cell-15").assertExists()
+        rule.onNodeWithTag("number-4").assertExists()
+        rule.onNodeWithTag("game-back").performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("nova-igra")
+        rule.onNodeWithTag("size-6").performClick()
+        rule.onNodeWithTag("difficulty-3").performClick()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("sudoku-cell-35").assertExists()
+        rule.onNodeWithTag("number-6").assertExists()
+    }
+
+    @Test
+    fun numericEntryUndoNotesAndResumeAreInteractive() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+
+        val empty = hasContentDescription("prazno polje", substring = true)
+        val before = rule.onAllNodes(empty).fetchSemanticsNodes().size
+        check(before > 0) { "The generated Sudoku had no editable empty cells" }
+        rule.onAllNodes(empty).onFirst().performClick()
+        rule.onNodeWithTag("number-1").performClick()
+        rule.waitForIdle()
+        check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before - 1) {
+            "Number entry did not update Sudoku board"
+        }
+
+        rule.onNodeWithTag("game-undo").performClick()
+        rule.waitForIdle()
+        check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before) {
+            "Undo did not restore the previous cell"
+        }
+
+        rule.onAllNodes(empty).onFirst().performClick()
+        rule.onNodeWithTag("game-notes").performClick()
+        rule.onNodeWithTag("number-2").performClick()
+        rule.waitForIdle()
+        check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before) {
+            "Notes mode must not fill the selected cell"
+        }
+        rule.onNodeWithTag("game-erase").performClick()
+        rule.onNodeWithTag("game-back").performClick()
+        waitFor("resume-game")
+        rule.onNodeWithTag("resume-game").performScrollTo().performClick()
+        waitFor("sudoku-board")
+        rule.onNodeWithTag("game-hint").assertExists()
     }
 
     @Test

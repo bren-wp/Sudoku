@@ -95,23 +95,38 @@ fun GamePage(controller: SudokuController) {
                     Box(Modifier.fillMaxWidth(percentage).fillMaxHeight()
                         .background(Ink.cyan, RoundedCornerShape(10.dp)))
                 }
+                Text("${(percentage * 100).toInt()}%", fontSize = 11.sp, color = Ink.cyan)
             }
-            Text("♥".repeat((3 - game.mistakes).coerceIn(0, 3)) +
-                "♡".repeat(game.mistakes.coerceIn(0, 3)),
-                color = Ink.red, fontSize = 20.sp)
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    if (controller.options.checkMistakes)
+                        "♥".repeat((3 - game.mistakes).coerceIn(0, 3)) +
+                            "♡".repeat(game.mistakes.coerceIn(0, 3))
+                    else "∞",
+                    color = Ink.red, fontSize = 19.sp,
+                )
+                Text(if (controller.options.checkMistakes) "Greške: ${game.mistakes}/3"
+                    else "Bez ograničenja", color = Ink.muted, fontSize = 10.sp)
+            }
         }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            SudokuBoard(game, controller.options.highlightEquals, controller.options.animations, Modifier.size(boardSize)) {
+            SudokuBoard(game, controller.options.highlightEquals, controller.options.checkMistakes,
+                controller.options.animations, Modifier.size(boardSize)) {
                 controller.select(it)
                 feedback()
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             GameTool("✎", "Bilješke", if (game.notesMode) Ink.teal else Ink.line,
-                Modifier.weight(1f), height = toolHeight, active = game.notesMode) { controller.toggleNotes(); feedback() }
-            GameTool("✧", "Savjet", Ink.cyan, Modifier.weight(1f), height = toolHeight) { controller.hint(); feedback() }
-            GameTool("↶", "Poništi", Ink.blue, Modifier.weight(1f), height = toolHeight) { controller.undo(); feedback() }
-            GameTool("⌫", "Izbriši", Ink.blue, Modifier.weight(1f), height = toolHeight) { controller.erase(); feedback() }
+                Modifier.weight(1f), height = toolHeight, active = game.notesMode,
+                tag = "game-notes") { controller.toggleNotes(); feedback() }
+            GameTool("✧", "Savjet", Ink.cyan, Modifier.weight(1f), height = toolHeight,
+                badge = "${(SudokuController.MAX_HINTS - game.hints).coerceAtLeast(0)}",
+                tag = "game-hint") { controller.hint(); feedback() }
+            GameTool("↶", "Poništi", Ink.blue, Modifier.weight(1f), height = toolHeight,
+                tag = "game-undo") { controller.undo(); feedback() }
+            GameTool("⌫", "Izbriši", Ink.blue, Modifier.weight(1f), height = toolHeight,
+                tag = "game-erase") { controller.erase(); feedback() }
         }
         val numbers = (1..game.size).toList()
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
@@ -174,7 +189,8 @@ fun GamePage(controller: SudokuController) {
 }
 
 @Composable
-private fun SudokuBoard(game: Session, highlight: Boolean, animations: Boolean, modifier: Modifier = Modifier, onSelect: (Int) -> Unit) {
+private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
+                        animations: Boolean, modifier: Modifier = Modifier, onSelect: (Int) -> Unit) {
     val n = game.size
     val selected = game.selected
     val selectionNumber = if (selected >= 0) game.board[selected] else 0
@@ -199,7 +215,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, animations: Boolean, 
                              c / game.boxColumns == selected % n / game.boxColumns)
                         )
                         val equal = highlight && selectionNumber > 0 && digit == selectionNumber
-                        val wrong = digit > 0 && digit != game.solution[index]
+                        val wrong = showErrors && digit > 0 && digit != game.solution[index]
                         val bg = when {
                             isSelected -> Color(0xFF007B9C).copy(alpha = .65f)
                             wrong -> Ink.red.copy(alpha = .17f)
@@ -214,6 +230,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, animations: Boolean, 
                         )
                         Box(
                             Modifier.weight(1f).fillMaxHeight()
+                                .testTag("sudoku-cell-$index")
                                 .background(highlightColor)
                                 .border(.35.dp, Ink.line.copy(alpha = .55f))
                                 .semantics {
@@ -275,12 +292,21 @@ private fun SudokuBoard(game: Session, highlight: Boolean, animations: Boolean, 
 
 @Composable
 private fun GameTool(icon: String, name: String, accent: Color, modifier: Modifier,
-                     height: androidx.compose.ui.unit.Dp = 73.dp, active: Boolean = false, onClick: () -> Unit) {
-    NeonPanel(modifier.height(height).clickable(onClick = onClick),
+                     height: androidx.compose.ui.unit.Dp = 73.dp, active: Boolean = false,
+                     badge: String? = null, tag: String = "", onClick: () -> Unit) {
+    NeonPanel(modifier.testTag(tag).height(height).clickable(onClick = onClick),
         if (active) Ink.cyan else accent, corner = 14.dp) {
         Column(Modifier.fillMaxSize().padding(5.dp),
             verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(icon, color = if (active) Ink.cyan else Ink.muted, fontSize = 26.sp)
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center) {
+                Text(icon, color = if (active) Ink.cyan else Ink.muted, fontSize = 25.sp)
+                if (badge != null) {
+                    Spacer(Modifier.width(2.dp))
+                    Text(badge, color = Ink.cyan, fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold)
+                }
+            }
             Text(name, color = Ink.white, fontSize = 11.sp, maxLines = 1)
         }
     }
@@ -290,7 +316,8 @@ private fun GameTool(icon: String, name: String, accent: Color, modifier: Modifi
 private fun NumberRow(values: List<Int>, height: androidx.compose.ui.unit.Dp, onClick: (Int) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         values.forEach { value ->
-            NeonPanel(Modifier.weight(1f).height(height).clickable { onClick(value) },
+            NeonPanel(Modifier.weight(1f).testTag("number-$value")
+                .height(height).clickable { onClick(value) },
                 highlight = Ink.blue, corner = 13.dp) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(value.toString(), color = Ink.white,
