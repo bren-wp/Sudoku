@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -211,6 +212,20 @@ class SudokuVisualSmokeTest {
         homeTile("postavke")
         waitFor("screen-postavke")
         rule.onNodeWithTag("sound-vibration").assertIsDisplayed()
+        // A complete setting row, not just the small thumb, must toggle.
+        val darkSetting = rule.onNodeWithTag("setting-tamna-tema")
+        darkSetting.assertIsDisplayed()
+        val initial = darkSetting.fetchSemanticsNode().config[SemanticsProperties.ToggleableState]
+        darkSetting.performClick()
+        rule.waitForIdle()
+        val toggled = darkSetting.fetchSemanticsNode().config[SemanticsProperties.ToggleableState]
+        check(initial != toggled) { "Entire dark-theme row did not toggle" }
+        darkSetting.performClick()
+        rule.waitForIdle()
+        check(darkSetting.fetchSemanticsNode().config[SemanticsProperties.ToggleableState] == initial) {
+            "Second row press did not restore dark theme"
+        }
+        rule.onNodeWithTag("setting-provjera-greške").assertIsDisplayed()
         rule.onNodeWithTag("language-settings").assertIsDisplayed()
         rule.onNodeWithTag("privacy-policy").assertIsDisplayed()
         rule.onNodeWithTag("language-settings").performClick()
@@ -229,6 +244,9 @@ class SudokuVisualSmokeTest {
         check(ctx.packageManager.getApplicationIcon(ctx.packageName) != null) {
             "Launcher adaptive icon is missing"
         }
+        check(ctx.resources.getIdentifier(
+            "ic_sudoku_monochrome", "drawable", ctx.packageName) != 0
+        ) { "Android themed adaptive icon is missing" }
     }
 
     @Test
