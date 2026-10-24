@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.6`
+- Version: `1.0.7`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -89,3 +89,16 @@ reference resolution. See [pixel QA instructions](docs/pixel-qa.md) for the
 optional per-pixel comparison and difference overlays. Exact 1:1 fidelity
 has not yet been certified: source screenshots contain reference-specific
 puzzles, scores and system bar layouts.
+
+## Visual parity 1.0.7
+
+The first eight achievements now appear in the reference 4 × 2 arrangement, with all
+24 still available using a real "show all" action. Daily challenge cards, game
+statistics, completion chart, recent-game history and the achievement preview
+have been resized for the 941×1672 reference layout. Android UI tests verify
+the featured legend card is actually visible and that the remaining awards
+are accessible without losing navigation.
+
+The images are **not** passed off as exact screenshots of a finished app.
+Pixel comparison is still necessary; the baseline mismatch in the reference
+emulator captures is documented in docs/visual-parity-report.md.
