@@ -136,6 +136,17 @@ class SudokuController(context: Context) {
             page = Screen.GAME
             return
         }
+        if (daily) {
+            val saved = readGame("daily_game")
+            if (saved != null && saved.daily && saved.day == date && !saved.completed && !saved.failed) {
+                game = saved
+                undoHistory.clear()
+                undoHistory.addAll(readUndoHistory("daily_undo", saved))
+                page = Screen.GAME
+                saveGame()
+                return
+            }
+        }
         isGenerating = true
         try {
             val result = withContext(Dispatchers.Default) {
@@ -306,11 +317,11 @@ class SudokuController(context: Context) {
         if (undoHistory.size > 100) undoHistory.removeFirst()
     }
 
-    private fun readUndoHistory(): ArrayDeque<Move> {
+    private fun readUndoHistory(key: String = "undo", session: Session? = game): ArrayDeque<Move> {
         val saved = ArrayDeque<Move>()
         try {
-            val entries = JSONArray(prefs.getString("undo", "[]"))
-            val s = game ?: return saved
+            val entries = JSONArray(prefs.getString(key, "[]"))
+            val s = session ?: return saved
             for (i in 0 until entries.length()) {
                 val j = entries.optJSONObject(i) ?: continue
                 val cell = j.optInt("cell", -1)
@@ -431,7 +442,7 @@ class SudokuController(context: Context) {
 
     private fun saveGame() {
         val s = game ?: return
-        prefs.edit().putString("game", JSONObject().apply {
+        val snapshot = JSONObject().apply {
             put("size", s.size)
             put("boxRows", s.boxRows)
             put("boxColumns", s.boxColumns)
@@ -450,7 +461,8 @@ class SudokuController(context: Context) {
             put("day", s.day)
             put("completed", s.completed)
             put("failed", s.failed)
-        }.toString()).putString("undo", JSONArray().apply {
+        }.toString()
+        val history = JSONArray().apply {
             undoHistory.forEach { move ->
                 put(JSONObject().apply {
                     put("cell", move.cell)
@@ -458,12 +470,15 @@ class SudokuController(context: Context) {
                     put("notes", move.oldNotes)
                 })
             }
-        }.toString()).apply()
+        }.toString()
+        val editor = prefs.edit().putString("game", snapshot).putString("undo", history)
+        if (s.daily) editor.putString("daily_game", snapshot).putString("daily_undo", history)
+        editor.apply()
     }
 
-    private fun readGame(): Session? {
+    private fun readGame(key: String = "game"): Session? {
         return try {
-        val raw = prefs.getString("game", null) ?: return null
+        val raw = prefs.getString(key, null) ?: return null
         val j = JSONObject(raw)
         val size = j.getInt("size")
         if (size !in setOf(4, 6, 9)) return null
