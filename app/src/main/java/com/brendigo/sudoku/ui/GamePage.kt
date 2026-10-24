@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -44,7 +45,7 @@ fun GamePage(controller: SudokuController) {
     }
     PageContent {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(45.dp).background(Color(0x770B2256), RoundedCornerShape(14.dp))
+            Box(Modifier.size(45.dp).testTag("game-back").background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.HOME) }, contentAlignment = Alignment.Center) {
                 Text("‹", color = Ink.muted, fontSize = 34.sp)
             }
@@ -58,7 +59,7 @@ fun GamePage(controller: SudokuController) {
                 Text("Ⅱ", color = Ink.muted, fontSize = 22.sp)
             }
             Spacer(Modifier.width(8.dp))
-            Box(Modifier.size(43.dp).background(Color(0x770B2256), RoundedCornerShape(14.dp))
+            Box(Modifier.size(43.dp).testTag("game-settings").background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.SETTINGS) }, contentAlignment = Alignment.Center) {
                 Text("⚙", color = Ink.muted, fontSize = 22.sp)
             }
@@ -156,7 +157,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, onSelect: (Int) -> Un
     val selected = game.selected
     val selectionNumber = if (selected >= 0) game.board[selected] else 0
     Box(
-        Modifier.fillMaxWidth().aspectRatio(1f)
+        Modifier.fillMaxWidth().aspectRatio(1f).testTag("sudoku-board")
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xF8041336))
             .border(2.dp, Ink.blue, RoundedCornerShape(14.dp))
