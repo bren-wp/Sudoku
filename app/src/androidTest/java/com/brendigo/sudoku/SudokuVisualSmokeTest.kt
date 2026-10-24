@@ -31,7 +31,10 @@ class SudokuVisualSmokeTest {
 
     private fun shot(name: String) {
         rule.waitForIdle()
+        // Compose semantics can settle before the emulator compositor completes a frame.
+        Thread.sleep(500)
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        instrumentation.waitForIdleSync()
         val screenshot = instrumentation.uiAutomation.takeScreenshot()
             ?: error("Emulator did not return a screenshot")
         val resolver = rule.activity.contentResolver
@@ -72,6 +75,7 @@ class SudokuVisualSmokeTest {
         shot("01-home")
 
         homeTile("nova-igra")
+        waitFor("screen-nova-igra")
         waitFor("primary-action")
         shot("02-new-game")
 
@@ -80,6 +84,7 @@ class SudokuVisualSmokeTest {
         shot("03-game")
 
         rule.onNodeWithTag("game-settings").performClick()
+        waitFor("screen-postavke")
         waitFor("navigate-back")
         shot("04-settings")
 
@@ -89,15 +94,18 @@ class SudokuVisualSmokeTest {
         waitFor("home-nova-igra")
 
         homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
         waitFor("primary-action")
         shot("05-daily")
         rule.onNodeWithTag("navigate-back").performClick()
 
         homeTile("statistika")
+        waitFor("screen-statistika")
         shot("06-statistics")
         rule.onNodeWithTag("navigate-back").performClick()
 
         homeTile("postignuća")
+        waitFor("screen-postignuća")
         shot("07-achievements")
         rule.onNodeWithTag("navigate-back").performClick()
         waitFor("home-nova-igra")

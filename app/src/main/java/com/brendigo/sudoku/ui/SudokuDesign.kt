@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.sin
+import kotlin.math.cos
 
 object Ink {
     val navy = Color(0xFF020B27)
@@ -72,6 +75,25 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             drawLine(Ink.blue.copy(alpha = .12f), Offset(x, 0f), Offset(x + w * .25f, h * .28f), 2.5f)
             drawLine(Ink.blue.copy(alpha = .10f), Offset(0f, x), Offset(w, x - w * .20f), 2.5f)
         }
+        // Large translucent Sudoku digits are part of the original visual motif.
+        // Native canvas text here is decoration, never interactive content.
+        drawIntoCanvas { canvas ->
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.rgb(24, 101, 209)
+                alpha = 105
+                textSize = w * .084f
+                typeface = android.graphics.Typeface.create(
+                    android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.NORMAL
+                )
+            }
+            listOf(
+                Triple("9", .10f, .034f), Triple("5", .86f, .021f),
+                Triple("3", .20f, .11f), Triple("1", .70f, .095f),
+                Triple("6", .92f, .18f)
+            ).forEach { (digit, x, y) ->
+                canvas.nativeCanvas.drawText(digit, w * x, h * y, paint)
+            }
+        }
         // Stars are deterministic for stable rendering and no flashing/recomposition.
         for (i in 1..60) {
             val x = ((i * 173 + 61) % 991) / 991f * w
@@ -100,6 +122,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             }
             drawPath(path, color)
         }
+        mountains(h * .81f, h * .042f, Color(0xFF0A2A68).copy(alpha = .68f), 2.2f)
         mountains(h * .85f, h * .055f, Color(0xFF0B2A60), .1f)
         mountains(h * .89f, h * .038f, Color(0xFF071D49), 1.5f)
         drawRect(
@@ -110,16 +133,17 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             topLeft = Offset(0f, h * .88f),
             size = androidx.compose.ui.geometry.Size(w, h * .12f),
         )
-        for (i in 0..35) {
-            val y = h * (.90f + (i / 35f) * .10f)
+        // Fine moonlit ripples across the lake.
+        for (i in 0..70) {
+            val y = h * (.90f + (i / 70f) * .10f)
             val x = (i * 83 % 100) / 100f * w
             drawLine(Ink.cyan.copy(alpha = .04f + i % 5 * .02f),
                 Offset(x, y), Offset(x + w * .045f, y), 1.2f)
         }
         // Distinctive pagoda on the right, built from paths rather than external art.
-        val cx = w * .91f
-        val by = h * .87f
-        val unit = w * .021f
+        val cx = w * .87f
+        val by = h * .865f
+        val unit = w * .033f
         val structure = Path().apply {
             moveTo(cx - unit * 1.5f, by)
             lineTo(cx - unit * 1.5f, by - unit * 3.5f)
@@ -142,13 +166,58 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
         drawRect(Ink.gold.copy(alpha = .82f),
             Offset(cx - unit * .36f, by - unit * 3f),
             androidx.compose.ui.geometry.Size(unit * .72f, unit * 1.4f))
-        // Flower clusters create the foreground framing from the references.
-        for (i in 0..24) {
-            val t = i / 24f
-            val x = w * t * .27f
-            val y = h * (.87f + .08f * sin(i * .5f).toFloat())
-            val radius = w * (.004f + (i % 3) * .002f)
-            drawCircle(Color(0xFF8EAEFF).copy(alpha = .2f), radius, Offset(x, y))
+        // Soft amber lantern glow and patterned reflections on the water.
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0x66FFB66B), Color.Transparent),
+                center = Offset(cx, by - unit * 2.4f),
+                radius = unit * 6f,
+            ),
+            radius = unit * 6f,
+            center = Offset(cx, by - unit * 2.4f),
+        )
+        for (i in 0..28) {
+            val y = by + i * h * .003f
+            if (y < h) drawLine(
+                Ink.gold.copy(alpha = (.24f * (1f - i / 28f)).coerceAtLeast(0f)),
+                Offset(cx - w * .005f - (i % 4) * w * .006f, y),
+                Offset(cx + w * .006f + (i % 5) * w * .009f, y),
+                strokeWidth = 1.5f,
+            )
+        }
+
+        // The owner's night-landscape references feature flowering branches
+        // along the lower left edge. Draw them as deterministic vector petals.
+        val branch = Path().apply {
+            moveTo(-w * .05f, h * .99f)
+            cubicTo(w * .06f, h * .94f, w * .06f, h * .87f, w * .23f, h * .83f)
+            moveTo(w * .02f, h * .93f)
+            cubicTo(w * .04f, h * .88f, w * .12f, h * .84f, w * .17f, h * .79f)
+        }
+        drawPath(branch, Color(0xFF020C26), style = Stroke(width = w * .012f))
+        for (i in 0..130) {
+            val t = ((i * 53 + 7) % 101) / 100f
+            val x = w * t * .45f
+            val y = h * (.82f + .14f * ((i * 37 % 103) / 103f))
+            val radius = w * (.0035f + (i % 4) * .0013f)
+            val hue = if (i % 3 == 0) Color(0xFF9CA6FB) else Color(0xFF617BCF)
+            val opacity = if (i % 4 == 0) .60f else .37f
+            for (petal in 0..4) {
+                val radians = petal * 1.256637f
+                drawCircle(
+                    color = hue.copy(alpha = opacity),
+                    radius = radius * 1.22f,
+                    center = Offset(
+                        x + cos(radians) * radius * 1.35f,
+                        y + sin(radians) * radius * 1.35f,
+                    ),
+                )
+            }
+            drawCircle(
+                Color(0xFFFFDBB0).copy(alpha = opacity * .65f),
+                radius = radius * .49f,
+                center = Offset(x, y),
+            )
         }
     }
 }
@@ -211,10 +280,44 @@ fun NeonPanel(
 ) {
     Box(
         modifier.clip(RoundedCornerShape(corner))
-            .background(Brush.linearGradient(listOf(highlight.copy(alpha = .20f), Color(0xE8061740), Color(0xF603102E))))
+            .background(Brush.linearGradient(listOf(highlight.copy(alpha = .23f), Color(0xE8061740), Color(0xF603102E))))
             .border(1.dp, highlight.copy(alpha = .8f), RoundedCornerShape(corner)),
-        content = content,
-    )
+    ) {
+        // Dim moonlight and distant terrain are decorative, never baked-in UI.
+        Canvas(Modifier.matchParentSize()) {
+            val w = size.width
+            val h = size.height
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(highlight.copy(alpha = .32f), Color.Transparent),
+                    center = Offset(w * .82f, h * .14f),
+                    radius = w * .48f,
+                ),
+                radius = w * .48f,
+                center = Offset(w * .82f, h * .14f),
+            )
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(highlight.copy(alpha = .13f), Color.Transparent),
+                    center = Offset(w * .08f, h * .76f),
+                    radius = w * .41f,
+                ),
+                radius = w * .41f,
+                center = Offset(w * .08f, h * .76f),
+            )
+            val mountain = Path().apply {
+                moveTo(w * .38f, h)
+                lineTo(w * .54f, h * .69f)
+                lineTo(w * .67f, h * .81f)
+                lineTo(w * .81f, h * .61f)
+                lineTo(w, h * .87f)
+                lineTo(w, h)
+                close()
+            }
+            drawPath(mountain, highlight.copy(alpha = .085f))
+        }
+        content()
+    }
 }
 
 @Composable

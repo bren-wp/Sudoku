@@ -4,7 +4,7 @@ A native **Android Sudoku** game written in **Kotlin + Jetpack Compose**, brande
 
 ## Status
 
-Early working implementation on the `feature/native-android-sudoku` branch. UI reference screens are **design targets**, not claimed pixel-perfect reproductions. No third-party source or visual assets from SudokuNova are included; the engine and UI in this repository are newly written. This repository remains MIT licensed (see LICENSE).
+Active implementation on the `main` branch with pull-request validation, automated Gradle unit/lint builds, emulator UI smoke tests, and versioned GitHub Releases. UI reference screens remain **design targets**, not claimed pixel-perfect reproductions. No third-party source or visual assets from SudokuNova are included; the engine and UI in this repository are newly written. This repository remains MIT licensed (see LICENSE).
 
 ## Features
 
@@ -29,14 +29,14 @@ gradle :app:assembleDebug
 gradle :app:bundleRelease
 ```
 
-GitHub Actions runs these checks for every change to main/feature branches. The APK artifact is a **debug test build**. The release AAB created without signing configuration is **not ready for Google Play**; publication requires the publisher's secure upload key and release signing on a trusted runner or locally. Never commit signing keys or credentials.
+GitHub Actions runs the checks for main and pull requests. A successful main build publishes a versioned GitHub Release with an APK and an AAB. Without protected publisher signing secrets, these are a **debug test APK** and an **unsigned AAB**, neither of which should be represented as a production Play release. For Play-ready files configure the four `SUDOKU_*` signing secrets on GitHub, verify the certificate fingerprint and inspect the final signed artifacts. Never commit signing keys or credentials.
 
 ## Package and brand
 
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.0`
+- Version: `1.0.2`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -46,3 +46,23 @@ App state is stored using private SharedPreferences as compact JSON; backup and 
 ## Privacy
 
 See [PRIVACY.md](PRIVACY.md). No user account or network permission is requested by this implementation.
+
+
+## Android visual QA
+
+The `Android visual smoke` workflow tests seven actual app screens using an
+Android emulator and saves **real, PNG-verified screenshots** in the GitHub Actions
+artifact `sudoku-emulator-screen-references`. The original owner mockups remain
+the target; a passing smoke test establishes navigation and valid captures, not
+pixel-by-pixel visual equivalence. Compare layout, typography, artwork, touch
+targets and accessibility on multiple device sizes before a production release.
+
+## Signing
+
+GitHub version tags are published by `.github/workflows/publish-release.yml`
+after a successful main-branch build. Without a publisher keystore, Releases
+contain a debug-test APK and **unsigned AAB**, clearly marked as a preview.
+For production signing use protected GitHub Actions secrets:
+`SUDOKU_KEYSTORE_BASE64`, `SUDOKU_SIGNING_KEY_ALIAS`,
+`SUDOKU_SIGNING_STORE_PASSWORD`, `SUDOKU_SIGNING_KEY_PASSWORD`.
+Do not commit or share the private signing keystore.

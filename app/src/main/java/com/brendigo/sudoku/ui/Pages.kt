@@ -60,7 +60,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) { Text("‹", fontSize = 37.sp, color = Ink.muted, textAlign = TextAlign.Center) }
         Spacer(Modifier.width(13.dp))
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f).testTag("screen-" + title.lowercase().replace(" ", "-"))) {
             AccentText(title, if (title.length > 16) 29 else 34)
             if (description.isNotBlank()) Subtitle(description)
         }
@@ -570,7 +570,7 @@ fun SettingsPage(controller: SudokuController) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("O aplikaciji", fontSize = 20.sp, color = Ink.white, fontWeight = FontWeight.Bold)
                 Subtitle("Sudoku by Brendigo")
-                Subtitle("Verzija 1.0.0")
+                Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 Subtitle("Igra radi potpuno offline; napredak ostaje na uređaju.")
                 Subtitle("Izvorni kod i uvjeti: MIT licenca u GitHub repozitoriju.")
             }
