@@ -53,38 +53,38 @@ fun GamePage(controller: SudokuController) {
         val compact = maxHeight < 730.dp
         val horizontal = if (compact) 12.dp else 20.dp
         val boardSize = minOf(maxWidth - horizontal * 2,
-            maxHeight - if (compact) 330.dp else 310.dp).coerceAtLeast(216.dp)
-        val toolHeight = if (compact) 61.dp else 73.dp
-        val numberHeight = if (compact) 49.dp else 62.dp
+            maxHeight - if (compact) 255.dp else 300.dp).coerceAtLeast(216.dp)
+        val toolHeight = if (compact) 51.dp else 65.dp
+        val numberHeight = if (compact) 40.dp else 54.dp
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(horizontal = horizontal, vertical = if (compact) 6.dp else 12.dp),
-            verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 8.dp),
         ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(45.dp).testTag("game-back").background(Color(0x770B2256), RoundedCornerShape(14.dp))
+            Box(Modifier.size(if (compact) 39.dp else 45.dp).testTag("game-back").background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.HOME) }, contentAlignment = Alignment.Center) {
                 Text("‹", color = Ink.muted, fontSize = 34.sp)
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                AccentText("Sudoku", 37)
+                AccentText("Sudoku", if (compact) 32 else 37)
                 Subtitle(if (game.daily) "Dnevni izazov" else difficultyLabels[game.level],
                     centered = true)
             }
-            Box(Modifier.size(43.dp).background(Color(0x770B2256), RoundedCornerShape(14.dp))
+            Box(Modifier.size(if (compact) 39.dp else 43.dp).background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.togglePause() }, contentAlignment = Alignment.Center) {
                 Text("Ⅱ", color = Ink.muted, fontSize = 22.sp)
             }
             Spacer(Modifier.width(8.dp))
-            Box(Modifier.size(43.dp).testTag("game-settings").background(Color(0x770B2256), RoundedCornerShape(14.dp))
+            Box(Modifier.size(if (compact) 39.dp else 43.dp).testTag("game-settings").background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.SETTINGS) }, contentAlignment = Alignment.Center) {
                 Text("⚙", color = Ink.muted, fontSize = 22.sp)
             }
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(if (compact) 1.dp else 4.dp))
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("◷ ${formatTime(game.elapsed)}", fontSize = 16.sp, color = Ink.muted)
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)) {
+            Text("◷ ${formatTime(game.elapsed)}", fontSize = if (compact) 14.sp else 16.sp, color = Ink.muted)
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 val correct = game.correctCount()
                 val percentage = correct.toFloat() / game.board.size
@@ -116,7 +116,7 @@ fun GamePage(controller: SudokuController) {
                 feedback()
             }
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)) {
             GameTool("✎", "Bilješke", if (game.notesMode) Ink.teal else Ink.line,
                 Modifier.weight(1f), height = toolHeight, active = game.notesMode,
                 tag = "game-notes") { controller.toggleNotes(); feedback() }
