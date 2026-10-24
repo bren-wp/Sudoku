@@ -3,6 +3,7 @@ package com.brendigo.sudoku.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -297,7 +298,8 @@ fun NewGamePage(controller: SudokuController) {
             ) {
                 BrandIcon("back", Modifier.size(24.dp), Ink.muted)
             }
-            Row(Modifier.width(204.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(Modifier.weight(1f).widthIn(max = 204.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 listOf(9, 6, 4).forEach { option ->
                     NeonPanel(
                         Modifier.weight(1f).testTag("size-$option")
@@ -368,16 +370,26 @@ fun DailyPage(controller: SudokuController) {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 76.dp), Ink.gold) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Subtitle("DANAS")
-                    Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                    BrandIcon("calendar", Modifier.size(23.dp), Ink.cyan)
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text("DANAS", color = Ink.cyan, fontSize = 10.sp, letterSpacing = 1.sp)
+                        Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp, maxLines = 1)
+                    }
                 }
-                BrandIcon("flame", Modifier.size(30.dp), Ink.gold)
-                Spacer(Modifier.width(6.dp))
-                Column {
-                    Text("${controller.currentStreak()}", color = Ink.gold, fontSize = 30.sp,
-                        fontWeight = FontWeight.ExtraBold)
-                    Subtitle("dana u nizu")
+                Spacer(Modifier.width(8.dp))
+                BrandIcon("flame", Modifier.size(25.dp), Ink.gold)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("${controller.currentStreak()}", color = Ink.gold, fontSize = 25.sp,
+                        fontWeight = FontWeight.ExtraBold, lineHeight = 27.sp)
+                    Text("DANA U NIZU", color = Ink.muted, fontSize = 8.sp, maxLines = 1)
+                }
+                Spacer(Modifier.width(9.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    BrandIcon("trophy", Modifier.size(23.dp), Ink.gold)
+                    Text("NAGRADA", color = Ink.gold, fontSize = 8.sp)
                 }
             }
         }
@@ -437,8 +449,10 @@ fun DailyPage(controller: SudokuController) {
             { scope.launch { controller.startNew(9, 2, daily = true) } },
             Modifier.fillMaxWidth(), !controller.isGenerating && !controller.dailyAlreadyCompleted()
         )
-        NeonPanel(Modifier.fillMaxWidth().height(43.dp)
-            .testTag("daily-leaderboard").clickable { showRanking = true }, Ink.purple) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 48.dp)
+            .testTag("daily-leaderboard")
+            .semantics { contentDescription = "Otvori osobnu rang-listu"; role = Role.Button }
+            .clickable { showRanking = true }, Ink.purple) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     BrandIcon("trophy", Modifier.size(20.dp), Ink.purple)
@@ -982,7 +996,13 @@ private fun SettingHeader(icon: String, title: String, subtitle: String) {
 
 @Composable
 private fun SettingToggle(icon: String, title: String, caption: String, checked: Boolean, change: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 54.dp), verticalAlignment = Alignment.CenterVertically) {
+    val tag = "setting-" + title.lowercase().replace(" ", "-")
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 54.dp).testTag(tag)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = change)
+            .semantics { contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}" },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         BrandIcon(when (title) {
             "Tamna tema" -> "moon"; "Animacije" -> "sparkles"
             "Automatske bilješke" -> "note"; "Provjera greške" -> "warning"
@@ -994,8 +1014,7 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
             Text(title, fontSize = 14.sp, color = Ink.white, fontWeight = FontWeight.SemiBold)
             Text(caption, color = Ink.muted, fontSize = 11.sp, lineHeight = 13.sp)
         }
-        Switch(checked = checked, onCheckedChange = change,
-            modifier = Modifier.semantics { contentDescription = "$title, ${if (checked) "uključeno" else "isključeno"}" })
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

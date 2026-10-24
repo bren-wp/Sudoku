@@ -63,7 +63,10 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
         val h = size.height
         drawRect(
             Brush.verticalGradient(
-                if (bright) listOf(Color(0xFFBDE9FF), Color(0xFF2C7DCA), Color(0xFF071944))
+                if (bright) listOf(
+                    Color(0xFF163D79), Color(0xFF255A9C),
+                    Color(0xFF12376F), Color(0xFF091F46)
+                )
                 else listOf(Color(0xFF020921), Color(0xFF071A43), Color(0xFF052052), Color(0xFF03112F)),
                 startY = 0f, endY = h,
             )

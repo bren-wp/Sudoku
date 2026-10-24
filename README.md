@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.8`
+- Version: `1.0.9`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -123,3 +123,19 @@ emulator captures is documented in docs/visual-parity-report.md.
 
 Remaining: reference illustration fidelity, zero-difference pixel QA and
 publisher-signed Google Play AAB are *not* certified by these checks.
+
+## Sudoku 1.0.9 UI/UX and adaptive icon refinement
+
+- Whole settings rows now toggle options with standard accessibility `Role.Switch`,
+  not only the small visual thumb; real Compose state and preferences still persist.
+- Board-size selector adapts to narrow Android screens without fixed-width overflow.
+- Daily challenge header has three icon-led groups: date, streak, and reward.
+- Daily ranking button has a 48dp target and accessible role.
+- The optional brighter theme uses contrast-safe deep-blue scenery behind
+  the existing light text and dark translucent cards.
+- Launcher icons now provide a native **monochrome themed icon** for Android 13+
+  (alongside standard and round 7/3/9 foregrounds).
+- Emulator integration tests cover tapping entire setting rows, daily navigation
+  and launcher themed icon resource.
+- Pixel-perfect 1:1 comparison to the user's supplied art remains open in issue #11;
+  functional Android test success must never be called zero pixel difference.
