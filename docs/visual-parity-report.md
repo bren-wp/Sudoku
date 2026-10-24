@@ -41,3 +41,14 @@ The visual QA tooling in scripts/pixel_compare.py produces difference overlays
 and a CSV report. Actual zero-difference verification against normalized v1.0.7
 images has not been completed; do not label it "1:1" on the store, in the
 README, or in any release notes until all individual normalized captures pass.
+
+## Follow-up v1.0.10
+Visual improvements now include native layered night scenery and more faithful
+streak/reward icons on the seven screens. The Android 13+ monochrome launcher icon
+had a real defect: an opaque black fill was treated as opaque ALPHA by the
+themed launcher, causing the grid to disappear. Rebuilt it as transparent
+vector paths and added a rendered-bitmap instrumentation regression check.
+Achievement cards now expose actual detail dialogs, and the game lives use
+filled/outline vector hearts. **A new normalized RGB MAE=0 result has not been
+established**; reference backgrounds are visually richer than the Compose
+illustration. Keep #11 open.

@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.9`
+- Version: `1.0.10`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -139,3 +139,22 @@ publisher-signed Google Play AAB are *not* certified by these checks.
   and launcher themed icon resource.
 - Pixel-perfect 1:1 comparison to the user's supplied art remains open in issue #11;
   functional Android test success must never be called zero pixel difference.
+
+## Sudoku 1.0.10: premium UI polish and visual QA
+
+- Night backdrop: more faithful cobalt/purple cherry blossoms, layered
+  mountains, a three-tier moonlit pagoda with real rooftop silhouettes,
+  warm windows and lake reflections. These remain native vector scenes,
+  behind the functional UI rather than replacing screens with images.
+- Game status: deterministic, scalable **filled and outlined heart** icons
+  for remaining mistakes (with a complete TalkBack description).
+- Achievements: visibly muted locked cards, functional detail dialog with
+  full description, current progress and reward on tapping any card.
+- Calendar: consistently rendered seven-day circular markers on home and daily;
+  award metadata uses the same native iconography as the rest of the app.
+- Launcher: corrected the themed adaptive **alpha mask** for Android 13+
+  and added subtle 7-3-9 neon glints to the full-color foreground.
+- Instrumented QA checks clickable award cards and rendered icon transparency.
+- Android CI releases a test APK and an unsigned AAB unless publisher
+  signing secrets are configured.
+- Pixel-for-pixel parity is **not certified**; see issue #11 and docs/pixel-qa.md.
