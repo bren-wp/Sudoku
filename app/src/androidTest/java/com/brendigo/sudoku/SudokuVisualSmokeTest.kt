@@ -111,6 +111,28 @@ class SudokuVisualSmokeTest {
     }
 
     @Test
+    fun fourAndSixCellGridModesArePlayable() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("size-4").performClick()
+        rule.onNodeWithTag("difficulty-1").performClick()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("sudoku-cell-15").assertExists()
+        rule.onNodeWithTag("number-4").assertExists()
+        rule.onNodeWithTag("game-back").performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("nova-igra")
+        rule.onNodeWithTag("size-6").performClick()
+        rule.onNodeWithTag("difficulty-3").performClick()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("sudoku-cell-35").assertExists()
+        rule.onNodeWithTag("number-6").assertExists()
+    }
+
+    @Test
     fun numericEntryUndoNotesAndResumeAreInteractive() {
         waitFor("home-nova-igra")
         homeTile("nova-igra")
