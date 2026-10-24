@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.2`
+- Version: `1.0.3`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -66,3 +66,10 @@ For production signing use protected GitHub Actions secrets:
 `SUDOKU_KEYSTORE_BASE64`, `SUDOKU_SIGNING_KEY_ALIAS`,
 `SUDOKU_SIGNING_STORE_PASSWORD`, `SUDOKU_SIGNING_KEY_PASSWORD`.
 Do not commit or share the private signing keystore.
+
+## Version 1.0.3 validation
+
+- Emulator uses the AOSP system image to avoid the Pixel Launcher ANR overlay seen in previous QA captures.
+- A screenshot is rejected if representative central pixels indicate a light system dialog; successful tests alone are not accepted as evidence of clean screenshots.
+- Daily challenge completions grant a persisted 50-point reward, including a compatibility migration for existing local save data.
+- True 1:1 pixel-perfect fidelity is still not certified; source screen images remain visual targets.
