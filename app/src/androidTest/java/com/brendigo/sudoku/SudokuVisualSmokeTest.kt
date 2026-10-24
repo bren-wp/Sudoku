@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -180,6 +181,27 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("resume-game").performScrollTo().performClick()
         waitFor("sudoku-board")
         rule.onNodeWithTag("game-hint").assertExists()
+    }
+
+    @Test
+    fun premiumReferenceSectionsAreReachable() {
+        waitFor("home-nova-igra")
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        // The four featured achievement rows must be visible at reference size.
+        rule.onNodeWithTag("achievement-sudoku-legenda").assertIsDisplayed()
+        rule.onNodeWithTag("achievements-show-all")
+            .performScrollTo().performClick()
+        rule.onNodeWithTag("achievement-prvi-korak").assertExists()
+        rule.onNodeWithTag("navigate-back").performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("statistika")
+        waitFor("screen-statistika")
+        rule.onNodeWithTag("stats-achievements").performScrollTo().performClick()
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag("navigate-back").performClick()
+        waitFor("home-nova-igra")
     }
 
     @Test
