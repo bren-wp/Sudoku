@@ -108,9 +108,10 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
 }
 
 @Composable
-fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier,
+                enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp) {
     Box(
-        modifier.testTag("primary-action").heightIn(min = 49.dp)
+        modifier.testTag("primary-action").heightIn(min = minHeight)
             .background(
                 Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
@@ -135,15 +136,20 @@ fun HomePage(controller: SudokuController) {
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game").clickable { controller.go(Screen.GAME) }
-                .heightIn(min = 148.dp), highlight = Ink.blue) {
-                Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("N A S T A V I  I G R U", color = Ink.cyan, fontSize = 12.sp, letterSpacing = 2.sp)
-                    Text("Prekinuta igra", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 24.sp)
-                    Subtitle(difficultyLabels[game.level] + " · " + game.size + "×" + game.size)
-                    Subtitle("◷ " + formatTime(game.elapsed) + "  ·  Još " +
-                        game.board.indices.count { game.board[it] != game.solution[it] } + " polja")
-                    Spacer(Modifier.height(6.dp))
-                    SolidAction("▶   Nastavi", { controller.go(Screen.GAME) }, Modifier.fillMaxWidth(.6f))
+                .heightIn(min = 132.dp), highlight = Ink.blue) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text("N A S T A V I  I G R U", color = Ink.cyan,
+                        fontSize = 10.sp, letterSpacing = 2.sp)
+                    Text("Prekinuta igra", color = Ink.white,
+                        fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Text(difficultyLabels[game.level] + " · " + game.size + "×" + game.size,
+                        color = Ink.muted, fontSize = 13.sp)
+                    Text("◷ " + formatTime(game.elapsed) + "  ·  Još " +
+                        game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
+                        color = Ink.muted, fontSize = 12.sp)
+                    Spacer(Modifier.height(3.dp))
+                    SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
+                        Modifier.fillMaxWidth(.55f), minHeight = 38.dp)
                 }
             }
         }
