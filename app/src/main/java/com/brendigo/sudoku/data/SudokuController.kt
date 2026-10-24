@@ -484,7 +484,7 @@ class SudokuController(context: Context) {
             completed = j.optBoolean("completed"), failed = j.optBoolean("failed"),
         ).takeIf { session ->
             session.boxRows * session.boxColumns == size &&
-                session.boxRows == if (size == 9) 3 else 2 &&
+                session.boxRows == (if (size == 9) 3 else 2) &&
                 session.level in 0..5 &&
                 session.selected in -1 until size * size &&
                 session.elapsed >= 0 && session.mistakes >= 0 &&
