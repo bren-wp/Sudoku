@@ -38,7 +38,19 @@ class SudokuVisualSmokeTest {
         // Compose semantics can settle before the emulator compositor completes a frame.
         Thread.sleep(500)
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        // Android's first-run immersive-mode explanation is an OS overlay,
+        // not part of Sudoku. Dismiss it before screen evidence is captured.
+        val device = UiDevice.getInstance(instrumentation)
+        val immersiveDisclosure = device.findObject(By.text("Got it"))
+        if (immersiveDisclosure != null &&
+            device.findObject(By.textContains("Viewing full screen")) != null) {
+            immersiveDisclosure.click()
+            Thread.sleep(450)
+        }
         instrumentation.waitForIdleSync()
+        check(device.findObject(By.textContains("Viewing full screen")) == null) {
+            "The Android immersive disclosure obscures the screenshot"
+        }
         var screenshot = instrumentation.uiAutomation.takeScreenshot()
             ?: error("Emulator did not return a screenshot")
         // The launcher may briefly show an Android ANR dialog even when the app
@@ -46,6 +58,7 @@ class SudokuVisualSmokeTest {
         // wait and re-capture. Never skip failures inside our own app.
         fun modalSamples(image: Bitmap): Int {
             val points = listOf(
+                .35f to .10f, .50f to .10f, .65f to .10f,
                 .35f to .49f, .50f to .45f, .50f to .50f,
                 .50f to .55f, .65f to .49f
             )
@@ -60,7 +73,6 @@ class SudokuVisualSmokeTest {
         }
         var brightSamples = modalSamples(screenshot)
         if (brightSamples >= 3) {
-            val device = UiDevice.getInstance(instrumentation)
             val button = device.findObject(By.text("Close app"))
                 ?: device.findObject(By.textContains("Close app"))
                 ?: device.findObject(By.text("Wait"))
