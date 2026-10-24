@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.5`
+- Version: `1.0.6`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -81,3 +81,11 @@ Do not commit or share the private signing keystore.
 - Postavke uključuju dostupnu offline obavijest o privatnosti; svi glavni zasloni dobili su ujednačen brendirani podnožak.
 - Dodatni JUnit testovi pokrivaju duple pobjede, promjenu dana i niz dnevnih izazova.
 - GitHub Release sadrži APK i AAB. Bez sigurnog izdavačkog potpisa APK je testni, a AAB nepotpisan.
+
+## Pixel-level visual QA
+
+The `Android visual smoke` workflow captures seven screens at the 941×1672
+reference resolution. See [pixel QA instructions](docs/pixel-qa.md) for the
+optional per-pixel comparison and difference overlays. Exact 1:1 fidelity
+has not yet been certified: source screenshots contain reference-specific
+puzzles, scores and system bar layouts.
