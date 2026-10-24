@@ -374,19 +374,12 @@ class SudokuController(context: Context) {
             runCatching { LocalDate.parse(s.day) }.getOrNull() ?: return
         } else LocalDate.now()
         val date = completedDate.toString()
-        // An unfinished yesterday challenge must never consume today's reward.
-        val newDailyWin = s.daily && date !in stats.completedDailyDates &&
-            date != stats.lastDaily
-        if (s.daily && !newDailyWin) return
-        var streak = stats.streak
-        var lastDaily = stats.lastDaily
-        if (newDailyWin) {
-            val previous = runCatching { LocalDate.parse(stats.lastDaily) }.getOrNull()
-            if (previous == null || completedDate.isAfter(previous)) {
-                streak = if (previous == completedDate.minusDays(1)) streak + 1 else 1
-                lastDaily = date
-            }
-        }
+        val dailyResult = if (s.daily) DailyProgress.complete(
+            completedDate, stats.lastDaily, stats.streak, stats.bestStreak,
+            stats.completedDailyDates,
+        ) else null
+        if (s.daily && dailyResult?.awarded != true) return
+        val newDailyWin = dailyResult?.awarded == true
         val levels = stats.winsByLevel.toMutableList()
         levels[s.level]++
         val sizes = stats.winsBySize.toMutableList()
@@ -395,16 +388,14 @@ class SudokuController(context: Context) {
             finished = stats.finished + 1,
             totalSeconds = stats.totalSeconds + s.elapsed,
             best = if (stats.best == 0) s.elapsed else minOf(stats.best, s.elapsed),
-            streak = streak,
-            bestStreak = maxOf(stats.bestStreak, streak),
-            lastDaily = lastDaily,
+            streak = dailyResult?.currentStreak ?: stats.streak,
+            bestStreak = dailyResult?.bestStreak ?: stats.bestStreak,
+            lastDaily = dailyResult?.lastDay ?: stats.lastDaily,
             flawless = stats.flawless + if (s.mistakes == 0) 1 else 0,
             winsByLevel = levels,
             dailyWins = stats.dailyWins + if (newDailyWin) 1 else 0,
             dailyPoints = stats.dailyPoints + if (newDailyWin) 50 else 0,
-            completedDailyDates = if (newDailyWin)
-                (stats.completedDailyDates + date).distinct().takeLast(4000)
-                else stats.completedDailyDates,
+            completedDailyDates = dailyResult?.completedDays ?: stats.completedDailyDates,
             noHintWins = stats.noHintWins + if (s.hints == 0) 1 else 0,
             fastWins = stats.fastWins + if (s.size == 9 && s.elapsed < 300) 1 else 0,
             longWins = stats.longWins + if (s.elapsed >= 3600) 1 else 0,
