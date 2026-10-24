@@ -225,7 +225,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
 @Composable
 fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-        SudokuLogo(if (compact) 46.dp else 64.dp)
+        SudokuLogo(if (compact) 49.dp else 70.dp)
         Spacer(Modifier.width(14.dp))
         Column {
             Text(
@@ -259,7 +259,10 @@ fun SudokuLogo(size: Dp) {
                     val center = r == 1 && c == 1
                     Box(
                         Modifier.weight(1f).fillMaxHeight()
-                            .background(if (center) Color(0xFF0468D8) else Color(0xFF071B47)),
+                            .background(if (center)
+                                Brush.radialGradient(listOf(Color(0xFF12DFFF), Color(0xFF0054BA), Color(0xFF062358)))
+                            else Brush.linearGradient(listOf(Color(0xFF071B47), Color(0xFF062452))))
+                            .border(.55.dp, Ink.cyan.copy(alpha = .68f)),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(values[r * 3 + c], fontSize = if (size > 50.dp) 18.sp else 13.sp,
@@ -278,43 +281,91 @@ fun NeonPanel(
     corner: Dp = 18.dp,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val warm = highlight == Ink.gold
     Box(
         modifier.clip(RoundedCornerShape(corner))
-            .background(Brush.linearGradient(listOf(highlight.copy(alpha = .23f), Color(0xE8061740), Color(0xF603102E))))
-            .border(1.dp, highlight.copy(alpha = .8f), RoundedCornerShape(corner)),
+            .background(
+                Brush.linearGradient(
+                    listOf(highlight.copy(alpha = if (warm) .27f else .19f),
+                        Color(0xF3071C42), Color(0xFB03102B)),
+                ),
+            )
+            .border(1.dp, highlight.copy(alpha = .88f),
+                RoundedCornerShape(corner)),
     ) {
-        // Dim moonlight and distant terrain are decorative, never baked-in UI.
         Canvas(Modifier.matchParentSize()) {
             val w = size.width
             val h = size.height
+            if (w <= 0f || h <= 0f) return@Canvas
+
             drawCircle(
                 Brush.radialGradient(
-                    listOf(highlight.copy(alpha = .32f), Color.Transparent),
-                    center = Offset(w * .82f, h * .14f),
+                    listOf(highlight.copy(alpha = if (warm) .38f else .26f),
+                        Color.Transparent),
+                    center = Offset(w * .83f, h * .16f),
+                    radius = w * .65f,
+                ),
+                w * .65f, Offset(w * .83f, h * .16f),
+            )
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(highlight.copy(alpha = .11f), Color.Transparent),
+                    center = Offset(w * .08f, h * .87f),
                     radius = w * .48f,
                 ),
-                radius = w * .48f,
-                center = Offset(w * .82f, h * .14f),
+                w * .48f, Offset(w * .08f, h * .87f),
             )
-            drawCircle(
-                Brush.radialGradient(
-                    listOf(highlight.copy(alpha = .13f), Color.Transparent),
-                    center = Offset(w * .08f, h * .76f),
-                    radius = w * .41f,
-                ),
-                radius = w * .41f,
-                center = Offset(w * .08f, h * .76f),
-            )
-            val mountain = Path().apply {
-                moveTo(w * .38f, h)
-                lineTo(w * .54f, h * .69f)
-                lineTo(w * .67f, h * .81f)
-                lineTo(w * .81f, h * .61f)
-                lineTo(w, h * .87f)
+
+            // Diagonal translucent Sudoku cells from the reference cards.
+            // They stay behind real controls, never act as a substitute for UI.
+            val step = w * .23f
+            val left = w * .57f
+            for (index in 0..5) {
+                val x = left + index * step
+                drawLine(highlight.copy(alpha = .16f),
+                    Offset(x, 0f), Offset(x - w * .31f, h), 1.5f)
+            }
+            for (index in 0..5) {
+                val y = -h * .27f + index * h * .29f
+                drawLine(highlight.copy(alpha = .15f),
+                    Offset(left - w * .04f, y),
+                    Offset(w, y + h * .31f), 1.5f)
+            }
+            val hill = Path().apply {
+                moveTo(0f, h)
+                lineTo(0f, h * .93f)
+                for (index in 0..35) {
+                    val x = index / 35f * w
+                    val variation = sin(index * .35f + 2f) * .48f +
+                        sin(index * .73f + 1.1f) * .22f
+                    lineTo(x, h * (.84f - variation * .075f))
+                }
                 lineTo(w, h)
                 close()
             }
-            drawPath(mountain, highlight.copy(alpha = .085f))
+            drawPath(hill, Color(0xFF010D2E).copy(alpha = .26f))
+            if (warm) {
+                val moon = Offset(w * .79f, h * .23f)
+                drawCircle(
+                    Brush.radialGradient(
+                        listOf(Ink.gold.copy(alpha = .30f), Color.Transparent),
+                        center = moon, radius = w * .24f,
+                    ), w * .24f, moon,
+                )
+                drawCircle(Ink.gold.copy(alpha = .85f),
+                    radius = minOf(w, h) * .075f, center = moon)
+                val roof = Path().apply {
+                    moveTo(w * .82f, h * .70f)
+                    quadraticTo(w * .88f, h * .57f, w * .94f, h * .70f)
+                    lineTo(w * .96f, h * .71f)
+                    quadraticTo(w * .88f, h * .64f, w * .81f, h * .72f)
+                    close()
+                }
+                drawPath(roof, Color(0xFF020E27))
+                drawRect(Color(0xFF020E27),
+                    Offset(w * .85f, h * .70f),
+                    androidx.compose.ui.geometry.Size(w * .07f, h * .20f))
+            }
         }
         content()
     }
