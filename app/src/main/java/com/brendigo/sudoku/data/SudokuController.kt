@@ -226,7 +226,7 @@ class SudokuController(context: Context) {
         if (game!!.elapsed % 10 == 0) saveGame()
     }
 
-    fun setOptions(next: Options) {
+    fun updateOptions(next: Options) {
         options = next
         prefs.edit().putString("options", JSONObject().apply {
             put("dark", next.dark)

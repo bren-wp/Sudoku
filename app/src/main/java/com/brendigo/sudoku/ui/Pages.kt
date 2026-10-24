@@ -431,10 +431,10 @@ fun SettingsPage(controller: SudokuController) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("◉", "Izgled", "Prilagodi vizualni doživljaj igre")
                 SettingToggle("☾", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
-                    controller.setOptions(opts.copy(dark = it))
+                    controller.updateOptions(opts.copy(dark = it))
                 }
                 SettingToggle("✧", "Animacije", "Prikaži animacije i vizualne efekte", opts.animations) {
-                    controller.setOptions(opts.copy(animations = it))
+                    controller.updateOptions(opts.copy(animations = it))
                 }
             }
         }
@@ -442,13 +442,13 @@ fun SettingsPage(controller: SudokuController) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("▣", "Igra", "Postavke igrivosti i pomoći")
                 SettingToggle("▤", "Automatske bilješke", "Ukloni riješene kandidate iz bilješki", opts.autoNotes) {
-                    controller.setOptions(opts.copy(autoNotes = it))
+                    controller.updateOptions(opts.copy(autoNotes = it))
                 }
                 SettingToggle("⚠", "Provjera greške", "Označi netočne unose i prati pogreške", opts.checkMistakes) {
-                    controller.setOptions(opts.copy(checkMistakes = it))
+                    controller.updateOptions(opts.copy(checkMistakes = it))
                 }
                 SettingToggle("▦", "Isticanje brojeva", "Naglašavanje jednakih brojeva na ploči", opts.highlightEquals) {
-                    controller.setOptions(opts.copy(highlightEquals = it))
+                    controller.updateOptions(opts.copy(highlightEquals = it))
                 }
             }
         }
@@ -456,10 +456,10 @@ fun SettingsPage(controller: SudokuController) {
             Column(Modifier.padding(15.dp)) {
                 SettingHeader("♫", "Zvuk i vibracija", "Povratne informacije tijekom igre")
                 SettingToggle("♪", "Zvuk", "Zvučni efekti (nije još dostupno)", opts.sound) {
-                    controller.setOptions(opts.copy(sound = it))
+                    controller.updateOptions(opts.copy(sound = it))
                 }
                 SettingToggle("◈", "Vibracija", "Taktilna povratna informacija (nije još dostupna)", opts.vibration) {
-                    controller.setOptions(opts.copy(vibration = it))
+                    controller.updateOptions(opts.copy(vibration = it))
                 }
             }
         }
