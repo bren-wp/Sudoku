@@ -1,6 +1,9 @@
 package com.brendigo.sudoku
 
 import android.graphics.Bitmap
+import android.content.ContentValues
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -8,8 +11,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import java.io.File
-import java.io.FileOutputStream
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,10 +34,29 @@ class SudokuVisualSmokeTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val screenshot = instrumentation.uiAutomation.takeScreenshot()
             ?: error("Emulator did not return a screenshot")
-        val folder = File(rule.activity.filesDir, "screenshots")
-        check(folder.exists() || folder.mkdirs())
-        FileOutputStream(File(folder, "$name.png")).use {
-            check(screenshot.compress(Bitmap.CompressFormat.PNG, 100, it))
+        val resolver = rule.activity.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "$name.png")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + "/SudokuQA")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            ?: error("Could not create screenshot in MediaStore")
+        try {
+            val stream = resolver.openOutputStream(uri)
+                ?: error("Could not write screenshot image")
+            stream.use {
+                check(screenshot.compress(Bitmap.CompressFormat.PNG, 100, it))
+            }
+            val ready = ContentValues().apply {
+                put(MediaStore.Images.Media.IS_PENDING, 0)
+            }
+            check(resolver.update(uri, ready, null, null) == 1)
+        } catch (error: Exception) {
+            resolver.delete(uri, null, null)
+            throw error
         }
         screenshot.recycle()
     }
