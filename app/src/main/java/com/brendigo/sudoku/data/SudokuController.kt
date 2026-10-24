@@ -47,6 +47,7 @@ data class Statistics(
     val winsByLevel: List<Int> = List(6) { 0 },
     val history: List<Completed> = emptyList(),
     val dailyWins: Int = 0,
+    val dailyPoints: Int = 0,
     val noHintWins: Int = 0,
     val fastWins: Int = 0,
     val longWins: Int = 0,
@@ -362,6 +363,7 @@ class SudokuController(context: Context) {
             flawless = stats.flawless + if (s.mistakes == 0) 1 else 0,
             winsByLevel = levels,
             dailyWins = stats.dailyWins + if (newDailyWin) 1 else 0,
+            dailyPoints = stats.dailyPoints + if (newDailyWin) 50 else 0,
             noHintWins = stats.noHintWins + if (s.hints == 0) 1 else 0,
             fastWins = stats.fastWins + if (s.size == 9 && s.elapsed < 300) 1 else 0,
             longWins = stats.longWins + if (s.elapsed >= 3600) 1 else 0,
@@ -412,6 +414,7 @@ class SudokuController(context: Context) {
                 }
             },
             dailyWins = j.optInt("dailyWins"),
+            dailyPoints = j.optInt("dailyPoints", j.optInt("dailyWins", 0) * 50),
             noHintWins = j.optInt("noHintWins"),
             fastWins = j.optInt("fastWins"),
             longWins = j.optInt("longWins"),
@@ -430,6 +433,7 @@ class SudokuController(context: Context) {
             put("lastDaily", stats.lastDaily)
             put("flawless", stats.flawless)
             put("dailyWins", stats.dailyWins)
+            put("dailyPoints", stats.dailyPoints)
             put("noHintWins", stats.noHintWins)
             put("fastWins", stats.fastWins)
             put("longWins", stats.longWins)

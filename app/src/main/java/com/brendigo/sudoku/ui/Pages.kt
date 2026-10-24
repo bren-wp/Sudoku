@@ -472,7 +472,7 @@ fun AchievementsPage(controller: SudokuController) {
     val otherPoints = basic.filter { it.current >= it.goal }.sumOf { it.reward }
     val data = basic + Achievement("♛", "Sudoku legenda",
         "Osvoji 1000 bodova iz ostalih postignuća.", 1000, otherPoints, 200, Ink.gold)
-    val points = data.filter { it.current >= it.goal }.sumOf { it.reward }
+    val points = data.filter { it.current >= it.goal }.sumOf { it.reward } + s.dailyPoints
     PageContent {
         SectionTitle("Postignuća", "Skupljaj nagrade rješavanjem", { controller.go(Screen.HOME) })
         NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
