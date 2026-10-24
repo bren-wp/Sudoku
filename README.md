@@ -1,1 +1,48 @@
-# Sudoku
+# Sudoku by Brendigo
+
+A native **Android Sudoku** game written in **Kotlin + Jetpack Compose**, branded **Sudoku** (publisher: Brendigo). The app has original vector graphics inspired by the supplied design reference: midnight-blue scenery, cyan and blue glow, golden rewards, clean cards and a Croatian-first UI.
+
+## Status
+
+Early working implementation on the `feature/native-android-sudoku` branch. UI reference screens are **design targets**, not claimed pixel-perfect reproductions. No third-party source or visual assets from SudokuNova are included; the engine and UI in this repository are newly written. This repository remains MIT licensed (see LICENSE).
+
+## Features
+
+- Fully offline 4×4, 6×6 and 9×9 Sudoku; six clue-density difficulty tiers
+- Random valid solved grids + uniqueness-checked puzzle removal
+- Tap to select, number entry, notes, erase, undo, reveal hint
+- Mistake limit, optional error checking, highlighted peers/equals
+- Pause/resume, local autosave and persistence between launches
+- Deterministic daily puzzle, day streak and simple achievements
+- Play statistics, history, offline settings and custom vector visual theme
+- Responsive scrolling on smaller screens; Android 8.0+ (API 26)
+- No account, analytics, ads, internet permission, trackers or third-party Sudoku code
+
+## Build
+
+Install Android SDK 36, JDK 17 and Gradle 8.13, then:
+
+```bash
+gradle :app:testDebugUnitTest
+gradle :app:lintDebug
+gradle :app:assembleDebug
+gradle :app:bundleRelease
+```
+
+GitHub Actions runs these checks for every change to main/feature branches. The APK artifact is a **debug test build**. The release AAB created without signing configuration is **not ready for Google Play**; publication requires the publisher's secure upload key and release signing on a trusted runner or locally. Never commit signing keys or credentials.
+
+## Package and brand
+
+- App name: **Sudoku**
+- Publisher: **Brendigo**
+- Application ID: `com.brendigo.sudoku`
+- Version: `1.0.0`
+- Primary language: Croatian
+
+## Implementation notes
+
+App state is stored using private SharedPreferences as compact JSON; backup and transfer are disabled. Completed game statistics are calculated from local saves. Daily challenges use the Android device date; changing the device date can affect challenge availability. Tier labels reflect removed clue counts, **not an independent solver-rated complexity analysis**. Work remains to validate visual parity on real devices, accessibility contrast/font scaling, notifications (if introduced), large tablet layouts, review runtime test results and release signing.
+
+## Privacy
+
+See [PRIVACY.md](PRIVACY.md). No user account or network permission is requested by this implementation.

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img" aria-label="Sudoku by Brendigo logotip">
+<defs>
+<linearGradient id="letters" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#ffffff"/><stop offset=".54" stop-color="#ffffff"/><stop offset=".77" stop-color="#02abff"/><stop offset="1" stop-color="#14e9ed"/></linearGradient>
+<linearGradient id="grid" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071a4c"/><stop offset="1" stop-color="#006cea"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<rect width="1400" height="420" fill="none"/>
+<rect x="35" y="55" width="310" height="310" rx="72" fill="url(#grid)" stroke="#1bdcff" stroke-width="10"/>
+<path d="M138 55V365 M242 55V365 M35 158H345 M35 262H345" stroke="#17dffd" stroke-width="4"/>
+<rect x="138" y="158" width="104" height="104" fill="#0785e8"/>
+<g font-family="Arial, sans-serif" fill="#fff" font-size="72" font-weight="700" text-anchor="middle"><text x="86" y="132">7</text><text x="190" y="238">3</text><text x="294" y="342">9</text></g>
+<text x="378" y="246" fill="#0da8ff" opacity=".5" filter="url(#glow)" font-family="Arial, sans-serif" font-weight="800" font-size="189">Sudoku</text>
+<text x="378" y="246" fill="url(#letters)" font-family="Arial, sans-serif" font-weight="800" font-size="189" letter-spacing="-9">Sudoku</text>
+<text x="842" y="324" fill="#ACC8F7" font-family="Arial, sans-serif" font-size="47" letter-spacing="15">by Brendigo</text>
+</svg>

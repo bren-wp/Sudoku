@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+<defs><linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#020924"/><stop offset="1" stop-color="#093c80"/></linearGradient><linearGradient id="type" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#ffffff"/><stop offset=".7" stop-color="#27aaff"/><stop offset="1" stop-color="#00ebdf"/></linearGradient></defs>
+<rect width="1024" height="500" fill="url(#night)"/>
+<g stroke="#1762bd" opacity=".2" stroke-width="3"><path d="M0 80H1024 M0 170H1024 M0 260H1024 M0 350H1024 M0 440H1024 M90 0V500 M190 0V500 M290 0V500 M390 0V500 M490 0V500 M590 0V500 M690 0V500 M790 0V500 M890 0V500"/></g>
+<circle cx="860" cy="278" r="43" fill="#C4E5FC" opacity=".65"/>
+<path d="M0 405L110 340 217 405 322 320 420 412 548 336 648 419 763 333 863 405 940 357 1024 401V500H0Z" fill="#0C3674"/>
+<path d="M0 447L101 404 240 459 343 394 475 462 596 398 726 462 837 413 953 463 1024 430V500H0Z" fill="#041A43"/>
+<rect x="85" y="110" width="262" height="262" rx="51" fill="#061b48" stroke="#0ddbff" stroke-width="7"/>
+<path d="M172 110V372 M259 110V372 M85 197H347 M85 284H347" stroke="#04b9fc" stroke-width="3"/>
+<rect x="172" y="197" width="87" height="87" fill="#0076e7"/>
+<g fill="#fff" font-size="60" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle"><text x="125" y="177">7</text><text x="216" y="263">3</text><text x="301" y="352">9</text></g>
+<text x="400" y="244" fill="url(#type)" font-size="124" font-family="Arial,sans-serif" font-weight="bold">Sudoku</text>
+<text x="415" y="305" fill="#b8d4f5" font-size="28" font-family="Arial,sans-serif" letter-spacing="5">by Brendigo</text>
+<text x="400" y="369" fill="#8ac2ff" font-size="25" font-family="Arial,sans-serif" letter-spacing="4">TRENIRAJ MOZAK SVAKI DAN</text>
+</svg>
