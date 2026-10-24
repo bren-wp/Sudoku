@@ -36,7 +36,7 @@ GitHub Actions runs these checks for every change to main/feature branches. The 
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.0`
+- Version: `1.0.2`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -46,3 +46,23 @@ App state is stored using private SharedPreferences as compact JSON; backup and 
 ## Privacy
 
 See [PRIVACY.md](PRIVACY.md). No user account or network permission is requested by this implementation.
+
+
+## Android visual QA
+
+The `Android visual smoke` workflow tests seven actual app screens using an
+Android emulator and saves **real, PNG-verified screenshots** in the GitHub Actions
+artifact `sudoku-emulator-screen-references`. The original owner mockups remain
+the target; a passing smoke test establishes navigation and valid captures, not
+pixel-by-pixel visual equivalence. Compare layout, typography, artwork, touch
+targets and accessibility on multiple device sizes before a production release.
+
+## Signing
+
+GitHub version tags are published by `.github/workflows/publish-release.yml`
+after a successful main-branch build. Without a publisher keystore, Releases
+contain a debug-test APK and **unsigned AAB**, clearly marked as a preview.
+For production signing use protected GitHub Actions secrets:
+`SUDOKU_KEYSTORE_BASE64`, `SUDOKU_SIGNING_KEY_ALIAS`,
+`SUDOKU_SIGNING_STORE_PASSWORD`, `SUDOKU_SIGNING_KEY_PASSWORD`.
+Do not commit or share the private signing keystore.

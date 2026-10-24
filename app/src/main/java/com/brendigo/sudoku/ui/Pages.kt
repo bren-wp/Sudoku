@@ -570,7 +570,7 @@ fun SettingsPage(controller: SudokuController) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("O aplikaciji", fontSize = 20.sp, color = Ink.white, fontWeight = FontWeight.Bold)
                 Subtitle("Sudoku by Brendigo")
-                Subtitle("Verzija 1.0.0")
+                Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 Subtitle("Igra radi potpuno offline; napredak ostaje na uređaju.")
                 Subtitle("Izvorni kod i uvjeti: MIT licenca u GitHub repozitoriju.")
             }
