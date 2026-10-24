@@ -111,6 +111,9 @@ class SudokuVisualSmokeTest {
     @Test
     fun screenNavigationAndGameplayControls() {
         waitFor("home-nova-igra")
+        // The launch splash is composited for a moment after semantics switch to Home.
+        Thread.sleep(1300)
+        rule.waitForIdle()
         shot("01-home")
 
         homeTile("nova-igra")
