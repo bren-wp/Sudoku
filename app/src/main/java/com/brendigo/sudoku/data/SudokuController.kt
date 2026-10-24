@@ -82,6 +82,7 @@ data class Session(
 private data class Move(val cell: Int, val oldValue: Int, val oldNotes: Int)
 
 class SudokuController(context: Context) {
+    companion object { const val MAX_HINTS = 3 }
     private val prefs: SharedPreferences =
         context.applicationContext.getSharedPreferences("sudoku_state_v1", Context.MODE_PRIVATE)
     var page by mutableStateOf(Screen.SPLASH)
@@ -197,6 +198,7 @@ class SudokuController(context: Context) {
         val s = game ?: return
         val cell = s.selected
         if (!s.isEditable(cell) || s.paused || s.failed || s.completed || number !in 1..s.size) return
+        if (s.notesMode && s.board[cell] != 0) return
         if (!s.notesMode && s.board[cell] == number) return
         rememberMove(s, cell)
         val board = s.board.clone()
@@ -257,6 +259,10 @@ class SudokuController(context: Context) {
     fun hint() {
         val s = game ?: return
         if (s.paused || s.completed || s.failed) return
+        if (s.hints >= MAX_HINTS) {
+            toast = "Iskorištena su sva tri savjeta."
+            return
+        }
         val cell = s.selected.takeIf { it in s.board.indices &&
             s.isEditable(it) && s.board[it] != s.solution[it]
         } ?: s.board.indices.firstOrNull {
@@ -487,6 +493,7 @@ class SudokuController(context: Context) {
         }.toString()
         val editor = prefs.edit().putString("game", snapshot).putString("undo", history)
         if (s.daily) editor.putString("daily_game", snapshot).putString("daily_undo", history)
+        else editor.putString("regular_game", snapshot).putString("regular_undo", history)
         editor.apply()
     }
 
