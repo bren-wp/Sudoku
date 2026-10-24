@@ -247,10 +247,16 @@ fun DailyPage(controller: SudokuController) {
             Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
                 Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white)
+                val latest = runCatching { LocalDate.parse(controller.stats.lastDaily) }.getOrNull()
+                val today = LocalDate.now()
+                val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+                val completedDays = (0 until controller.stats.streak.coerceAtMost(7)).mapNotNull {
+                    latest?.minusDays(it.toLong())
+                }.toSet()
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (i < controller.stats.streak.coerceAtMost(7)) "✓" else "○",
+                            Text(if (monday.plusDays(i.toLong()) in completedDays) "✓" else "○",
                                 color = Ink.cyan, fontSize = 23.sp)
                             Text(label, color = Ink.muted, fontSize = 10.sp)
                         }
@@ -286,7 +292,7 @@ fun StatsPage(controller: SudokuController) {
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("◷", "Ukupno vrijeme", formatTime(stats.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
                 Ink.blue, Modifier.weight(1f))
-            StatTile("🔥", "Niz pobjeda", stats.streak.toString(), Ink.gold, Modifier.weight(1f))
+            StatTile("🔥", "Dnevni niz", stats.streak.toString(), Ink.gold, Modifier.weight(1f))
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(18.dp)) {
@@ -369,23 +375,35 @@ private data class Achievement(
 @Composable
 fun AchievementsPage(controller: SudokuController) {
     val s = controller.stats
-    val data = listOf(
+    // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
+    val basic = listOf(
         Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
-        Achievement("▣", "Sedam dana zaredom", "Igraj svakog dana tijekom tjedna.", 7, s.streak, 100, Ink.blue),
-        Achievement("✿", "Majstor logike", "Završi 50 teških igara.", 50, s.winsByLevel[3], 150, Ink.teal),
-        Achievement("ϟ", "Bez greške", "Završi igru bez pogreške.", 1, s.flawless, 100, Ink.gold),
-        Achievement("🔥", "Vrući niz", "Igraj 30 dana zaredom.", 30, s.streak, 150, Ink.cyan),
-        Achievement("◷", "Brzinac", "Završi igru za manje od 5 minuta.", 1,
-            s.history.count { it.seconds < 300 }, 75, Ink.purple),
-        Achievement("▦", "Rješavač izazova", "Završi 10 dnevnih izazova.", 10,
-            s.streak.coerceAtMost(10), 100, Ink.blue),
-        Achievement("♛", "Sudoku legenda", "Osvoji 500 bodova iz postignuća.", 500,
-            listOf(50 to (s.finished >= 1), 100 to (s.streak >= 7),
-                150 to (s.winsByLevel[3] >= 50), 100 to (s.flawless >= 1),
-                150 to (s.streak >= 30), 75 to (s.history.any { it.seconds < 300 })).sumOf {
-                if (it.second) it.first else 0
-            }, 200, Ink.muted),
+        Achievement("▣", "Sedam dana zaredom", "Riješi dnevne izazove sedam dana zaredom.", 7, s.streak, 100, Ink.blue),
+        Achievement("✿", "Majstor logike", "Završi 50 igara na teškoj razini.", 50, s.winsByLevel[3], 150, Ink.teal),
+        Achievement("ϟ", "Bez greške", "Završi igru bez ijedne pogreške.", 1, s.flawless, 100, Ink.gold),
+        Achievement("🔥", "Vrući niz", "Riješi dnevni izazov 30 dana zaredom.", 30, s.streak, 150, Ink.cyan),
+        Achievement("◷", "Brzinac", "Završi klasični 9×9 sudoku za manje od 5 minuta.", 1, s.fastWins, 75, Ink.purple),
+        Achievement("▦", "Rješavač izazova", "Završi 10 dnevnih izazova.", 10, s.dailyWins, 100, Ink.blue),
+        Achievement("★", "Prvi korak", "Pokreni svoju prvu igru.", 1, s.played, 25, Ink.teal),
+        Achievement("✦", "Redoviti igrač", "Pokreni 10 Sudoku igara.", 10, s.played, 50, Ink.cyan),
+        Achievement("🎖", "Iskusni igrač", "Završi 50 igara.", 50, s.finished, 100, Ink.gold),
+        Achievement("💯", "Stotka", "Završi 100 igara.", 100, s.finished, 150, Ink.gold),
+        Achievement("✓", "Besprijekoran niz", "Završi 10 igara bez greške.", 10, s.flawless, 125, Ink.teal),
+        Achievement("◇", "Samostalni mislilac", "Završi 10 igara bez savjeta.", 10, s.noHintWins, 100, Ink.purple),
+        Achievement("▣", "Prvi izazov", "Riješi prvi dnevni izazov.", 1, s.dailyWins, 50, Ink.blue),
+        Achievement("☀", "Dnevna rutina", "Završi sedam dnevnih izazova.", 7, s.dailyWins, 80, Ink.cyan),
+        Achievement("◷", "Deset sati logike", "Provedi ukupno 10 sati u riješenim igrama.", 36000, s.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), 120, Ink.blue),
+        Achievement("◴", "Strpljivi mislilac", "Završi igru nakon sat vremena razmišljanja.", 1, s.longWins, 80, Ink.purple),
+        Achievement("♜", "Ekspert", "Završi 10 igara razine Ekspert.", 10, s.winsByLevel[4], 140, Ink.purple),
+        Achievement("♛", "Velemajstor", "Završi pet igara razine Majstor.", 5, s.winsByLevel[5], 180, Ink.red),
+        Achievement("4", "Mala mreža", "Završi 10 igara 4×4.", 10, s.winsBySize[0], 70, Ink.teal),
+        Achievement("6", "Srednja mreža", "Završi 10 igara 6×6.", 10, s.winsBySize[1], 90, Ink.blue),
+        Achievement("9", "Klasična mreža", "Završi 10 igara 9×9.", 10, s.winsBySize[2], 120, Ink.cyan),
+        Achievement("🔥", "Zlatni niz", "Dovrši 14 dnevnih izazova zaredom.", 14, s.streak, 150, Ink.gold),
     )
+    val otherPoints = basic.filter { it.current >= it.goal }.sumOf { it.reward }
+    val data = basic + Achievement("♛", "Sudoku legenda",
+        "Osvoji 1000 bodova iz ostalih postignuća.", 1000, otherPoints, 200, Ink.gold)
     val points = data.filter { it.current >= it.goal }.sumOf { it.reward }
     PageContent {
         SectionTitle("Postignuća", "Skupljaj nagrade rješavanjem", { controller.go(Screen.HOME) })
