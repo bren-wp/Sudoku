@@ -41,6 +41,7 @@ data class Statistics(
     val totalSeconds: Long = 0L,
     val best: Int = 0,
     val streak: Int = 0,
+    val bestStreak: Int = 0,
     val lastDaily: String = "",
     val flawless: Int = 0,
     val winsByLevel: List<Int> = List(6) { 0 },
@@ -356,6 +357,7 @@ class SudokuController(context: Context) {
             totalSeconds = stats.totalSeconds + s.elapsed,
             best = if (stats.best == 0) s.elapsed else minOf(stats.best, s.elapsed),
             streak = streak,
+            bestStreak = maxOf(stats.bestStreak, streak),
             lastDaily = lastDaily,
             flawless = stats.flawless + if (s.mistakes == 0) 1 else 0,
             winsByLevel = levels,
@@ -368,6 +370,12 @@ class SudokuController(context: Context) {
                 today.toString(), s.daily, s.hints)) + stats.history).take(50),
         )
         saveStats()
+    }
+
+    /** Current active streak, unlike the lifetime best, expires after a missed day. */
+    fun currentStreak(today: LocalDate = LocalDate.now()): Int {
+        val latest = runCatching { LocalDate.parse(stats.lastDaily) }.getOrNull() ?: return 0
+        return if (latest == today || latest == today.minusDays(1)) stats.streak else 0
     }
 
     fun dailyAlreadyCompleted(): Boolean = stats.lastDaily == LocalDate.now().toString()
@@ -392,6 +400,7 @@ class SudokuController(context: Context) {
             totalSeconds = j.optLong("totalSeconds"),
             best = j.optInt("best"),
             streak = j.optInt("streak"),
+            bestStreak = j.optInt("bestStreak", j.optInt("streak")),
             lastDaily = j.optString("lastDaily", ""),
             flawless = j.optInt("flawless"),
             winsByLevel = List(6) { levels?.optInt(it) ?: 0 },
@@ -417,6 +426,7 @@ class SudokuController(context: Context) {
             put("totalSeconds", stats.totalSeconds)
             put("best", stats.best)
             put("streak", stats.streak)
+            put("bestStreak", stats.bestStreak)
             put("lastDaily", stats.lastDaily)
             put("flawless", stats.flawless)
             put("dailyWins", stats.dailyWins)

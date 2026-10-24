@@ -129,7 +129,7 @@ fun HomePage(controller: SudokuController) {
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Subtitle("Trenutni niz")
-                    Text("${controller.stats.streak} dana", fontSize = 25.sp,
+                    Text("${controller.currentStreak()} dana", fontSize = 25.sp,
                         color = Ink.gold, fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.weight(1f))
@@ -292,7 +292,7 @@ fun StatsPage(controller: SudokuController) {
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("◷", "Ukupno vrijeme", formatTime(stats.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
                 Ink.blue, Modifier.weight(1f))
-            StatTile("🔥", "Dnevni niz", stats.streak.toString(), Ink.gold, Modifier.weight(1f))
+            StatTile("🔥", "Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f))
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(18.dp)) {
@@ -378,10 +378,10 @@ fun AchievementsPage(controller: SudokuController) {
     // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
     val basic = listOf(
         Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
-        Achievement("▣", "Sedam dana zaredom", "Riješi dnevne izazove sedam dana zaredom.", 7, s.streak, 100, Ink.blue),
+        Achievement("▣", "Sedam dana zaredom", "Riješi dnevne izazove sedam dana zaredom.", 7, s.bestStreak, 100, Ink.blue),
         Achievement("✿", "Majstor logike", "Završi 50 igara na teškoj razini.", 50, s.winsByLevel[3], 150, Ink.teal),
         Achievement("ϟ", "Bez greške", "Završi igru bez ijedne pogreške.", 1, s.flawless, 100, Ink.gold),
-        Achievement("🔥", "Vrući niz", "Riješi dnevni izazov 30 dana zaredom.", 30, s.streak, 150, Ink.cyan),
+        Achievement("🔥", "Vrući niz", "Riješi dnevni izazov 30 dana zaredom.", 30, s.bestStreak, 150, Ink.cyan),
         Achievement("◷", "Brzinac", "Završi klasični 9×9 sudoku za manje od 5 minuta.", 1, s.fastWins, 75, Ink.purple),
         Achievement("▦", "Rješavač izazova", "Završi 10 dnevnih izazova.", 10, s.dailyWins, 100, Ink.blue),
         Achievement("★", "Prvi korak", "Pokreni svoju prvu igru.", 1, s.played, 25, Ink.teal),
@@ -399,7 +399,7 @@ fun AchievementsPage(controller: SudokuController) {
         Achievement("4", "Mala mreža", "Završi 10 igara 4×4.", 10, s.winsBySize[0], 70, Ink.teal),
         Achievement("6", "Srednja mreža", "Završi 10 igara 6×6.", 10, s.winsBySize[1], 90, Ink.blue),
         Achievement("9", "Klasična mreža", "Završi 10 igara 9×9.", 10, s.winsBySize[2], 120, Ink.cyan),
-        Achievement("🔥", "Zlatni niz", "Dovrši 14 dnevnih izazova zaredom.", 14, s.streak, 150, Ink.gold),
+        Achievement("🔥", "Zlatni niz", "Dovrši 14 dnevnih izazova zaredom.", 14, s.bestStreak, 150, Ink.gold),
     )
     val otherPoints = basic.filter { it.current >= it.goal }.sumOf { it.reward }
     val data = basic + Achievement("♛", "Sudoku legenda",
