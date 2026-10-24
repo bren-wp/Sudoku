@@ -44,10 +44,20 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
         Modifier.fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 42.dp),
+            .padding(top = 16.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
-        content = content,
-    )
+    ) {
+        content()
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
+            color = Ink.muted, fontSize = 9.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+                .testTag("brand-footer"),
+            maxLines = 1,
+        )
+    }
 }
 
 @Composable
@@ -189,9 +199,7 @@ fun HomePage(controller: SudokuController) {
                 Text("PON  UTO  SRI  ČET  PET", fontSize = 10.sp, color = Ink.cyan)
             }
         }
-        Text("B I S T R I J I  U M  ·  B O L J I  D A N", color = Ink.muted,
-            modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
-            textAlign = TextAlign.Center, fontSize = 10.sp)
+        Spacer(Modifier.height(4.dp))
     }
 }
 
@@ -301,16 +309,15 @@ fun DailyPage(controller: SudokuController) {
             Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
                 Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white)
-                val latest = runCatching { LocalDate.parse(controller.stats.lastDaily) }.getOrNull()
                 val today = LocalDate.now()
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-                val completedDays = (0 until controller.currentStreak().coerceAtMost(7)).mapNotNull {
-                    latest?.minusDays(it.toLong())
-                }.toSet()
+                val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
+                    setOf(controller.stats.lastDaily)
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (monday.plusDays(i.toLong()) in completedDays) "✓" else "○",
+                            Text(if (monday.plusDays(i.toLong()).toString() in completedDays) "✓" else "○",
                                 color = Ink.cyan, fontSize = 23.sp)
                             Text(label, color = Ink.muted, fontSize = 10.sp)
                         }
@@ -381,47 +388,17 @@ fun StatsPage(controller: SudokuController) {
                 Ink.blue, Modifier.weight(1f))
             StatTile("🔥", "Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f))
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(Modifier.padding(18.dp)) {
-                Text("Riješene igre po težini", color = Ink.white, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(10.dp))
-                val maximum = (stats.winsByLevel.maxOrNull() ?: 0).coerceAtLeast(1)
-                Row(Modifier.fillMaxWidth().height(170.dp), verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceEvenly) {
-                    stats.winsByLevel.forEachIndexed { index, amount ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("$amount", color = Ink.white, fontSize = 12.sp)
-                            Spacer(Modifier.height(5.dp))
-                            Box(
-                                Modifier.width(28.dp).height((12 + 105 * amount / maximum).dp)
-                                    .background(Brush.verticalGradient(
-                                        listOf(difficultyColors[index], difficultyColors[index].copy(alpha = .45f))),
-                                        RoundedCornerShape(topStart = 7.dp, topEnd = 7.dp)),
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text((index + 1).toString(), color = Ink.muted, fontSize = 11.sp)
-                        }
-                    }
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth >= 348.dp) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    DifficultyChart(stats, Modifier.weight(1.25f))
+                    CompletionRing(stats, Modifier.weight(1f))
                 }
-                Subtitle("Razine težine 1–6", Modifier.fillMaxWidth(), centered = true)
-            }
-        }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.cyan) {
-            Column(Modifier.padding(18.dp)) {
-                Text("Postotak dovršenosti", color = Ink.white,
-                    fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                val percentage = if (stats.played > 0) stats.finished * 100 / stats.played else 0
-                Box(Modifier.fillMaxWidth().height(125.dp), contentAlignment = Alignment.Center) {
-                    Canvas(Modifier.size(110.dp)) {
-                        drawArc(Ink.blue.copy(alpha = .26f), 0f, 360f, false,
-                            style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
-                        drawArc(Ink.cyan, -90f, percentage * 3.6f, false,
-                            style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
-                    }
-                    Text("$percentage%", fontSize = 29.sp, color = Ink.white, fontWeight = FontWeight.ExtraBold)
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    DifficultyChart(stats, Modifier.fillMaxWidth())
+                    CompletionRing(stats, Modifier.fillMaxWidth())
                 }
-                Subtitle("${stats.finished} dovršeno · ${stats.played} pokrenuto",
-                    Modifier.fillMaxWidth(), centered = true)
             }
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -471,6 +448,80 @@ fun StatsPage(controller: SudokuController) {
                 TextButton(onClick = { showHistory = false }) { Text("Zatvori", color = Ink.cyan) }
             },
         )
+    }
+}
+
+@Composable
+private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
+    // Four visual groups match the reference design while preserving all six
+    // internal difficulty tiers (the first two and last two are aggregated).
+    val counts = listOf(
+        stats.winsByLevel[0] + stats.winsByLevel[1],
+        stats.winsByLevel[2],
+        stats.winsByLevel[3],
+        stats.winsByLevel[4] + stats.winsByLevel[5],
+    )
+    val colors = listOf(Ink.teal, Ink.blue, Ink.purple, Ink.gold)
+    val labels = listOf("Lako", "Srednje", "Teško", "Stručno")
+    val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
+    NeonPanel(modifier.heightIn(min = 246.dp), Ink.blue) {
+        Column(Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 13.dp)) {
+            Text("Riješene igre po težini", color = Ink.white,
+                fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+            Spacer(Modifier.height(12.dp))
+            Row(Modifier.fillMaxWidth().height(177.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.Bottom) {
+                counts.forEachIndexed { index, amount ->
+                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(amount.toString(), color = Ink.white, fontSize = 12.sp)
+                        Spacer(Modifier.height(7.dp))
+                        Box(
+                            Modifier.fillMaxWidth(.75f)
+                                .height((12 + 100 * amount / ceiling).dp)
+                                .background(
+                                    Brush.verticalGradient(listOf(
+                                        colors[index], colors[index].copy(alpha = .35f)
+                                    )),
+                                    RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
+                                )
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(labels[index], color = Ink.muted, fontSize = 9.sp,
+                            maxLines = 1, textAlign = TextAlign.Center)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompletionRing(stats: Statistics, modifier: Modifier) {
+    val fraction = if (stats.played > 0)
+        (stats.finished.toFloat() / stats.played).coerceIn(0f, 1f)
+    else 0f
+    val percentage = (fraction * 100).toInt()
+    NeonPanel(modifier.heightIn(min = 246.dp), Ink.cyan) {
+        Column(Modifier.fillMaxSize().padding(11.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Postotak dovršenosti", color = Ink.white,
+                fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+            Spacer(Modifier.height(9.dp))
+            Box(Modifier.fillMaxWidth().height(152.dp), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.size(115.dp)) {
+                    drawArc(Ink.blue.copy(alpha = .27f), 0f, 360f, false,
+                        style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
+                    drawArc(Ink.cyan, -90f, fraction * 360f, false,
+                        style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
+                }
+                Text("$percentage%", fontSize = 27.sp, color = Ink.white,
+                    fontWeight = FontWeight.ExtraBold)
+            }
+            Subtitle("${stats.finished} dovršeno", Modifier.fillMaxWidth(), centered = true)
+            Subtitle("${(stats.played - stats.finished).coerceAtLeast(0)} nedovršeno",
+                Modifier.fillMaxWidth(), centered = true)
+        }
     }
 }
 
@@ -567,6 +618,7 @@ fun AchievementsPage(controller: SudokuController) {
 @Composable
 fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
+    var showPrivacy by remember { androidx.compose.runtime.mutableStateOf(false) }
     PageContent {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -622,9 +674,56 @@ fun SettingsPage(controller: SudokuController) {
                 Subtitle("Sudoku by Brendigo")
                 Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 Subtitle("Igra radi potpuno offline; napredak ostaje na uređaju.")
+                NeonPanel(
+                    Modifier.fillMaxWidth().heightIn(min = 52.dp)
+                        .testTag("privacy-policy").clickable { showPrivacy = true },
+                    Ink.blue,
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("♧", color = Ink.cyan, fontSize = 20.sp)
+                        Spacer(Modifier.width(12.dp))
+                        Text("Pravila privatnosti", color = Ink.white,
+                            fontSize = 15.sp, modifier = Modifier.weight(1f))
+                        Text("›", color = Ink.cyan, fontSize = 20.sp)
+                    }
+                }
                 Subtitle("Izvorni kod i uvjeti: MIT licenca u GitHub repozitoriju.")
             }
         }
+    }
+    if (showPrivacy) {
+        AlertDialog(
+            onDismissRequest = { showPrivacy = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("Pravila privatnosti", color = Ink.white) },
+            text = {
+                Column(
+                    Modifier.heightIn(max = 370.dp).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(9.dp),
+                ) {
+                    Text(
+                        "Sudoku by Brendigo možeš igrati bez registracije i internetske veze.",
+                        color = Ink.white, fontSize = 14.sp,
+                    )
+                    Subtitle("Podaci o odigranim igrama, postavkama, napretku i postignućima " +
+                        "spremaju se lokalno u privatnu pohranu aplikacije na uređaju.")
+                    Subtitle("Aplikacija ne koristi oglase, analitiku, praćenje korisnika niti " +
+                        "internetsku dozvolu. Podaci se ne šalju na poslužitelj.")
+                    Subtitle("Deinstaliranjem aplikacije lokalni se podaci u pravilu brišu. " +
+                        "Postavke Android sustava mogu utjecati na ponašanje pohrane.")
+                    Subtitle("Izdavač: Brendigo · verzija " +
+                        com.brendigo.sudoku.BuildConfig.VERSION_NAME)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacy = false }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
     }
 }
 
