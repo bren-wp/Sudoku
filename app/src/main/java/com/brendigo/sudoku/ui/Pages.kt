@@ -311,7 +311,7 @@ fun DailyPage(controller: SudokuController) {
                 Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white)
                 val today = LocalDate.now()
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-                val completedDays = controller.stats.completedDailyDates.toHashSet().ifEmpty {
+                val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
                     setOf(controller.stats.lastDaily)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
