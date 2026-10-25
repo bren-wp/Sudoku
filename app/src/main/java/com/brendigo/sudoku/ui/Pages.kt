@@ -355,7 +355,7 @@ fun NewGamePage(controller: SudokuController) {
             ) {
                 BrandIcon("back", Modifier.size(24.dp), Ink.muted)
             }
-            Row(Modifier.weight(1f).widthIn(max = 204.dp),
+            Row(Modifier.width(192.dp),
                 horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 listOf(9, 6, 4).forEach { option ->
                     NeonPanel(
@@ -377,7 +377,7 @@ fun NewGamePage(controller: SudokuController) {
                 }
             }
         }
-        Spacer(Modifier.height(25.dp))
+        Spacer(Modifier.height(5.dp))
         Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")) {
             AccentText("Nova igra", 43)
             Text("Odaberi težinu", color = Ink.muted, fontSize = 18.sp)
@@ -421,11 +421,15 @@ fun NewGamePage(controller: SudokuController) {
                 }
             }
         }
-        SolidAction(
-            if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
-            { scope.launch { controller.startNew(size, level) } },
-            Modifier.fillMaxWidth(), !controller.isGenerating
-        )
+        Spacer(Modifier.height(14.dp))
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            SolidAction(
+                if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
+                { scope.launch { controller.startNew(size, level) } },
+                Modifier.fillMaxWidth(.75f), !controller.isGenerating,
+                minHeight = 54.dp,
+            )
+        }
         if (controller.isGenerating) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally),
             color = Ink.cyan)
     }
