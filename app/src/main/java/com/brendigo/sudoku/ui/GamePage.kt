@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
@@ -138,16 +139,16 @@ fun GamePage(controller: SudokuController) {
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)) {
-            GameTool("✎", "Bilješke", if (game.notesMode) Ink.teal else Ink.line,
+            GameTool("Bilješke", if (game.notesMode) Ink.teal else Ink.line,
                 Modifier.weight(1f), height = toolHeight, active = game.notesMode,
                 tag = "game-notes") { controller.toggleNotes(); feedback() }
-            GameTool("✧", "Savjet", Ink.cyan, Modifier.weight(1f), height = toolHeight,
+            GameTool("Savjet", Ink.cyan, Modifier.weight(1f), height = toolHeight,
                 badge = "${(SudokuController.MAX_HINTS - game.hints).coerceAtLeast(0)}",
-                tag = "game-hint") { controller.hint(); feedback() }
-            GameTool("↶", "Poništi", Ink.blue, Modifier.weight(1f), height = toolHeight,
-                tag = "game-undo") { controller.undo(); feedback() }
-            GameTool("⌫", "Izbriši", Ink.blue, Modifier.weight(1f), height = toolHeight,
-                tag = "game-erase") { controller.erase(); feedback() }
+                enabled = controller.canHint(), tag = "game-hint") { controller.hint(); feedback() }
+            GameTool("Poništi", Ink.blue, Modifier.weight(1f), height = toolHeight,
+                enabled = controller.canUndo(), tag = "game-undo") { controller.undo(); feedback() }
+            GameTool("Izbriši", Ink.blue, Modifier.weight(1f), height = toolHeight,
+                enabled = controller.canErase(), tag = "game-erase") { controller.erase(); feedback() }
         }
         val numbers = (1..game.size).toList()
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
@@ -253,7 +254,8 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                             Modifier.weight(1f).fillMaxHeight()
                                 .testTag("sudoku-cell-$index")
                                 .background(highlightColor)
-                                .border(.35.dp, Ink.line.copy(alpha = .55f))
+                                .border(if (isSelected) 1.7.dp else .35.dp,
+                                    if (isSelected) Ink.cyan else Ink.line.copy(alpha = .55f))
                                 .semantics {
                                     role = Role.Button
                                     contentDescription = (if (isSelected) "Odabrano. " else "") +
@@ -313,29 +315,49 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
 }
 
 @Composable
-private fun GameTool(icon: String, name: String, accent: Color, modifier: Modifier,
-                     height: androidx.compose.ui.unit.Dp = 73.dp, active: Boolean = false,
-                     badge: String? = null, tag: String = "", onClick: () -> Unit) {
-    NeonPanel(modifier.testTag(tag)
-        .semantics { contentDescription = name; role = Role.Button }
-        .heightIn(min = 48.dp).height(height).clickable(onClick = onClick),
-        if (active) Ink.cyan else accent, corner = 14.dp) {
-        Column(Modifier.fillMaxSize().padding(5.dp),
-            verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center) {
-                BrandIcon(when (name) {
-                    "Bilješke" -> "note"; "Savjet" -> "hint"
-                    "Poništi" -> "undo"; "Izbriši" -> "erase"
+private fun GameTool(
+    name: String, accent: Color, modifier: Modifier,
+    height: androidx.compose.ui.unit.Dp = 73.dp,
+    active: Boolean = false, badge: String? = null,
+    enabled: Boolean = true, tag: String = "", onClick: () -> Unit,
+) {
+    NeonPanel(
+        modifier.testTag(tag)
+            .alpha(if (enabled) 1f else .53f)
+            .semantics { contentDescription = name; role = Role.Button }
+            .heightIn(min = 48.dp).height(height)
+            .clickable(enabled = enabled, onClick = onClick),
+        if (active) Ink.cyan else accent, corner = 14.dp,
+    ) {
+        Column(
+            Modifier.fillMaxSize().padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            BrandIcon(
+                when (name) {
+                    "Bilješke" -> "note"
+                    "Savjet" -> "hint"
+                    "Poništi" -> "undo"
+                    "Izbriši" -> "erase"
                     else -> "grid"
-                }, Modifier.size(23.dp), if (active) Ink.cyan else Ink.muted)
-                if (badge != null) {
-                    Spacer(Modifier.width(2.dp))
-                    Text(badge, color = Ink.cyan, fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold)
-                }
-            }
+                },
+                Modifier.size(25.dp),
+                if (active) Ink.cyan else Ink.muted,
+            )
+            Spacer(Modifier.height(3.dp))
             Text(name, color = Ink.white, fontSize = 11.sp, maxLines = 1)
+        }
+        if (badge != null) {
+            Box(
+                Modifier.align(Alignment.TopEnd).padding(4.dp).size(19.dp)
+                    .background(Ink.blue, RoundedCornerShape(50))
+                    .border(.8.dp, Ink.cyan, RoundedCornerShape(50)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(badge, color = Ink.white, fontSize = 10.sp,
+                    fontWeight = FontWeight.ExtraBold)
+            }
         }
     }
 }
