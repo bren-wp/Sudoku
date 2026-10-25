@@ -108,7 +108,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
             radius = w * .16f, center = Offset(w * .81f, h * .77f),
         )
-        drawCircle(Color(0xFFA2D8FF).copy(alpha = .74f),
+        drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
             radius = w * .030f, center = Offset(w * .81f, h * .77f))
         // Distant layered mountain silhouettes.
         fun mountains(y: Float, amplitude: Float, color: Color, phase: Float) {
@@ -137,8 +137,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             size = androidx.compose.ui.geometry.Size(w, h * .12f),
         )
         // Fine moonlit ripples across the lake.
-        for (i in 0..70) {
-            val y = h * (.90f + (i / 70f) * .10f)
+        for (i in 0..100) {
+            val y = h * (.90f + (i / 100f) * .10f)
             val x = (i * 83 % 100) / 100f * w
             drawLine(Ink.cyan.copy(alpha = .04f + i % 5 * .02f),
                 Offset(x, y), Offset(x + w * .045f, y), 1.2f)
@@ -193,10 +193,10 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             radius = unit * 6f,
             center = Offset(cx, by - unit * 2.4f),
         )
-        for (i in 0..28) {
-            val y = by + i * h * .003f
+        for (i in 0..34) {
+            val y = by + i * h * .0025f
             if (y < h) drawLine(
-                Ink.gold.copy(alpha = (.24f * (1f - i / 28f)).coerceAtLeast(0f)),
+                Ink.gold.copy(alpha = (.28f * (1f - i / 34f)).coerceAtLeast(0f)),
                 Offset(cx - w * .005f - (i % 4) * w * .006f, y),
                 Offset(cx + w * .006f + (i % 5) * w * .009f, y),
                 strokeWidth = 1.5f,
@@ -218,7 +218,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             val y = h * (.86f + .12f * ((i * 37 % 103) / 103f))
             val radius = w * (.0028f + (i % 4) * .0012f)
             val hue = if (i % 3 == 0) Color(0xFF7897E4) else Color(0xFF4B67BA)
-            val opacity = if (i % 4 == 0) .52f else .31f
+            val opacity = if (i % 4 == 0) .67f else .39f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
@@ -242,12 +242,12 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
 @Composable
 fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-        SudokuLogo(if (compact) 45.dp else 62.dp)
+        SudokuLogo(if (compact) 46.dp else 76.dp)
         Spacer(Modifier.width(14.dp))
         Column {
             Text(
                 text = "Sudoku",
-                fontSize = if (compact) 36.sp else 42.sp,
+                fontSize = if (compact) 36.sp else 45.sp,
                 fontWeight = FontWeight.ExtraBold,
                 style = TextStyle(brush = Brush.horizontalGradient(listOf(Ink.white, Ink.white, Ink.cyan, Ink.blue))),
                 letterSpacing = (-1).sp,
@@ -282,7 +282,7 @@ fun SudokuLogo(size: Dp) {
                             .border(.55.dp, Ink.cyan.copy(alpha = .68f)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(values[r * 3 + c], fontSize = if (size > 50.dp) 18.sp else 13.sp,
+                        Text(values[r * 3 + c], fontSize = (size.value * .29f).sp,
                             color = if (center) Ink.cyan else Ink.white, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -303,7 +303,7 @@ fun NeonPanel(
         modifier.clip(RoundedCornerShape(corner))
             .background(
                 Brush.linearGradient(
-                    listOf(highlight.copy(alpha = if (warm) .27f else .19f),
+                    listOf(highlight.copy(alpha = if (warm) .32f else .23f),
                         Color(0xF3071C42), Color(0xFB03102B)),
                 ),
             )
@@ -317,7 +317,7 @@ fun NeonPanel(
 
             drawCircle(
                 Brush.radialGradient(
-                    listOf(highlight.copy(alpha = if (warm) .38f else .26f),
+                    listOf(highlight.copy(alpha = if (warm) .43f else .31f),
                         Color.Transparent),
                     center = Offset(w * .83f, h * .16f),
                     radius = w * .65f,
@@ -361,6 +361,13 @@ fun NeonPanel(
                 close()
             }
             drawPath(hill, Color(0xFF010D2E).copy(alpha = .26f))
+            // Glass-like highlight remains behind actual Compose content.
+            drawLine(
+                highlight.copy(alpha = .38f),
+                Offset(w * .075f, 1.5f),
+                Offset(w * .60f, 1.5f),
+                strokeWidth = 1.25f,
+            )
             if (warm) {
                 val moon = Offset(w * .79f, h * .23f)
                 drawCircle(
