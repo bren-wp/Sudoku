@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.20`
+- Version: `1.0.21`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -309,3 +309,18 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - Dodane regresijske provjere na emulatorima 941×1672 i 720×1280.
 - Postojeće spremljene igre, podaci i korisničke postavke ostaju sačuvani.
 - Potpuna 1:1 jednakost piksela nije potvrđena; issue #11 ostaje otvoren.
+
+## Sudoku 1.0.21 — first-screen Home pixel review
+
+- Rebalanced logo, slogan and resume hero spacing for the 941x1672 artwork.
+- Recreated the decorative Sudoku board in the right half of the Resume Game card
+  with a lightweight native Compose Canvas, never with a fake screenshot UI.
+- Enlarged the saved-game heading/CTA. Time, difficulty and empty cells remain
+  connected to the real saved game and its controller.
+- Added consistent right-arrow icons, card heights, paddings and Croatian
+  descriptions to all five navigational cards.
+- Refined the streak summary, weekday labels, separator and next-reward gift.
+- UI regression tests cover the resume hero, all five links and reward strip.
+- No game data, database, settings or functionality removed or migrated.
+- Pixel-perfect 1:1 requires new real screenshots and measured comparisons.
+  Track residual mismatches in issue #11.

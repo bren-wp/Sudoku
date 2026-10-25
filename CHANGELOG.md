@@ -1,3 +1,12 @@
+## 1.0.21 — Home screen reference alignment
+
+- Reworked the first Home screen's vertical composition and resume panel.
+- Restored a native vector mini Sudoku illustration behind the resume button.
+- Tuned two large and three compact cards with active chevrons and proper copy.
+- Improved real-time streak and next reward layout; no mock statistics.
+- Added UI screenshot and geometry assertions for Home elements.
+- Saved state and other screens unchanged. Pixel parity still to be measured.
+
 ## 1.0.20
 
 - Added graph icon to Statistics title and vector arrows in summary cards.

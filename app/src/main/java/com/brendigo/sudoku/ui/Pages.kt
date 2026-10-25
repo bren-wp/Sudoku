@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,6 +68,7 @@ private fun rememberToday(): LocalDate {
 @Composable
 fun PageContent(
     topPadding: androidx.compose.ui.unit.Dp = 28.dp,
+    footerText: String = "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
     content: @Composable ColumnScope.() -> Unit,
 ) {
     // Footer occupies its own layout slot below the scroll viewport.
@@ -82,7 +85,7 @@ fun PageContent(
             content()
         }
         Text(
-            "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
+            footerText,
             color = Ink.muted, fontSize = 9.sp, letterSpacing = 1.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -216,29 +219,93 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
     }
 }
 
+/**
+ * Decorative Sudoku board for the home resume card.
+ * Canvas-only artwork: the underlying card and Compose action are real UI.
+ */
+@Composable
+private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        fun boardPoint(col: Float, row: Float) = Offset(
+            w * (.56f + col * .155f - row * .026f),
+            h * (.03f + row * .315f),
+        )
+        val lineColor = Color(0xFF168CFA).copy(alpha = .46f)
+        val glowColor = Ink.cyan.copy(alpha = .18f)
+        for (line in 0..3) {
+            val a = boardPoint(line.toFloat(), 0f)
+            val b = boardPoint(line.toFloat(), 3f)
+            drawLine(glowColor, a, b, strokeWidth = 3.5f)
+            drawLine(lineColor, a, b, strokeWidth = 1.4f)
+            val c = boardPoint(0f, line.toFloat())
+            val d = boardPoint(3f, line.toFloat())
+            drawLine(lineColor, c, d, strokeWidth = 1.6f)
+        }
+        val bright = boardPoint(1.5f, 1.5f)
+        drawCircle(
+            Brush.radialGradient(
+                colors = listOf(Ink.cyan.copy(alpha = .28f), Color.Transparent),
+                center = bright, radius = w * .14f,
+            ),
+            radius = w * .14f,
+            center = bright,
+        )
+        drawIntoCanvas { canvas ->
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                textSize = h * .13f
+                typeface = android.graphics.Typeface.create(
+                    android.graphics.Typeface.DEFAULT,
+                    android.graphics.Typeface.BOLD,
+                )
+                textAlign = android.graphics.Paint.Align.CENTER
+            }
+            listOf(
+                Triple(1f, 0f, "5"), Triple(1f, 1f, "3"),
+                Triple(2f, 2f, "6"),
+                Triple(2f, 0f, "9"), Triple(1f, 2f, "8"),
+            ).forEach { (col, row, value) ->
+                val center = boardPoint(col + .5f, row + .67f)
+                paint.color = if (value == "3")
+                    android.graphics.Color.CYAN else android.graphics.Color.rgb(77, 143, 220)
+                canvas.nativeCanvas.drawText(value, center.x, center.y, paint)
+            }
+        }
+    }
+}
+
 @Composable
 fun HomePage(controller: SudokuController) {
     val today = rememberToday()
-    PageContent {
-        Spacer(Modifier.height(18.dp))
+    PageContent(
+        topPadding = 22.dp,
+        footerText = "B I S T R I J I   U M  ·  B O L J I   D A N",
+    ) {
+        Spacer(Modifier.height(14.dp))
         BrandHeader(Modifier.fillMaxWidth())
+        Spacer(Modifier.height(9.dp))
         Text(
             "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
             color = Ink.muted, fontSize = 10.sp, modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(30.dp))
+        Spacer(Modifier.height(5.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
-            NeonPanel(Modifier.fillMaxWidth().testTag("resume-game").clickable { controller.go(Screen.GAME) }
-                .heightIn(min = 132.dp), highlight = Ink.blue) {
+            NeonPanel(Modifier.fillMaxWidth().testTag("resume-game")
+                .clickable { controller.go(Screen.GAME) }
+                .heightIn(min = 174.dp), highlight = Ink.blue) {
+                // Decorative, non-interactive canvas behind the real resume action.
+                // It recreates the illuminated Sudoku-board motif, not a bitmap UI.
+                ResumeBoardArtwork(Modifier.matchParentSize())
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text("N A S T A V I  I G R U", color = Ink.cyan,
                         fontSize = 10.sp, letterSpacing = 2.sp)
                     Text("Prekinuta igra", color = Ink.white,
-                        fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text(difficultyLabels[game.level] + " · " + game.size + "×" + game.size,
-                        color = Ink.muted, fontSize = 13.sp)
+                        fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+                    Text(difficultyLabels[game.level] + " težina",
+                        color = Ink.muted, fontSize = 14.sp)
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
@@ -247,9 +314,9 @@ fun HomePage(controller: SudokuController) {
                             game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
                             color = Ink.muted, fontSize = 12.sp)
                     }
-                    Spacer(Modifier.height(3.dp))
+                    Spacer(Modifier.height(4.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
-                        Modifier.fillMaxWidth(.55f), minHeight = 38.dp)
+                        Modifier.fillMaxWidth(.50f), minHeight = 42.dp)
                 }
             }
         }
@@ -274,57 +341,76 @@ fun HomePage(controller: SudokuController) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            HomeTile("Nova igra", "Odaberi težinu", Ink.teal, Modifier.weight(1f)) {
+            HomeTile("Nova igra", "Odaberi težinu\ni započni novu igru", Ink.teal, Modifier.weight(1f)) {
                 controller.go(Screen.NEW_GAME)
             }
-            HomeTile("Dnevni izazov", "Nova zagonetka svaki dan", Ink.gold, Modifier.weight(1f)) {
+            HomeTile("Dnevni izazov", "Svaki dan nova\nzagonetka", Ink.gold, Modifier.weight(1f)) {
                 controller.go(Screen.DAILY)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeTile("Statistika", "Prati napredak", Ink.blue, Modifier.weight(1f), compact = true) {
+            HomeTile("Statistika", "Prati svoj napredak", Ink.blue, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.STATS)
             }
-            HomeTile("Postignuća", "Osvoji nagrade", Ink.purple, Modifier.weight(1f), compact = true) {
+            HomeTile("Postignuća", "Otkrij sve nagrade", Ink.purple, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.ACHIEVEMENTS)
             }
             HomeTile("Postavke", "Prilagodi igru", Ink.muted, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.SETTINGS)
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 77.dp), highlight = Ink.blue) {
+        NeonPanel(
+            Modifier.fillMaxWidth().heightIn(min = 80.dp),
+            highlight = Ink.blue,
+        ) {
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 11.dp, vertical = 9.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                BrandIcon("flame", Modifier.size(28.dp), Ink.gold)
-                Column {
-                    Text("Trenutni niz", fontSize = 11.sp, color = Ink.muted)
+                BrandIcon("flame", Modifier.size(33.dp), Ink.gold)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("Trenutni niz", fontSize = 10.sp, color = Ink.muted)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("${controller.currentStreak(today)}", fontSize = 26.sp,
-                            color = Ink.gold, fontWeight = FontWeight.Bold)
-                        Text(" dana", fontSize = 12.sp, color = Ink.muted)
+                        Text("${controller.currentStreak(today)}", fontSize = 29.sp,
+                            color = Ink.gold, fontWeight = FontWeight.ExtraBold)
+                        Text(" dana", fontSize = 11.sp, color = Ink.muted)
                     }
                 }
-                Spacer(Modifier.width(5.dp))
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(
+                    Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
                     val completed = controller.stats.completedDailyDates.toSet()
-                    listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
+                    val weekdays = listOf("Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned")
+                    val fullDays = listOf("Ponedjeljak", "Utorak", "Srijeda",
+                        "Četvrtak", "Petak", "Subota", "Nedjelja")
+                    weekdays.forEachIndexed { index, day ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
-                        val fullDay = listOf("Ponedjeljak", "Utorak", "Srijeda",
-                            "Četvrtak", "Petak", "Subota", "Nedjelja")[index]
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            StreakMarker(checked, dayLabel = fullDay)
-                            Spacer(Modifier.height(4.dp))
-                            Text(weekday, fontSize = 9.sp, color = Ink.muted)
+                            StreakMarker(checked, diameter = 18.dp, dayLabel = fullDays[index])
+                            Spacer(Modifier.height(6.dp))
+                            Text(day, fontSize = 9.sp, color = Ink.muted)
                         }
                     }
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    BrandIcon("gift", Modifier.size(24.dp), Ink.gold)
-                    Text("Nagrada", fontSize = 9.sp, color = Ink.muted)
+                Box(Modifier.width(1.dp).height(44.dp).background(Ink.line.copy(alpha = .60f)))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Box(
+                        Modifier.size(31.dp)
+                            .background(Ink.cyan.copy(alpha = .10f), RoundedCornerShape(50))
+                            .border(1.3.dp, Ink.cyan, RoundedCornerShape(50)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        BrandIcon("gift", Modifier.size(21.dp), Ink.gold)
+                    }
+                    Text("Sljedeća\nnagrada", fontSize = 9.sp,
+                        color = Ink.muted, lineHeight = 11.sp, textAlign = TextAlign.Center)
                 }
             }
         }
@@ -337,25 +423,46 @@ private fun HomeTile(
     title: String, subtitle: String, accent: Color,
     modifier: Modifier = Modifier, compact: Boolean = false, onClick: () -> Unit,
 ) {
-    NeonPanel(modifier.testTag("home-" + title.lowercase().replace(" ", "-"))
-        .semantics { contentDescription = "$title, $subtitle"; role = Role.Button }
-        .heightIn(min = if (compact) 102.dp else 140.dp).clickable(onClick = onClick), highlight = accent) {
-        Column(Modifier.padding(if (compact) 10.dp else 15.dp),
-            verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 5.dp)) {
-            val iconSize = if (compact) 30.dp else 43.dp
-            Box(
-                Modifier.size(iconSize)
-                    .background(accent.copy(alpha = .13f), RoundedCornerShape(50))
-                    .border(1.3.dp, accent.copy(alpha = .95f), RoundedCornerShape(50)),
-                contentAlignment = Alignment.Center,
-            ) {
-                BrandIcon(homeIconFor(title),
-                    Modifier.size(if (compact) 22.dp else 29.dp), accent)
+    NeonPanel(
+        modifier.testTag("home-" + title.lowercase().replace(" ", "-"))
+            .semantics { contentDescription = "$title, $subtitle"; role = Role.Button }
+            .heightIn(min = if (compact) 94.dp else 146.dp)
+            .clickable(onClick = onClick),
+        highlight = accent,
+    ) {
+        Column(
+            Modifier.fillMaxWidth()
+                .padding(start = if (compact) 10.dp else 17.dp,
+                    top = if (compact) 12.dp else 16.dp,
+                    end = if (compact) 16.dp else 20.dp,
+                    bottom = if (compact) 10.dp else 15.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 3.dp else 6.dp),
+        ) {
+            val icon = homeIconFor(title)
+            if (compact) {
+                // The reference uses unboxed icons on the smaller three cards.
+                BrandIcon(icon, Modifier.size(29.dp), accent)
+            } else {
+                Box(
+                    Modifier.size(44.dp)
+                        .background(accent.copy(alpha = .13f), RoundedCornerShape(50))
+                        .border(1.5.dp, accent, RoundedCornerShape(50)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    BrandIcon(icon, Modifier.size(30.dp), accent)
+                }
             }
-            Text(title, color = Ink.white, fontWeight = FontWeight.Bold,
+            Text(title, color = Ink.white, fontWeight = FontWeight.ExtraBold,
                 fontSize = if (compact) 14.sp else 19.sp, maxLines = 2)
-            Text(subtitle, color = Ink.muted, fontSize = if (compact) 10.sp else 12.sp, lineHeight = 17.sp)
+            Text(subtitle, color = Ink.muted,
+                fontSize = if (compact) 10.sp else 12.sp,
+                lineHeight = if (compact) 13.sp else 17.sp)
         }
+        BrandIcon(
+            "next",
+            Modifier.align(Alignment.CenterEnd).padding(end = 9.dp).size(19.dp),
+            if (compact) Ink.muted else accent,
+        )
     }
 }
 

@@ -243,18 +243,40 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
 
 @Composable
 fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-        SudokuLogo(if (compact) 46.dp else 76.dp)
-        Spacer(Modifier.width(14.dp))
-        Column {
-            Text(
-                text = "Sudoku",
-                fontSize = if (compact) 36.sp else 45.sp,
-                fontWeight = FontWeight.ExtraBold,
-                style = TextStyle(brush = Brush.horizontalGradient(listOf(Ink.white, Ink.white, Ink.cyan, Ink.blue))),
-                letterSpacing = (-1).sp,
-            )
-            Text("by Brendigo", fontSize = 11.sp, color = Ink.muted, letterSpacing = 3.sp)
+    // Reference-sized 7-3-9 brand mark, with a compact fallback for narrow phones.
+    // Keep a real text logo for scaling, localization and accessibility.
+    BoxWithConstraints(modifier) {
+        val narrow = maxWidth < 350.dp
+        val logoSize = if (compact) 46.dp else if (narrow) 69.dp else 82.dp
+        val headingSize = if (compact) 36.sp else if (narrow) 41.sp else 51.sp
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            SudokuLogo(logoSize)
+            Spacer(Modifier.width(if (narrow) 10.dp else 13.dp))
+            Column {
+                Text(
+                    text = "Sudoku",
+                    fontSize = headingSize,
+                    fontWeight = FontWeight.ExtraBold,
+                    style = TextStyle(brush = Brush.horizontalGradient(
+                        listOf(Ink.white, Ink.white, Ink.cyan, Ink.blue),
+                    )),
+                    letterSpacing = (-1.2).sp,
+                    maxLines = 1,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        Modifier.width(if (narrow) 18.dp else 30.dp).height(1.dp)
+                            .background(Ink.cyan.copy(alpha = .65f)),
+                    )
+                    Spacer(Modifier.width(7.dp))
+                    Text("by Brendigo", fontSize = if (narrow) 10.sp else 11.sp,
+                        color = Ink.muted, letterSpacing = 2.5.sp, maxLines = 1)
+                }
+            }
         }
     }
 }
