@@ -276,6 +276,26 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Prekinute igre").assertExists()
         rule.onNodeWithText("Riješene igre po težini").assertExists()
         rule.onNodeWithText("Postotak dovršenosti").assertExists()
+        // Verify both metric rows remain separate and tappable even at 720x1280.
+        listOf("played", "best", "total", "streak").forEach { id ->
+            rule.onNodeWithTag("stat-tile-$id").assertExists()
+        }
+        val playedTile = rule.onNodeWithTag("stat-tile-played")
+            .fetchSemanticsNode().boundsInRoot
+        val bestTile = rule.onNodeWithTag("stat-tile-best")
+            .fetchSemanticsNode().boundsInRoot
+        val totalTile = rule.onNodeWithTag("stat-tile-total")
+            .fetchSemanticsNode().boundsInRoot
+        val streakTile = rule.onNodeWithTag("stat-tile-streak")
+            .fetchSemanticsNode().boundsInRoot
+        check(playedTile.right <= bestTile.left + 1f &&
+            totalTile.right <= streakTile.left + 1f &&
+            playedTile.bottom <= totalTile.top + 1f) {
+            "Statistics metric cards overlap on a compact viewport"
+        }
+        rule.onNodeWithTag("stat-tile-best").performClick()
+        rule.onNodeWithText("Najbrže vrijeme dovršene Sudoku partije.").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
         // The entire 48dp history header is an accessible click target.
         rule.onNodeWithTag("open-game-history").performScrollTo().performClick()
         rule.onNodeWithText("Povijest igara").assertExists()
