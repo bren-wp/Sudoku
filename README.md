@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.16`
+- Version: `1.0.17`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -256,3 +256,17 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - Veći kružni grafikon i postotak, uz očuvane stvarne rezultate igrača.
 - Testovi provjeravaju oba grafikona na Android emulatorima.
 - Potpuna 1:1 jednakost nije potvrđena; issue #11 ostaje otvoren.
+
+## Sudoku 1.0.17 — UI, ikonice i pixel audit
+
+- Usklađeni su tamnoplavi tonovi neba, Sudoku mreža u pozadini, planine,
+  jezero i cvjetne grane na svih sedam ekrana.
+- Android adaptive ikonica dobila je vidljiviji svijetlocijan broj 3,
+  uz očuvane brojeve 7–3–9 i standardne Android maske.
+- Veći splash logotip, naslov igre, HUD srca, sat i istaknuto polje.
+- Poklon u prikazu dnevne nagrade, odgovarajuće strelice u karticama
+  težine te stvarno pristupačno odabrano stanje veličine/težine igre.
+- Sređen odjeljak O aplikaciji, odvojena verzija i vektorska info ikona.
+- Dodani emulator testovi odabira veličine i razine težine.
+- Pixel-perfect 1:1 nije potvrđen bez novog usporednog mjerenja svih
+  sedam 941×1672 referenci (issue #11).
