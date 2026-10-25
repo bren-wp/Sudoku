@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.brendigo.sudoku.data.Screen
@@ -263,10 +264,12 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                             Modifier.weight(1f).fillMaxHeight()
                                 .testTag("sudoku-cell-$index")
                                 .background(highlightColor)
-                                .border(if (isSelected) 2.dp else .35.dp,
-                                    if (isSelected) Ink.cyan else Ink.line.copy(alpha = .55f))
+                                .border(if (isSelected) 2.3.dp else .35.dp,
+                                    if (isSelected) Color(0xFF6EF9FF)
+                                    else Ink.line.copy(alpha = .55f))
                                 .semantics {
                                     role = Role.Button
+                                    this.selected = isSelected
                                     contentDescription = (if (isSelected) "Odabrano. " else "") +
                                         "Redak ${r + 1}, stupac ${c + 1}: " + when {
                                             digit == 0 && game.notes[index] != 0 ->
@@ -310,13 +313,13 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
             val cellH = size.height / n
             for (c in 1 until n) if (c % game.boxColumns == 0) {
                 val x = c * cellW
-                drawLine(Ink.cyan.copy(alpha = .60f),
-                    Offset(x, 0f), Offset(x, size.height), strokeWidth = 2.5.dp.toPx())
+                drawLine(Ink.blue.copy(alpha = .78f),
+                    Offset(x, 0f), Offset(x, size.height), strokeWidth = 2.2.dp.toPx())
             }
             for (r in 1 until n) if (r % game.boxRows == 0) {
                 val y = r * cellH
-                drawLine(Ink.cyan.copy(alpha = .60f),
-                    Offset(0f, y), Offset(size.width, y), strokeWidth = 2.5.dp.toPx())
+                drawLine(Ink.blue.copy(alpha = .78f),
+                    Offset(0f, y), Offset(size.width, y), strokeWidth = 2.2.dp.toPx())
             }
         }
     }

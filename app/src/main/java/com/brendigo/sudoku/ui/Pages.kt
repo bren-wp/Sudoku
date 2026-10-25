@@ -95,9 +95,17 @@ fun PageContent(
 
 /** Consistent checked/unchecked weekly calendar marker for home and daily. */
 @Composable
-private fun StreakMarker(checked: Boolean, diameter: androidx.compose.ui.unit.Dp = 20.dp) {
+private fun StreakMarker(
+    checked: Boolean,
+    diameter: androidx.compose.ui.unit.Dp = 20.dp,
+    dayLabel: String = "",
+) {
     Box(
         Modifier.size(diameter)
+            .semantics {
+                contentDescription = "$dayLabel: " +
+                    (if (checked) "dnevni izazov riješen" else "dnevni izazov nije riješen")
+            }
             .background(
                 if (checked) Ink.cyan.copy(alpha = .18f) else Color(0xFF061D48),
                 RoundedCornerShape(50),
@@ -144,7 +152,14 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AccentText(title, if (title.length > 16) 35 else 39)
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                    if (title == "Statistika") {
+                        BrandIcon("statistics", Modifier.size(29.dp), Ink.cyan)
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    AccentText(title, if (title.length > 16) 35 else 39)
+                }
                 if (description.isNotBlank()) {
                     Subtitle(description, Modifier.fillMaxWidth(), centered = true)
                 }
@@ -224,9 +239,14 @@ fun HomePage(controller: SudokuController) {
                         fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     Text(difficultyLabels[game.level] + " · " + game.size + "×" + game.size,
                         color = Ink.muted, fontSize = 13.sp)
-                    Text("◷ " + formatTime(game.elapsed) + "  ·  Još " +
-                        game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
-                        color = Ink.muted, fontSize = 12.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
+                        Text(formatTime(game.elapsed), color = Ink.muted, fontSize = 12.sp)
+                        Text("·  Još " +
+                            game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
+                            color = Ink.muted, fontSize = 12.sp)
+                    }
                     Spacer(Modifier.height(3.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
                         Modifier.fillMaxWidth(.55f), minHeight = 38.dp)
@@ -293,8 +313,10 @@ fun HomePage(controller: SudokuController) {
                     val completed = controller.stats.completedDailyDates.toSet()
                     listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
+                        val fullDay = listOf("Ponedjeljak", "Utorak", "Srijeda",
+                            "Četvrtak", "Petak", "Subota", "Nedjelja")[index]
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            StreakMarker(checked)
+                            StreakMarker(checked, dayLabel = fullDay)
                             Spacer(Modifier.height(4.dp))
                             Text(weekday, fontSize = 9.sp, color = Ink.muted)
                         }
@@ -565,8 +587,11 @@ fun DailyPage(controller: SudokuController) {
                 val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
                     setOf(controller.stats.lastDaily)
                 }
-                val completedInWeek = (0..6).count {
-                    monday.plusDays(it.toLong()).toString() in completedDays
+                // Draw a segment only when BOTH neighboring days are complete.
+                // Counting all completions produces misleading fills after missed days.
+                val completedSegments = (0..5).filter { i ->
+                    monday.plusDays(i.toLong()).toString() in completedDays &&
+                        monday.plusDays((i + 1).toLong()).toString() in completedDays
                 }
                 Row(
                     Modifier.fillMaxWidth().drawBehind {
@@ -575,11 +600,10 @@ fun DailyPage(controller: SudokuController) {
                             Offset(size.width * .07f, lineY),
                             Offset(size.width * .93f, lineY),
                             strokeWidth = 2.dp.toPx())
-                        if (completedInWeek > 1) {
-                            drawLine(Ink.cyan.copy(alpha = .85f),
-                                Offset(size.width * .07f, lineY),
-                                Offset(size.width * (.07f +
-                                    .86f * (completedInWeek - 1) / 6f), lineY),
+                        completedSegments.forEach { i ->
+                            drawLine(Ink.cyan.copy(alpha = .90f),
+                                Offset(size.width * (.07f + .86f * i / 6f), lineY),
+                                Offset(size.width * (.07f + .86f * (i + 1) / 6f), lineY),
                                 strokeWidth = 2.dp.toPx())
                         }
                     },
@@ -592,7 +616,7 @@ fun DailyPage(controller: SudokuController) {
                                 Text(label, color = Ink.muted, fontSize = 10.sp)
                                 Spacer(Modifier.height(3.dp))
                                 StreakMarker(date.toString() in completedDays,
-                                    diameter = 31.dp)
+                                    diameter = 31.dp, dayLabel = label)
                                 Spacer(Modifier.height(3.dp))
                                 Text("${date.dayOfMonth}.${date.monthValue}.",
                                     color = if (date == today) Ink.white else Ink.muted,
@@ -905,19 +929,36 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
             Text("Postotak dovršenosti", color = Ink.white,
                 fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2)
             Spacer(Modifier.height(5.dp))
-            Box(Modifier.fillMaxWidth().height(136.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(126.dp), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.size(105.dp)) {
                     drawArc(Ink.blue.copy(alpha = .27f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     drawArc(Ink.cyan, -90f, fraction * 360f, false,
                         style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
                 }
-                Text("$percentage%", fontSize = 29.sp, color = Ink.white,
-                    fontWeight = FontWeight.ExtraBold)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("$percentage%", fontSize = 29.sp, color = Ink.white,
+                        fontWeight = FontWeight.ExtraBold)
+                    Text("Dovršene igre", color = Ink.muted, fontSize = 10.sp, maxLines = 1)
+                }
             }
-            Subtitle("${stats.finished} dovršeno", Modifier.fillMaxWidth(), centered = true)
-            Subtitle("${(stats.played - stats.finished).coerceAtLeast(0)} nedovršeno",
-                Modifier.fillMaxWidth(), centered = true)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(10.dp).background(Ink.cyan, RoundedCornerShape(50)))
+                Spacer(Modifier.width(6.dp))
+                Text("Dovršene igre", color = Ink.muted,
+                    fontSize = 11.sp, modifier = Modifier.weight(1f))
+                Text("${stats.finished}", color = Ink.white, fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold)
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(10.dp)
+                    .background(Ink.blue.copy(alpha = .50f), RoundedCornerShape(50)))
+                Spacer(Modifier.width(6.dp))
+                Text("Prekinute igre", color = Ink.muted,
+                    fontSize = 11.sp, modifier = Modifier.weight(1f))
+                Text("${(stats.played - stats.finished).coerceAtLeast(0)}", color = Ink.white, fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -945,7 +986,7 @@ private fun StatTile(label: String, value: String, color: Color,
                 Text(value, color = Ink.white, fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold, maxLines = 1)
             }
-            Text("›", color = color, fontSize = 17.sp)
+            BrandIcon("next", Modifier.size(17.dp), color)
         }
     }
 }
@@ -1068,7 +1109,8 @@ fun AchievementsPage(controller: SudokuController) {
                                         if (unlocked) achievement.tint else Ink.muted)
                                     Spacer(Modifier.width(3.dp))
                                     Text("${achievement.reward}",
-                                        color = if (unlocked) achievement.tint else Ink.muted,
+                                        color = if (unlocked) achievement.tint
+                                            else achievement.tint.copy(alpha = .75f),
                                         fontSize = 11.sp)
                                 }
                             }
@@ -1088,7 +1130,8 @@ fun AchievementsPage(controller: SudokuController) {
                             Box(Modifier.fillMaxWidth().height(7.dp).background(Ink.blue.copy(alpha = .25f),
                                 RoundedCornerShape(12.dp))) {
                                 Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
-                                    .background(if (unlocked) achievement.tint else Ink.muted,
+                                    .background(if (unlocked) achievement.tint else
+                                        achievement.tint.copy(alpha = .58f),
                                     RoundedCornerShape(12.dp)))
                             }
                             Text("${achievement.current.coerceAtMost(achievement.goal)} / ${achievement.goal}",

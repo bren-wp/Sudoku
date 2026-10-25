@@ -52,6 +52,21 @@
         android:strokeColor="#04D6FF"
         android:strokeWidth="1.65"
         android:pathData="M45,27 V81 M63,27 V81 M27,45 H81 M27,63 H81" />
+    <!-- Soft figure glows remain inside the adaptive safe area. -->
+    <path
+        android:strokeColor="#00CFFF"
+        android:strokeAlpha=".28"
+        android:strokeWidth="6.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M30.5,32 H40 L33,41.5" />
+    <path
+        android:strokeColor="#1D8DFF"
+        android:strokeAlpha=".27"
+        android:strokeWidth="6.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M77.5,72.5 C76,68 69,68.8 69.7,74 C70.2,79.5 78.5,77.5 77.5,72.5 C78,84.5 71.5,84.5 69.5,82" />
     <!-- Dedicated 7 / 3 / 9 glyphs at their reference positions. -->
     <path
         android:strokeColor="#EAF7FF"
