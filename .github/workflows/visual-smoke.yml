@@ -16,8 +16,21 @@ permissions:
 
 jobs:
   emulator-ui:
+    name: Android UI (${{ matrix.layout }})
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - layout: reference
+            resolution: 941x1672
+            density: 320
+            artifact: sudoku-emulator-screen-references
+          - layout: compact
+            resolution: 720x1280
+            density: 320
+            artifact: sudoku-emulator-compact-screenshots
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -42,12 +55,11 @@ jobs:
           disable-animations: true
           emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
           script: |
-            # Reference artworks were supplied at 941x1672 pixels.
-            # Set exact device pixel bounds before the screenshot baseline.
-            adb shell wm size 941x1672
-            # At 320 dpi a 48dp tap target is 96px, matching the reference
-            # screen proportions. 420 dpi made all cards ~31% too large.
-            adb shell wm density 320
+            # Exact source reference baseline plus a narrow-screen UI regression.
+            # Never compare compact screenshots directly against 941x1672 art.
+            adb shell wm size ${{ matrix.resolution }}
+            # Keep density stable to reveal layout overflow and touch targets.
+            adb shell wm density ${{ matrix.density }}
             adb shell wm size
             adb shell wm density
             bash .github/scripts/run-visual-smoke.sh
@@ -55,6 +67,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sudoku-emulator-screen-references
+          name: ${{ matrix.artifact }}
           path: screenshots/*.png
           if-no-files-found: warn
