@@ -247,6 +247,7 @@ class SudokuController(context: Context) {
 
     fun toggleNotes() {
         val session = game ?: return
+        if (session.paused || session.completed || session.failed) return
         game = session.copy(notesMode = !session.notesMode)
         saveGame()
     }
