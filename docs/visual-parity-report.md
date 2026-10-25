@@ -62,3 +62,14 @@ The seven original owner PNG reference files are not present in this repository;
 therefore this change does **not** constitute measured MAE/SSIM improvement or
 proof of 1:1 matching. Capture and compare normalized screenshots before making
 pixel-perfect claims, keeping issue #11 open.
+
+## v1.0.26 — Achievements responsive layout
+
+The existing 941×1672 reference-width layout retains its two-column featured
+award grid and established 151dp/137dp card hierarchy at the default font scale.
+At smaller widths award cards can grow in height, and narrow layouts or enlarged
+system font scales use a single column. Tests check text containment and access
+to all 24 real awards on emulator viewports. This improves adaptive behavior,
+not measured pixel equality. Original owner PNG references are still required
+to calculate new MAE/SSIM and verify the illustrated background and every icon.
+Issue #11 remains open.
