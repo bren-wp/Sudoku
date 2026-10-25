@@ -157,8 +157,14 @@ fun GamePage(controller: SudokuController) {
         }
         val numbers = (1..game.size).toList()
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
-        NumberRow(numbers.take(split), numberHeight, controller.canEnter()) { controller.enter(it); feedback() }
-        if (numbers.size > split) NumberRow(numbers.drop(split), numberHeight, controller.canEnter()) { controller.enter(it); feedback() }
+        NumberRow(numbers.take(split), numberHeight, controller.canEnter(), split) {
+            controller.enter(it); feedback()
+        }
+        if (numbers.size > split) {
+            NumberRow(numbers.drop(split), numberHeight, controller.canEnter(), split) {
+                controller.enter(it); feedback()
+            }
+        }
         // On shorter screens, the board and keypad remain usable through scroll.
         // The landscape and brand footer remain visible on the main pages.
         }
@@ -263,6 +269,10 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                     role = Role.Button
                                     contentDescription = (if (isSelected) "Odabrano. " else "") +
                                         "Redak ${r + 1}, stupac ${c + 1}: " + when {
+                                            digit == 0 && game.notes[index] != 0 ->
+                                                "prazno polje, bilješke " +
+                                                    (1..n).filter { game.notes[index] and (1 shl it) != 0 }
+                                                        .joinToString(", ")
                                             digit == 0 -> "prazno polje"
                                             fixed -> "zadano ${digit}"
                                             wrong -> "netočno ${digit}"
@@ -288,12 +298,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                     fontWeight = if (fixed) FontWeight.Medium else FontWeight.Bold,
                                 )
                             } else if (game.notes[index] != 0) {
-                                val present = (1..n).filter { game.notes[index] and (1 shl it) != 0 }
-                                val grouped = present.chunked(if (n == 9) 3 else 2)
-                                    .joinToString("\n") { it.joinToString(" ") }
-                                Text(grouped, fontSize = if (n == 9) 7.sp else 10.sp,
-                                    lineHeight = if (n == 9) 8.sp else 11.sp,
-                                    textAlign = TextAlign.Center, color = Ink.muted)
+                                CandidateGrid(game.notes[index], n)
                             }
                         }
                     }
@@ -365,20 +370,70 @@ private fun GameTool(
     }
 }
 
+/**
+ * Stable candidate slots prevent notes from shifting when a second digit
+ * is toggled. The reference board uses a 3×3 micro-grid for 9×9 play.
+ */
 @Composable
-private fun NumberRow(values: List<Int>, height: androidx.compose.ui.unit.Dp,
-                      enabled: Boolean, onClick: (Int) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-        values.forEach { value ->
-            NeonPanel(Modifier.weight(1f).testTag("number-$value")
-                .alpha(if (enabled) 1f else .50f)
-                .semantics { contentDescription = "Unesi broj $value"; role = Role.Button }
-                .heightIn(min = 48.dp).height(height)
-                .clickable(enabled = enabled) { onClick(value) },
-                highlight = Ink.blue, corner = 13.dp) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(value.toString(), color = Ink.white,
-                        fontSize = 29.sp, fontWeight = FontWeight.SemiBold)
+private fun CandidateGrid(mask: Int, size: Int) {
+    val columns = when (size) {
+        9, 6 -> 3
+        else -> 2
+    }
+    val rows = (size + columns - 1) / columns
+    Column(Modifier.fillMaxSize().padding(1.dp)) {
+        repeat(rows) { row ->
+            Row(Modifier.weight(1f).fillMaxWidth()) {
+                repeat(columns) { column ->
+                    val digit = row * columns + column + 1
+                    Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                        if (digit <= size && mask and (1 shl digit) != 0) {
+                            Text(
+                                digit.toString(),
+                                color = Ink.muted,
+                                fontSize = when (size) {
+                                    9 -> 7.sp
+                                    6 -> 10.sp
+                                    else -> 12.sp
+                                },
+                                lineHeight = 10.sp,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Five uniform keys per row on 9×9, with the last four centered. */
+@Composable
+private fun NumberRow(
+    values: List<Int>, height: androidx.compose.ui.unit.Dp,
+    enabled: Boolean, columns: Int, onClick: (Int) -> Unit,
+) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val gap = 7.dp
+        val keyWidth = (maxWidth - gap * (columns - 1)) / columns
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
+        ) {
+            values.forEach { value ->
+                NeonPanel(
+                    Modifier.width(keyWidth).testTag("number-$value")
+                        .alpha(if (enabled) 1f else .50f)
+                        .semantics { contentDescription = "Unesi broj $value"; role = Role.Button }
+                        .heightIn(min = 48.dp).height(height)
+                        .clickable(enabled = enabled) { onClick(value) },
+                    highlight = Ink.blue, corner = 13.dp,
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(value.toString(), color = Ink.white,
+                            fontSize = 29.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
