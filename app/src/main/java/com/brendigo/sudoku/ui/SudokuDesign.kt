@@ -108,10 +108,10 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
         }
         drawCircle(
             Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
-            radius = w * .18f, center = Offset(w * .81f, h * .745f),
+            radius = w * .16f, center = Offset(w * .81f, h * .77f),
         )
         drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
-            radius = w * .035f, center = Offset(w * .81f, h * .745f))
+            radius = w * .030f, center = Offset(w * .81f, h * .77f))
         // Distant layered mountain silhouettes.
         fun mountains(y: Float, amplitude: Float, color: Color, phase: Float) {
             val path = Path().apply {
@@ -219,8 +219,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             val x = w * t * .36f
             val y = h * (.86f + .12f * ((i * 37 % 103) / 103f))
             val radius = w * (.0024f + (i % 4) * .0009f)
-            val hue = if (i % 3 == 0) Color(0xFFB4A7DC) else Color(0xFF8799D3)
-            val opacity = if (i % 4 == 0) .80f else .58f
+            val hue = if (i % 3 == 0) Color(0xFF9A8EC4) else Color(0xFF6477B4)
+            val opacity = if (i % 4 == 0) .70f else .46f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
