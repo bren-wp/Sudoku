@@ -201,13 +201,13 @@ class SudokuVisualSmokeTest {
         waitFor("screen-postignuća")
         // The four featured achievement rows must be visible at reference size.
         rule.onNodeWithTag("achievement-sudoku-legenda").performScrollTo().assertIsDisplayed()
-        rule.onNodeWithTag("achievement-prva-pobjeda").performClick()
+        rule.onNodeWithTag("achievement-prva-pobjeda").performScrollTo().performClick()
         rule.onNodeWithTag("achievement-detail").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("achievements-show-all")
             .performScrollTo().performClick()
         rule.onNodeWithTag("achievement-prvi-korak").assertExists()
-        rule.onNodeWithTag("navigate-back").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
 
         homeTile("statistika")
@@ -218,7 +218,7 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("stats-achievements").performScrollTo().performClick()
         waitFor("screen-postignuća")
-        rule.onNodeWithTag("navigate-back").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
     }
 
@@ -244,16 +244,16 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("setting-provjera-greške").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("language-settings").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("privacy-policy").performScrollTo().assertIsDisplayed()
-        rule.onNodeWithTag("language-settings").performClick()
+        rule.onNodeWithTag("language-settings").performScrollTo().performClick()
         rule.onNodeWithText("Aplikacija trenutačno podržava hrvatski jezik.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
-        rule.onNodeWithTag("sound-vibration").performClick()
+        rule.onNodeWithTag("sound-vibration").performScrollTo().performClick()
         rule.onNodeWithText("Zatvori").performClick()
-        rule.onNodeWithTag("privacy-policy").performClick()
+        rule.onNodeWithTag("privacy-policy").performScrollTo().performClick()
         rule.onNodeWithText("Sudoku by Brendigo možeš igrati bez registracije i internetske veze.")
             .assertExists()
         rule.onNodeWithText("Zatvori").performClick()
-        rule.onNodeWithTag("navigate-back").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
 
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
@@ -300,7 +300,7 @@ class SudokuVisualSmokeTest {
         waitFor("navigate-back")
         shot("04-settings")
 
-        rule.onNodeWithTag("navigate-back").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("sudoku-board")
         rule.onNodeWithTag("game-back").performClick()
         waitFor("home-nova-igra")
@@ -309,17 +309,17 @@ class SudokuVisualSmokeTest {
         waitFor("screen-dnevni-izazov")
         waitFor("primary-action")
         shot("05-daily")
-        rule.onNodeWithTag("navigate-back").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
 
         homeTile("statistika")
         waitFor("screen-statistika")
         shot("06-statistics")
-        rule.onNodeWithTag("navigate-back").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
 
         homeTile("postignuća")
         waitFor("screen-postignuća")
         shot("07-achievements")
-        rule.onNodeWithTag("navigate-back").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
     }
 }
