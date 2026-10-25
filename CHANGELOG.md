@@ -1,3 +1,16 @@
+## 1.0.20
+
+- Added graph icon to Statistics title and vector arrows in summary cards.
+- Completion donut now shows completed/abandoned legend with real counts.
+- Replaced Unicode resume timer with branded scalable icon.
+- Linked weekly progress only between adjacent completed daily challenges.
+- Improved Sudoku selection rim, group separators and TalkBack state.
+- Exposed the completed state of weekly circles to accessibility.
+- Recolored locked achievements progression by individual reward tier.
+- Added subtle 7/9 glows to adaptive icon while keeping 7-3-9 geometry.
+- UI regressions for game selection, statistics legend and weekday labels.
+- No save format migrations. Pixel-perfect remains unverified (issue #11).
+
 ## 1.0.19
 
 - Improved Settings vertical layout and About panel so the real version row fits in the original 941×1672 screenshot viewport.
