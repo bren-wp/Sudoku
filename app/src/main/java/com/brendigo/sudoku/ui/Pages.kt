@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -297,7 +298,7 @@ fun HomePage(controller: SudokuController) {
                     }
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    BrandIcon("trophy", Modifier.size(21.dp), Ink.gold)
+                    BrandIcon("gift", Modifier.size(24.dp), Ink.gold)
                     Text("Nagrada", fontSize = 9.sp, color = Ink.muted)
                 }
             }
@@ -364,6 +365,7 @@ fun NewGamePage(controller: SudokuController) {
                             .semantics {
                                 contentDescription = "Veličina $option puta $option"
                                 role = Role.Button
+                                selected = size == option
                             }
                             .clickable { size = option },
                         highlight = if (size == option) Ink.cyan else Ink.line,
@@ -386,7 +388,8 @@ fun NewGamePage(controller: SudokuController) {
         difficultyLabels.forEachIndexed { i, _ ->
             NeonPanel(
                 Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 75.dp)
-                    .semantics { contentDescription = "Težina ${difficultyLabels[i]}"; role = Role.Button }
+                    .semantics { contentDescription = "Težina ${difficultyLabels[i]}"; role = Role.Button
+                        selected = level == i }
                     .clickable { level = i },
                 highlight = difficultyColors[i],
             ) {
@@ -417,7 +420,8 @@ fun NewGamePage(controller: SudokuController) {
                             "Ozbiljan izazov", "Samo za najbolje",
                         )[i], color = Ink.muted, fontSize = 13.sp, maxLines = 2)
                     }
-                    BrandIcon(if (level == i) "check" else "next", Modifier.size(23.dp), difficultyColors[i])
+                    BrandIcon("next", Modifier.size(23.dp),
+                        if (level == i) Ink.cyan else difficultyColors[i])
                 }
             }
         }
@@ -1181,9 +1185,7 @@ fun SettingsPage(controller: SudokuController) {
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("O aplikaciji", fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold)
-                Subtitle("Sudoku by Brendigo")
-                Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
+                SettingHeader("info", "O aplikaciji", "Sudoku by Brendigo")
                 NeonPanel(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("privacy-policy").clickable { showPrivacy = true },
@@ -1199,6 +1201,15 @@ fun SettingsPage(controller: SudokuController) {
                             fontSize = 15.sp, modifier = Modifier.weight(1f))
                         BrandIcon("next", Modifier.size(18.dp), Ink.cyan)
                     }
+                }
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 44.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BrandIcon("grid", Modifier.size(20.dp), Ink.muted)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME,
+                        color = Ink.muted, fontSize = 13.sp)
                 }
             }
         }
@@ -1329,9 +1340,9 @@ fun SplashPage() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            SudokuLogo(112.dp)
+            SudokuLogo(122.dp)
             Spacer(Modifier.height(30.dp))
-            AccentText("Sudoku", 58)
+            AccentText("Sudoku", 64)
             Text("by Brendigo", color = Ink.muted, letterSpacing = 5.sp, fontSize = 16.sp)
             Spacer(Modifier.height(32.dp))
             Text("T R E N I R A J   M O Z A K   S V A K I   D A N",

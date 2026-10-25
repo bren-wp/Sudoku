@@ -59,9 +59,17 @@
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:pathData="M30.5,32 H40 L33,41.5" />
+    <!-- Center digit carries its own glow to remain legible on launchers. -->
     <path
-        android:strokeColor="#EAFDFF"
-        android:strokeWidth="3.8"
+        android:strokeColor="#00EFFF"
+        android:strokeAlpha=".30"
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M49,49 C56,45.5 60.5,51.5 54,54 C61.5,54 59.5,62.5 49,59.5" />
+    <path
+        android:strokeColor="#C5FCFF"
+        android:strokeWidth="4.0"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:pathData="M49,49 C56,45.5 60.5,51.5 54,54 C61.5,54 59.5,62.5 49,59.5" />

@@ -15,6 +15,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -133,6 +135,9 @@ class SudokuVisualSmokeTest {
     fun fourAndSixCellGridModesArePlayable() {
         waitFor("home-nova-igra")
         homeTile("nova-igra")
+        rule.onNodeWithTag("size-9").assertIsSelected()
+        rule.onNodeWithTag("size-4").assertIsNotSelected()
+        rule.onNodeWithTag("difficulty-2").assertIsSelected()
         val size9 = rule.onNodeWithTag("size-9").fetchSemanticsNode().boundsInRoot
         val size4 = rule.onNodeWithTag("size-4").fetchSemanticsNode().boundsInRoot
         val selectorWidthDp = (size4.right - size9.left) /
@@ -146,7 +151,9 @@ class SudokuVisualSmokeTest {
             "New Game primary CTA must be narrower than difficulty cards"
         }
         rule.onNodeWithTag("size-4").performClick()
+        rule.onNodeWithTag("size-4").assertIsSelected()
         rule.onNodeWithTag("difficulty-1").performClick()
+        rule.onNodeWithTag("difficulty-1").assertIsSelected()
         rule.onNodeWithTag("primary-action").performScrollTo().performClick()
         waitFor("sudoku-board", timeoutMs = 60_000)
         rule.onNodeWithTag("sudoku-cell-15").assertExists()

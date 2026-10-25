@@ -1,3 +1,14 @@
+## 1.0.17
+
+- Recalibrated native night scenery, mountains, background Sudoku grid and sakura palette across all seven screens.
+- Improved launcher icon center cyan digit 3 glow, retaining 7-3-9 adaptive-safe geometry.
+- Enlarged splash mark/title and game HUD, improved selection-cell glow.
+- Home reward now shows gift icon; difficulty cards use directional icons.
+- Android size/difficulty controls provide real accessible selected semantics.
+- Settings About section includes info icon and version row.
+- Added instrumented assertions for 9x9/4x4 and difficulty selection.
+- No claim of pixel-perfect parity; open issue #11 remains.
+
 ## 1.0.16
 
 - Enlarged statistics chart geometry, labels and circular completion indicator.
