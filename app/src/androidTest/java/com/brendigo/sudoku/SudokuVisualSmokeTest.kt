@@ -133,6 +133,18 @@ class SudokuVisualSmokeTest {
     fun fourAndSixCellGridModesArePlayable() {
         waitFor("home-nova-igra")
         homeTile("nova-igra")
+        val size9 = rule.onNodeWithTag("size-9").fetchSemanticsNode().boundsInRoot
+        val size4 = rule.onNodeWithTag("size-4").fetchSemanticsNode().boundsInRoot
+        val selectorWidthDp = (size4.right - size9.left) /
+            rule.activity.resources.displayMetrics.density
+        check(selectorWidthDp <= 210f) {
+            "New Game size selector unexpectedly stretched to $selectorWidthDp dp"
+        }
+        val mainAction = rule.onNodeWithTag("primary-action").fetchSemanticsNode().boundsInRoot
+        val difficulty = rule.onNodeWithTag("difficulty-2").fetchSemanticsNode().boundsInRoot
+        check(mainAction.width < difficulty.width * .86f) {
+            "New Game primary CTA must be narrower than difficulty cards"
+        }
         rule.onNodeWithTag("size-4").performClick()
         rule.onNodeWithTag("difficulty-1").performClick()
         rule.onNodeWithTag("primary-action").performScrollTo().performClick()
@@ -233,6 +245,33 @@ class SudokuVisualSmokeTest {
         waitFor("screen-postignuća")
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
+    }
+
+    @Test
+    fun dailyAndAchievementReferencePanelsRemainInteractive() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        rule.onNodeWithTag("daily-summary").assertExists()
+        rule.onNodeWithTag("daily-hero").assertExists()
+        rule.onNodeWithText("Zlatna značka").assertExists()
+        rule.onNodeWithTag("daily-leaderboard").performScrollTo().performClick()
+        rule.onNodeWithText("Osobna rang-lista").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag("achievement-summary").assertExists()
+        val award = rule.onNodeWithTag("achievement-prva-pobjeda")
+        val heightInPixels = award.fetchSemanticsNode().boundsInRoot.height
+        val minHeightInPixels = 145f * rule.activity.resources.displayMetrics.density
+        check(heightInPixels >= minHeightInPixels) {
+            "Achievement card height $heightInPixels px smaller than $minHeightInPixels px"
+        }
+        award.performScrollTo().performClick()
+        rule.onNodeWithTag("achievement-detail").assertExists()
     }
 
     @Test

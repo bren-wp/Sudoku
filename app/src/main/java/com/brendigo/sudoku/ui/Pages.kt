@@ -3,6 +3,7 @@ package com.brendigo.sudoku.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
@@ -71,7 +72,7 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
             Modifier.fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(top = 10.dp, bottom = 68.dp),
+                .padding(top = 28.dp, bottom = 68.dp),
             verticalArrangement = Arrangement.spacedBy(7.dp),
         ) {
             content()
@@ -110,7 +111,8 @@ private fun StreakMarker(checked: Boolean, diameter: androidx.compose.ui.unit.Dp
 
 @Composable
 fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
-                 centered: Boolean = false) {
+                 centered: Boolean = false,
+                 titleOffset: androidx.compose.ui.unit.Dp = 0.dp) {
     if (!centered) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -134,11 +136,11 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
         Box(Modifier.fillMaxWidth().heightIn(min = 63.dp)) {
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = 50.dp)
-                    .testTag("screen-" + title.lowercase().replace(" ", "-"))
+                    .offset(y = titleOffset).testTag("screen-" + title.lowercase().replace(" ", "-"))
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AccentText(title, if (title.length > 16) 30 else 34)
+                AccentText(title, if (title.length > 16) 35 else 39)
                 if (description.isNotBlank()) {
                     Subtitle(description, Modifier.fillMaxWidth(), centered = true)
                 }
@@ -353,7 +355,7 @@ fun NewGamePage(controller: SudokuController) {
             ) {
                 BrandIcon("back", Modifier.size(24.dp), Ink.muted)
             }
-            Row(Modifier.weight(1f).widthIn(max = 204.dp),
+            Row(Modifier.width(192.dp),
                 horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 listOf(9, 6, 4).forEach { option ->
                     NeonPanel(
@@ -375,7 +377,7 @@ fun NewGamePage(controller: SudokuController) {
                 }
             }
         }
-        Spacer(Modifier.height(25.dp))
+        Spacer(Modifier.height(5.dp))
         Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")) {
             AccentText("Nova igra", 43)
             Text("Odaberi težinu", color = Ink.muted, fontSize = 18.sp)
@@ -419,13 +421,39 @@ fun NewGamePage(controller: SudokuController) {
                 }
             }
         }
-        SolidAction(
-            if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
-            { scope.launch { controller.startNew(size, level) } },
-            Modifier.fillMaxWidth(), !controller.isGenerating
-        )
+        Spacer(Modifier.height(14.dp))
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            SolidAction(
+                if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
+                { scope.launch { controller.startNew(size, level) } },
+                Modifier.fillMaxWidth(.75f), !controller.isGenerating,
+                minHeight = 54.dp,
+            )
+        }
         if (controller.isGenerating) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally),
             color = Ink.cyan)
+    }
+}
+
+@Composable
+private fun DailyMetric(
+    icon: String, label: String, value: String,
+    color: Color, modifier: Modifier = Modifier,
+) {
+    NeonPanel(modifier.heightIn(min = 64.dp), Ink.blue, corner = 13.dp) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BrandIcon(icon, Modifier.size(25.dp), color)
+            Spacer(Modifier.width(7.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(label, color = Ink.muted, fontSize = 8.sp,
+                    lineHeight = 10.sp, maxLines = 2)
+                Text(value, color = Ink.white, fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold, maxLines = 1)
+            }
+        }
     }
 }
 
@@ -438,91 +466,134 @@ fun DailyPage(controller: SudokuController) {
         today.format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
     PageContent {
-        SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 92.dp), Ink.blue) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                    BrandIcon("calendar", Modifier.size(23.dp), Ink.cyan)
+        SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
+            onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
+        Spacer(Modifier.height(32.dp))
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 98.dp)
+            .testTag("daily-summary"), Ink.blue) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(11.dp),
+            ) {
+                Row(Modifier.weight(1.4f), verticalAlignment = Alignment.CenterVertically) {
+                    BrandIcon("calendar", Modifier.size(27.dp), Ink.blue)
                     Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text("DANAS", color = Ink.cyan, fontSize = 10.sp, letterSpacing = 1.sp)
-                        Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp, maxLines = 1)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("D A N A S", color = Ink.muted, fontSize = 10.sp)
+                        Text(formattedDate, color = Ink.white,
+                            fontWeight = FontWeight.Bold, fontSize = 12.sp,
+                            lineHeight = 14.sp, maxLines = 2)
                     }
                 }
-                Spacer(Modifier.width(8.dp))
-                BrandIcon("flame", Modifier.size(25.dp), Ink.gold)
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("${controller.currentStreak(today)}", color = Ink.gold, fontSize = 25.sp,
-                        fontWeight = FontWeight.ExtraBold, lineHeight = 27.sp)
-                    Text("DANA U NIZU", color = Ink.muted, fontSize = 8.sp, maxLines = 1)
+                Box(Modifier.width(1.dp).height(57.dp)
+                    .background(Ink.blue.copy(alpha = .65f)))
+                Column(Modifier.weight(1.0f),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        BrandIcon("flame", Modifier.size(33.dp), Ink.gold)
+                        Spacer(Modifier.width(4.dp))
+                        Text("${controller.currentStreak(today)}", color = Ink.gold,
+                            fontSize = 34.sp, fontWeight = FontWeight.ExtraBold,
+                            lineHeight = 38.sp)
+                    }
+                    Text("DANA U NIZU", color = Ink.muted,
+                        fontSize = 9.sp, maxLines = 1)
                 }
-                Spacer(Modifier.width(9.dp))
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    BrandIcon("trophy", Modifier.size(23.dp), Ink.gold)
-                    Text("NAGRADA", color = Ink.gold, fontSize = 8.sp)
-                    Text("Zlatna značka", color = Ink.white, fontSize = 9.sp, maxLines = 1)
-                }
-            }
-        }
-        Spacer(Modifier.height(2.dp))
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 190.dp), Ink.gold) {
-            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("DANAŠNJI IZAZOV", color = Ink.gold, fontSize = 12.sp, letterSpacing = 2.sp)
-                AccentText("Misteriozna planina", 25)
-                Subtitle("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!")
-                Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            BrandIcon("statistics", Modifier.size(13.dp), Ink.gold)
-                            Spacer(Modifier.width(4.dp))
-                            Text("TEŽINA", color = Ink.muted, fontSize = 10.sp)
-                        }
-                        Text("Srednja", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            BrandIcon("timer", Modifier.size(13.dp), Ink.cyan)
-                            Spacer(Modifier.width(4.dp))
-                            Text("VRIJEME", color = Ink.muted, fontSize = 10.sp)
-                        }
-                        Text("12 min", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            BrandIcon("star", Modifier.size(13.dp), Ink.gold)
-                            Spacer(Modifier.width(4.dp))
-                            Text("NAGRADA", color = Ink.muted, fontSize = 10.sp)
-                        }
-                        Text("50 bodova", color = Ink.gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
+                Column(Modifier.weight(1.18f),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    BrandIcon("gift", Modifier.size(34.dp), Ink.gold)
+                    Text("DANAŠNJA NAGRADA", color = Ink.gold,
+                        fontSize = 8.sp, textAlign = TextAlign.Center,
+                        lineHeight = 10.sp, maxLines = 2)
+                    Text("Zlatna značka", color = Ink.white,
+                        fontSize = 11.sp, maxLines = 1)
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 120.dp), Ink.cyan) {
-            Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
-                Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white, fontSize = 12.sp)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp)
+            .testTag("daily-hero"), Ink.gold) {
+            Column(
+                Modifier.fillMaxWidth().heightIn(min = 202.dp).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text("D A N A Š N J I   I Z A Z O V",
+                    color = Ink.muted, fontSize = 11.sp, maxLines = 1)
+                AccentText("Misteriozna planina", 28)
+                Text("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!",
+                    color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
+                    maxLines = 2)
+                Spacer(Modifier.height(13.dp))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    DailyMetric("statistics", "TEŽINA", "Srednja",
+                        Ink.gold, Modifier.weight(1f))
+                    DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
+                        Ink.cyan, Modifier.weight(1f))
+                    DailyMetric("star", "NAGRADA", "50 bodova",
+                        Ink.gold, Modifier.weight(1f))
+                }
+            }
+        }
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 122.dp), Ink.blue) {
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text("T V O J   N I Z", color = Ink.muted, fontSize = 11.sp,
+                        modifier = Modifier.weight(.40f))
+                    Text("Riješi izazove svaki dan za više nagrada!",
+                        color = Ink.muted, fontSize = 10.sp,
+                        textAlign = TextAlign.End, maxLines = 2,
+                        modifier = Modifier.weight(.60f))
+                }
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
                 val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
                     setOf(controller.stats.lastDaily)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
-                        val date = monday.plusDays(i.toLong())
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(label, color = Ink.muted, fontSize = 9.sp)
-                            Spacer(Modifier.height(4.dp))
-                            StreakMarker(date.toString() in completedDays, diameter = 28.dp)
-                            Spacer(Modifier.height(4.dp))
-                            Text("${date.dayOfMonth}.${date.monthValue}.",
-                                color = if (date == today) Ink.white else Ink.muted,
-                                fontSize = 9.sp,
-                                fontWeight = if (date == today) FontWeight.Bold else FontWeight.Normal,
-                            )
+                val completedInWeek = (0..6).count {
+                    monday.plusDays(it.toLong()).toString() in completedDays
+                }
+                Row(
+                    Modifier.fillMaxWidth().drawBehind {
+                        val lineY = size.height * .48f
+                        drawLine(Ink.blue.copy(alpha = .65f),
+                            Offset(size.width * .07f, lineY),
+                            Offset(size.width * .93f, lineY),
+                            strokeWidth = 2.dp.toPx())
+                        if (completedInWeek > 1) {
+                            drawLine(Ink.cyan.copy(alpha = .85f),
+                                Offset(size.width * .07f, lineY),
+                                Offset(size.width * (.07f +
+                                    .86f * (completedInWeek - 1) / 6f), lineY),
+                                strokeWidth = 2.dp.toPx())
                         }
-                    }
+                    },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED")
+                        .forEachIndexed { index, label ->
+                            val date = monday.plusDays(index.toLong())
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(label, color = Ink.muted, fontSize = 10.sp)
+                                Spacer(Modifier.height(3.dp))
+                                StreakMarker(date.toString() in completedDays,
+                                    diameter = 31.dp)
+                                Spacer(Modifier.height(3.dp))
+                                Text("${date.dayOfMonth}.${date.monthValue}.",
+                                    color = if (date == today) Ink.white else Ink.muted,
+                                    fontSize = 10.sp,
+                                    fontWeight = if (date == today)
+                                        FontWeight.Bold else FontWeight.Normal)
+                            }
+                        }
                 }
             }
         }
@@ -530,25 +601,39 @@ fun DailyPage(controller: SudokuController) {
             Text("✓ Današnji izazov već je riješen.", color = Ink.teal,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
-        SolidAction(
-            when {
-                controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
-                controller.isGenerating -> "Učitavanje…"
-                else -> "▶   Pokreni izazov"
-            },
-            { scope.launch { controller.startNew(9, 2, daily = true) } },
-            Modifier.fillMaxWidth(), !controller.isGenerating && !controller.dailyAlreadyCompleted()
-        )
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 48.dp)
-            .testTag("daily-leaderboard")
-            .semantics { contentDescription = "Otvori osobnu rang-listu"; role = Role.Button }
-            .clickable { showRanking = true }, Ink.purple) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    BrandIcon("trophy", Modifier.size(20.dp), Ink.purple)
-                    Spacer(Modifier.width(8.dp))
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            SolidAction(
+                when {
+                    controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
+                    controller.isGenerating -> "Učitavanje…"
+                    else -> "▶   Pokreni izazov"
+                },
+                { scope.launch { controller.startNew(9, 2, daily = true) } },
+                Modifier.fillMaxWidth(.80f),
+                !controller.isGenerating && !controller.dailyAlreadyCompleted(),
+                minHeight = 56.dp,
+            )
+        }
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            NeonPanel(
+                Modifier.fillMaxWidth(.64f).heightIn(min = 53.dp)
+                    .testTag("daily-leaderboard")
+                    .semantics {
+                        contentDescription = "Otvori osobnu rang-listu"
+                        role = Role.Button
+                    }
+                    .clickable { showRanking = true },
+                Ink.blue,
+            ) {
+                Row(
+                    Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    BrandIcon("trophy", Modifier.size(25.dp), Ink.purple)
+                    Spacer(Modifier.width(9.dp))
                     Text("Pogledaj rang-listu", color = Ink.white,
-                        fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                        maxLines = 1)
                 }
             }
         }
@@ -622,7 +707,7 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 132.dp), Ink.blue) {
             Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
@@ -640,7 +725,7 @@ fun StatsPage(controller: SudokuController) {
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
-                stats.history.take(3).forEach {
+                stats.history.take(4).forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         BrandIcon("grid", Modifier.size(21.dp), difficultyColors[it.level])
                         Spacer(Modifier.width(9.dp))
@@ -652,7 +737,7 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 142.dp)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 109.dp)
             .testTag("stats-achievements")
             .semantics {
                 contentDescription = "Otvori svih 24 postignuća"
@@ -680,7 +765,7 @@ fun StatsPage(controller: SudokuController) {
                     ).forEach { award ->
                         val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
                         NeonPanel(
-                            Modifier.weight(1f).heightIn(min = 91.dp),
+                            Modifier.weight(1f).heightIn(min = 67.dp),
                             if (fraction >= 1f) award.tint else Ink.line,
                             corner = 10.dp,
                         ) {
@@ -691,7 +776,7 @@ fun StatsPage(controller: SudokuController) {
                             ) {
                                 BrandIcon(
                                     if (fraction >= 1f) award.icon else "lock",
-                                    Modifier.size(24.dp),
+                                    Modifier.size(20.dp),
                                     if (fraction >= 1f) award.tint else Ink.muted,
                                 )
                                 Text(award.title, color = Ink.white, fontSize = 9.sp,
@@ -833,7 +918,7 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
 @Composable
 private fun StatTile(label: String, value: String, color: Color,
                      modifier: Modifier, onClick: () -> Unit) {
-    NeonPanel(modifier.heightIn(min = 77.dp)
+    NeonPanel(modifier.heightIn(min = 86.dp)
         .semantics { contentDescription = "$label: $value"; role = Role.Button }
         .clickable(onClick = onClick), color) {
         Row(
@@ -846,11 +931,11 @@ private fun StatTile(label: String, value: String, color: Color,
                 "Ukupno vrijeme" -> "timer"
                 "Dnevni niz" -> "flame"
                 else -> "statistics"
-            }, Modifier.size(25.dp), color)
-            Spacer(Modifier.width(7.dp))
+            }, Modifier.size(37.dp), color)
+            Spacer(Modifier.width(9.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(label, color = Ink.muted, fontSize = 11.sp, maxLines = 1)
-                Text(value, color = Ink.white, fontSize = 19.sp,
+                Text(label, color = Ink.muted, fontSize = 12.sp, maxLines = 1)
+                Text(value, color = Ink.white, fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold, maxLines = 1)
             }
             Text("›", color = color, fontSize = 17.sp)
@@ -904,21 +989,38 @@ fun AchievementsPage(controller: SudokuController) {
     val featured = basic.take(7) + data.last()
     val visible = if (showAll) featured + basic.drop(7) else featured
     PageContent {
-        SectionTitle("Postignuća", "Skupljaj nagrade rješavanjem", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
-            Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                Column { Subtitle("Ukupno bodova"); Text("$points", fontSize = 25.sp,
-                    color = Ink.gold, fontWeight = FontWeight.ExtraBold) }
-                Column { Subtitle("Otključano"); Text("${data.count { it.current >= it.goal }} / ${data.size}",
-                    fontSize = 24.sp, color = Ink.cyan, fontWeight = FontWeight.Bold) }
+        SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 75.dp)
+            .testTag("achievement-summary"), Ink.blue) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 17.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(13.dp),
+            ) {
+                BrandIcon("trophy", Modifier.size(37.dp), Ink.gold)
+                Column(Modifier.weight(1f)) {
+                    Subtitle("Ukupno bodova")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("$points", fontSize = 27.sp,
+                            color = Ink.gold, fontWeight = FontWeight.ExtraBold)
+                        Text(" / 1000", fontSize = 13.sp, color = Ink.muted)
+                    }
+                }
+                Box(Modifier.width(1.dp).height(49.dp)
+                    .background(Ink.blue.copy(alpha = .80f)))
+                BrandIcon("star", Modifier.size(34.dp), Ink.cyan)
+                Column(Modifier.weight(.75f)) {
+                    Subtitle("Otključano")
+                    Text("${data.count { it.current >= it.goal }} / ${data.size}", fontSize = 26.sp,
+                        color = Ink.cyan, fontWeight = FontWeight.ExtraBold)
+                }
             }
         }
         visible.chunked(2).forEach { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { achievement ->
                     val unlocked = achievement.current >= achievement.goal
-                    NeonPanel(Modifier.weight(1f).height(128.dp)
+                    NeonPanel(Modifier.weight(1f).height(149.dp)
                         .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-"))
                         .semantics {
                             contentDescription = achievement.title +
@@ -926,24 +1028,37 @@ fun AchievementsPage(controller: SudokuController) {
                             role = Role.Button
                         }
                         .clickable { selectedAchievement = achievement },
-                        if (unlocked) achievement.tint else Ink.line.copy(alpha = .50f)) {
+                        if (unlocked) achievement.tint else Ink.blue.copy(alpha = .52f)) {
                         Column(Modifier.fillMaxSize().padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 BrandIcon(if (unlocked) achievementIconFor(achievement.title) else "lock",
-                                    Modifier.size(32.dp),
+                                    Modifier.size(41.dp),
                                     if (unlocked) achievement.tint else Ink.muted.copy(alpha = .73f))
-                                Text("★ ${achievement.reward}",
-                                    color = if (unlocked) achievement.tint else Ink.muted,
-                                    fontSize = 11.sp)
+                                Row(
+                                    Modifier.background(Ink.blue.copy(alpha = .23f),
+                                            RoundedCornerShape(30.dp))
+                                        .border(1.dp, if (unlocked) achievement.tint
+                                            else Ink.muted.copy(alpha = .55f),
+                                            RoundedCornerShape(30.dp))
+                                        .padding(horizontal = 7.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    BrandIcon("star", Modifier.size(13.dp),
+                                        if (unlocked) achievement.tint else Ink.muted)
+                                    Spacer(Modifier.width(3.dp))
+                                    Text("${achievement.reward}",
+                                        color = if (unlocked) achievement.tint else Ink.muted,
+                                        fontSize = 11.sp)
+                                }
                             }
-                            Text(achievement.title, color = Ink.white, fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold, lineHeight = 17.sp, maxLines = 1)
-                            Text(achievement.text, color = Ink.muted, fontSize = 10.sp,
-                                lineHeight = 12.sp, modifier = Modifier.weight(1f), maxLines = 2)
+                            Text(achievement.title, color = Ink.white, fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
+                            Text(achievement.text, color = Ink.muted, fontSize = 11.sp,
+                                lineHeight = 13.sp, modifier = Modifier.weight(1f), maxLines = 2)
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
-                            Box(Modifier.fillMaxWidth().height(5.dp).background(Ink.blue.copy(alpha = .25f),
+                            Box(Modifier.fillMaxWidth().height(7.dp).background(Ink.blue.copy(alpha = .25f),
                                 RoundedCornerShape(12.dp))) {
                                 Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
                                     .background(if (unlocked) achievement.tint else Ink.muted,
