@@ -511,12 +511,11 @@ fun DailyPage(controller: SudokuController) {
                 }
             }
         }
-        Spacer(Modifier.height(2.dp))
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp)
             .testTag("daily-hero"), Ink.gold) {
             Column(
                 Modifier.fillMaxWidth().heightIn(min = 202.dp).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text("D A N A Š N J I   I Z A Z O V",
                     color = Ink.muted, fontSize = 11.sp, maxLines = 1)
@@ -540,8 +539,8 @@ fun DailyPage(controller: SudokuController) {
         }
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 122.dp), Ink.blue) {
             Column(
-                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 13.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Row(
                     Modifier.fillMaxWidth(),
@@ -584,10 +583,10 @@ fun DailyPage(controller: SudokuController) {
                             val date = monday.plusDays(index.toLong())
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(label, color = Ink.muted, fontSize = 10.sp)
-                                Spacer(Modifier.height(7.dp))
+                                Spacer(Modifier.height(3.dp))
                                 StreakMarker(date.toString() in completedDays,
                                     diameter = 31.dp)
-                                Spacer(Modifier.height(7.dp))
+                                Spacer(Modifier.height(3.dp))
                                 Text("${date.dayOfMonth}.${date.monthValue}.",
                                     color = if (date == today) Ink.white else Ink.muted,
                                     fontSize = 10.sp,
