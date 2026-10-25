@@ -365,24 +365,39 @@ fun NewGamePage(controller: SudokuController) {
             Text("Odaberi težinu", color = Ink.muted, fontSize = 18.sp)
         }
         Spacer(Modifier.height(5.dp))
-        listOf("✿", "★", "★★", "★★★", "♛", "♛").forEachIndexed { i, symbol ->
+        difficultyLabels.forEachIndexed { i, _ ->
             NeonPanel(
                 Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 75.dp)
                     .semantics { contentDescription = "Težina ${difficultyLabels[i]}"; role = Role.Button }
                     .clickable { level = i },
-                highlight = if (level == i) Ink.cyan else difficultyColors[i],
+                highlight = difficultyColors[i],
             ) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    BrandIcon(when (i) { 0 -> "sparkles"; 1 -> "star"; 2 -> "star"; 3 -> "trophy"; else -> "crown" },
-                        Modifier.size(27.dp), difficultyColors[i])
-                    Spacer(Modifier.width(13.dp))
+                    Box(
+                        Modifier.size(48.dp)
+                            .background(difficultyColors[i].copy(alpha = .11f), RoundedCornerShape(50))
+                            .border(1.5.dp, difficultyColors[i], RoundedCornerShape(50)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        BrandIcon(
+                            when (i) {
+                                0 -> "leaf"
+                                1 -> "star"
+                                2 -> "double-star"
+                                3 -> "triple-star"
+                                else -> "crown"
+                            },
+                            Modifier.size(28.dp), difficultyColors[i],
+                        )
+                    }
+                    Spacer(Modifier.width(17.dp))
                     Column(Modifier.weight(1f)) {
                         Text(difficultyLabels[i], fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Ink.white)
-                        Subtitle(listOf(
+                        Text(listOf(
                             "Savršeno za početnike", "Lagani izazov za vježbu",
                             "Uravnotežen izazov", "Za iskusne igrače",
                             "Ozbiljan izazov", "Samo za najbolje",
-                        )[i])
+                        )[i], color = Ink.muted, fontSize = 13.sp, maxLines = 2)
                     }
                     BrandIcon(if (level == i) "check" else "next", Modifier.size(23.dp), difficultyColors[i])
                 }
