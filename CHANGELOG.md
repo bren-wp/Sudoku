@@ -1,3 +1,13 @@
+## 1.0.26 — Prilagodljiv ekran Postignuća
+
+- Sačuvan izvorni dvostupčani raspored i redoslijed osam istaknutih postignuća na referentnom zaslonu.
+- Na kompaktnim Android ekranima kartice se mogu proširiti kako opis i napredak ne bi bili odrezani.
+- Za uske uređaje ili povećani sistemski font prikazuje se jedan stupac pristupačnijih kartica.
+- Sažetak bodova i broja otključanih nagrada prilagođen je užim uređajima; gumb za proširenje ima jasan opis za čitače zaslona.
+- UI regresijski testovi provjeravaju smještaj opisa i prisutnost svih 24 postignuća.
+- Nisu mijenjani bodovi, kriteriji nagrada, lokalni spremljeni podaci ni originalne SVG/WebP datoteke.
+- Pixel-perfect 1:1 nije potvrđen bez izvornih referentnih PNG-ova (issue #11).
+
 ## 1.0.25 — Statistics compact-screen readability
 
 - Scale statistics tile icons and text at widths below 180dp per tile.
