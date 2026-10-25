@@ -442,29 +442,44 @@ fun DailyPage(controller: SudokuController) {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
         Spacer(Modifier.height(32.dp))
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 92.dp), Ink.blue) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                    BrandIcon("calendar", Modifier.size(23.dp), Ink.cyan)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 98.dp), Ink.blue) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(11.dp),
+            ) {
+                Row(Modifier.weight(1.4f), verticalAlignment = Alignment.CenterVertically) {
+                    BrandIcon("calendar", Modifier.size(27.dp), Ink.blue)
                     Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text("DANAS", color = Ink.cyan, fontSize = 10.sp, letterSpacing = 1.sp)
-                        Text(formattedDate, color = Ink.white, fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp, maxLines = 1)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("D A N A S", color = Ink.muted, fontSize = 10.sp)
+                        Text(formattedDate, color = Ink.white,
+                            fontWeight = FontWeight.Bold, fontSize = 12.sp,
+                            lineHeight = 14.sp, maxLines = 2)
                     }
                 }
-                Spacer(Modifier.width(8.dp))
-                BrandIcon("flame", Modifier.size(25.dp), Ink.gold)
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("${controller.currentStreak(today)}", color = Ink.gold, fontSize = 25.sp,
-                        fontWeight = FontWeight.ExtraBold, lineHeight = 27.sp)
-                    Text("DANA U NIZU", color = Ink.muted, fontSize = 8.sp, maxLines = 1)
+                Box(Modifier.width(1.dp).height(57.dp)
+                    .background(Ink.blue.copy(alpha = .65f)))
+                Column(Modifier.weight(1.0f),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        BrandIcon("flame", Modifier.size(33.dp), Ink.gold)
+                        Spacer(Modifier.width(4.dp))
+                        Text("${controller.currentStreak(today)}", color = Ink.gold,
+                            fontSize = 34.sp, fontWeight = FontWeight.ExtraBold,
+                            lineHeight = 38.sp)
+                    }
+                    Text("DANA U NIZU", color = Ink.muted,
+                        fontSize = 9.sp, maxLines = 1)
                 }
-                Spacer(Modifier.width(9.dp))
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    BrandIcon("trophy", Modifier.size(23.dp), Ink.gold)
-                    Text("NAGRADA", color = Ink.gold, fontSize = 8.sp)
-                    Text("Zlatna značka", color = Ink.white, fontSize = 9.sp, maxLines = 1)
+                Column(Modifier.weight(1.18f),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    BrandIcon("gift", Modifier.size(34.dp), Ink.gold)
+                    Text("DANAŠNJA NAGRADA", color = Ink.gold,
+                        fontSize = 8.sp, textAlign = TextAlign.Center,
+                        lineHeight = 10.sp, maxLines = 2)
+                    Text("Zlatna značka", color = Ink.white,
+                        fontSize = 11.sp, maxLines = 1)
                 }
             }
         }
