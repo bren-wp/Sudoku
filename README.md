@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.17`
+- Version: `1.0.18`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -270,3 +270,18 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - Dodani emulator testovi odabira veličine i razine težine.
 - Pixel-perfect 1:1 nije potvrđen bez novog usporednog mjerenja svih
   sedam 941×1672 referenci (issue #11).
+
+## Sudoku 1.0.18 — premium settings and achievement fixes
+
+- The shared footer now owns a layout slot **outside** each scroll viewport.
+  On short devices, users can scroll to the final action without text overlays.
+- Appearance settings use a dedicated scalable palette vector icon.
+- Settings toggles match the cyan-to-blue track and white thumb in the
+  original reference; the full row remains the only interactive switch.
+- Achievement cards retain their distinct icon and accent even while locked,
+  with a compact lock badge. Unlocked achievements show a checkmark.
+- Instrumented pixel-geometry guards verify the final achievements action
+  and privacy row never overlap the footer at 941x1672 and 720x1280.
+- No storage migration or changes to puzzle persistence.
+- 1:1 pixel equality still requires normalized screenshots and measured MAE;
+  issue #11 remains open.
