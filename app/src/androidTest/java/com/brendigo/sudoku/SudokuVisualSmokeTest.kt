@@ -161,6 +161,17 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-undo").assertIsNotEnabled()
         rule.onNodeWithTag("game-erase").assertIsNotEnabled()
         rule.onNodeWithTag("number-1").assertIsEnabled()
+        // Both keypad rows use the same key width; the four-key row is centered.
+        val firstKey = rule.onNodeWithTag("number-1").fetchSemanticsNode().boundsInRoot
+        val fifthKey = rule.onNodeWithTag("number-5").fetchSemanticsNode().boundsInRoot
+        val sixthKey = rule.onNodeWithTag("number-6").fetchSemanticsNode().boundsInRoot
+        val ninthKey = rule.onNodeWithTag("number-9").fetchSemanticsNode().boundsInRoot
+        check(kotlin.math.abs(firstKey.width - sixthKey.width) < 5f) {
+            "Second keypad row has different-sized keys"
+        }
+        check(sixthKey.left > firstKey.left && ninthKey.right < fifthKey.right) {
+            "Four numeric keys must be centered under the first five"
+        }
         val empty = hasContentDescription("prazno polje", substring = true)
         val before = rule.onAllNodes(empty).fetchSemanticsNodes().size
         check(before > 0) { "The generated Sudoku had no editable empty cells" }
@@ -185,6 +196,8 @@ class SudokuVisualSmokeTest {
         check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before) {
             "Notes mode must not fill the selected cell"
         }
+        rule.onAllNodes(hasContentDescription("bilješke 2", substring = true))
+            .onFirst().assertExists()
         rule.onNodeWithTag("game-erase").assertIsEnabled().performClick()
         rule.onNodeWithTag("game-back").performClick()
         waitFor("resume-game")
