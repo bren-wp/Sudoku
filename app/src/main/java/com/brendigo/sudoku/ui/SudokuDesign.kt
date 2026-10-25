@@ -127,12 +127,12 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             }
             drawPath(path, color)
         }
-        mountains(h * .835f, h * .039f, Color(0xFF0B3476).copy(alpha = .78f), 2.2f)
-        mountains(h * .862f, h * .050f, Color(0xFF0B2A60), .1f)
+        mountains(h * .835f, h * .039f, Color(0xFF102B66).copy(alpha = .80f), 2.2f)
+        mountains(h * .862f, h * .050f, Color(0xFF0A2455), .1f)
         mountains(h * .902f, h * .033f, Color(0xFF051943), 1.5f)
         drawRect(
             Brush.verticalGradient(
-                listOf(Color(0x00226BD0), Color(0x993A89CD), Color(0xFF03112C)),
+                listOf(Color(0x00226BD0), Color(0x882459A3), Color(0xFF03112C)),
                 startY = h * .88f, endY = h,
             ),
             topLeft = Offset(0f, h * .88f),
@@ -214,13 +214,13 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             cubicTo(w * .04f, h * .88f, w * .12f, h * .84f, w * .17f, h * .79f)
         }
         drawPath(branch, Color(0xFF010C24), style = Stroke(width = w * .009f))
-        for (i in 0..72) {
+        for (i in 0..112) {
             val t = ((i * 53 + 7) % 101) / 100f
             val x = w * t * .36f
             val y = h * (.86f + .12f * ((i * 37 % 103) / 103f))
             val radius = w * (.0028f + (i % 4) * .0012f)
             val hue = if (i % 3 == 0) Color(0xFF7897E4) else Color(0xFF4B67BA)
-            val opacity = if (i % 4 == 0) .67f else .39f
+            val opacity = if (i % 4 == 0) .76f else .49f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
@@ -307,8 +307,11 @@ fun NeonPanel(
     Box(
         modifier.clip(RoundedCornerShape(corner))
             .background(
-                Brush.linearGradient(
-                    listOf(highlight.copy(alpha = if (warm) .32f else .23f),
+                if (warm) Brush.horizontalGradient(
+                    listOf(Color(0xFC04132F), Color(0xF4091B3A),
+                        Color(0xF940311A)),
+                ) else Brush.linearGradient(
+                    listOf(highlight.copy(alpha = .23f),
                         Color(0xF3071C42), Color(0xFB03102B)),
                 ),
             )
@@ -338,20 +341,22 @@ fun NeonPanel(
                 w * .48f, Offset(w * .08f, h * .87f),
             )
 
-            // Diagonal translucent Sudoku cells from the reference cards.
-            // They stay behind real controls, never act as a substitute for UI.
-            val step = w * .23f
-            val left = w * .57f
-            for (index in 0..5) {
-                val x = left + index * step
-                drawLine(highlight.copy(alpha = .16f),
-                    Offset(x, 0f), Offset(x - w * .31f, h), 1.5f)
-            }
-            for (index in 0..5) {
-                val y = -h * .27f + index * h * .29f
-                drawLine(highlight.copy(alpha = .15f),
-                    Offset(left - w * .04f, y),
-                    Offset(w, y + h * .31f), 1.5f)
+            // Sudoku watermark belongs on cool-blue panels; warm illustrated
+            // reward cards need a clear sky so their text stays readable.
+            if (!warm) {
+                val step = w * .23f
+                val left = w * .57f
+                for (index in 0..5) {
+                    val x = left + index * step
+                    drawLine(highlight.copy(alpha = .11f),
+                        Offset(x, 0f), Offset(x - w * .31f, h), 1.5f)
+                }
+                for (index in 0..5) {
+                    val y = -h * .27f + index * h * .29f
+                    drawLine(highlight.copy(alpha = .10f),
+                        Offset(left - w * .04f, y),
+                        Offset(w, y + h * .31f), 1.5f)
+                }
             }
             val hill = Path().apply {
                 moveTo(0f, h)
@@ -374,7 +379,7 @@ fun NeonPanel(
                 strokeWidth = 1.25f,
             )
             if (warm) {
-                val moon = Offset(w * .79f, h * .23f)
+                val moon = Offset(w * .87f, h * .21f)
                 drawCircle(
                     Brush.radialGradient(
                         listOf(Ink.gold.copy(alpha = .30f), Color.Transparent),
@@ -382,7 +387,7 @@ fun NeonPanel(
                     ), w * .24f, moon,
                 )
                 drawCircle(Ink.gold.copy(alpha = .85f),
-                    radius = minOf(w, h) * .075f, center = moon)
+                    radius = minOf(w, h) * .090f, center = moon)
                 val roof = Path().apply {
                     moveTo(w * .82f, h * .70f)
                     quadraticTo(w * .88f, h * .57f, w * .94f, h * .70f)
