@@ -187,6 +187,14 @@ class SudokuController(context: Context) {
                 solution = result.solution,
                 givens = result.givens,
                 board = result.givens.clone(),
+                // Start with the nearest editable cell to the center, so the
+                // number keypad is immediately functional (including 4x4/6x6).
+                selected = result.givens.indices
+                    .filter { result.givens[it] == 0 }
+                    .minByOrNull { index ->
+                        kotlin.math.abs(index / result.size - result.size / 2) +
+                            kotlin.math.abs(index % result.size - result.size / 2)
+                    } ?: -1,
                 notes = if (options.autoNotes) SudokuCandidates.automaticNotes(
                     result.givens, size, result.boxRows, result.boxColumns
                 ) else IntArray(size * size),
