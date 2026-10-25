@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.14`
+- Version: `1.0.15`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -237,3 +237,14 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - Data storage keys and saved game progress remain unchanged.
 - **MAE=0 is not yet established:** original 941×1672 reference artworks
   have dynamic sample data and richer scenic illustration. See issue #11.
+
+## Sudoku 1.0.15 — vizualna dorada prema originalnim referencama
+
+- Dnevni izazov: preciznije poravnanje naslova i povratka, tri informacijska bloka,
+  ikonica poklona, povezani sedmodnevni napredak i uži centrirani gumbi.
+- Postignuća: veće kartice, izraženije vektorske ikone, značke bodova,
+  deblji napredak i dvodijelno zaglavlje sa simbolima.
+- Zajednički UI: prilagođeni vertikalni razmaci i tamniji noćni krajolik.
+- Prošireni emulator testovi za dnevne nagrade, interakcije i kartice.
+- Provjere na 941 × 1672 i 720 × 1280 px; korisnička spremanja ostaju sačuvana.
+- Potpuna 1:1 jednakost piksela još nije dokazana; detalji u issueu #11.
