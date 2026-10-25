@@ -953,25 +953,25 @@ fun SettingsPage(controller: SudokuController) {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(9.dp)) {
-                SettingHeader("◉", "Izgled", "Prilagodi vizualni doživljaj igre")
-                SettingToggle("☾", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
+                SettingHeader("sparkles", "Izgled", "Prilagodi vizualni doživljaj igre")
+                SettingToggle("moon", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
                     controller.updateOptions(opts.copy(dark = it))
                 }
-                SettingToggle("✧", "Animacije", "Prikaži animacije i vizualne efekte", opts.animations) {
+                SettingToggle("sparkles", "Animacije", "Prikaži animacije i vizualne efekte", opts.animations) {
                     controller.updateOptions(opts.copy(animations = it))
                 }
             }
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(9.dp)) {
-                SettingHeader("▣", "Igra", "Postavke igrivosti i pomoći")
-                SettingToggle("▤", "Automatske bilješke", "Ukloni riješene kandidate iz bilješki", opts.autoNotes) {
+                SettingHeader("gamepad", "Igra", "Postavke igrivosti i pomoći")
+                SettingToggle("note", "Automatske bilješke", "Ukloni riješene kandidate iz bilješki", opts.autoNotes) {
                     controller.updateOptions(opts.copy(autoNotes = it))
                 }
-                SettingToggle("⚠", "Provjera greške", "Označi netočne unose i prati pogreške", opts.checkMistakes) {
+                SettingToggle("warning", "Provjera greške", "Označi netočne unose i prati pogreške", opts.checkMistakes) {
                     controller.updateOptions(opts.copy(checkMistakes = it))
                 }
-                SettingToggle("▦", "Isticanje brojeva", "Naglašavanje jednakih brojeva na ploči", opts.highlightEquals) {
+                SettingToggle("grid", "Isticanje brojeva", "Naglašavanje jednakih brojeva na ploči", opts.highlightEquals) {
                     controller.updateOptions(opts.copy(highlightEquals = it))
                 }
             }
@@ -1065,10 +1065,10 @@ fun SettingsPage(controller: SudokuController) {
             title = { Text("Zvuk i vibracija", color = Ink.white) },
             text = {
                 Column {
-                    SettingToggle("♫", "Zvuk", "Zvuk pri pritisku gumba", opts.sound) {
+                    SettingToggle("speaker", "Zvuk", "Zvučni efekt tijekom igre", opts.sound) {
                         controller.updateOptions(controller.options.copy(sound = it))
                     }
-                    SettingToggle("◈", "Vibracija", "Vibracija pri unosu broja", opts.vibration) {
+                    SettingToggle("sparkles", "Vibracija", "Vibracija pri unosu broja", opts.vibration) {
                         controller.updateOptions(controller.options.copy(vibration = it))
                     }
                 }
@@ -1116,7 +1116,7 @@ fun SettingsPage(controller: SudokuController) {
 @Composable
 private fun SettingHeader(icon: String, title: String, subtitle: String) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        BrandIcon(when (title) { "Izgled" -> "sparkles"; "Igra" -> "gamepad"; else -> "settings" }, Modifier.size(24.dp), Ink.cyan)
+        BrandIcon(icon, Modifier.size(24.dp), Ink.cyan)
         Spacer(Modifier.width(14.dp))
         Column { Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold); Subtitle(subtitle) }
     }
@@ -1131,12 +1131,7 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
             .semantics { contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}" },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BrandIcon(when (title) {
-            "Tamna tema" -> "moon"; "Animacije" -> "sparkles"
-            "Automatske bilješke" -> "note"; "Provjera greške" -> "warning"
-            "Isticanje brojeva" -> "grid"; "Zvuk" -> "speaker"
-            "Vibracija" -> "sparkles"; else -> "settings"
-        }, Modifier.size(21.dp), Ink.cyan)
+        BrandIcon(icon, Modifier.size(21.dp), Ink.cyan)
         Spacer(Modifier.width(13.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 14.sp, color = Ink.white, fontWeight = FontWeight.SemiBold)
