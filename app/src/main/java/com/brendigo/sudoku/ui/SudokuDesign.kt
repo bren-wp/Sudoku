@@ -323,6 +323,7 @@ fun NeonPanel(
     modifier: Modifier = Modifier,
     highlight: Color = Ink.line,
     corner: Dp = 18.dp,
+    warmPagoda: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val warm = highlight == Ink.gold
@@ -410,17 +411,19 @@ fun NeonPanel(
                 )
                 drawCircle(Ink.gold.copy(alpha = .85f),
                     radius = minOf(w, h) * .090f, center = moon)
-                val roof = Path().apply {
-                    moveTo(w * .82f, h * .70f)
+                if (warmPagoda) {
+                    val roof = Path().apply {
+                        moveTo(w * .82f, h * .70f)
                     quadraticTo(w * .88f, h * .57f, w * .94f, h * .70f)
                     lineTo(w * .96f, h * .71f)
                     quadraticTo(w * .88f, h * .64f, w * .81f, h * .72f)
                     close()
                 }
                 drawPath(roof, Color(0xFF020E27))
-                drawRect(Color(0xFF020E27),
-                    Offset(w * .85f, h * .70f),
-                    androidx.compose.ui.geometry.Size(w * .07f, h * .20f))
+                    drawRect(Color(0xFF020E27),
+                        Offset(w * .85f, h * .70f),
+                        androidx.compose.ui.geometry.Size(w * .07f, h * .20f))
+                }
             }
         }
         content()
