@@ -1032,13 +1032,26 @@ fun AchievementsPage(controller: SudokuController) {
                             role = Role.Button
                         }
                         .clickable { selectedAchievement = achievement },
-                        if (unlocked) achievement.tint else Ink.blue.copy(alpha = .52f)) {
+                        if (unlocked) achievement.tint else achievement.tint.copy(alpha = .48f)) {
                         Column(Modifier.fillMaxSize().padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                BrandIcon(if (unlocked) achievementIconFor(achievement.title) else "lock",
-                                    Modifier.size(41.dp),
-                                    if (unlocked) achievement.tint else Ink.muted.copy(alpha = .73f))
+                                Box(Modifier.size(43.dp), contentAlignment = Alignment.Center) {
+                                    // Keep each award recognizable when locked.
+                                    BrandIcon(achievementIconFor(achievement.title),
+                                        Modifier.size(40.dp),
+                                        if (unlocked) achievement.tint
+                                        else achievement.tint.copy(alpha = .60f))
+                                    if (!unlocked) {
+                                        Box(
+                                            Modifier.size(20.dp).align(Alignment.BottomEnd)
+                                                .background(Color(0xEE081936), RoundedCornerShape(7.dp)),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            BrandIcon("lock", Modifier.size(17.dp), Ink.muted)
+                                        }
+                                    }
+                                }
                                 Row(
                                     Modifier.background(Ink.blue.copy(alpha = .23f),
                                             RoundedCornerShape(30.dp))
@@ -1056,8 +1069,15 @@ fun AchievementsPage(controller: SudokuController) {
                                         fontSize = 11.sp)
                                 }
                             }
-                            Text(achievement.title, color = Ink.white, fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Text(achievement.title, color = Ink.white, fontSize = 15.sp,
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
+                                if (unlocked) {
+                                    Spacer(Modifier.width(4.dp))
+                                    BrandIcon("check", Modifier.size(18.dp), achievement.tint)
+                                }
+                            }
                             Text(achievement.text, color = Ink.muted, fontSize = 11.sp,
                                 lineHeight = 13.sp, modifier = Modifier.weight(1f), maxLines = 2)
                             val progress = (achievement.current.toFloat() /
