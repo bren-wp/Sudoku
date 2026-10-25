@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.11`
+- Version: `1.0.12`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -170,3 +170,24 @@ publisher-signed Google Play AAB are *not* certified by these checks.
   transition, New Year's Eve, and clock-change polling.
 - Full 941×1672 design parity is still pending normalized emulator image comparison
   under issue #11; this patch does not assert a new MAE score.
+
+## Sudoku 1.0.12: seven-screen native UI refinement
+
+- Increased 7–3–9 brand mark clarity and adaptive/round/themed launcher foreground
+  scale, keeping paths centered inside the native icon masks.
+- Improved native nightscape and glass-like panel accents; no screenshot UI is
+  substituted for interactive Compose content.
+- Rebalanced titles, statistics tile heights, daily challenge date/reward and
+  seven-day markers, and 24 achievement cards with larger vector icons.
+- Corrected the “Odigrane igre” statistic to count started sessions (`played`),
+  instead of incorrectly showing only finished sessions.
+- New-game difficulty cards now include bordered circular vector leaf,
+  star, multi-star and crown glyphs using stable Croatian labels.
+- Selected Sudoku cell gets an electric-cyan outline. New puzzles preselect a
+  central editable cell. Undo, erase, hints and keypad clearly disable when
+  the action cannot be performed.
+- Emulator UI tests verify disabled/enabled tools around move, undo, notes and
+  erase; existing gameplay, history, settings and achievements are retained.
+- **Not a certified 1:1 match**: exact reference background textures, type
+  rasterization and dynamic fixture data need another normalized 941×1672
+  pixel-diff cycle. Follow issue #11.
