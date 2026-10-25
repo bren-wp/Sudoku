@@ -1182,6 +1182,7 @@ fun AchievementsPage(controller: SudokuController) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { achievement ->
                     val unlocked = achievement.current >= achievement.goal
+                    val compactFeatured = rowIndex in 2..3
                     NeonPanel(Modifier.weight(1f).height(rowHeight)
                         .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-"))
                         .semantics {
@@ -1193,7 +1194,8 @@ fun AchievementsPage(controller: SudokuController) {
                         // Preserve the warm sunset treatment on gold awards.
                         if (achievement.tint == Ink.gold) Ink.gold
                         else if (unlocked) achievement.tint
-                        else achievement.tint.copy(alpha = .70f)) {
+                        else achievement.tint.copy(alpha = .70f),
+                        warmPagoda = false) {
                         if (!unlocked) {
                             Box(Modifier.matchParentSize().background(Color(0x66051530)))
                         }
@@ -1201,19 +1203,25 @@ fun AchievementsPage(controller: SudokuController) {
                             horizontal = 9.dp, vertical = if (rowIndex < 2) 9.dp else 7.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Box(Modifier.size(43.dp), contentAlignment = Alignment.Center) {
+                                Box(
+                                    Modifier.size(if (compactFeatured) 36.dp else 43.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
                                     // Keep each award recognizable when locked.
                                     BrandIcon(achievementIconFor(achievement.title),
-                                        Modifier.size(42.dp),
+                                        Modifier.size(if (compactFeatured) 35.dp else 42.dp),
                                         if (unlocked) achievement.tint
                                         else achievement.tint.copy(alpha = .60f))
                                     if (!unlocked) {
                                         Box(
-                                            Modifier.size(20.dp).align(Alignment.BottomEnd)
+                                            Modifier.size(if (compactFeatured) 18.dp else 20.dp)
+                                                .align(Alignment.BottomEnd)
                                                 .background(Color(0xEE081936), RoundedCornerShape(7.dp)),
                                             contentAlignment = Alignment.Center,
                                         ) {
-                                            BrandIcon("lock", Modifier.size(17.dp), Ink.muted)
+                                            BrandIcon("lock",
+                                                Modifier.size(if (compactFeatured) 15.dp else 17.dp),
+                                                Ink.muted)
                                         }
                                     }
                                 }
@@ -1250,8 +1258,12 @@ fun AchievementsPage(controller: SudokuController) {
                                     }
                                 }
                             }
-                            Text(achievement.text, color = Ink.muted, fontSize = 11.sp,
-                                lineHeight = 13.sp, modifier = Modifier.weight(1f), maxLines = 2)
+                            Text(
+                                achievement.text, color = Ink.muted,
+                                fontSize = if (compactFeatured) 10.sp else 11.sp,
+                                lineHeight = if (compactFeatured) 12.sp else 13.sp,
+                                modifier = Modifier.weight(1f), maxLines = 2,
+                            )
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
                             Box(Modifier.fillMaxWidth().height(8.dp).background(Ink.blue.copy(alpha = .25f),
@@ -1268,6 +1280,9 @@ fun AchievementsPage(controller: SudokuController) {
                 }
             }
         }
+        // Available by scrolling, not partially rendered over the first
+        // 941×1672 reference view or the landscape / fixed footer.
+        Spacer(Modifier.height(24.dp))
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 48.dp)
             .testTag("achievements-show-all")
             .clickable { showAll = !showAll }, Ink.blue) {
