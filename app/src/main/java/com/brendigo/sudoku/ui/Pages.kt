@@ -813,7 +813,7 @@ fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
     var metricInfo by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
-    PageContent {
+    PageContent(topPadding = 18.dp) {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true, onBack = { controller.go(Screen.HOME) })
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("Odigrane igre", stats.played.toString(), Ink.teal, Modifier.weight(1f)) {
@@ -994,8 +994,12 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
     val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
     NeonPanel(modifier.heightIn(min = 210.dp), Ink.blue) {
         Column(Modifier.fillMaxSize().padding(horizontal = 11.dp, vertical = 12.dp)) {
-            Text("Riješene igre po težini", color = Ink.white,
-                fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                BrandIcon("statistics", Modifier.size(20.dp), Ink.cyan)
+                Spacer(Modifier.width(6.dp))
+                Text("Riješene igre po težini", color = Ink.white,
+                    fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+            }
             Spacer(Modifier.height(6.dp))
             Row(Modifier.fillMaxWidth().height(148.dp),
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -1033,8 +1037,12 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
     NeonPanel(modifier.heightIn(min = 210.dp), Ink.cyan) {
         Column(Modifier.fillMaxSize().padding(11.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Postotak dovršenosti", color = Ink.white,
-                fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                BrandIcon("statistics", Modifier.size(19.dp), Ink.cyan)
+                Spacer(Modifier.width(5.dp))
+                Text("Postotak dovršenosti", color = Ink.white,
+                    fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+            }
             Spacer(Modifier.height(5.dp))
             Box(Modifier.fillMaxWidth().height(126.dp), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.size(105.dp)) {
@@ -1090,7 +1098,7 @@ private fun StatTile(label: String, value: String, color: Color,
             Spacer(Modifier.width(9.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(label, color = Ink.muted, fontSize = 12.sp, maxLines = 1)
-                Text(value, color = Ink.white, fontSize = 24.sp,
+                Text(value, color = Ink.white, fontSize = 22.sp,
                     fontWeight = FontWeight.ExtraBold, maxLines = 1)
             }
             BrandIcon("next", Modifier.size(17.dp), color)
