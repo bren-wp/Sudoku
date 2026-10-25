@@ -1143,7 +1143,7 @@ fun AchievementsPage(controller: SudokuController) {
     // first four rows; the remaining 16 remain accessible on demand.
     val featured = basic.take(7) + data.last()
     val visible = if (showAll) featured + basic.drop(7) else featured
-    PageContent {
+    PageContent(topPadding = 18.dp) {
         SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 75.dp)
             .testTag("achievement-summary"), Ink.blue) {
@@ -1152,7 +1152,7 @@ fun AchievementsPage(controller: SudokuController) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(13.dp),
             ) {
-                BrandIcon("trophy", Modifier.size(37.dp), Ink.gold)
+                BrandIcon("trophy", Modifier.size(40.dp), Ink.gold)
                 Column(Modifier.weight(1f)) {
                     Subtitle("Ukupno bodova")
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1163,7 +1163,7 @@ fun AchievementsPage(controller: SudokuController) {
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
                     .background(Ink.blue.copy(alpha = .80f)))
-                BrandIcon("star", Modifier.size(34.dp), Ink.cyan)
+                BrandIcon("star", Modifier.size(38.dp), Ink.cyan)
                 Column(Modifier.weight(.75f)) {
                     Subtitle("Otključano")
                     Text("${data.count { it.current >= it.goal }} / ${data.size}", fontSize = 26.sp,
@@ -1171,11 +1171,18 @@ fun AchievementsPage(controller: SudokuController) {
                 }
             }
         }
-        visible.chunked(2).forEach { pair ->
+        visible.chunked(2).forEachIndexed { rowIndex, pair ->
+            // Reference: first two rows are taller, final two show more scenery.
+            // Remaining awards stay full-height when expanded.
+            val rowHeight = when {
+                rowIndex < 2 -> 151.dp
+                rowIndex < 4 -> 137.dp
+                else -> 151.dp
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { achievement ->
                     val unlocked = achievement.current >= achievement.goal
-                    NeonPanel(Modifier.weight(1f).height(149.dp)
+                    NeonPanel(Modifier.weight(1f).height(rowHeight)
                         .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-"))
                         .semantics {
                             contentDescription = achievement.title +
@@ -1183,14 +1190,21 @@ fun AchievementsPage(controller: SudokuController) {
                             role = Role.Button
                         }
                         .clickable { selectedAchievement = achievement },
-                        if (unlocked) achievement.tint else achievement.tint.copy(alpha = .48f)) {
-                        Column(Modifier.fillMaxSize().padding(9.dp),
+                        // Preserve the warm sunset treatment on gold awards.
+                        if (achievement.tint == Ink.gold) Ink.gold
+                        else if (unlocked) achievement.tint
+                        else achievement.tint.copy(alpha = .70f)) {
+                        if (!unlocked) {
+                            Box(Modifier.matchParentSize().background(Color(0x66051530)))
+                        }
+                        Column(Modifier.fillMaxSize().padding(
+                            horizontal = 9.dp, vertical = if (rowIndex < 2) 9.dp else 7.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Box(Modifier.size(43.dp), contentAlignment = Alignment.Center) {
                                     // Keep each award recognizable when locked.
                                     BrandIcon(achievementIconFor(achievement.title),
-                                        Modifier.size(40.dp),
+                                        Modifier.size(42.dp),
                                         if (unlocked) achievement.tint
                                         else achievement.tint.copy(alpha = .60f))
                                     if (!unlocked) {
@@ -1209,7 +1223,7 @@ fun AchievementsPage(controller: SudokuController) {
                                         .border(1.dp, if (unlocked) achievement.tint
                                             else Ink.muted.copy(alpha = .55f),
                                             RoundedCornerShape(30.dp))
-                                        .padding(horizontal = 7.dp, vertical = 4.dp),
+                                        .padding(horizontal = 9.dp, vertical = 5.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     BrandIcon("star", Modifier.size(13.dp),
@@ -1218,7 +1232,7 @@ fun AchievementsPage(controller: SudokuController) {
                                     Text("${achievement.reward}",
                                         color = if (unlocked) achievement.tint
                                             else achievement.tint.copy(alpha = .75f),
-                                        fontSize = 11.sp)
+                                        fontSize = 12.sp)
                                 }
                             }
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -1227,14 +1241,20 @@ fun AchievementsPage(controller: SudokuController) {
                                     fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
                                 if (unlocked) {
                                     Spacer(Modifier.width(4.dp))
-                                    BrandIcon("check", Modifier.size(18.dp), achievement.tint)
+                                    Box(
+                                        Modifier.size(23.dp)
+                                            .border(1.2.dp, achievement.tint, RoundedCornerShape(50)),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        BrandIcon("check", Modifier.size(15.dp), achievement.tint)
+                                    }
                                 }
                             }
                             Text(achievement.text, color = Ink.muted, fontSize = 11.sp,
                                 lineHeight = 13.sp, modifier = Modifier.weight(1f), maxLines = 2)
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
-                            Box(Modifier.fillMaxWidth().height(7.dp).background(Ink.blue.copy(alpha = .25f),
+                            Box(Modifier.fillMaxWidth().height(8.dp).background(Ink.blue.copy(alpha = .25f),
                                 RoundedCornerShape(12.dp))) {
                                 Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
                                     .background(if (unlocked) achievement.tint else
