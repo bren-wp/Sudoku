@@ -95,9 +95,17 @@ fun PageContent(
 
 /** Consistent checked/unchecked weekly calendar marker for home and daily. */
 @Composable
-private fun StreakMarker(checked: Boolean, diameter: androidx.compose.ui.unit.Dp = 20.dp) {
+private fun StreakMarker(
+    checked: Boolean,
+    diameter: androidx.compose.ui.unit.Dp = 20.dp,
+    dayLabel: String = "",
+) {
     Box(
         Modifier.size(diameter)
+            .semantics {
+                contentDescription = "$dayLabel: " +
+                    if (checked) "dnevni izazov riješen" else "dnevni izazov nije riješen"
+            }
             .background(
                 if (checked) Ink.cyan.copy(alpha = .18f) else Color(0xFF061D48),
                 RoundedCornerShape(50),
@@ -305,8 +313,10 @@ fun HomePage(controller: SudokuController) {
                     val completed = controller.stats.completedDailyDates.toSet()
                     listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
+                        val fullDay = listOf("Ponedjeljak", "Utorak", "Srijeda",
+                            "Četvrtak", "Petak", "Subota", "Nedjelja")[index]
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            StreakMarker(checked)
+                            StreakMarker(checked, dayLabel = fullDay)
                             Spacer(Modifier.height(4.dp))
                             Text(weekday, fontSize = 9.sp, color = Ink.muted)
                         }
@@ -606,7 +616,7 @@ fun DailyPage(controller: SudokuController) {
                                 Text(label, color = Ink.muted, fontSize = 10.sp)
                                 Spacer(Modifier.height(3.dp))
                                 StreakMarker(date.toString() in completedDays,
-                                    diameter = 31.dp)
+                                    diameter = 31.dp, dayLabel = label)
                                 Spacer(Modifier.height(3.dp))
                                 Text("${date.dayOfMonth}.${date.monthValue}.",
                                     color = if (date == today) Ink.white else Ink.muted,
