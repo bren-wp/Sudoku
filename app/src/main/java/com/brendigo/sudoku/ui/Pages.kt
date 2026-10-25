@@ -1200,27 +1200,33 @@ fun AchievementsPage(controller: SudokuController) {
         SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 75.dp)
             .testTag("achievement-summary"), Ink.blue) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 17.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(13.dp),
-            ) {
-                BrandIcon("trophy", Modifier.size(40.dp), Ink.gold)
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val compactSummary = maxWidth < 375.dp || LocalDensity.current.fontScale >= 1.4f
+                Row(
+                    Modifier.fillMaxWidth().padding(
+                        horizontal = if (compactSummary) 9.dp else 17.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        if (compactSummary) 6.dp else 13.dp),
+                ) {
+                BrandIcon("trophy", Modifier.size(if (compactSummary) 30.dp else 40.dp), Ink.gold)
                 Column(Modifier.weight(1f)) {
                     Subtitle("Ukupno bodova")
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("$points", fontSize = 27.sp,
+                        Text("$points", fontSize = if (compactSummary) 22.sp else 27.sp,
                             color = Ink.gold, fontWeight = FontWeight.ExtraBold)
-                        Text(" / 1000", fontSize = 13.sp, color = Ink.muted)
+                        Text(" / 1000", fontSize = if (compactSummary) 10.sp else 13.sp, color = Ink.muted)
                     }
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
                     .background(Ink.blue.copy(alpha = .80f)))
-                BrandIcon("star", Modifier.size(38.dp), Ink.cyan)
+                BrandIcon("star", Modifier.size(if (compactSummary) 27.dp else 38.dp), Ink.cyan)
                 Column(Modifier.weight(.75f)) {
                     Subtitle("Otključano")
-                    Text("${data.count { it.current >= it.goal }} / ${data.size}", fontSize = 26.sp,
+                    Text("${data.count { it.current >= it.goal }} / ${data.size}",
+                        fontSize = if (compactSummary) 20.sp else 26.sp,
                         color = Ink.cyan, fontWeight = FontWeight.ExtraBold)
+                }
                 }
             }
         }
