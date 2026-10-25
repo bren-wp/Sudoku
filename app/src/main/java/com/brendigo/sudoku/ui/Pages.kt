@@ -704,7 +704,7 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 132.dp), Ink.blue) {
             Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
@@ -722,7 +722,7 @@ fun StatsPage(controller: SudokuController) {
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
-                stats.history.take(3).forEach {
+                stats.history.take(4).forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         BrandIcon("grid", Modifier.size(21.dp), difficultyColors[it.level])
                         Spacer(Modifier.width(9.dp))
@@ -734,7 +734,7 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 142.dp)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 109.dp)
             .testTag("stats-achievements")
             .semantics {
                 contentDescription = "Otvori svih 24 postignuća"
@@ -762,7 +762,7 @@ fun StatsPage(controller: SudokuController) {
                     ).forEach { award ->
                         val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
                         NeonPanel(
-                            Modifier.weight(1f).heightIn(min = 91.dp),
+                            Modifier.weight(1f).heightIn(min = 67.dp),
                             if (fraction >= 1f) award.tint else Ink.line,
                             corner = 10.dp,
                         ) {
@@ -773,7 +773,7 @@ fun StatsPage(controller: SudokuController) {
                             ) {
                                 BrandIcon(
                                     if (fraction >= 1f) award.icon else "lock",
-                                    Modifier.size(24.dp),
+                                    Modifier.size(20.dp),
                                     if (fraction >= 1f) award.tint else Ink.muted,
                                 )
                                 Text(award.title, color = Ink.white, fontSize = 9.sp,
@@ -915,7 +915,7 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
 @Composable
 private fun StatTile(label: String, value: String, color: Color,
                      modifier: Modifier, onClick: () -> Unit) {
-    NeonPanel(modifier.heightIn(min = 77.dp)
+    NeonPanel(modifier.heightIn(min = 86.dp)
         .semantics { contentDescription = "$label: $value"; role = Role.Button }
         .clickable(onClick = onClick), color) {
         Row(
@@ -928,11 +928,11 @@ private fun StatTile(label: String, value: String, color: Color,
                 "Ukupno vrijeme" -> "timer"
                 "Dnevni niz" -> "flame"
                 else -> "statistics"
-            }, Modifier.size(25.dp), color)
-            Spacer(Modifier.width(7.dp))
+            }, Modifier.size(37.dp), color)
+            Spacer(Modifier.width(9.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(label, color = Ink.muted, fontSize = 11.sp, maxLines = 1)
-                Text(value, color = Ink.white, fontSize = 19.sp,
+                Text(label, color = Ink.muted, fontSize = 12.sp, maxLines = 1)
+                Text(value, color = Ink.white, fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold, maxLines = 1)
             }
             Text("›", color = color, fontSize = 17.sp)
