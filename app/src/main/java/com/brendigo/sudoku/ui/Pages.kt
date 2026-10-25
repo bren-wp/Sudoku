@@ -1029,9 +1029,22 @@ fun AchievementsPage(controller: SudokuController) {
                                 BrandIcon(if (unlocked) achievementIconFor(achievement.title) else "lock",
                                     Modifier.size(41.dp),
                                     if (unlocked) achievement.tint else Ink.muted.copy(alpha = .73f))
-                                Text("★ ${achievement.reward}",
-                                    color = if (unlocked) achievement.tint else Ink.muted,
-                                    fontSize = 11.sp)
+                                Row(
+                                    Modifier.background(Ink.blue.copy(alpha = .23f),
+                                            RoundedCornerShape(30.dp))
+                                        .border(1.dp, if (unlocked) achievement.tint
+                                            else Ink.muted.copy(alpha = .55f),
+                                            RoundedCornerShape(30.dp))
+                                        .padding(horizontal = 7.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    BrandIcon("star", Modifier.size(13.dp),
+                                        if (unlocked) achievement.tint else Ink.muted)
+                                    Spacer(Modifier.width(3.dp))
+                                    Text("${achievement.reward}",
+                                        color = if (unlocked) achievement.tint else Ink.muted,
+                                        fontSize = 11.sp)
+                                }
                             }
                             Text(achievement.title, color = Ink.white, fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
