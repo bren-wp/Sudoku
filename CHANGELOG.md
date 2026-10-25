@@ -1,3 +1,13 @@
+## 1.0.22 — Achievements screen reference pass
+
+- Tightened the achievements header-to-score spacing for the owner reference.
+- Aligned four featured rows with a taller top half and more compact lower half.
+- Gold awards retain warm sunset illustration while a native scrim expresses lock.
+- Enlarged reward icons, point badges, progress track, and outlined completion.
+- Distinct scalable calendar-seven icon matches the seven-day award.
+- Added geometry regression checks; preserved all 24 functional awards and data.
+- Pixel-perfect match is not certified until normalized 941×1672 image QA (#11).
+
 ## 1.0.21 — Home screen reference alignment
 
 - Reworked the first Home screen's vertical composition and resume panel.
