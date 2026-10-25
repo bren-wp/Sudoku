@@ -68,6 +68,7 @@ private fun rememberToday(): LocalDate {
 @Composable
 fun PageContent(
     topPadding: androidx.compose.ui.unit.Dp = 28.dp,
+    footerText: String = "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
     content: @Composable ColumnScope.() -> Unit,
 ) {
     // Footer occupies its own layout slot below the scroll viewport.
@@ -84,7 +85,7 @@ fun PageContent(
             content()
         }
         Text(
-            "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
+            footerText,
             color = Ink.muted, fontSize = 9.sp, letterSpacing = 1.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -277,7 +278,10 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
 @Composable
 fun HomePage(controller: SudokuController) {
     val today = rememberToday()
-    PageContent(topPadding = 22.dp) {
+    PageContent(
+        topPadding = 22.dp,
+        footerText = "B I S T R I J I   U M  ·  B O L J I   D A N",
+    ) {
         Spacer(Modifier.height(14.dp))
         BrandHeader(Modifier.fillMaxWidth())
         Spacer(Modifier.height(9.dp))
