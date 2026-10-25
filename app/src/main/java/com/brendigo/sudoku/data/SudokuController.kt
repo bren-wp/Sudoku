@@ -187,6 +187,14 @@ class SudokuController(context: Context) {
                 solution = result.solution,
                 givens = result.givens,
                 board = result.givens.clone(),
+                // Start with the nearest editable cell to the center, so the
+                // number keypad is immediately functional (including 4x4/6x6).
+                selected = result.givens.indices
+                    .filter { result.givens[it] == 0 }
+                    .minByOrNull { index ->
+                        kotlin.math.abs(index / result.size - result.size / 2) +
+                            kotlin.math.abs(index % result.size - result.size / 2)
+                    } ?: -1,
                 notes = if (options.autoNotes) SudokuCandidates.automaticNotes(
                     result.givens, size, result.boxRows, result.boxColumns
                 ) else IntArray(size * size),
@@ -202,6 +210,32 @@ class SudokuController(context: Context) {
         } finally {
             isGenerating = false
         }
+    }
+
+    /** Expose actionable state so controls never look enabled when tapping is a no-op. */
+    fun canUndo(): Boolean {
+        val s = game ?: return false
+        return undoHistory.isNotEmpty() && !s.paused && !s.completed && !s.failed
+    }
+
+    fun canErase(): Boolean {
+        val s = game ?: return false
+        val cell = s.selected
+        return s.isEditable(cell) && !s.paused && !s.completed && !s.failed &&
+            (s.board[cell] != 0 || s.notes[cell] != 0)
+    }
+
+    fun canHint(): Boolean {
+        val s = game ?: return false
+        return !s.paused && !s.completed && !s.failed && s.hints < MAX_HINTS &&
+            s.board.indices.any { s.isEditable(it) && s.board[it] != s.solution[it] }
+    }
+
+    fun canEnter(): Boolean {
+        val s = game ?: return false
+        val cell = s.selected
+        return s.isEditable(cell) && !s.paused && !s.completed && !s.failed &&
+            (!s.notesMode || s.board[cell] == 0)
     }
 
     fun select(index: Int) {

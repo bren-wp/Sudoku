@@ -114,6 +114,25 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     line(9f,2f,15f,2f)
                 }
                 "star" -> star()
+                "double-star" -> {
+                    star(cx = 7.5f, cy = 12f, radius = 6f)
+                    star(cx = 17f, cy = 12f, radius = 6f)
+                }
+                "triple-star" -> {
+                    star(cx = 4.5f, cy = 12f, radius = 4.5f)
+                    star(cx = 12f, cy = 12f, radius = 4.5f)
+                    star(cx = 19.5f, cy = 12f, radius = 4.5f)
+                }
+                "leaf" -> {
+                    val p = Path().apply {
+                        moveTo(3f, 20f)
+                        cubicTo(4f, 9f, 10f, 4f, 22f, 3f)
+                        cubicTo(22f, 14f, 16f, 20f, 3f, 20f)
+                        close()
+                    }
+                    canvas.drawPath(p, stroke)
+                    line(4f, 20f, 16f, 9f)
+                }
                 "heart", "heart-outline" -> {
                     val p = Path().apply {
                         moveTo(12f, 21f)

@@ -1,3 +1,25 @@
+## 1.0.12
+
+### UI and branding
+- Stronger 7–3–9 adaptive and themed launcher assets and larger home/splash logo.
+- Enriched Compose midnight scene, lake reflection, blossoms and neon card sheen.
+- Tuned titles, statistics, daily header/weekly markers and achievement rows.
+- Color-preserving difficulty cards with native circled leaf, star and crown icons.
+
+### Functionality and stability
+- “Odigrane igre” now displays started sessions, not finished sessions.
+- New games select a central editable cell to make the keypad immediately usable.
+- Contextual undo/erase/hint/keypad availability and brighter selected-cell border.
+- Added emulator assertions for actions before/after a move, undo and notes.
+- Preserves existing local saves and statistics; no new permissions.
+
+### QA and limitations
+- Builds must pass JVM tests, Lint, debug APK and release AAB, and emulator UI
+  navigation/screenshot capture before merge. Package signing status is documented
+  in each release.
+- Original 941×1672 pixel-for-pixel equality **not yet established**. Issue #11
+  remains open.
+
 # Changelog
 
 ## 1.0.11
