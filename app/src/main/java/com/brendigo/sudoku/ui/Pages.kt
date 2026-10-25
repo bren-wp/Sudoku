@@ -465,7 +465,8 @@ fun DailyPage(controller: SudokuController) {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
         Spacer(Modifier.height(32.dp))
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 98.dp), Ink.blue) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 98.dp)
+            .testTag("daily-summary"), Ink.blue) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -507,7 +508,8 @@ fun DailyPage(controller: SudokuController) {
             }
         }
         Spacer(Modifier.height(2.dp))
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp), Ink.gold) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp)
+            .testTag("daily-hero"), Ink.gold) {
             Column(
                 Modifier.fillMaxWidth().heightIn(min = 202.dp).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -985,7 +987,8 @@ fun AchievementsPage(controller: SudokuController) {
     val visible = if (showAll) featured + basic.drop(7) else featured
     PageContent {
         SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 75.dp), Ink.blue) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 75.dp)
+            .testTag("achievement-summary"), Ink.blue) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 17.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
