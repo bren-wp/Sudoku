@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.21`
+- Version: `1.0.22`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -324,3 +324,19 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - No game data, database, settings or functionality removed or migrated.
 - Pixel-perfect 1:1 requires new real screenshots and measured comparisons.
   Track residual mismatches in issue #11.
+
+## Sudoku 1.0.22 — Postignuća, ekran po ekran
+
+- Focused reference alignment of Achievements (941 × 1672): reduced top offset,
+  tuned title/summary dimensions and deliberately shorter lower featured rows.
+- Preserved four rows / two columns and every existing achievement, score,
+  milestone, detail dialog, and all-24 expansion.
+- Restored warm native sunset color treatment on gold rewards without faking
+  unlocked states, plus a restrained locked-state scrim.
+- Improved native trophy/star scales, award points badges, progress-track height
+  and outlined unlock indicators.
+- Added a genuine vector calendar with the numeral 7 for the seven-day award.
+- Added instrumented bounds assertions for card alignment, score separation,
+  and lower-row geometry. Saved puzzles, streaks and user preferences unchanged.
+- Exact pixel parity remains unverified: live scores and dates differ from the
+  user's illustration and native scenery still needs further comparison (#11).

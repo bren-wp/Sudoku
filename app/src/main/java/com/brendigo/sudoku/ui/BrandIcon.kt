@@ -105,6 +105,16 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     line(8f,3f,8f,7f);line(16f,3f,16f,7f)
                     poly(8f,15f,11f,18f,17f,12f)
                 }
+                "calendar-seven" -> {
+                    rectangle(3f,5f,21f,21f);line(3f,10f,21f,10f)
+                    line(8f,3f,8f,7f);line(16f,3f,16f,7f)
+                    val labelPaint = Paint(filled).apply {
+                        textSize = 9.5f
+                        textAlign = Paint.Align.CENTER
+                        typeface = android.graphics.Typeface.DEFAULT_BOLD
+                    }
+                    canvas.drawText("7", 12f, 19f, labelPaint)
+                }
                 "statistics" -> {
                     canvas.drawRoundRect(RectF(3f,11f,7f,21f),1f,1f,filled)
                     canvas.drawRoundRect(RectF(10f,4f,14f,21f),1f,1f,filled)
@@ -251,7 +261,8 @@ fun homeIconFor(title: String): String = when (title) {
 
 fun achievementIconFor(title: String): String = when (title) {
     "Prva pobjeda","Iskusni igrač","Stotka" -> "trophy"
-    "Sedam dana zaredom","Prvi izazov","Dnevna rutina","Rješavač izazova" -> "calendar"
+    "Sedam dana zaredom" -> "calendar-seven"
+    "Prvi izazov","Dnevna rutina","Rješavač izazova" -> "calendar"
     "Majstor logike","Samostalni mislilac" -> "brain"
     "Bez greške","Besprijekoran niz" -> "bolt"
     "Vrući niz","Zlatni niz" -> "flame"
