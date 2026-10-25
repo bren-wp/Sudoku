@@ -228,24 +228,24 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
         val w = size.width
         val h = size.height
         fun boardPoint(col: Float, row: Float) = Offset(
-            w * (.56f + col * .155f - row * .052f),
+            w * (.56f + col * .155f - row * .026f),
             h * (.03f + row * .315f),
         )
-        val lineColor = Color(0xFF168CFA).copy(alpha = .68f)
-        val glowColor = Ink.cyan.copy(alpha = .32f)
+        val lineColor = Color(0xFF168CFA).copy(alpha = .46f)
+        val glowColor = Ink.cyan.copy(alpha = .18f)
         for (line in 0..3) {
             val a = boardPoint(line.toFloat(), 0f)
             val b = boardPoint(line.toFloat(), 3f)
-            drawLine(glowColor, a, b, strokeWidth = 5f)
-            drawLine(lineColor, a, b, strokeWidth = 1.7f)
+            drawLine(glowColor, a, b, strokeWidth = 3.5f)
+            drawLine(lineColor, a, b, strokeWidth = 1.4f)
             val c = boardPoint(0f, line.toFloat())
             val d = boardPoint(3f, line.toFloat())
-            drawLine(lineColor, c, d, strokeWidth = 2f)
+            drawLine(lineColor, c, d, strokeWidth = 1.6f)
         }
         val bright = boardPoint(1.5f, 1.5f)
         drawCircle(
             Brush.radialGradient(
-                colors = listOf(Ink.cyan.copy(alpha = .46f), Color.Transparent),
+                colors = listOf(Ink.cyan.copy(alpha = .28f), Color.Transparent),
                 center = bright, radius = w * .14f,
             ),
             radius = w * .14f,
@@ -253,7 +253,7 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
         )
         drawIntoCanvas { canvas ->
             val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                textSize = h * .17f
+                textSize = h * .13f
                 typeface = android.graphics.Typeface.create(
                     android.graphics.Typeface.DEFAULT,
                     android.graphics.Typeface.BOLD,
@@ -262,12 +262,12 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
             }
             listOf(
                 Triple(1f, 0f, "5"), Triple(1f, 1f, "3"),
-                Triple(0f, 2f, "1"), Triple(2f, 2f, "6"),
+                Triple(2f, 2f, "6"),
                 Triple(2f, 0f, "9"), Triple(1f, 2f, "8"),
             ).forEach { (col, row, value) ->
                 val center = boardPoint(col + .5f, row + .67f)
                 paint.color = if (value == "3")
-                    android.graphics.Color.CYAN else android.graphics.Color.rgb(105, 176, 255)
+                    android.graphics.Color.CYAN else android.graphics.Color.rgb(77, 143, 220)
                 canvas.nativeCanvas.drawText(value, center.x, center.y, paint)
             }
         }
@@ -280,22 +280,22 @@ fun HomePage(controller: SudokuController) {
     PageContent(topPadding = 22.dp) {
         Spacer(Modifier.height(14.dp))
         BrandHeader(Modifier.fillMaxWidth())
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(9.dp))
         Text(
             "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
             color = Ink.muted, fontSize = 10.sp, modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(5.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game")
                 .clickable { controller.go(Screen.GAME) }
-                .heightIn(min = 176.dp), highlight = Ink.blue) {
+                .heightIn(min = 174.dp), highlight = Ink.blue) {
                 // Decorative, non-interactive canvas behind the real resume action.
                 // It recreates the illuminated Sudoku-board motif, not a bitmap UI.
                 ResumeBoardArtwork(Modifier.matchParentSize())
-                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text("N A S T A V I  I G R U", color = Ink.cyan,
                         fontSize = 10.sp, letterSpacing = 2.sp)
                     Text("Prekinuta igra", color = Ink.white,
@@ -310,7 +310,7 @@ fun HomePage(controller: SudokuController) {
                             game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
                             color = Ink.muted, fontSize = 12.sp)
                     }
-                    Spacer(Modifier.height(9.dp))
+                    Spacer(Modifier.height(4.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
                         Modifier.fillMaxWidth(.50f), minHeight = 42.dp)
                 }
@@ -360,7 +360,7 @@ fun HomePage(controller: SudokuController) {
             highlight = Ink.blue,
         ) {
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
