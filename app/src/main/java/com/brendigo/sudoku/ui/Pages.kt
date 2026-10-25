@@ -165,9 +165,12 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
             .semantics { contentDescription = title; role = Role.Button }
             .heightIn(min = 48.dp).heightIn(min = minHeight)
             .background(
-                Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
+                Brush.horizontalGradient(if (enabled)
+                    listOf(Color(0xFF04BFFF), Ink.blue, Color(0xFF0755EE))
+                    else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
             )
+            .border(1.4.dp, if (enabled) Ink.cyan else Color.Gray, RoundedCornerShape(30.dp))
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
@@ -186,7 +189,7 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
             Text(
                 title.trimStart().removePrefix("▶").removePrefix("✓").trim(),
                 color = Ink.white, fontWeight = FontWeight.ExtraBold,
-                fontSize = 16.sp, maxLines = 1,
+                fontSize = 17.sp, maxLines = 1,
             )
         }
     }
@@ -311,7 +314,16 @@ private fun HomeTile(
         .heightIn(min = if (compact) 102.dp else 140.dp).clickable(onClick = onClick), highlight = accent) {
         Column(Modifier.padding(if (compact) 10.dp else 15.dp),
             verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 5.dp)) {
-            BrandIcon(homeIconFor(title), Modifier.size(if (compact) 25.dp else 34.dp), accent)
+            val iconSize = if (compact) 30.dp else 43.dp
+            Box(
+                Modifier.size(iconSize)
+                    .background(accent.copy(alpha = .13f), RoundedCornerShape(50))
+                    .border(1.3.dp, accent.copy(alpha = .95f), RoundedCornerShape(50)),
+                contentAlignment = Alignment.Center,
+            ) {
+                BrandIcon(homeIconFor(title),
+                    Modifier.size(if (compact) 22.dp else 29.dp), accent)
+            }
             Text(title, color = Ink.white, fontWeight = FontWeight.Bold,
                 fontSize = if (compact) 14.sp else 19.sp, maxLines = 2)
             Text(subtitle, color = Ink.muted, fontSize = if (compact) 10.sp else 12.sp, lineHeight = 17.sp)
@@ -427,7 +439,7 @@ fun DailyPage(controller: SudokuController) {
     }
     PageContent {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 92.dp), Ink.gold) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 92.dp), Ink.blue) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     BrandIcon("calendar", Modifier.size(23.dp), Ink.cyan)
@@ -568,6 +580,11 @@ fun DailyPage(controller: SudokuController) {
     }
 }
 
+private data class PreviewAward(
+    val title: String, val icon: String,
+    val current: Int, val goal: Int, val tint: Color,
+)
+
 @Composable
 fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
@@ -635,29 +652,64 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 79.dp)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 142.dp)
             .testTag("stats-achievements")
+            .semantics {
+                contentDescription = "Otvori svih 24 postignuća"
+                role = Role.Button
+            }
             .clickable { controller.go(Screen.ACHIEVEMENTS) }, Ink.blue) {
-            Column(Modifier.fillMaxWidth().padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Column(
+                Modifier.fillMaxWidth().padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                        BrandIcon("trophy", Modifier.size(18.dp), Ink.cyan)
-                        Spacer(Modifier.width(6.dp))
-                        Text("Postignuća", color = Ink.white, fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold)
-                    }
-                    Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 11.sp)
+                    BrandIcon("trophy", Modifier.size(19.dp), Ink.cyan)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Postignuća", color = Ink.white, fontSize = 16.sp,
+                        modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text("Pogledaj sve", color = Ink.cyan, fontSize = 11.sp)
+                    BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                     listOf(
-                        "★ Prva pobjeda" to (stats.finished >= 1),
-                        "◷ Brzinac" to (stats.fastWins >= 1),
-                        "🔥 Sedam dana" to (stats.bestStreak >= 7),
-                    ).forEach { (label, unlocked) ->
-                        Text(label, fontSize = 10.sp,
-                            color = if (unlocked) Ink.cyan else Ink.muted,
-                            maxLines = 1)
+                        PreviewAward("Prva pobjeda", "star", stats.finished, 1, Ink.teal),
+                        PreviewAward("Brzinac", "timer", stats.fastWins, 1, Ink.blue),
+                        PreviewAward("Sedam dana", "flame", stats.bestStreak, 7, Ink.purple),
+                        PreviewAward("Majstor logike", "brain", stats.winsByLevel[3], 50, Ink.cyan),
+                    ).forEach { award ->
+                        val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
+                        NeonPanel(
+                            Modifier.weight(1f).heightIn(min = 91.dp),
+                            if (fraction >= 1f) award.tint else Ink.line,
+                            corner = 10.dp,
+                        ) {
+                            Column(
+                                Modifier.fillMaxWidth().padding(6.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(3.dp),
+                            ) {
+                                BrandIcon(
+                                    if (fraction >= 1f) award.icon else "lock",
+                                    Modifier.size(24.dp),
+                                    if (fraction >= 1f) award.tint else Ink.muted,
+                                )
+                                Text(award.title, color = Ink.white, fontSize = 9.sp,
+                                    maxLines = 1, textAlign = TextAlign.Center)
+                                Box(
+                                    Modifier.fillMaxWidth().height(4.dp)
+                                        .background(Ink.blue.copy(alpha = .30f),
+                                            RoundedCornerShape(8.dp)),
+                                ) {
+                                    Box(
+                                        Modifier.fillMaxWidth(fraction).fillMaxHeight()
+                                            .background(award.tint, RoundedCornerShape(8.dp)),
+                                    )
+                                }
+                                Text("${award.current.coerceAtMost(award.goal)}/${award.goal}",
+                                    color = Ink.muted, fontSize = 9.sp)
+                            }
+                        }
                     }
                 }
             }
@@ -1115,10 +1167,23 @@ fun SettingsPage(controller: SudokuController) {
 
 @Composable
 private fun SettingHeader(icon: String, title: String, subtitle: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        BrandIcon(icon, Modifier.size(24.dp), Ink.cyan)
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(39.dp)
+                .background(Ink.cyan.copy(alpha = .13f), RoundedCornerShape(12.dp))
+                .border(1.dp, Ink.cyan.copy(alpha = .85f), RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            BrandIcon(icon, Modifier.size(25.dp), Ink.cyan)
+        }
         Spacer(Modifier.width(14.dp))
-        Column { Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold); Subtitle(subtitle) }
+        Column {
+            Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold)
+            Subtitle(subtitle)
+        }
     }
 }
 
