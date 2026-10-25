@@ -64,20 +64,24 @@ private fun rememberToday(): LocalDate {
 
 @Composable
 fun PageContent(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        Modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-            .padding(top = 10.dp, bottom = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(7.dp),
-    ) {
-        content()
-        Spacer(Modifier.height(5.dp))
+    // The reference footer is anchored over the landscape. Keep the page
+    // scrollable with enough bottom padding so the footer hides no controls.
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(top = 10.dp, bottom = 68.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            content()
+        }
         Text(
             "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
-            color = Ink.muted, fontSize = 9.sp,
+            color = Ink.muted, fontSize = 9.sp, letterSpacing = 1.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                .padding(horizontal = 12.dp, vertical = 15.dp)
                 .testTag("brand-footer"),
             maxLines = 1,
         )
@@ -445,6 +449,7 @@ fun DailyPage(controller: SudokuController) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     BrandIcon("trophy", Modifier.size(23.dp), Ink.gold)
                     Text("NAGRADA", color = Ink.gold, fontSize = 8.sp)
+                    Text("Zlatna značka", color = Ink.white, fontSize = 9.sp, maxLines = 1)
                 }
             }
         }
@@ -493,10 +498,17 @@ fun DailyPage(controller: SudokuController) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
+                        val date = monday.plusDays(i.toLong())
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            StreakMarker(monday.plusDays(i.toLong()).toString() in completedDays, diameter = 30.dp)
-                            Spacer(Modifier.height(5.dp))
-                            Text(label, color = Ink.muted, fontSize = 10.sp)
+                            Text(label, color = Ink.muted, fontSize = 9.sp)
+                            Spacer(Modifier.height(4.dp))
+                            StreakMarker(date.toString() in completedDays, diameter = 28.dp)
+                            Spacer(Modifier.height(4.dp))
+                            Text("${date.dayOfMonth}.${date.monthValue}.",
+                                color = if (date == today) Ink.white else Ink.muted,
+                                fontSize = 9.sp,
+                                fontWeight = if (date == today) FontWeight.Bold else FontWeight.Normal,
+                            )
                         }
                     }
                 }
@@ -595,11 +607,20 @@ fun StatsPage(controller: SudokuController) {
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("open-game-history")
+                        .semantics { contentDescription = "Prikaži povijest dovršenih igara"; role = Role.Button }
+                        .clickable { showHistory = true },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BrandIcon("grid", Modifier.size(19.dp), Ink.cyan)
+                    Spacer(Modifier.width(8.dp))
                     Text("Nedavni napredak", color = Ink.white, fontSize = 16.sp,
                         modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 12.sp,
-                        modifier = Modifier.testTag("open-game-history").clickable { showHistory = true })
+                    Text("Pogledaj sve", color = Ink.cyan, fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
                 stats.history.take(3).forEach {
@@ -630,9 +651,9 @@ fun StatsPage(controller: SudokuController) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     listOf(
-                        "★  Početnik" to (stats.finished >= 1),
-                        "◷  Brzi um" to (stats.fastWins >= 1),
-                        "🔥  Pobjednički niz" to (stats.bestStreak >= 7),
+                        "★ Prva pobjeda" to (stats.finished >= 1),
+                        "◷ Brzinac" to (stats.fastWins >= 1),
+                        "🔥 Sedam dana" to (stats.bestStreak >= 7),
                     ).forEach { (label, unlocked) ->
                         Text(label, fontSize = 10.sp,
                             color = if (unlocked) Ink.cyan else Ink.muted,
