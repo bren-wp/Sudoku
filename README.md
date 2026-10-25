@@ -12,7 +12,7 @@
 
 <br />
 
-<a href="https://github.com/bren-wp/Sudoku/releases/latest"><strong>Preuzmi najnovije izdanje</strong></a>
+<a href="https://github.com/bren-wp/Sudoku/releases"><strong>Preuzmi najnovije izdanje</strong></a>
 &nbsp;·&nbsp;
 <a href="#-snimke-aplikacije">Pogledaj svih 7 ekrana</a>
 &nbsp;·&nbsp;
