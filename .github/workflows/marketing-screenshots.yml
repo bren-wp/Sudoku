@@ -7,7 +7,13 @@ on:
     branches: ["feature/sudoku-v123-showcase-and-screen-parity"]
     paths:
       - ".github/workflows/marketing-screenshots.yml"
+      - "app/src/main/**"
+      - "app/src/androidTest/**"
   workflow_dispatch:
+
+concurrency:
+  group: sudoku-marketing-captures-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
