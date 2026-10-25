@@ -152,8 +152,8 @@ fun GamePage(controller: SudokuController) {
         }
         val numbers = (1..game.size).toList()
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
-        NumberRow(numbers.take(split), numberHeight) { controller.enter(it); feedback() }
-        if (numbers.size > split) NumberRow(numbers.drop(split), numberHeight) { controller.enter(it); feedback() }
+        NumberRow(numbers.take(split), numberHeight, controller.canEnter()) { controller.enter(it); feedback() }
+        if (numbers.size > split) NumberRow(numbers.drop(split), numberHeight, controller.canEnter()) { controller.enter(it); feedback() }
         if (!compact) {
             Text("B I S T R I J I  U M  ·  B O L J I  D A N", color = Ink.muted,
                 fontSize = 10.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -363,12 +363,15 @@ private fun GameTool(
 }
 
 @Composable
-private fun NumberRow(values: List<Int>, height: androidx.compose.ui.unit.Dp, onClick: (Int) -> Unit) {
+private fun NumberRow(values: List<Int>, height: androidx.compose.ui.unit.Dp,
+                      enabled: Boolean, onClick: (Int) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         values.forEach { value ->
             NeonPanel(Modifier.weight(1f).testTag("number-$value")
+                .alpha(if (enabled) 1f else .50f)
                 .semantics { contentDescription = "Unesi broj $value"; role = Role.Button }
-                .heightIn(min = 48.dp).height(height).clickable { onClick(value) },
+                .heightIn(min = 48.dp).height(height)
+                .clickable(enabled = enabled) { onClick(value) },
                 highlight = Ink.blue, corner = 13.dp) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(value.toString(), color = Ink.white,
