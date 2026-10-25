@@ -13,6 +13,8 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -156,6 +158,9 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("primary-action").performScrollTo().performClick()
         waitFor("sudoku-board", timeoutMs = 60_000)
 
+        rule.onNodeWithTag("game-undo").assertIsNotEnabled()
+        rule.onNodeWithTag("game-erase").assertIsNotEnabled()
+        rule.onNodeWithTag("number-1").assertIsEnabled()
         val empty = hasContentDescription("prazno polje", substring = true)
         val before = rule.onAllNodes(empty).fetchSemanticsNodes().size
         check(before > 0) { "The generated Sudoku had no editable empty cells" }
@@ -166,11 +171,12 @@ class SudokuVisualSmokeTest {
             "Number entry did not update Sudoku board"
         }
 
-        rule.onNodeWithTag("game-undo").performClick()
+        rule.onNodeWithTag("game-undo").assertIsEnabled().performClick()
         rule.waitForIdle()
         check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before) {
             "Undo did not restore the previous cell"
         }
+        rule.onNodeWithTag("game-undo").assertIsNotEnabled()
 
         rule.onAllNodes(empty).onFirst().performClick()
         rule.onNodeWithTag("game-notes").performClick()
@@ -179,7 +185,7 @@ class SudokuVisualSmokeTest {
         check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before) {
             "Notes mode must not fill the selected cell"
         }
-        rule.onNodeWithTag("game-erase").performClick()
+        rule.onNodeWithTag("game-erase").assertIsEnabled().performClick()
         rule.onNodeWithTag("game-back").performClick()
         waitFor("resume-game")
         rule.onNodeWithTag("resume-game").performScrollTo().performClick()
