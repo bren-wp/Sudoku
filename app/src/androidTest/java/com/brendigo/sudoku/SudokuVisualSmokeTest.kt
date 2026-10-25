@@ -237,6 +237,8 @@ class SudokuVisualSmokeTest {
 
         homeTile("statistika")
         waitFor("screen-statistika")
+        rule.onNodeWithText("Riješene igre po težini").assertExists()
+        rule.onNodeWithText("Postotak dovršenosti").assertExists()
         // The entire 48dp history header is an accessible click target.
         rule.onNodeWithTag("open-game-history").performScrollTo().performClick()
         rule.onNodeWithText("Povijest igara").assertExists()
