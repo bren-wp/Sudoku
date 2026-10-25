@@ -37,6 +37,12 @@
         android:fillColor="#08DBF8"
         android:fillAlpha=".43"
         android:pathData="M47,47 H61 V61 H47 Z" />
+    <!-- Subtle blue glow, then sharp native vector cell strokes. -->
+    <path
+        android:strokeColor="#02DFFF"
+        android:strokeAlpha=".30"
+        android:strokeWidth="4.2"
+        android:pathData="M45,27 V81 M63,27 V81 M27,45 H81 M27,63 H81" />
     <!-- Balanced 3×3 Sudoku grid and highlights. -->
     <path
         android:strokeColor="#079AFF"
