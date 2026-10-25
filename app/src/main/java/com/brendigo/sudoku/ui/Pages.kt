@@ -616,7 +616,7 @@ fun DailyPage(controller: SudokuController) {
     PageContent {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(32.dp))
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 98.dp)
             .testTag("daily-summary"), Ink.blue) {
             Row(
