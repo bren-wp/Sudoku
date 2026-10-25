@@ -104,7 +104,7 @@ private fun StreakMarker(
         Modifier.size(diameter)
             .semantics {
                 contentDescription = "$dayLabel: " +
-                    if (checked) "dnevni izazov riješen" else "dnevni izazov nije riješen"
+                    (if (checked) "dnevni izazov riješen" else "dnevni izazov nije riješen")
             }
             .background(
                 if (checked) Ink.cyan.copy(alpha = .18f) else Color(0xFF061D48),
