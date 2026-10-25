@@ -1,3 +1,11 @@
+## 1.0.24 — Statistics reference polish
+
+- Kept the seven real emulator screenshots and branded marketing README from 1.0.23.
+- Reduced Statistics title offset and adjusted metric card typography.
+- Added branded vector chart-heading symbols, retaining truthful live values.
+- No modification to the saved state, score calculations, game logic or achievements.
+- Pixel-perfect not yet certified; issue #11 continues to track reference parity.
+
 ## 1.0.23 — marketing README and multi-screen visual audit
 
 - Replaced the lengthy development-focused homepage with a Croatian marketing
