@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.13`
+- Version: `1.0.14`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -212,3 +212,28 @@ publisher-signed Google Play AAB are *not* certified by these checks.
   display), recording actual Android screenshots separately.
 - Original artwork still has unmeasured differences to the Compose rendering.
   **Pixel parity is not certified**; issue #11 stays open.
+
+## Sudoku 1.0.14: Gameplay layout and pixel-accurate component geometry
+
+- Live candidate pencil marks are now rendered in fixed micro-grid slots.
+  For 9×9 puzzles this is a 3×3 mini-board inside every empty cell; 6×6
+  uses 3×2 and 4×4 uses 2×2. Empty candidate positions no longer shift
+  nearby digits when a note is toggled.
+- Sudoku's 9-key number pad now uses five equal-width keys on row one and
+  four **equal-width, centered** keys on row two, matching the reference
+  instead of stretching the final four across the available width.
+- The entire board cell's accessibility description includes entered
+  candidate digits.
+- Home cards use accented circular vector icon outlines, primary actions
+  use a brighter bounded cyan-blue gradient, and settings section icons
+  have a defined bordered tile.
+- Statistics includes four functional achievement previews with vector
+  icons, locked/unlocked states and live progress bars, all opening the
+  full 24-achievement screen.
+- The daily date/streak panel uses the original screen's cool-blue surface,
+  while warm-gold rewards and special cards remain emphasized.
+- Regression coverage checks note semantics and number-key layout on the
+  real emulator at reference and compact sizes.
+- Data storage keys and saved game progress remain unchanged.
+- **MAE=0 is not yet established:** original 941×1672 reference artworks
+  have dynamic sample data and richer scenic illustration. See issue #11.
