@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -219,26 +221,31 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
 @Composable
 fun HomePage(controller: SudokuController) {
     val today = rememberToday()
-    PageContent {
-        Spacer(Modifier.height(18.dp))
+    PageContent(topPadding = 22.dp) {
+        Spacer(Modifier.height(14.dp))
         BrandHeader(Modifier.fillMaxWidth())
+        Spacer(Modifier.height(15.dp))
         Text(
             "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
             color = Ink.muted, fontSize = 10.sp, modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(30.dp))
+        Spacer(Modifier.height(7.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
-            NeonPanel(Modifier.fillMaxWidth().testTag("resume-game").clickable { controller.go(Screen.GAME) }
-                .heightIn(min = 132.dp), highlight = Ink.blue) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            NeonPanel(Modifier.fillMaxWidth().testTag("resume-game")
+                .clickable { controller.go(Screen.GAME) }
+                .heightIn(min = 176.dp), highlight = Ink.blue) {
+                // Decorative, non-interactive canvas behind the real resume action.
+                // It recreates the illuminated Sudoku-board motif, not a bitmap UI.
+                ResumeBoardArtwork(Modifier.matchParentSize())
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Text("N A S T A V I  I G R U", color = Ink.cyan,
                         fontSize = 10.sp, letterSpacing = 2.sp)
                     Text("Prekinuta igra", color = Ink.white,
-                        fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text(difficultyLabels[game.level] + " · " + game.size + "×" + game.size,
-                        color = Ink.muted, fontSize = 13.sp)
+                        fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+                    Text(difficultyLabels[game.level] + " težina",
+                        color = Ink.muted, fontSize = 14.sp)
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
@@ -247,9 +254,9 @@ fun HomePage(controller: SudokuController) {
                             game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
                             color = Ink.muted, fontSize = 12.sp)
                     }
-                    Spacer(Modifier.height(3.dp))
+                    Spacer(Modifier.height(9.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
-                        Modifier.fillMaxWidth(.55f), minHeight = 38.dp)
+                        Modifier.fillMaxWidth(.50f), minHeight = 42.dp)
                 }
             }
         }
@@ -274,18 +281,18 @@ fun HomePage(controller: SudokuController) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            HomeTile("Nova igra", "Odaberi težinu", Ink.teal, Modifier.weight(1f)) {
+            HomeTile("Nova igra", "Odaberi težinu\ni započni novu igru", Ink.teal, Modifier.weight(1f)) {
                 controller.go(Screen.NEW_GAME)
             }
-            HomeTile("Dnevni izazov", "Nova zagonetka svaki dan", Ink.gold, Modifier.weight(1f)) {
+            HomeTile("Dnevni izazov", "Svaki dan nova\nzagonetka", Ink.gold, Modifier.weight(1f)) {
                 controller.go(Screen.DAILY)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeTile("Statistika", "Prati napredak", Ink.blue, Modifier.weight(1f), compact = true) {
+            HomeTile("Statistika", "Prati svoj napredak", Ink.blue, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.STATS)
             }
-            HomeTile("Postignuća", "Osvoji nagrade", Ink.purple, Modifier.weight(1f), compact = true) {
+            HomeTile("Postignuća", "Otkrij sve nagrade", Ink.purple, Modifier.weight(1f), compact = true) {
                 controller.go(Screen.ACHIEVEMENTS)
             }
             HomeTile("Postavke", "Prilagodi igru", Ink.muted, Modifier.weight(1f), compact = true) {
