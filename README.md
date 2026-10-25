@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.19`
+- Version: `1.0.20`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -292,3 +292,20 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - The fixed footer has its own layout slot and cannot obscure scrollable settings or achievement actions.
 - Cyan/white switches remain accessible and saved through the existing controller.
 - QA verifies 941×1672 and 720×1280 emulator workflows. Pixel parity remains incomplete (issue #11).
+
+## Sudoku 1.0.20 — vizualna dorada po izvornim referencama
+
+- Početni ekran: sat uz nastavak igre sada je prava vektorska ikona;
+  sedmodnevni niz ima pristupačna stanja po danu.
+- Nova igra: zadržani svi odabiri i vizualno označavanje aktivne težine.
+- Igra: jasniji neonski okvir odabranog polja, pravilnije plave granice
+  blokova i pristupačno odabrano polje u Android sučelju.
+- Dnevni izazov: linije niza povezuju samo stvarno uzastopne riješene dane.
+- Statistika: vektorski grafikon uz naslov, strelice u karticama,
+  dovršene/prekinute igre prikazane uz kružni grafikon.
+- Postignuća: indikatori napretka i bodova zaključanih nagrada
+  zadržavaju odgovarajuće nijanse umjesto jednolične sive.
+- Android adaptive ikonica: diskretan cijan/plavi sjaj uz brojeve 7 i 9.
+- Dodane regresijske provjere na emulatorima 941×1672 i 720×1280.
+- Postojeće spremljene igre, podaci i korisničke postavke ostaju sačuvani.
+- Potpuna 1:1 jednakost piksela nije potvrđena; issue #11 ostaje otvoren.
