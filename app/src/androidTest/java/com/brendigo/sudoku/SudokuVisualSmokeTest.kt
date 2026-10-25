@@ -221,7 +221,14 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-erase").assertIsEnabled().performClick()
         rule.onNodeWithTag("game-back").performClick()
         waitFor("resume-game")
-        rule.onNodeWithTag("resume-game").performScrollTo().performClick()
+        val resume = rule.onNodeWithTag("resume-game")
+        resume.performScrollTo().assertIsDisplayed()
+        val resumeHeightDp = resume.fetchSemanticsNode().boundsInRoot.height /
+            rule.activity.resources.displayMetrics.density
+        check(resumeHeightDp >= 166f) {
+            "Resume hero card is too short for the reference layout: $resumeHeightDp dp"
+        }
+        resume.performClick()
         waitFor("sudoku-board")
         rule.onNodeWithTag("game-hint").assertExists()
     }
@@ -230,6 +237,17 @@ class SudokuVisualSmokeTest {
     fun premiumReferenceSectionsAreReachable() {
         waitFor("home-nova-igra")
         rule.onNodeWithTag("brand-footer").assertExists()
+        val primaryHome = rule.onNodeWithTag("home-nova-igra")
+        val compactHome = rule.onNodeWithTag("home-statistika")
+        val largeBounds = primaryHome.fetchSemanticsNode().boundsInRoot
+        val smallBounds = compactHome.fetchSemanticsNode().boundsInRoot
+        check(largeBounds.height > smallBounds.height) {
+            "Primary home cards must be taller than compact navigation cards"
+        }
+        rule.onNodeWithTag("home-dnevni-izazov").assertExists()
+        rule.onNodeWithTag("home-postignuća").assertExists()
+        rule.onNodeWithTag("home-postavke").assertExists()
+        rule.onNodeWithText("Sljedeća", substring = true).assertExists()
         rule.onAllNodes(hasContentDescription("Ponedjeljak:", substring = true))
             .onFirst().assertExists()
         homeTile("postignuća")
