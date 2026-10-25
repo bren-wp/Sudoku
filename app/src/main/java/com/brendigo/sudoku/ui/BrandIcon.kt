@@ -69,6 +69,19 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                             12f+cos(a).toFloat()*10f,12f+sin(a).toFloat()*10f)
                     }
                 }
+                "gift" -> {
+                    rectangle(3f, 9f, 21f, 21f, 1.5f)
+                    rectangle(2f, 7f, 22f, 11f, 1f)
+                    line(12f, 7f, 12f, 21f)
+                    val bow = Path().apply {
+                        moveTo(12f, 7f)
+                        cubicTo(3f, 7f, 3f, 1f, 7f, 1.7f)
+                        cubicTo(10f, 1.7f, 12f, 5f, 12f, 7f)
+                        cubicTo(12f, 5f, 14f, 1.7f, 17f, 1.7f)
+                        cubicTo(21f, 1f, 21f, 7f, 12f, 7f)
+                    }
+                    canvas.drawPath(bow, stroke)
+                }
                 "calendar" -> {
                     rectangle(3f,5f,21f,21f);line(3f,10f,21f,10f)
                     line(8f,3f,8f,7f);line(16f,3f,16f,7f)
