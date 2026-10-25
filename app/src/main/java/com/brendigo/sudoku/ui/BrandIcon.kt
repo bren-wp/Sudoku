@@ -69,6 +69,24 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                             12f+cos(a).toFloat()*10f,12f+sin(a).toFloat()*10f)
                     }
                 }
+                "palette" -> {
+                    // Outline palette with thumb rest and three paint dots.
+                    val p = Path().apply {
+                        moveTo(12f, 2.5f)
+                        cubicTo(6f, 2.5f, 2f, 6.8f, 2f, 12f)
+                        cubicTo(2f, 17.6f, 6.6f, 21.5f, 12.2f, 21.5f)
+                        cubicTo(15.5f, 21.5f, 16.7f, 19.7f, 15.1f, 17.5f)
+                        cubicTo(13.8f, 15.7f, 16f, 14.5f, 18.4f, 15f)
+                        cubicTo(22.1f, 15.6f, 23f, 12.1f, 21f, 8f)
+                        cubicTo(19.3f, 4.6f, 16.3f, 2.5f, 12f, 2.5f)
+                        close()
+                    }
+                    canvas.drawPath(p, stroke)
+                    canvas.drawCircle(7.3f, 10f, 1f, filled)
+                    canvas.drawCircle(10f, 6.6f, 1f, filled)
+                    canvas.drawCircle(14.8f, 7f, 1f, filled)
+                    canvas.drawCircle(6.3f, 14.8f, 1f, filled)
+                }
                 "gift" -> {
                     rectangle(3f, 9f, 21f, 21f, 1.5f)
                     rectangle(2f, 7f, 22f, 11f, 1f)

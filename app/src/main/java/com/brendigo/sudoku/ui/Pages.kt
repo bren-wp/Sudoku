@@ -13,7 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
@@ -66,14 +65,15 @@ private fun rememberToday(): LocalDate {
 
 @Composable
 fun PageContent(content: @Composable ColumnScope.() -> Unit) {
-    // The reference footer is anchored over the landscape. Keep the page
-    // scrollable with enough bottom padding so the footer hides no controls.
-    Box(Modifier.fillMaxSize()) {
+    // Footer occupies its own layout slot below the scroll viewport.
+    // Keeping it outside the scrolling content prevents overlays on cards,
+    // dialogs, settings actions and the "show all achievements" control.
+    Column(Modifier.fillMaxSize()) {
         Column(
-            Modifier.fillMaxSize()
+            Modifier.weight(1f).fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(top = 28.dp, bottom = 68.dp),
+                .padding(top = 28.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(7.dp),
         ) {
             content()
@@ -82,8 +82,8 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
             "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
             color = Ink.muted, fontSize = 9.sp, letterSpacing = 1.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-                .padding(horizontal = 12.dp, vertical = 15.dp)
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 13.dp)
                 .testTag("brand-footer"),
             maxLines = 1,
         )
@@ -1032,13 +1032,26 @@ fun AchievementsPage(controller: SudokuController) {
                             role = Role.Button
                         }
                         .clickable { selectedAchievement = achievement },
-                        if (unlocked) achievement.tint else Ink.blue.copy(alpha = .52f)) {
+                        if (unlocked) achievement.tint else achievement.tint.copy(alpha = .48f)) {
                         Column(Modifier.fillMaxSize().padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                BrandIcon(if (unlocked) achievementIconFor(achievement.title) else "lock",
-                                    Modifier.size(41.dp),
-                                    if (unlocked) achievement.tint else Ink.muted.copy(alpha = .73f))
+                                Box(Modifier.size(43.dp), contentAlignment = Alignment.Center) {
+                                    // Keep each award recognizable when locked.
+                                    BrandIcon(achievementIconFor(achievement.title),
+                                        Modifier.size(40.dp),
+                                        if (unlocked) achievement.tint
+                                        else achievement.tint.copy(alpha = .60f))
+                                    if (!unlocked) {
+                                        Box(
+                                            Modifier.size(20.dp).align(Alignment.BottomEnd)
+                                                .background(Color(0xEE081936), RoundedCornerShape(7.dp)),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            BrandIcon("lock", Modifier.size(17.dp), Ink.muted)
+                                        }
+                                    }
+                                }
                                 Row(
                                     Modifier.background(Ink.blue.copy(alpha = .23f),
                                             RoundedCornerShape(30.dp))
@@ -1056,8 +1069,15 @@ fun AchievementsPage(controller: SudokuController) {
                                         fontSize = 11.sp)
                                 }
                             }
-                            Text(achievement.title, color = Ink.white, fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Text(achievement.title, color = Ink.white, fontSize = 15.sp,
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
+                                if (unlocked) {
+                                    Spacer(Modifier.width(4.dp))
+                                    BrandIcon("check", Modifier.size(18.dp), achievement.tint)
+                                }
+                            }
                             Text(achievement.text, color = Ink.muted, fontSize = 11.sp,
                                 lineHeight = 13.sp, modifier = Modifier.weight(1f), maxLines = 2)
                             val progress = (achievement.current.toFloat() /
@@ -1124,7 +1144,7 @@ fun SettingsPage(controller: SudokuController) {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(9.dp)) {
-                SettingHeader("sparkles", "Izgled", "Prilagodi vizualni doživljaj igre")
+                SettingHeader("palette", "Izgled", "Prilagodi vizualni doživljaj igre")
                 SettingToggle("moon", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
                     controller.updateOptions(opts.copy(dark = it))
                 }
@@ -1328,7 +1348,29 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
             Text(title, fontSize = 14.sp, color = Ink.white, fontWeight = FontWeight.SemiBold)
             Text(caption, color = Ink.muted, fontSize = 11.sp, lineHeight = 13.sp)
         }
-        Switch(checked = checked, onCheckedChange = null)
+        // The Material3 default thumb inherited the app's purple theme.
+        // Render the brand switch ourselves; the parent remains the one
+        // accessible/clickable control and persists its state via change().
+        Box(
+            Modifier.width(55.dp).height(31.dp)
+                .background(
+                    if (checked) Brush.horizontalGradient(
+                        listOf(Color(0xFF00D8F7), Color(0xFF0868F5)),
+                    ) else Brush.horizontalGradient(
+                        listOf(Color(0xFF243657), Color(0xFF152444)),
+                    ),
+                    RoundedCornerShape(25.dp),
+                )
+                .border(1.dp,
+                    if (checked) Ink.cyan else Ink.muted.copy(alpha = .65f),
+                    RoundedCornerShape(25.dp)),
+            contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
+        ) {
+            Box(
+                Modifier.padding(horizontal = 4.dp).size(23.dp)
+                    .background(Color.White, RoundedCornerShape(50)),
+            )
+        }
     }
 }
 

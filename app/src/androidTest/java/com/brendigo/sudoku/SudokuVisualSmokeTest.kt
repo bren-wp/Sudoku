@@ -236,8 +236,15 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("achievement-prva-pobjeda").performScrollTo().performClick()
         rule.onNodeWithTag("achievement-detail").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
-        rule.onNodeWithTag("achievements-show-all")
-            .performScrollTo().performClick()
+        val allAwards = rule.onNodeWithTag("achievements-show-all")
+        allAwards.performScrollTo()
+        val lastButtonBottom = allAwards.fetchSemanticsNode().boundsInRoot.bottom
+        val footerTop = rule.onNodeWithTag("brand-footer")
+            .fetchSemanticsNode().boundsInRoot.top
+        check(lastButtonBottom <= footerTop + 1f) {
+            "Achievements button overlaps fixed footer: $lastButtonBottom > $footerTop"
+        }
+        allAwards.performClick()
         rule.onNodeWithTag("achievement-prvi-korak").assertExists()
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
@@ -304,7 +311,14 @@ class SudokuVisualSmokeTest {
         }
         rule.onNodeWithTag("setting-provjera-greške").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("language-settings").performScrollTo().assertIsDisplayed()
-        rule.onNodeWithTag("privacy-policy").performScrollTo().assertIsDisplayed()
+        val privacyRow = rule.onNodeWithTag("privacy-policy")
+        privacyRow.performScrollTo().assertIsDisplayed()
+        val privacyBottom = privacyRow.fetchSemanticsNode().boundsInRoot.bottom
+        val footerAt = rule.onNodeWithTag("brand-footer")
+            .fetchSemanticsNode().boundsInRoot.top
+        check(privacyBottom <= footerAt + 1f) {
+            "Settings privacy action must not be obscured by the footer"
+        }
         rule.onNodeWithTag("language-settings").performScrollTo().performClick()
         rule.onNodeWithText("Aplikacija trenutačno podržava hrvatski jezik.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
