@@ -64,7 +64,10 @@ private fun rememberToday(): LocalDate {
 }
 
 @Composable
-fun PageContent(content: @Composable ColumnScope.() -> Unit) {
+fun PageContent(
+    topPadding: androidx.compose.ui.unit.Dp = 28.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     // Footer occupies its own layout slot below the scroll viewport.
     // Keeping it outside the scrolling content prevents overlays on cards,
     // dialogs, settings actions and the "show all achievements" control.
@@ -73,7 +76,7 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
             Modifier.weight(1f).fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(top = 28.dp, bottom = 16.dp),
+                .padding(top = topPadding, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(7.dp),
         ) {
             content()
@@ -1140,7 +1143,7 @@ fun SettingsPage(controller: SudokuController) {
     var showPrivacy by remember { androidx.compose.runtime.mutableStateOf(false) }
     var showSound by remember { androidx.compose.runtime.mutableStateOf(false) }
     var showLanguage by remember { androidx.compose.runtime.mutableStateOf(false) }
-    PageContent {
+    PageContent(topPadding = 20.dp) {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(9.dp)) {
@@ -1204,7 +1207,10 @@ fun SettingsPage(controller: SudokuController) {
             }
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(
+                Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
                 SettingHeader("info", "O aplikaciji", "Sudoku by Brendigo")
                 NeonPanel(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
@@ -1223,7 +1229,7 @@ fun SettingsPage(controller: SudokuController) {
                     }
                 }
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 44.dp),
+                    Modifier.fillMaxWidth().heightIn(min = 28.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     BrandIcon("grid", Modifier.size(20.dp), Ink.muted)
@@ -1314,7 +1320,7 @@ fun SettingsPage(controller: SudokuController) {
 @Composable
 private fun SettingHeader(icon: String, title: String, subtitle: String) {
     Row(
-        Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        Modifier.fillMaxWidth().padding(vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -1337,7 +1343,7 @@ private fun SettingHeader(icon: String, title: String, subtitle: String) {
 private fun SettingToggle(icon: String, title: String, caption: String, checked: Boolean, change: (Boolean) -> Unit) {
     val tag = "setting-" + title.lowercase().replace(" ", "-")
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 54.dp).testTag(tag)
+        Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag(tag)
             .toggleable(value = checked, role = Role.Switch, onValueChange = change)
             .semantics { contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}" },
         verticalAlignment = Alignment.CenterVertically,
