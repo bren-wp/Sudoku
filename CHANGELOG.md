@@ -1,3 +1,21 @@
+## 1.0.15
+
+### Native UI reference refinements
+- Daily Challenge headline aligned independently of the back button.
+- Calendar, streak and golden reward segmented into balanced panels with
+  a dedicated vector gift glyph; three bordered challenge metrics.
+- Seven-day progress shows connected circles and actual device calendar days.
+- Primary challenge and secondary ranking controls match narrower reference widths.
+- Achievements score header split by divider, with real totals and reward iconography.
+- Larger achievement cards, points badges, icons, progress bars and descriptions.
+- Night landscape and warm reward cards use darker/navier gradients for text clarity.
+- Instrumented tests cover daily ranking and achievement component dimensions.
+
+### Quality gates
+- CI: JUnit, Android Lint, APK/AAB build, 941x1672 and 720x1280 emulators.
+- Previous v1.0.14 measured full-frame mean RGB error: 34.010 / 255.
+- Dynamic dates, sample progress and scenic image details still differ from artwork.
+- Never declare pixel-perfect without normalized evidence; tracking issue #11.
 ## 1.0.14
 
 ### Pixel-alignment and interactions
