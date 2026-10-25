@@ -1,3 +1,13 @@
+## 1.0.23 — Statistics and marketing README
+
+- Fine-tuned Statistics header vertical spacing and numeric tile typography.
+- Added vector chart icons to native bar-chart and completion-ring headings.
+- Introduced Croatian marketing README with original SVG logo, feature artwork,
+  adaptive brand icon preview, release/CI badges and screenshot artifact links.
+- Screenshot links point to real emulator captures; no fabricated image previews.
+- Preserves all local games, 24 achievements, difficulty modes and statistics.
+- Pixel-perfect fidelity is not asserted until normalized comparisons pass (#11).
+
 ## 1.0.22 — Achievements screen reference pass
 
 - Tightened the achievements header-to-score spacing for the owner reference.
