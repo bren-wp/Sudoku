@@ -854,12 +854,12 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
     val colors = listOf(Ink.teal, Ink.blue, Ink.purple, Ink.gold)
     val labels = listOf("Lako", "Srednje", "Teško", "Stručno")
     val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
-    NeonPanel(modifier.heightIn(min = 172.dp), Ink.blue) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 9.dp, vertical = 10.dp)) {
+    NeonPanel(modifier.heightIn(min = 210.dp), Ink.blue) {
+        Column(Modifier.fillMaxSize().padding(horizontal = 11.dp, vertical = 12.dp)) {
             Text("Riješene igre po težini", color = Ink.white,
-                fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+                fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2)
             Spacer(Modifier.height(6.dp))
-            Row(Modifier.fillMaxWidth().height(119.dp),
+            Row(Modifier.fillMaxWidth().height(148.dp),
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.Bottom) {
                 counts.forEachIndexed { index, amount ->
@@ -868,7 +868,7 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
                         Spacer(Modifier.height(4.dp))
                         Box(
                             Modifier.fillMaxWidth(.75f)
-                                .height((8 + 65 * amount / ceiling).dp)
+                                .height(if (amount == 0) 2.dp else (12 + 85 * amount / ceiling).dp)
                                 .background(
                                     Brush.verticalGradient(listOf(
                                         colors[index], colors[index].copy(alpha = .35f)
@@ -892,20 +892,20 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
         (stats.finished.toFloat() / stats.played).coerceIn(0f, 1f)
     else 0f
     val percentage = (fraction * 100).toInt()
-    NeonPanel(modifier.heightIn(min = 172.dp), Ink.cyan) {
-        Column(Modifier.fillMaxSize().padding(9.dp),
+    NeonPanel(modifier.heightIn(min = 210.dp), Ink.cyan) {
+        Column(Modifier.fillMaxSize().padding(11.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Postotak dovršenosti", color = Ink.white,
-                fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+                fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2)
             Spacer(Modifier.height(5.dp))
-            Box(Modifier.fillMaxWidth().height(106.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(84.dp)) {
+            Box(Modifier.fillMaxWidth().height(136.dp), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.size(105.dp)) {
                     drawArc(Ink.blue.copy(alpha = .27f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     drawArc(Ink.cyan, -90f, fraction * 360f, false,
                         style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
                 }
-                Text("$percentage%", fontSize = 24.sp, color = Ink.white,
+                Text("$percentage%", fontSize = 29.sp, color = Ink.white,
                     fontWeight = FontWeight.ExtraBold)
             }
             Subtitle("${stats.finished} dovršeno", Modifier.fillMaxWidth(), centered = true)
