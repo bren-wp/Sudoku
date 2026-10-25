@@ -1,3 +1,25 @@
+## 1.0.13
+
+### Seven-screen UI and accessibility
+- Anchored shared footer to the lower scenic background while preserving
+  full content scrolling and avoiding controls hidden beneath it.
+- Daily challenge shows real Monday–Sunday calendar dates and a named
+  reward, with revised calendar captions.
+- Entire statistics history header is clickable and has a 48dp touch target.
+- Statistics achievement preview now links to actual award names.
+- Responsive Sudoku board now fits narrow multi-window device widths.
+- Notes cannot be toggled during pause or completed/failed games.
+- Settings vector icons use explicit icon keys rather than ignored emoji
+  parameters and inferred titles.
+- TalkBack description for the Sudoku 7–3–9 brand icon; additional subtle
+  cyan glow in adaptive launcher artwork.
+- Reference-size and compact emulator smoke runs test 941×1672 and 720×1280.
+
+### Verification
+- Real emulator and static checks required before merge and version release.
+- The original source artwork remains the target: 100% 1:1 and MAE=0
+  are **not claimed** until normalized screenshot comparison proves them.
+
 ## 1.0.12
 
 ### UI and branding

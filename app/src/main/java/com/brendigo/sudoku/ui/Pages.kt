@@ -64,20 +64,24 @@ private fun rememberToday(): LocalDate {
 
 @Composable
 fun PageContent(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        Modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-            .padding(top = 10.dp, bottom = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(7.dp),
-    ) {
-        content()
-        Spacer(Modifier.height(5.dp))
+    // The reference footer is anchored over the landscape. Keep the page
+    // scrollable with enough bottom padding so the footer hides no controls.
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(top = 10.dp, bottom = 68.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            content()
+        }
         Text(
             "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
-            color = Ink.muted, fontSize = 9.sp,
+            color = Ink.muted, fontSize = 9.sp, letterSpacing = 1.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                .padding(horizontal = 12.dp, vertical = 15.dp)
                 .testTag("brand-footer"),
             maxLines = 1,
         )
@@ -445,6 +449,7 @@ fun DailyPage(controller: SudokuController) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     BrandIcon("trophy", Modifier.size(23.dp), Ink.gold)
                     Text("NAGRADA", color = Ink.gold, fontSize = 8.sp)
+                    Text("Zlatna značka", color = Ink.white, fontSize = 9.sp, maxLines = 1)
                 }
             }
         }
@@ -493,10 +498,17 @@ fun DailyPage(controller: SudokuController) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
+                        val date = monday.plusDays(i.toLong())
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            StreakMarker(monday.plusDays(i.toLong()).toString() in completedDays, diameter = 30.dp)
-                            Spacer(Modifier.height(5.dp))
-                            Text(label, color = Ink.muted, fontSize = 10.sp)
+                            Text(label, color = Ink.muted, fontSize = 9.sp)
+                            Spacer(Modifier.height(4.dp))
+                            StreakMarker(date.toString() in completedDays, diameter = 28.dp)
+                            Spacer(Modifier.height(4.dp))
+                            Text("${date.dayOfMonth}.${date.monthValue}.",
+                                color = if (date == today) Ink.white else Ink.muted,
+                                fontSize = 9.sp,
+                                fontWeight = if (date == today) FontWeight.Bold else FontWeight.Normal,
+                            )
                         }
                     }
                 }
@@ -595,11 +607,20 @@ fun StatsPage(controller: SudokuController) {
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("open-game-history")
+                        .semantics { contentDescription = "Prikaži povijest dovršenih igara"; role = Role.Button }
+                        .clickable { showHistory = true },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BrandIcon("grid", Modifier.size(19.dp), Ink.cyan)
+                    Spacer(Modifier.width(8.dp))
                     Text("Nedavni napredak", color = Ink.white, fontSize = 16.sp,
                         modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    Text("Pogledaj sve ›", color = Ink.cyan, fontSize = 12.sp,
-                        modifier = Modifier.testTag("open-game-history").clickable { showHistory = true })
+                    Text("Pogledaj sve", color = Ink.cyan, fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
                 stats.history.take(3).forEach {
@@ -630,9 +651,9 @@ fun StatsPage(controller: SudokuController) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     listOf(
-                        "★  Početnik" to (stats.finished >= 1),
-                        "◷  Brzi um" to (stats.fastWins >= 1),
-                        "🔥  Pobjednički niz" to (stats.bestStreak >= 7),
+                        "★ Prva pobjeda" to (stats.finished >= 1),
+                        "◷ Brzinac" to (stats.fastWins >= 1),
+                        "🔥 Sedam dana" to (stats.bestStreak >= 7),
                     ).forEach { (label, unlocked) ->
                         Text(label, fontSize = 10.sp,
                             color = if (unlocked) Ink.cyan else Ink.muted,
@@ -932,25 +953,25 @@ fun SettingsPage(controller: SudokuController) {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(9.dp)) {
-                SettingHeader("◉", "Izgled", "Prilagodi vizualni doživljaj igre")
-                SettingToggle("☾", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
+                SettingHeader("sparkles", "Izgled", "Prilagodi vizualni doživljaj igre")
+                SettingToggle("moon", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
                     controller.updateOptions(opts.copy(dark = it))
                 }
-                SettingToggle("✧", "Animacije", "Prikaži animacije i vizualne efekte", opts.animations) {
+                SettingToggle("sparkles", "Animacije", "Prikaži animacije i vizualne efekte", opts.animations) {
                     controller.updateOptions(opts.copy(animations = it))
                 }
             }
         }
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(9.dp)) {
-                SettingHeader("▣", "Igra", "Postavke igrivosti i pomoći")
-                SettingToggle("▤", "Automatske bilješke", "Ukloni riješene kandidate iz bilješki", opts.autoNotes) {
+                SettingHeader("gamepad", "Igra", "Postavke igrivosti i pomoći")
+                SettingToggle("note", "Automatske bilješke", "Ukloni riješene kandidate iz bilješki", opts.autoNotes) {
                     controller.updateOptions(opts.copy(autoNotes = it))
                 }
-                SettingToggle("⚠", "Provjera greške", "Označi netočne unose i prati pogreške", opts.checkMistakes) {
+                SettingToggle("warning", "Provjera greške", "Označi netočne unose i prati pogreške", opts.checkMistakes) {
                     controller.updateOptions(opts.copy(checkMistakes = it))
                 }
-                SettingToggle("▦", "Isticanje brojeva", "Naglašavanje jednakih brojeva na ploči", opts.highlightEquals) {
+                SettingToggle("grid", "Isticanje brojeva", "Naglašavanje jednakih brojeva na ploči", opts.highlightEquals) {
                     controller.updateOptions(opts.copy(highlightEquals = it))
                 }
             }
@@ -1044,10 +1065,10 @@ fun SettingsPage(controller: SudokuController) {
             title = { Text("Zvuk i vibracija", color = Ink.white) },
             text = {
                 Column {
-                    SettingToggle("♫", "Zvuk", "Zvuk pri pritisku gumba", opts.sound) {
+                    SettingToggle("speaker", "Zvuk", "Zvučni efekt tijekom igre", opts.sound) {
                         controller.updateOptions(controller.options.copy(sound = it))
                     }
-                    SettingToggle("◈", "Vibracija", "Vibracija pri unosu broja", opts.vibration) {
+                    SettingToggle("sparkles", "Vibracija", "Vibracija pri unosu broja", opts.vibration) {
                         controller.updateOptions(controller.options.copy(vibration = it))
                     }
                 }
@@ -1095,7 +1116,7 @@ fun SettingsPage(controller: SudokuController) {
 @Composable
 private fun SettingHeader(icon: String, title: String, subtitle: String) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        BrandIcon(when (title) { "Izgled" -> "sparkles"; "Igra" -> "gamepad"; else -> "settings" }, Modifier.size(24.dp), Ink.cyan)
+        BrandIcon(icon, Modifier.size(24.dp), Ink.cyan)
         Spacer(Modifier.width(14.dp))
         Column { Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold); Subtitle(subtitle) }
     }
@@ -1110,12 +1131,7 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
             .semantics { contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}" },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BrandIcon(when (title) {
-            "Tamna tema" -> "moon"; "Animacije" -> "sparkles"
-            "Automatske bilješke" -> "note"; "Provjera greške" -> "warning"
-            "Isticanje brojeva" -> "grid"; "Zvuk" -> "speaker"
-            "Vibracija" -> "sparkles"; else -> "settings"
-        }, Modifier.size(21.dp), Ink.cyan)
+        BrandIcon(icon, Modifier.size(21.dp), Ink.cyan)
         Spacer(Modifier.width(13.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 14.sp, color = Ink.white, fontWeight = FontWeight.SemiBold)

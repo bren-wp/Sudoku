@@ -55,8 +55,12 @@ fun GamePage(controller: SudokuController) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxHeight < 730.dp
         val horizontal = if (compact) 12.dp else 20.dp
-        val boardSize = minOf(maxWidth - horizontal * 2,
-            maxHeight - if (compact) 255.dp else 300.dp).coerceAtLeast(216.dp)
+        // Width is the hard limit: a 216dp minimum previously overflowed
+        // narrow multi-window and foldable screens.
+        val availableWidth = (maxWidth - horizontal * 2).coerceAtLeast(1.dp)
+        val availableHeight = (maxHeight - if (compact) 255.dp else 300.dp)
+            .coerceAtLeast(216.dp)
+        val boardSize = minOf(availableWidth, availableHeight)
         val toolHeight = if (compact) 51.dp else 65.dp
         val numberHeight = if (compact) 48.dp else 54.dp
         Column(
@@ -141,6 +145,7 @@ fun GamePage(controller: SudokuController) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)) {
             GameTool("Bilješke", if (game.notesMode) Ink.teal else Ink.line,
                 Modifier.weight(1f), height = toolHeight, active = game.notesMode,
+                enabled = !game.paused && !game.completed && !game.failed,
                 tag = "game-notes") { controller.toggleNotes(); feedback() }
             GameTool("Savjet", Ink.cyan, Modifier.weight(1f), height = toolHeight,
                 badge = "${(SudokuController.MAX_HINTS - game.hints).coerceAtLeast(0)}",
@@ -154,10 +159,8 @@ fun GamePage(controller: SudokuController) {
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
         NumberRow(numbers.take(split), numberHeight, controller.canEnter()) { controller.enter(it); feedback() }
         if (numbers.size > split) NumberRow(numbers.drop(split), numberHeight, controller.canEnter()) { controller.enter(it); feedback() }
-        if (!compact) {
-            Text("B I S T R I J I  U M  ·  B O L J I  D A N", color = Ink.muted,
-                fontSize = 10.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        }
+        // On shorter screens, the board and keypad remain usable through scroll.
+        // The landscape and brand footer remain visible on the main pages.
         }
     }
 
