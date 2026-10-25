@@ -269,7 +269,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                     else Ink.line.copy(alpha = .55f))
                                 .semantics {
                                     role = Role.Button
-                                    selected = isSelected
+                                    this.selected = isSelected
                                     contentDescription = (if (isSelected) "Odabrano. " else "") +
                                         "Redak ${r + 1}, stupac ${c + 1}: " + when {
                                             digit == 0 && game.notes[index] != 0 ->
