@@ -1,3 +1,22 @@
+## 1.0.14
+
+### Pixel-alignment and interactions
+- Corrected misaligned/stretched second row of the 9×9 numeric keypad:
+  all key widths match and the final four are centered.
+- Candidate notes now occupy stable micro-grid positions (9×9: 3×3,
+  6×6: 3×2, 4×4: 2×2) and have accessible spoken labels.
+- Premium circular home-menu vector icon framing, brighter primary buttons
+  with dedicated cyan outlines, and more consistent Settings section tiles.
+- Four real achievement preview cards in Statistics with progress and
+  unlocked/locked vectors, linked to all 24 achievements.
+- Cool-blue daily date header with separate gold achievement accents.
+- Updated emulator tests for notes and equal-width keypad key geometry.
+
+### QA
+- Preserve user saves and settings. Require green Android CI and both
+  941×1672/720×1280 emulator smoke tests before release.
+- Screenshot pixel parity is not certified. Issue #11 remains open.
+
 ## 1.0.13
 
 ### Seven-screen UI and accessibility
