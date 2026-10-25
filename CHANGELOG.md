@@ -1,3 +1,21 @@
+## 1.0.18
+
+### Visual alignment / accessibility
+- Corrected footer overlap: every major page reserves a separate non-scrolling
+  footer slot outside its fully scrollable content.
+- Replaced Material default switches with native cyan-blue/white-thumb controls
+  while preserving a single accessible and persisted switch per setting.
+- Added a dedicated palette vector icon for Appearance.
+- Locked achievements show meaningful dimmed award symbols alongside small
+  lock status icons; unlocked cards gain explicit completion checks.
+- New instrumentation compares footer top with the last actionable settings
+  and achievements bounds, guarding compact/reference viewport sizes.
+
+### QA
+- Retain save format; gate publication on JUnit, Android Lint, debug APK,
+  unsigned AAB and both emulator smoke tests.
+- Reference artwork remains the target: numerical MAE=0 not claimed.
+
 ## 1.0.17
 
 - Recalibrated native night scenery, mountains, background Sudoku grid and sakura palette across all seven screens.
