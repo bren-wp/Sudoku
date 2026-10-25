@@ -108,10 +108,10 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
         }
         drawCircle(
             Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
-            radius = w * .16f, center = Offset(w * .81f, h * .77f),
+            radius = w * .18f, center = Offset(w * .81f, h * .745f),
         )
         drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
-            radius = w * .030f, center = Offset(w * .81f, h * .77f))
+            radius = w * .035f, center = Offset(w * .81f, h * .745f))
         // Distant layered mountain silhouettes.
         fun mountains(y: Float, amplitude: Float, color: Color, phase: Float) {
             val path = Path().apply {
@@ -219,8 +219,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             val x = w * t * .36f
             val y = h * (.86f + .12f * ((i * 37 % 103) / 103f))
             val radius = w * (.0024f + (i % 4) * .0009f)
-            val hue = if (i % 3 == 0) Color(0xFF9A8EC4) else Color(0xFF6477B4)
-            val opacity = if (i % 4 == 0) .70f else .46f
+            val hue = if (i % 3 == 0) Color(0xFFB4A7DC) else Color(0xFF8799D3)
+            val opacity = if (i % 4 == 0) .80f else .58f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
@@ -324,6 +324,7 @@ fun NeonPanel(
     highlight: Color = Ink.line,
     corner: Dp = 18.dp,
     warmPagoda: Boolean = true,
+    warmGlowAlpha: Float = .43f,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val warm = highlight == Ink.gold
@@ -348,7 +349,7 @@ fun NeonPanel(
 
             drawCircle(
                 Brush.radialGradient(
-                    listOf(highlight.copy(alpha = if (warm) .43f else .31f),
+                    listOf(highlight.copy(alpha = if (warm) warmGlowAlpha.coerceIn(0f, 1f) else .31f),
                         Color.Transparent),
                     center = Offset(w * .83f, h * .16f),
                     radius = w * .65f,
