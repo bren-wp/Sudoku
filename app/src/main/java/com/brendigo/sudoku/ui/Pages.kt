@@ -919,19 +919,36 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
             Text("Postotak dovršenosti", color = Ink.white,
                 fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2)
             Spacer(Modifier.height(5.dp))
-            Box(Modifier.fillMaxWidth().height(136.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(126.dp), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.size(105.dp)) {
                     drawArc(Ink.blue.copy(alpha = .27f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     drawArc(Ink.cyan, -90f, fraction * 360f, false,
                         style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
                 }
-                Text("$percentage%", fontSize = 29.sp, color = Ink.white,
-                    fontWeight = FontWeight.ExtraBold)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("$percentage%", fontSize = 29.sp, color = Ink.white,
+                        fontWeight = FontWeight.ExtraBold)
+                    Text("Dovršene igre", color = Ink.muted, fontSize = 10.sp, maxLines = 1)
+                }
             }
-            Subtitle("${stats.finished} dovršeno", Modifier.fillMaxWidth(), centered = true)
-            Subtitle("${(stats.played - stats.finished).coerceAtLeast(0)} nedovršeno",
-                Modifier.fillMaxWidth(), centered = true)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(10.dp).background(Ink.cyan, RoundedCornerShape(50)))
+                Spacer(Modifier.width(6.dp))
+                Text("Dovršene igre", color = Ink.muted,
+                    fontSize = 11.sp, modifier = Modifier.weight(1f))
+                Text("${stats.finished}", color = Ink.white, fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold)
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(10.dp)
+                    .background(Ink.blue.copy(alpha = .50f), RoundedCornerShape(50)))
+                Spacer(Modifier.width(6.dp))
+                Text("Prekinute igre", color = Ink.muted,
+                    fontSize = 11.sp, modifier = Modifier.weight(1f))
+                Text("${(stats.played - stats.finished).coerceAtLeast(0)}", color = Ink.white, fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -1082,7 +1099,8 @@ fun AchievementsPage(controller: SudokuController) {
                                         if (unlocked) achievement.tint else Ink.muted)
                                     Spacer(Modifier.width(3.dp))
                                     Text("${achievement.reward}",
-                                        color = if (unlocked) achievement.tint else Ink.muted,
+                                        color = if (unlocked) achievement.tint
+                                            else achievement.tint.copy(alpha = .75f),
                                         fontSize = 11.sp)
                                 }
                             }
@@ -1102,7 +1120,8 @@ fun AchievementsPage(controller: SudokuController) {
                             Box(Modifier.fillMaxWidth().height(7.dp).background(Ink.blue.copy(alpha = .25f),
                                 RoundedCornerShape(12.dp))) {
                                 Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
-                                    .background(if (unlocked) achievement.tint else Ink.muted,
+                                    .background(if (unlocked) achievement.tint else
+                                        achievement.tint.copy(alpha = .58f),
                                     RoundedCornerShape(12.dp)))
                             }
                             Text("${achievement.current.coerceAtMost(achievement.goal)} / ${achievement.goal}",
