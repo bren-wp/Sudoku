@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.18`
+- Version: `1.0.19`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -285,3 +285,10 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - No storage migration or changes to puzzle persistence.
 - 1:1 pixel equality still requires normalized screenshots and measured MAE;
   issue #11 remains open.
+
+## Sudoku 1.0.19 — Settings viewport alignment
+
+- The About section uses compact spacing so the actual app version appears in the initial 941×1672 reference view.
+- The fixed footer has its own layout slot and cannot obscure scrollable settings or achievement actions.
+- Cyan/white switches remain accessible and saved through the existing controller.
+- QA verifies 941×1672 and 720×1280 emulator workflows. Pixel parity remains incomplete (issue #11).

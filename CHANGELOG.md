@@ -1,3 +1,10 @@
+## 1.0.19
+
+- Improved Settings vertical layout and About panel so the real version row fits in the original 941×1672 screenshot viewport.
+- Preserved footer isolation, white-thumb cyan switches, palette icon and achievement color identity from v1.0.18.
+- No user-data migration or removed features; revalidate Android CI and both UI emulator sizes before release.
+- Numeric reference matching is not yet pixel-perfect (issue #11).
+
 ## 1.0.18
 
 ### Visual alignment / accessibility
