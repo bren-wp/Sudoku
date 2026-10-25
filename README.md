@@ -4,7 +4,9 @@
 
 ### Više od igre. Vježba za um.
 
-**Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**\n\n**Izdanje 1.0.23** · Android 8.0+ · Kotlin + Jetpack Compose
+**Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
+
+**Izdanje 1.0.23** · Android 8.0+ · Kotlin + Jetpack Compose
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
