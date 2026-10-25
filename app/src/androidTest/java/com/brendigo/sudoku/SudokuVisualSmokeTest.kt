@@ -253,6 +253,24 @@ class SudokuVisualSmokeTest {
         homeTile("postignuća")
         waitFor("screen-postignuća")
         // The four featured achievement rows must be visible at reference size.
+        // Content-sized compact cards must contain their real description text.
+        val firstCard = rule.onNodeWithTag("achievement-prva-pobjeda")
+            .fetchSemanticsNode().boundsInRoot
+        val firstDescription = rule.onNodeWithTag(
+            "achievement-description-prva-pobjeda", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        check(firstDescription.top >= firstCard.top - 1f &&
+            firstDescription.bottom <= firstCard.bottom + 1f) {
+            "Achievement description escapes its card on this viewport"
+        }
+        val viewportWidthDp = rule.activity.resources.displayMetrics.widthPixels /
+            rule.activity.resources.displayMetrics.density
+        if (viewportWidthDp < 410f) {
+            val minHeightPx = 180f * rule.activity.resources.displayMetrics.density
+            check(firstCard.height >= minHeightPx) {
+                "Compact achievement card too short: ${firstCard.height}px"
+            }
+        }
         rule.onNodeWithTag("achievement-sudoku-legenda").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("achievement-prva-pobjeda").performScrollTo().performClick()
         rule.onNodeWithTag("achievement-detail").assertExists()
@@ -266,7 +284,19 @@ class SudokuVisualSmokeTest {
             "Achievements button overlaps fixed footer: $lastButtonBottom > $footerTop"
         }
         allAwards.performClick()
-        rule.onNodeWithTag("achievement-prvi-korak").assertExists()
+        val expectedAwards = listOf(
+            "prva-pobjeda", "sedam-dana-zaredom", "majstor-logike",
+            "bez-greške", "vrući-niz", "brzinac", "rješavač-izazova",
+            "prvi-korak", "redoviti-igrač", "iskusni-igrač", "stotka",
+            "besprijekoran-niz", "samostalni-mislilac", "prvi-izazov",
+            "dnevna-rutina", "deset-sati-logike", "strpljivi-mislilac",
+            "ekspert", "velemajstor", "mala-mreža", "srednja-mreža",
+            "klasična-mreža", "zlatni-niz", "sudoku-legenda"
+        )
+        check(expectedAwards.size == 24)
+        expectedAwards.forEach { slug ->
+            rule.onNodeWithTag("achievement-$slug").assertExists()
+        }
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
 
