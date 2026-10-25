@@ -1,3 +1,21 @@
+## 1.0.23 — marketing README and multi-screen visual audit
+
+- Replaced the lengthy development-focused homepage with a Croatian marketing
+  README featuring the existing Sudoku/Brendigo original SVG logo, 7-3-9 icon,
+  feature banner and a complete seven-screen gallery of real emulator captures.
+- Added an isolated GitHub Actions job to capture the actual Compose app on a
+  941×1672 emulator and commit optimized WebP screenshots to docs/screenshots.
+- Centered reference headings for Statistics and Settings now use uppercase,
+  letter-spaced Croatian descriptors; they remain accessible native text.
+- Reduced the oversized gap above the Daily Challenge summary and improved its
+  warm hero contrast and title styling to more closely match the owner artwork.
+- Refined native scenic moon and cherry blossom positions/colors across screens.
+- Preserved real offline data, 24 achievements, gameplay mechanics and saved
+  state; no static screen backgrounds masquerading as live controls.
+- No claim of full 1:1 parity: all screen areas still require normalized
+  numeric comparison with the owner's design files (issue #11).
+- APK/AAB signing state follows CI secrets; unsigned release is not Play-ready.
+
 ## 1.0.22 — Achievements screen reference pass
 
 - Tightened the achievements header-to-score spacing for the owner reference.
