@@ -1,3 +1,10 @@
+## 1.0.16
+
+- Enlarged statistics chart geometry, labels and circular completion indicator.
+- Zero-win categories now render a minimal baseline rather than a misleading bar.
+- Emulator smoke test asserts both statistics visualizations are present.
+- Original reference pixel parity remains a work in progress (issue #11).
+
 ## 1.0.15
 
 ### Native UI reference refinements
