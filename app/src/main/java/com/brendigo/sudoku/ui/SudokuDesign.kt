@@ -69,7 +69,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
                     Color(0xFF163D79), Color(0xFF255A9C),
                     Color(0xFF12376F), Color(0xFF091F46)
                 )
-                else listOf(Color(0xFF020921), Color(0xFF071A43), Color(0xFF052052), Color(0xFF03112F)),
+                else listOf(Color(0xFF001335), Color(0xFF041C48), Color(0xFF05204C), Color(0xFF01102B)),
                 startY = 0f, endY = h,
             )
         )
@@ -77,8 +77,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
         val spacing = w / 3.5f
         for (i in -2..8) {
             val x = i * spacing
-            drawLine(Ink.blue.copy(alpha = .12f), Offset(x, 0f), Offset(x + w * .25f, h * .28f), 2.5f)
-            drawLine(Ink.blue.copy(alpha = .10f), Offset(0f, x), Offset(w, x - w * .20f), 2.5f)
+            drawLine(Ink.blue.copy(alpha = .20f), Offset(x, 0f), Offset(x + w * .25f, h * .28f), 2.5f)
+            drawLine(Ink.blue.copy(alpha = .16f), Offset(0f, x), Offset(w, x - w * .20f), 2.5f)
         }
         // Large translucent Sudoku digits are part of the original visual motif.
         // Native canvas text here is decoration, never interactive content.
@@ -104,7 +104,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             val x = ((i * 173 + 61) % 991) / 991f * w
             val y = ((i * 137 + 19) % 997) / 997f * h * .83f
             drawCircle(Ink.white.copy(alpha = .10f + (i % 4) * .055f),
-                radius = if (i % 7 == 0) 1.7f else .9f, center = Offset(x, y))
+                radius = if (i % 7 == 0) 1.4f else .7f, center = Offset(x, y))
         }
         drawCircle(
             Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
@@ -127,12 +127,12 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             }
             drawPath(path, color)
         }
-        mountains(h * .835f, h * .039f, Color(0xFF102B66).copy(alpha = .80f), 2.2f)
-        mountains(h * .862f, h * .050f, Color(0xFF0A2455), .1f)
-        mountains(h * .902f, h * .033f, Color(0xFF051943), 1.5f)
+        mountains(h * .847f, h * .035f, Color(0xFF102B60).copy(alpha = .82f), 2.2f)
+        mountains(h * .875f, h * .048f, Color(0xFF08214A), .1f)
+        mountains(h * .910f, h * .034f, Color(0xFF031533), 1.5f)
         drawRect(
             Brush.verticalGradient(
-                listOf(Color(0x00226BD0), Color(0x882459A3), Color(0xFF03112C)),
+                listOf(Color(0x00226BD0), Color(0x88305CA0), Color(0xFF02112E)),
                 startY = h * .88f, endY = h,
             ),
             topLeft = Offset(0f, h * .88f),
@@ -214,13 +214,13 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             cubicTo(w * .04f, h * .88f, w * .12f, h * .84f, w * .17f, h * .79f)
         }
         drawPath(branch, Color(0xFF010C24), style = Stroke(width = w * .009f))
-        for (i in 0..112) {
+        for (i in 0..87) {
             val t = ((i * 53 + 7) % 101) / 100f
             val x = w * t * .36f
             val y = h * (.86f + .12f * ((i * 37 % 103) / 103f))
-            val radius = w * (.0028f + (i % 4) * .0012f)
-            val hue = if (i % 3 == 0) Color(0xFF7897E4) else Color(0xFF4B67BA)
-            val opacity = if (i % 4 == 0) .76f else .49f
+            val radius = w * (.0024f + (i % 4) * .0009f)
+            val hue = if (i % 3 == 0) Color(0xFF9A8EC4) else Color(0xFF6477B4)
+            val opacity = if (i % 4 == 0) .70f else .46f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
@@ -233,7 +233,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
                 )
             }
             drawCircle(
-                Color(0xFF91B9EE).copy(alpha = opacity * .55f),
+                Color(0xFFD2B4C7).copy(alpha = opacity * .55f),
                 radius = radius * .49f,
                 center = Offset(x, y),
             )
