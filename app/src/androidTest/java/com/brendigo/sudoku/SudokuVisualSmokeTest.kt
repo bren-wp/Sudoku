@@ -195,6 +195,7 @@ class SudokuVisualSmokeTest {
         val before = rule.onAllNodes(empty).fetchSemanticsNodes().size
         check(before > 0) { "The generated Sudoku had no editable empty cells" }
         rule.onAllNodes(empty).onFirst().performClick()
+        rule.onAllNodes(empty).onFirst().assertIsSelected()
         rule.onNodeWithTag("number-1").performClick()
         rule.waitForIdle()
         check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before - 1) {
@@ -229,6 +230,8 @@ class SudokuVisualSmokeTest {
     fun premiumReferenceSectionsAreReachable() {
         waitFor("home-nova-igra")
         rule.onNodeWithTag("brand-footer").assertExists()
+        rule.onAllNodes(hasContentDescription("Ponedjeljak:", substring = true))
+            .onFirst().assertExists()
         homeTile("postignuća")
         waitFor("screen-postignuća")
         // The four featured achievement rows must be visible at reference size.
@@ -251,6 +254,7 @@ class SudokuVisualSmokeTest {
 
         homeTile("statistika")
         waitFor("screen-statistika")
+        rule.onNodeWithText("Prekinute igre").assertExists()
         rule.onNodeWithText("Riješene igre po težini").assertExists()
         rule.onNodeWithText("Postotak dovršenosti").assertExists()
         // The entire 48dp history header is an accessible click target.
