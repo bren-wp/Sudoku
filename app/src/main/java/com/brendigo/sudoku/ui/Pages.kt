@@ -110,7 +110,8 @@ private fun StreakMarker(checked: Boolean, diameter: androidx.compose.ui.unit.Dp
 
 @Composable
 fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
-                 centered: Boolean = false) {
+                 centered: Boolean = false,
+                 titleOffset: androidx.compose.ui.unit.Dp = 0.dp) {
     if (!centered) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -134,7 +135,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
         Box(Modifier.fillMaxWidth().heightIn(min = 63.dp)) {
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = 50.dp)
-                    .testTag("screen-" + title.lowercase().replace(" ", "-"))
+                    .offset(y = titleOffset).testTag("screen-" + title.lowercase().replace(" ", "-"))
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -438,7 +439,9 @@ fun DailyPage(controller: SudokuController) {
         today.format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
     PageContent {
-        SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
+        SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
+            onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
+        Spacer(Modifier.height(32.dp))
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 92.dp), Ink.blue) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
@@ -905,7 +908,7 @@ fun AchievementsPage(controller: SudokuController) {
     val visible = if (showAll) featured + basic.drop(7) else featured
     PageContent {
         SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 75.dp), Ink.gold) {
             Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
                 Column { Subtitle("Ukupno bodova"); Text("$points", fontSize = 25.sp,
