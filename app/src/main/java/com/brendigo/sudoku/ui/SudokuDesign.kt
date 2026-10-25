@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -262,6 +264,9 @@ fun SudokuLogo(size: Dp) {
     val values = listOf("7", "", "", "", "3", "", "", "", "9")
     Column(
         Modifier.size(size)
+            .clearAndSetSemantics {
+                contentDescription = "Sudoku by Brendigo, logotip 7, 3, 9"
+            }
             .clip(RoundedCornerShape(13.dp))
             .background(Brush.linearGradient(listOf(Color(0xFF0058DF), Ink.cyan)))
             .padding(2.dp)
