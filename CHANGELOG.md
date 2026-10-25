@@ -1,3 +1,11 @@
+## 1.0.25 — Statistics compact-screen readability
+
+- Scale statistics tile icons and text at widths below 180dp per tile.
+- Allow labels to wrap onto two lines, preserving readable time values.
+- Add compact-emulator regression coverage for metric card separation and info dialog.
+- Keep real statistics, offline game state, seven-screen marketing gallery and original branding unchanged.
+- Pixel-perfect parity remains unverified without normalized 941×1672 owner references (#11).
+
 ## 1.0.24 — Statistics reference polish
 
 - Kept the seven real emulator screenshots and branded marketing README from 1.0.23.
