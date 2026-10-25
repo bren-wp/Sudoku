@@ -1099,27 +1099,53 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
 @Composable
 private fun StatTile(label: String, value: String, color: Color,
                      modifier: Modifier, onClick: () -> Unit) {
+    val tileId = when (label) {
+        "Odigrane igre" -> "played"
+        "Najbolje vrijeme" -> "best"
+        "Ukupno vrijeme" -> "total"
+        "Dnevni niz" -> "streak"
+        else -> "other"
+    }
     NeonPanel(modifier.heightIn(min = 86.dp)
+        .testTag("stat-tile-$tileId")
         .semantics { contentDescription = "$label: $value"; role = Role.Button }
         .clickable(onClick = onClick), color) {
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BrandIcon(when (label) {
-                "Odigrane igre" -> "gamepad"
-                "Najbolje vrijeme" -> "timer"
-                "Ukupno vrijeme" -> "timer"
-                "Dnevni niz" -> "flame"
-                else -> "statistics"
-            }, Modifier.size(37.dp), color)
-            Spacer(Modifier.width(9.dp))
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(label, color = Ink.muted, fontSize = 12.sp, maxLines = 1)
-                Text(value, color = Ink.white, fontSize = 22.sp,
-                    fontWeight = FontWeight.ExtraBold, maxLines = 1)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            // The 941px reference and compact emulator give each tile less
+            // than 180dp. Scale decorations instead of truncating the label.
+            val compact = maxWidth < 180.dp
+            Row(
+                Modifier.fillMaxWidth().padding(
+                    horizontal = if (compact) 7.dp else 10.dp,
+                    vertical = 8.dp,
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BrandIcon(when (label) {
+                    "Odigrane igre" -> "gamepad"
+                    "Najbolje vrijeme" -> "timer"
+                    "Ukupno vrijeme" -> "timer"
+                    "Dnevni niz" -> "flame"
+                    else -> "statistics"
+                }, Modifier.size(if (compact) 27.dp else 37.dp), color)
+                Spacer(Modifier.width(if (compact) 5.dp else 9.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        label, color = Ink.muted,
+                        fontSize = if (compact) 10.sp else 12.sp,
+                        lineHeight = if (compact) 12.sp else 14.sp,
+                        maxLines = 2,
+                    )
+                    Text(
+                        value, color = Ink.white,
+                        fontSize = if (compact && value.length > 7) 14.sp
+                            else if (compact) 18.sp else 22.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1,
+                    )
+                }
+                BrandIcon("next", Modifier.size(if (compact) 12.dp else 17.dp), color)
             }
-            BrandIcon("next", Modifier.size(17.dp), color)
         }
     }
 }
