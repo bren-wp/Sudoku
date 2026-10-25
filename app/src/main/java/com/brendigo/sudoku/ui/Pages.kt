@@ -144,7 +144,14 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AccentText(title, if (title.length > 16) 35 else 39)
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                    if (title == "Statistika") {
+                        BrandIcon("statistics", Modifier.size(29.dp), Ink.cyan)
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    AccentText(title, if (title.length > 16) 35 else 39)
+                }
                 if (description.isNotBlank()) {
                     Subtitle(description, Modifier.fillMaxWidth(), centered = true)
                 }
@@ -224,9 +231,14 @@ fun HomePage(controller: SudokuController) {
                         fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     Text(difficultyLabels[game.level] + " · " + game.size + "×" + game.size,
                         color = Ink.muted, fontSize = 13.sp)
-                    Text("◷ " + formatTime(game.elapsed) + "  ·  Još " +
-                        game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
-                        color = Ink.muted, fontSize = 12.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
+                        Text(formatTime(game.elapsed), color = Ink.muted, fontSize = 12.sp)
+                        Text("·  Još " +
+                            game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
+                            color = Ink.muted, fontSize = 12.sp)
+                    }
                     Spacer(Modifier.height(3.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
                         Modifier.fillMaxWidth(.55f), minHeight = 38.dp)
@@ -565,8 +577,11 @@ fun DailyPage(controller: SudokuController) {
                 val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
                     setOf(controller.stats.lastDaily)
                 }
-                val completedInWeek = (0..6).count {
-                    monday.plusDays(it.toLong()).toString() in completedDays
+                // Draw a segment only when BOTH neighboring days are complete.
+                // Counting all completions produces misleading fills after missed days.
+                val completedSegments = (0..5).filter { i ->
+                    monday.plusDays(i.toLong()).toString() in completedDays &&
+                        monday.plusDays((i + 1).toLong()).toString() in completedDays
                 }
                 Row(
                     Modifier.fillMaxWidth().drawBehind {
@@ -575,11 +590,10 @@ fun DailyPage(controller: SudokuController) {
                             Offset(size.width * .07f, lineY),
                             Offset(size.width * .93f, lineY),
                             strokeWidth = 2.dp.toPx())
-                        if (completedInWeek > 1) {
-                            drawLine(Ink.cyan.copy(alpha = .85f),
-                                Offset(size.width * .07f, lineY),
-                                Offset(size.width * (.07f +
-                                    .86f * (completedInWeek - 1) / 6f), lineY),
+                        completedSegments.forEach { i ->
+                            drawLine(Ink.cyan.copy(alpha = .90f),
+                                Offset(size.width * (.07f + .86f * i / 6f), lineY),
+                                Offset(size.width * (.07f + .86f * (i + 1) / 6f), lineY),
                                 strokeWidth = 2.dp.toPx())
                         }
                     },
@@ -945,7 +959,7 @@ private fun StatTile(label: String, value: String, color: Color,
                 Text(value, color = Ink.white, fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold, maxLines = 1)
             }
-            Text("›", color = color, fontSize = 17.sp)
+            BrandIcon("next", Modifier.size(17.dp), color)
         }
     }
 }
