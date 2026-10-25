@@ -355,39 +355,58 @@ fun HomePage(controller: SudokuController) {
                 controller.go(Screen.SETTINGS)
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 77.dp), highlight = Ink.blue) {
+        NeonPanel(
+            Modifier.fillMaxWidth().heightIn(min = 80.dp),
+            highlight = Ink.blue,
+        ) {
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 11.dp, vertical = 9.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                BrandIcon("flame", Modifier.size(28.dp), Ink.gold)
-                Column {
-                    Text("Trenutni niz", fontSize = 11.sp, color = Ink.muted)
+                BrandIcon("flame", Modifier.size(33.dp), Ink.gold)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("Trenutni niz", fontSize = 10.sp, color = Ink.muted)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("${controller.currentStreak(today)}", fontSize = 26.sp,
-                            color = Ink.gold, fontWeight = FontWeight.Bold)
-                        Text(" dana", fontSize = 12.sp, color = Ink.muted)
+                        Text("${controller.currentStreak(today)}", fontSize = 29.sp,
+                            color = Ink.gold, fontWeight = FontWeight.ExtraBold)
+                        Text(" dana", fontSize = 11.sp, color = Ink.muted)
                     }
                 }
-                Spacer(Modifier.width(5.dp))
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(
+                    Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
                     val completed = controller.stats.completedDailyDates.toSet()
-                    listOf("P", "U", "S", "Č", "P", "S", "N").forEachIndexed { index, weekday ->
+                    val weekdays = listOf("Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned")
+                    val fullDays = listOf("Ponedjeljak", "Utorak", "Srijeda",
+                        "Četvrtak", "Petak", "Subota", "Nedjelja")
+                    weekdays.forEachIndexed { index, day ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
-                        val fullDay = listOf("Ponedjeljak", "Utorak", "Srijeda",
-                            "Četvrtak", "Petak", "Subota", "Nedjelja")[index]
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            StreakMarker(checked, dayLabel = fullDay)
-                            Spacer(Modifier.height(4.dp))
-                            Text(weekday, fontSize = 9.sp, color = Ink.muted)
+                            StreakMarker(checked, diameter = 18.dp, dayLabel = fullDays[index])
+                            Spacer(Modifier.height(6.dp))
+                            Text(day, fontSize = 9.sp, color = Ink.muted)
                         }
                     }
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    BrandIcon("gift", Modifier.size(24.dp), Ink.gold)
-                    Text("Nagrada", fontSize = 9.sp, color = Ink.muted)
+                Box(Modifier.width(1.dp).height(44.dp).background(Ink.line.copy(alpha = .60f)))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Box(
+                        Modifier.size(31.dp)
+                            .background(Ink.cyan.copy(alpha = .10f), RoundedCornerShape(50))
+                            .border(1.3.dp, Ink.cyan, RoundedCornerShape(50)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        BrandIcon("gift", Modifier.size(21.dp), Ink.gold)
+                    }
+                    Text("Sljedeća\nnagrada", fontSize = 9.sp,
+                        color = Ink.muted, lineHeight = 11.sp, textAlign = TextAlign.Center)
                 }
             }
         }
