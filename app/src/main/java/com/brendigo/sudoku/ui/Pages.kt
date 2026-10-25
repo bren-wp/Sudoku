@@ -71,7 +71,7 @@ fun PageContent(content: @Composable ColumnScope.() -> Unit) {
             Modifier.fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(top = 10.dp, bottom = 68.dp),
+                .padding(top = 28.dp, bottom = 68.dp),
             verticalArrangement = Arrangement.spacedBy(7.dp),
         ) {
             content()
@@ -138,7 +138,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AccentText(title, if (title.length > 16) 30 else 34)
+                AccentText(title, if (title.length > 16) 35 else 39)
                 if (description.isNotBlank()) {
                     Subtitle(description, Modifier.fillMaxWidth(), centered = true)
                 }
@@ -904,7 +904,7 @@ fun AchievementsPage(controller: SudokuController) {
     val featured = basic.take(7) + data.last()
     val visible = if (showAll) featured + basic.drop(7) else featured
     PageContent {
-        SectionTitle("Postignuća", "Skupljaj nagrade rješavanjem", centered = true, onBack = { controller.go(Screen.HOME) })
+        SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
         NeonPanel(Modifier.fillMaxWidth(), Ink.gold) {
             Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
