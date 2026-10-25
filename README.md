@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.15`
+- Version: `1.0.16`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -248,3 +248,11 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - Prošireni emulator testovi za dnevne nagrade, interakcije i kartice.
 - Provjere na 941 × 1672 i 720 × 1280 px; korisnička spremanja ostaju sačuvana.
 - Potpuna 1:1 jednakost piksela još nije dokazana; detalji u issueu #11.
+
+## Sudoku 1.0.16 — statistika
+
+- Povećani grafikoni i naslovi prema referentnoj slici.
+- Nulta vrijednost u grafikonu težina više ne prikazuje lažni stupac.
+- Veći kružni grafikon i postotak, uz očuvane stvarne rezultate igrača.
+- Testovi provjeravaju oba grafikona na Android emulatorima.
+- Potpuna 1:1 jednakost nije potvrđena; issue #11 ostaje otvoren.
