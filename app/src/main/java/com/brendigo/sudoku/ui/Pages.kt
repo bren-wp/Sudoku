@@ -431,6 +431,28 @@ fun NewGamePage(controller: SudokuController) {
 }
 
 @Composable
+private fun DailyMetric(
+    icon: String, label: String, value: String,
+    color: Color, modifier: Modifier = Modifier,
+) {
+    NeonPanel(modifier.heightIn(min = 64.dp), color, corner = 13.dp) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BrandIcon(icon, Modifier.size(25.dp), color)
+            Spacer(Modifier.width(7.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(label, color = Ink.muted, fontSize = 8.sp,
+                    lineHeight = 10.sp, maxLines = 2)
+                Text(value, color = Ink.white, fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold, maxLines = 1)
+            }
+        }
+    }
+}
+
+@Composable
 fun DailyPage(controller: SudokuController) {
     val today = rememberToday()
     val scope = rememberCoroutineScope()
@@ -484,37 +506,28 @@ fun DailyPage(controller: SudokuController) {
             }
         }
         Spacer(Modifier.height(2.dp))
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 190.dp), Ink.gold) {
-            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("DANAŠNJI IZAZOV", color = Ink.gold, fontSize = 12.sp, letterSpacing = 2.sp)
-                AccentText("Misteriozna planina", 25)
-                Subtitle("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!")
-                Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            BrandIcon("statistics", Modifier.size(13.dp), Ink.gold)
-                            Spacer(Modifier.width(4.dp))
-                            Text("TEŽINA", color = Ink.muted, fontSize = 10.sp)
-                        }
-                        Text("Srednja", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            BrandIcon("timer", Modifier.size(13.dp), Ink.cyan)
-                            Spacer(Modifier.width(4.dp))
-                            Text("VRIJEME", color = Ink.muted, fontSize = 10.sp)
-                        }
-                        Text("12 min", color = Ink.white, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            BrandIcon("star", Modifier.size(13.dp), Ink.gold)
-                            Spacer(Modifier.width(4.dp))
-                            Text("NAGRADA", color = Ink.muted, fontSize = 10.sp)
-                        }
-                        Text("50 bodova", color = Ink.gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp), Ink.gold) {
+            Column(
+                Modifier.fillMaxWidth().heightIn(min = 202.dp).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("D A N A Š N J I   I Z A Z O V",
+                    color = Ink.muted, fontSize = 11.sp, maxLines = 1)
+                AccentText("Misteriozna planina", 28)
+                Text("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!",
+                    color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
+                    maxLines = 2)
+                Spacer(Modifier.height(13.dp))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    DailyMetric("statistics", "TEŽINA", "Srednja",
+                        Ink.gold, Modifier.weight(1f))
+                    DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
+                        Ink.cyan, Modifier.weight(1f))
+                    DailyMetric("star", "NAGRADA", "50 bodova",
+                        Ink.gold, Modifier.weight(1f))
                 }
             }
         }
