@@ -301,7 +301,24 @@ class SudokuVisualSmokeTest {
 
         homeTile("postignuća")
         waitFor("screen-postignuća")
-        rule.onNodeWithTag("achievement-summary").assertExists()
+        val summary = rule.onNodeWithTag("achievement-summary")
+        summary.assertExists()
+        val firstRow = rule.onNodeWithTag("achievement-prva-pobjeda")
+            .fetchSemanticsNode().boundsInRoot
+        val secondColumn = rule.onNodeWithTag("achievement-sedam-dana-zaredom")
+            .fetchSemanticsNode().boundsInRoot
+        val finalRow = rule.onNodeWithTag("achievement-sudoku-legenda")
+            .fetchSemanticsNode().boundsInRoot
+        val summaryBounds = summary.fetchSemanticsNode().boundsInRoot
+        check(firstRow.top >= summaryBounds.bottom) {
+            "First achievement card overlaps the score summary"
+        }
+        check(kotlin.math.abs(firstRow.top - secondColumn.top) <= 1f) {
+            "First two achievement cards do not share a row baseline"
+        }
+        check(firstRow.height > finalRow.height) {
+            "Reference achievement hierarchy requires compact lower feature rows"
+        }
         val award = rule.onNodeWithTag("achievement-prva-pobjeda")
         val heightInPixels = award.fetchSemanticsNode().boundsInRoot.height
         val minHeightInPixels = 145f * rule.activity.resources.displayMetrics.density
