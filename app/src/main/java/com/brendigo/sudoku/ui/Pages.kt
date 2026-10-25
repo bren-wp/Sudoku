@@ -164,7 +164,19 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                     AccentText(title, if (title.length > 16) 35 else 39)
                 }
                 if (description.isNotBlank()) {
-                    Subtitle(description, Modifier.fillMaxWidth(), centered = true)
+                    if (title == "Statistika" || title == "Postavke") {
+                        Text(
+                            description.uppercase(Locale("hr", "HR")),
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Ink.muted,
+                            fontSize = 9.sp,
+                            letterSpacing = 3.sp,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                        )
+                    } else {
+                        Subtitle(description, Modifier.fillMaxWidth(), centered = true)
+                    }
                 }
             }
             Box(
@@ -604,7 +616,7 @@ fun DailyPage(controller: SudokuController) {
     PageContent {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(18.dp))
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 98.dp)
             .testTag("daily-summary"), Ink.blue) {
             Row(
@@ -648,14 +660,20 @@ fun DailyPage(controller: SudokuController) {
             }
         }
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp)
-            .testTag("daily-hero"), Ink.gold) {
+            .testTag("daily-hero"), Ink.gold, warmGlowAlpha = .25f) {
             Column(
                 Modifier.fillMaxWidth().heightIn(min = 202.dp).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text("D A N A Š N J I   I Z A Z O V",
                     color = Ink.muted, fontSize = 11.sp, maxLines = 1)
-                AccentText("Misteriozna planina", 28)
+                Text(
+                    "Misteriozna planina",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Ink.white,
+                    maxLines = 1,
+                )
                 Text("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!",
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
