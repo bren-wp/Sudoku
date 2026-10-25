@@ -52,3 +52,13 @@ Achievement cards now expose actual detail dialogs, and the game lives use
 filled/outline vector hearts. **A new normalized RGB MAE=0 result has not been
 established**; reference backgrounds are visually richer than the Compose
 illustration. Keep #11 open.
+
+## v1.0.25 — compact Statistics cards
+
+The metric tiles now switch to smaller decorations and readable two-line labels
+when constrained below 180dp in width. The existing 941×1672 and 720×1280
+emulator smoke tests check card separation and the Statistics dialog interaction.
+The seven original owner PNG reference files are not present in this repository;
+therefore this change does **not** constitute measured MAE/SSIM improvement or
+proof of 1:1 matching. Capture and compare normalized screenshots before making
+pixel-perfect claims, keeping issue #11 open.
