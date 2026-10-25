@@ -75,7 +75,7 @@ fun GamePage(controller: SudokuController) {
                 BrandIcon("back", Modifier.size(24.dp), Ink.muted)
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                AccentText("Sudoku", if (compact) 32 else 37)
+                AccentText("Sudoku", if (compact) 36 else 40)
                 Subtitle(if (game.daily) "Dnevni izazov" else difficultyLabels[game.level],
                     centered = true)
             }
@@ -96,7 +96,7 @@ fun GamePage(controller: SudokuController) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                BrandIcon("timer", Modifier.size(18.dp), Ink.muted)
+                BrandIcon("timer", Modifier.size(21.dp), Ink.muted)
                 Spacer(Modifier.width(5.dp))
                 Text(formatTime(game.elapsed), fontSize = if (compact) 14.sp else 16.sp, color = Ink.muted)
             }
@@ -123,7 +123,7 @@ fun GamePage(controller: SudokuController) {
                         repeat(3) { index ->
                             BrandIcon(
                                 if (index < (3 - game.mistakes).coerceIn(0, 3)) "heart" else "heart-outline",
-                                Modifier.size(17.dp),
+                                Modifier.size(19.dp),
                                 if (index < 3 - game.mistakes) Ink.red else Ink.muted.copy(alpha = .6f),
                             )
                         }
@@ -248,7 +248,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                         val equal = highlight && selectionNumber > 0 && digit == selectionNumber
                         val wrong = showErrors && digit > 0 && digit != game.solution[index]
                         val bg = when {
-                            isSelected -> Color(0xFF007B9C).copy(alpha = .65f)
+                            isSelected -> Color(0xFF006D93).copy(alpha = .72f)
                             wrong -> Ink.red.copy(alpha = .17f)
                             equal -> Ink.blue.copy(alpha = .27f)
                             isPeer -> Ink.blue.copy(alpha = .12f)
@@ -263,7 +263,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                             Modifier.weight(1f).fillMaxHeight()
                                 .testTag("sudoku-cell-$index")
                                 .background(highlightColor)
-                                .border(if (isSelected) 1.7.dp else .35.dp,
+                                .border(if (isSelected) 2.dp else .35.dp,
                                     if (isSelected) Ink.cyan else Ink.line.copy(alpha = .55f))
                                 .semantics {
                                     role = Role.Button
