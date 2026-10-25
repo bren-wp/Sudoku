@@ -204,6 +204,32 @@ class SudokuController(context: Context) {
         }
     }
 
+    /** Expose actionable state so controls never look enabled when tapping is a no-op. */
+    fun canUndo(): Boolean {
+        val s = game ?: return false
+        return undoHistory.isNotEmpty() && !s.paused && !s.completed && !s.failed
+    }
+
+    fun canErase(): Boolean {
+        val s = game ?: return false
+        val cell = s.selected
+        return s.isEditable(cell) && !s.paused && !s.completed && !s.failed &&
+            (s.board[cell] != 0 || s.notes[cell] != 0)
+    }
+
+    fun canHint(): Boolean {
+        val s = game ?: return false
+        return !s.paused && !s.completed && !s.failed && s.hints < MAX_HINTS &&
+            s.board.indices.any { s.isEditable(it) && s.board[it] != s.solution[it] }
+    }
+
+    fun canEnter(): Boolean {
+        val s = game ?: return false
+        val cell = s.selected
+        return s.isEditable(cell) && !s.paused && !s.completed && !s.failed &&
+            (!s.notesMode || s.board[cell] == 0)
+    }
+
     fun select(index: Int) {
         val session = game ?: return
         if (index in session.board.indices && !session.paused && !session.completed && !session.failed) {
