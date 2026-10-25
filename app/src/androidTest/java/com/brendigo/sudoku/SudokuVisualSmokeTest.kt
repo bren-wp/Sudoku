@@ -236,6 +236,33 @@ class SudokuVisualSmokeTest {
     }
 
     @Test
+    fun dailyAndAchievementReferencePanelsRemainInteractive() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        rule.onNodeWithTag("daily-summary").assertExists()
+        rule.onNodeWithTag("daily-hero").assertExists()
+        rule.onNodeWithText("Zlatna značka").assertExists()
+        rule.onNodeWithTag("daily-leaderboard").performScrollTo().performClick()
+        rule.onNodeWithText("Osobna rang-lista").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag("achievement-summary").assertExists()
+        val award = rule.onNodeWithTag("achievement-prva-pobjeda")
+        val heightInPixels = award.fetchSemanticsNode().boundsInRoot.height
+        val minHeightInPixels = 145f * rule.activity.resources.displayMetrics.density
+        check(heightInPixels >= minHeightInPixels) {
+            "Achievement card height $heightInPixels px smaller than $minHeightInPixels px"
+        }
+        award.performScrollTo().performClick()
+        rule.onNodeWithTag("achievement-detail").assertExists()
+    }
+
+    @Test
     fun settingsButtonsAreVisibleAndFunctional() {
         waitFor("home-nova-igra")
         homeTile("postavke")
