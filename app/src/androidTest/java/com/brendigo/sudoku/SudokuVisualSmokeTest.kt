@@ -196,10 +196,11 @@ class SudokuVisualSmokeTest {
     @Test
     fun premiumReferenceSectionsAreReachable() {
         waitFor("home-nova-igra")
+        rule.onNodeWithTag("brand-footer").assertExists()
         homeTile("postignuća")
         waitFor("screen-postignuća")
         // The four featured achievement rows must be visible at reference size.
-        rule.onNodeWithTag("achievement-sudoku-legenda").assertIsDisplayed()
+        rule.onNodeWithTag("achievement-sudoku-legenda").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("achievement-prva-pobjeda").performClick()
         rule.onNodeWithTag("achievement-detail").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
@@ -211,6 +212,10 @@ class SudokuVisualSmokeTest {
 
         homeTile("statistika")
         waitFor("screen-statistika")
+        // The entire 48dp history header is an accessible click target.
+        rule.onNodeWithTag("open-game-history").performScrollTo().performClick()
+        rule.onNodeWithText("Povijest igara").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("stats-achievements").performScrollTo().performClick()
         waitFor("screen-postignuća")
         rule.onNodeWithTag("navigate-back").performClick()
@@ -222,7 +227,7 @@ class SudokuVisualSmokeTest {
         waitFor("home-nova-igra")
         homeTile("postavke")
         waitFor("screen-postavke")
-        rule.onNodeWithTag("sound-vibration").assertIsDisplayed()
+        rule.onNodeWithTag("sound-vibration").performScrollTo().assertIsDisplayed()
         // A complete setting row, not just the small thumb, must toggle.
         val darkSetting = rule.onNodeWithTag("setting-tamna-tema")
         darkSetting.assertIsDisplayed()
@@ -236,9 +241,9 @@ class SudokuVisualSmokeTest {
         check(darkSetting.fetchSemanticsNode().config[SemanticsProperties.ToggleableState] == initial) {
             "Second row press did not restore dark theme"
         }
-        rule.onNodeWithTag("setting-provjera-greške").assertIsDisplayed()
-        rule.onNodeWithTag("language-settings").assertIsDisplayed()
-        rule.onNodeWithTag("privacy-policy").assertIsDisplayed()
+        rule.onNodeWithTag("setting-provjera-greške").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("language-settings").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("privacy-policy").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("language-settings").performClick()
         rule.onNodeWithText("Aplikacija trenutačno podržava hrvatski jezik.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
