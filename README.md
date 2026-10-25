@@ -2,6 +2,50 @@
 
 A native **Android Sudoku** game written in **Kotlin + Jetpack Compose**, branded **Sudoku** (publisher: Brendigo). The app has original vector graphics inspired by the supplied design reference: midnight-blue scenery, cyan and blue glow, golden rewards, clean cards and a Croatian-first UI.
 
+<div align="center">
+
+![Sudoku by Brendigo — original vector logotype](branding/sudoku-logo.svg)
+
+### Više od igre. Vježba za um.
+
+**Hrvatska Sudoku igra za Android — bez oglasa, praćenja i internetske veze.**
+
+![Sudoku — promotional feature graphic](branding/sudoku-feature-graphic.svg)
+
+[![Preuzmi najnovije izdanje](https://img.shields.io/github/v/release/bren-wp/Sudoku?label=Preuzmi%20APK&color=0c9ef4)](https://github.com/bren-wp/Sudoku/releases/latest)
+[![Android CI](https://github.com/bren-wp/Sudoku/actions/workflows/android.yml/badge.svg)](https://github.com/bren-wp/Sudoku/actions/workflows/android.yml)
+[![Vizualni QA](https://github.com/bren-wp/Sudoku/actions/workflows/visual-smoke.yml/badge.svg)](https://github.com/bren-wp/Sudoku/actions/workflows/visual-smoke.yml)
+
+</div>
+
+## Igra koja trenira koncentraciju
+
+| Odaberi izazov | Igraj bez ometanja | Prati vlastiti napredak |
+| :-- | :-- | :-- |
+| Mreže **4×4, 6×6, 9×9** i šest razina težine | Bilješke, savjeti, poništavanje poteza i automatsko spremanje | Dnevni izazovi, statistika i **24 postignuća** |
+
+### Identitet aplikacije
+
+<img src="branding/sudoku-icon.svg" alt="Sudoku 7–3–9 — plavo cijan vektorska ikonica" width="136" />
+
+Tamna noćna paleta, cijan/plavi neonski naglasci i prepoznatljiva mreža **7–3–9**. Sve funkcionalne kontrole implementirane su u Kotlinu i Jetpack Composeu — bez lažnih slika zaslona.
+
+### Stvarne snimke aplikacije
+
+Snimke svih sedam ekrana izravno se snimaju s Android emulatora u GitHub Actions procesu. Pregledaj [zadnje stvarne snimke (941×1672 i 720×1280)](https://github.com/bren-wp/Sudoku/actions/workflows/visual-smoke.yml) u artefaktima uspješnog izvršavanja. Snimke nisu zamijenjene marketinškim mockupovima; za prikaz galerije unutar README-ja potrebno je zasebno dodati provjerene PNG-ove u repozitorij.
+
+**Ekrani:** Početna · Nova igra · Igra · Dnevni izazov · Statistika · Postignuća · Postavke.
+
+### Preuzimanje i provjera
+
+**[GitHub Releases — APK i AAB](https://github.com/bren-wp/Sudoku/releases/latest)**
+
+Bez izdavačkog ključa APK je **testno potpisan**, a AAB **nepotpisan**. Nemoj ih tretirati kao gotove Google Play produkcijske pakete. Funkcionalnost se provjerava JUnitom, Android Lintom, Gradle buildom i instrumentacijskim testovima.
+
+**Vizualna preciznost:** originalne reference od 941×1672 služe kao cilj; automatizirani testovi i usporedbe bilježe preostala odstupanja u [issueu #11](https://github.com/bren-wp/Sudoku/issues/11). Ne tvrdi se potpuna podudarnost piksela dok mjerenje to ne potvrdi.
+
+---
+
 ## Status
 
 Active implementation on the `main` branch with pull-request validation, automated Gradle unit/lint builds, emulator UI smoke tests, and versioned GitHub Releases. UI reference screens remain **design targets**, not claimed pixel-perfect reproductions. No third-party source or visual assets from SudokuNova are included; the engine and UI in this repository are newly written. This repository remains MIT licensed (see LICENSE).
@@ -36,7 +80,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.22`
+- Version: `1.0.23`
 - Primary language: Croatian
 
 ## Implementation notes
