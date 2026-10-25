@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
@@ -1223,19 +1224,30 @@ fun AchievementsPage(controller: SudokuController) {
                 }
             }
         }
-        visible.chunked(2).forEachIndexed { rowIndex, pair ->
-            // Reference: first two rows are taller, final two show more scenery.
-            // Remaining awards stay full-height when expanded.
-            val rowHeight = when {
-                rowIndex < 2 -> 151.dp
-                rowIndex < 4 -> 137.dp
-                else -> 151.dp
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        // The 941x1672 reference keeps two columns; narrow phones and large
+        // accessibility fonts get cards that can grow without clipping text.
+        val fontScale = LocalDensity.current.fontScale
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val stackCards = maxWidth < 300.dp || fontScale >= 1.4f
+            val compactCards = maxWidth < 375.dp || stackCards
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                visible.chunked(if (stackCards) 1 else 2).forEachIndexed { rowIndex, pair ->
+                    val rowHeight = when {
+                        compactCards && rowIndex < 2 -> 186.dp
+                        compactCards && rowIndex < 4 -> 174.dp
+                        compactCards -> 184.dp
+                        rowIndex < 2 -> 151.dp
+                        rowIndex < 4 -> 137.dp
+                        else -> 151.dp
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { achievement ->
                     val unlocked = achievement.current >= achievement.goal
                     val compactFeatured = rowIndex in 2..3
-                    NeonPanel(Modifier.weight(1f).height(rowHeight)
+                    NeonPanel(Modifier.weight(1f).then(
+                            if (compactCards) Modifier.heightIn(min = rowHeight)
+                            else Modifier.height(rowHeight)
+                        )
                         .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-"))
                         .semantics {
                             contentDescription = achievement.title +
@@ -1251,9 +1263,15 @@ fun AchievementsPage(controller: SudokuController) {
                         if (!unlocked) {
                             Box(Modifier.matchParentSize().background(Color(0x66051530)))
                         }
-                        Column(Modifier.fillMaxSize().padding(
-                            horizontal = 9.dp, vertical = if (rowIndex < 2) 9.dp else 7.dp),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Column(
+                            Modifier.fillMaxWidth()
+                                .then(if (compactCards) Modifier.heightIn(min = rowHeight)
+                                      else Modifier.fillMaxHeight())
+                                .padding(horizontal = 9.dp,
+                                    vertical = if (rowIndex < 2) 9.dp else 7.dp),
+                            verticalArrangement = Arrangement.spacedBy(
+                                if (compactCards) 4.dp else 2.dp),
+                        ) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Box(
                                     Modifier.size(if (compactFeatured) 36.dp else 43.dp),
@@ -1296,9 +1314,13 @@ fun AchievementsPage(controller: SudokuController) {
                                 }
                             }
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Text(achievement.title, color = Ink.white, fontSize = 15.sp,
-                                    modifier = Modifier.weight(1f),
-                                    fontWeight = FontWeight.Bold, lineHeight = 18.sp, maxLines = 2)
+                                Text(achievement.title, color = Ink.white,
+                                    fontSize = if (compactCards) 13.sp else 15.sp,
+                                    modifier = Modifier.weight(1f).testTag(
+                                        "achievement-title-" + achievement.title.lowercase().replace(" ", "-")),
+                                    fontWeight = FontWeight.Bold,
+                                    lineHeight = if (compactCards) 16.sp else 18.sp,
+                                    maxLines = if (compactCards) 3 else 2)
                                 if (unlocked) {
                                     Spacer(Modifier.width(4.dp))
                                     Box(
@@ -1312,9 +1334,13 @@ fun AchievementsPage(controller: SudokuController) {
                             }
                             Text(
                                 achievement.text, color = Ink.muted,
-                                fontSize = if (compactFeatured) 10.sp else 11.sp,
-                                lineHeight = if (compactFeatured) 12.sp else 13.sp,
-                                modifier = Modifier.weight(1f), maxLines = 2,
+                                fontSize = if (compactFeatured || compactCards) 10.sp else 11.sp,
+                                lineHeight = if (compactFeatured || compactCards) 12.sp else 13.sp,
+                                modifier = (if (compactCards) Modifier
+                                    else Modifier.weight(1f)).testTag(
+                                        "achievement-description-" +
+                                            achievement.title.lowercase().replace(" ", "-")),
+                                maxLines = if (compactCards) 4 else 2,
                             )
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
@@ -1330,6 +1356,8 @@ fun AchievementsPage(controller: SudokuController) {
                         }
                     }
                 }
+                    }
+                }
             }
         }
         // Available by scrolling, not partially rendered over the first
@@ -1337,6 +1365,11 @@ fun AchievementsPage(controller: SudokuController) {
         Spacer(Modifier.height(24.dp))
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 48.dp)
             .testTag("achievements-show-all")
+            .semantics {
+                contentDescription = if (showAll) "Prikaži istaknuta postignuća"
+                    else "Pogledaj svih 24 postignuća"
+                role = Role.Button
+            }
             .clickable { showAll = !showAll }, Ink.blue) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(if (showAll) "Prikaži istaknuta postignuća"
