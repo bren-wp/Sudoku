@@ -436,7 +436,7 @@ private fun DailyMetric(
     icon: String, label: String, value: String,
     color: Color, modifier: Modifier = Modifier,
 ) {
-    NeonPanel(modifier.heightIn(min = 64.dp), color, corner = 13.dp) {
+    NeonPanel(modifier.heightIn(min = 64.dp), Ink.blue, corner = 13.dp) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,
