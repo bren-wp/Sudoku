@@ -38,3 +38,16 @@ before any claim of 1:1 pixel parity. This repository does **not** yet certify a
 zero-error result; green functional CI tests are not proof of pixel equality.
 
 Avoid storing sensitive production information or signing keys alongside QA images.
+
+## Compact-screen regression gate
+
+The `Android visual smoke` workflow also runs the same functional Compose
+navigation and control tests at `720×1280` pixels, density 320dpi.
+The compact screenshots are uploaded as `sudoku-emulator-compact-screenshots`.
+This is a **layout and accessibility regression**, not an input to the
+941×1672 pixel comparison. Use the `sudoku-emulator-screen-references`
+artifact for the original-size comparison only.
+
+Real 1:1 validation requires normalized screen content, date, puzzle seed,
+statistics and font environment. Screenshot fixtures must never alter
+production gameplay or masquerade as working interface components.
