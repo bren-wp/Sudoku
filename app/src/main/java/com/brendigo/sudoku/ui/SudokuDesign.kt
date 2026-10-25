@@ -324,6 +324,7 @@ fun NeonPanel(
     highlight: Color = Ink.line,
     corner: Dp = 18.dp,
     warmPagoda: Boolean = true,
+    warmGlowAlpha: Float = .43f,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val warm = highlight == Ink.gold
@@ -348,7 +349,7 @@ fun NeonPanel(
 
             drawCircle(
                 Brush.radialGradient(
-                    listOf(highlight.copy(alpha = if (warm) .43f else .31f),
+                    listOf(highlight.copy(alpha = if (warm) warmGlowAlpha.coerceIn(0f, 1f) else .31f),
                         Color.Transparent),
                     center = Offset(w * .83f, h * .16f),
                     radius = w * .65f,

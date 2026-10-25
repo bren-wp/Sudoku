@@ -272,6 +272,7 @@ class SudokuVisualSmokeTest {
 
         homeTile("statistika")
         waitFor("screen-statistika")
+        rule.onNodeWithText("TVOJ SUDOKU PUT U BROJKAMA").assertExists()
         rule.onNodeWithText("Prekinute igre").assertExists()
         rule.onNodeWithText("Riješene igre po težini").assertExists()
         rule.onNodeWithText("Postotak dovršenosti").assertExists()
@@ -292,6 +293,13 @@ class SudokuVisualSmokeTest {
         waitFor("screen-dnevni-izazov")
         rule.onNodeWithTag("daily-summary").assertExists()
         rule.onNodeWithTag("daily-hero").assertExists()
+        val dailyTop = rule.onNodeWithTag("daily-summary")
+            .fetchSemanticsNode().boundsInRoot
+        val heroTop = rule.onNodeWithTag("daily-hero")
+            .fetchSemanticsNode().boundsInRoot
+        check(dailyTop.bottom <= heroTop.top + 1f) {
+            "Daily Challenge header must not overlap the hero"
+        }
         rule.onNodeWithText("Zlatna značka").assertExists()
         rule.onNodeWithTag("daily-leaderboard").performScrollTo().performClick()
         rule.onNodeWithText("Osobna rang-lista").assertExists()
@@ -334,6 +342,7 @@ class SudokuVisualSmokeTest {
         waitFor("home-nova-igra")
         homeTile("postavke")
         waitFor("screen-postavke")
+        rule.onNodeWithText("PRILAGODI IGRU SVOJIM ŽELJAMA").assertExists()
         rule.onNodeWithTag("sound-vibration").performScrollTo().assertIsDisplayed()
         // A complete setting row, not just the small thumb, must toggle.
         val darkSetting = rule.onNodeWithTag("setting-tamna-tema")
