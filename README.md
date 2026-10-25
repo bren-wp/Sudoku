@@ -36,7 +36,7 @@ GitHub Actions runs the checks for main and pull requests. A successful main bui
 - App name: **Sudoku**
 - Publisher: **Brendigo**
 - Application ID: `com.brendigo.sudoku`
-- Version: `1.0.12`
+- Version: `1.0.13`
 - Primary language: Croatian
 
 ## Implementation notes
@@ -191,3 +191,24 @@ publisher-signed Google Play AAB are *not* certified by these checks.
 - **Not a certified 1:1 match**: exact reference background textures, type
   rasterization and dynamic fixture data need another normalized 941×1672
   pixel-diff cycle. Follow issue #11.
+
+## Sudoku 1.0.13: responsive UI and full-size touch targets
+
+- Shared screen footer is anchored above the landscape instead of drifting
+  directly beneath short content. Scrollable screens reserve sufficient bottom
+  space so the footer cannot cover actionable controls.
+- Daily challenge shows the real dates for the seven weekdays and a clearly
+  named gold badge reward; these are live calendar-derived labels, not static
+  screenshots or hard-coded days.
+- Statistics history opens from the entire accessible 48dp header; achievement
+  previews now use names that exist in the 24-achievement catalog.
+- Game board sizing respects available viewport width in narrow multi-window
+  layouts. The notes toggle is inactive for paused or finished games.
+- Settings explicitly supply native vector icon kinds, removing unnecessary
+  text-label-to-icon switching; 7/3/9 branding now has TalkBack semantics.
+- Adaptive launcher icon gains a restrained cyan line glow inside its
+  existing safe mask.
+- Emulator QA runs at both 941×1672 (design reference) and 720×1280 (compact
+  display), recording actual Android screenshots separately.
+- Original artwork still has unmeasured differences to the Compose rendering.
+  **Pixel parity is not certified**; issue #11 stays open.
