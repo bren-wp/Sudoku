@@ -165,9 +165,12 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
             .semantics { contentDescription = title; role = Role.Button }
             .heightIn(min = 48.dp).heightIn(min = minHeight)
             .background(
-                Brush.horizontalGradient(if (enabled) listOf(Ink.cyan, Ink.blue) else listOf(Color.DarkGray, Color.Gray)),
+                Brush.horizontalGradient(if (enabled)
+                    listOf(Color(0xFF04BFFF), Ink.blue, Color(0xFF0755EE))
+                    else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
             )
+            .border(1.4.dp, if (enabled) Ink.cyan else Color.Gray, RoundedCornerShape(30.dp))
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
@@ -186,7 +189,7 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
             Text(
                 title.trimStart().removePrefix("▶").removePrefix("✓").trim(),
                 color = Ink.white, fontWeight = FontWeight.ExtraBold,
-                fontSize = 16.sp, maxLines = 1,
+                fontSize = 17.sp, maxLines = 1,
             )
         }
     }
@@ -311,7 +314,16 @@ private fun HomeTile(
         .heightIn(min = if (compact) 102.dp else 140.dp).clickable(onClick = onClick), highlight = accent) {
         Column(Modifier.padding(if (compact) 10.dp else 15.dp),
             verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 5.dp)) {
-            BrandIcon(homeIconFor(title), Modifier.size(if (compact) 25.dp else 34.dp), accent)
+            val iconSize = if (compact) 30.dp else 43.dp
+            Box(
+                Modifier.size(iconSize)
+                    .background(accent.copy(alpha = .13f), RoundedCornerShape(50))
+                    .border(1.3.dp, accent.copy(alpha = .95f), RoundedCornerShape(50)),
+                contentAlignment = Alignment.Center,
+            ) {
+                BrandIcon(homeIconFor(title),
+                    Modifier.size(if (compact) 22.dp else 29.dp), accent)
+            }
             Text(title, color = Ink.white, fontWeight = FontWeight.Bold,
                 fontSize = if (compact) 14.sp else 19.sp, maxLines = 2)
             Text(subtitle, color = Ink.muted, fontSize = if (compact) 10.sp else 12.sp, lineHeight = 17.sp)
@@ -427,7 +439,7 @@ fun DailyPage(controller: SudokuController) {
     }
     PageContent {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 92.dp), Ink.gold) {
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 92.dp), Ink.blue) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     BrandIcon("calendar", Modifier.size(23.dp), Ink.cyan)
@@ -1115,10 +1127,23 @@ fun SettingsPage(controller: SudokuController) {
 
 @Composable
 private fun SettingHeader(icon: String, title: String, subtitle: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        BrandIcon(icon, Modifier.size(24.dp), Ink.cyan)
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(39.dp)
+                .background(Ink.cyan.copy(alpha = .13f), RoundedCornerShape(12.dp))
+                .border(1.dp, Ink.cyan.copy(alpha = .85f), RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            BrandIcon(icon, Modifier.size(25.dp), Ink.cyan)
+        }
         Spacer(Modifier.width(14.dp))
-        Column { Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold); Subtitle(subtitle) }
+        Column {
+            Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold)
+            Subtitle(subtitle)
+        }
     }
 }
 
