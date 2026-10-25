@@ -3,6 +3,7 @@ package com.brendigo.sudoku.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
@@ -531,29 +532,63 @@ fun DailyPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 120.dp), Ink.cyan) {
-            Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("TVOJ NIZ", color = Ink.muted, letterSpacing = 3.sp, fontSize = 11.sp)
-                Text("Riješi izazove svaki dan za više nagrada!", color = Ink.white, fontSize = 12.sp)
+        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 122.dp), Ink.blue) {
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 13.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text("T V O J   N I Z", color = Ink.muted, fontSize = 11.sp,
+                        modifier = Modifier.weight(.40f))
+                    Text("Riješi izazove svaki dan za više nagrada!",
+                        color = Ink.muted, fontSize = 10.sp,
+                        textAlign = TextAlign.End, maxLines = 2,
+                        modifier = Modifier.weight(.60f))
+                }
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
                 val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
                     setOf(controller.stats.lastDaily)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, label ->
-                        val date = monday.plusDays(i.toLong())
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(label, color = Ink.muted, fontSize = 9.sp)
-                            Spacer(Modifier.height(4.dp))
-                            StreakMarker(date.toString() in completedDays, diameter = 28.dp)
-                            Spacer(Modifier.height(4.dp))
-                            Text("${date.dayOfMonth}.${date.monthValue}.",
-                                color = if (date == today) Ink.white else Ink.muted,
-                                fontSize = 9.sp,
-                                fontWeight = if (date == today) FontWeight.Bold else FontWeight.Normal,
-                            )
+                val completedInWeek = (0..6).count {
+                    monday.plusDays(it.toLong()).toString() in completedDays
+                }
+                Row(
+                    Modifier.fillMaxWidth().drawBehind {
+                        val lineY = size.height * .48f
+                        drawLine(Ink.blue.copy(alpha = .65f),
+                            Offset(size.width * .07f, lineY),
+                            Offset(size.width * .93f, lineY),
+                            strokeWidth = 2.dp.toPx())
+                        if (completedInWeek > 1) {
+                            drawLine(Ink.cyan.copy(alpha = .85f),
+                                Offset(size.width * .07f, lineY),
+                                Offset(size.width * (.07f +
+                                    .86f * (completedInWeek - 1) / 6f), lineY),
+                                strokeWidth = 2.dp.toPx())
                         }
-                    }
+                    },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED")
+                        .forEachIndexed { index, label ->
+                            val date = monday.plusDays(index.toLong())
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(label, color = Ink.muted, fontSize = 10.sp)
+                                Spacer(Modifier.height(7.dp))
+                                StreakMarker(date.toString() in completedDays,
+                                    diameter = 31.dp)
+                                Spacer(Modifier.height(7.dp))
+                                Text("${date.dayOfMonth}.${date.monthValue}.",
+                                    color = if (date == today) Ink.white else Ink.muted,
+                                    fontSize = 10.sp,
+                                    fontWeight = if (date == today)
+                                        FontWeight.Bold else FontWeight.Normal)
+                            }
+                        }
                 }
             }
         }
@@ -561,25 +596,39 @@ fun DailyPage(controller: SudokuController) {
             Text("✓ Današnji izazov već je riješen.", color = Ink.teal,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
-        SolidAction(
-            when {
-                controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
-                controller.isGenerating -> "Učitavanje…"
-                else -> "▶   Pokreni izazov"
-            },
-            { scope.launch { controller.startNew(9, 2, daily = true) } },
-            Modifier.fillMaxWidth(), !controller.isGenerating && !controller.dailyAlreadyCompleted()
-        )
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 48.dp)
-            .testTag("daily-leaderboard")
-            .semantics { contentDescription = "Otvori osobnu rang-listu"; role = Role.Button }
-            .clickable { showRanking = true }, Ink.purple) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    BrandIcon("trophy", Modifier.size(20.dp), Ink.purple)
-                    Spacer(Modifier.width(8.dp))
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            SolidAction(
+                when {
+                    controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
+                    controller.isGenerating -> "Učitavanje…"
+                    else -> "▶   Pokreni izazov"
+                },
+                { scope.launch { controller.startNew(9, 2, daily = true) } },
+                Modifier.fillMaxWidth(.80f),
+                !controller.isGenerating && !controller.dailyAlreadyCompleted(),
+                minHeight = 56.dp,
+            )
+        }
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            NeonPanel(
+                Modifier.fillMaxWidth(.64f).heightIn(min = 53.dp)
+                    .testTag("daily-leaderboard")
+                    .semantics {
+                        contentDescription = "Otvori osobnu rang-listu"
+                        role = Role.Button
+                    }
+                    .clickable { showRanking = true },
+                Ink.blue,
+            ) {
+                Row(
+                    Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    BrandIcon("trophy", Modifier.size(25.dp), Ink.purple)
+                    Spacer(Modifier.width(9.dp))
                     Text("Pogledaj rang-listu", color = Ink.white,
-                        fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                        maxLines = 1)
                 }
             }
         }
