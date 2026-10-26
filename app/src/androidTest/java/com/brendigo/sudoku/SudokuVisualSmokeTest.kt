@@ -553,6 +553,86 @@ class SudokuVisualSmokeTest {
     }
 
     @Test
+    fun allSevenSettingsPersistAfterActivityRecreation() {
+        waitFor("home-nova-igra")
+        homeTile("postavke")
+        waitFor("screen-postavke")
+
+        // Toggle each switch via its full accessible row, not a visual thumb.
+        val mainToggles = listOf(
+            "setting-tamna-tema", "setting-animacije",
+            "setting-automatske-bilješke", "setting-provjera-greške",
+            "setting-isticanje-brojeva",
+        )
+        val original = mainToggles.associateWith { tag ->
+            rule.onNodeWithTag(tag).performScrollTo()
+                .fetchSemanticsNode().config[SemanticsProperties.ToggleableState]
+        }
+        mainToggles.forEach { tag ->
+            val toggle = rule.onNodeWithTag(tag)
+            toggle.performScrollTo().performClick()
+            rule.waitForIdle()
+            check(toggle.fetchSemanticsNode().config[SemanticsProperties.ToggleableState] !=
+                original.getValue(tag)) { "Switch $tag did not respond to full-row tap" }
+        }
+
+        rule.onNodeWithTag("sound-vibration").performScrollTo().performClick()
+        val modalToggles = listOf("setting-zvuk", "setting-vibracija")
+        val modalOriginal = modalToggles.associateWith { tag ->
+            rule.onNodeWithTag(tag)
+                .fetchSemanticsNode().config[SemanticsProperties.ToggleableState]
+        }
+        modalToggles.forEach { tag -> rule.onNodeWithTag(tag).performClick() }
+
+        // Recreate while the sound dialog is still visible: the screen,
+        // modal and both disk-backed option changes must all survive.
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-postavke")
+        modalToggles.forEach { tag ->
+            val toggle = rule.onNodeWithTag(tag)
+            check(toggle.fetchSemanticsNode().config[SemanticsProperties.ToggleableState] !=
+                modalOriginal.getValue(tag)) { "$tag was not saved or modal state was lost" }
+            toggle.performClick() // Restore device-specific original preference.
+            rule.waitForIdle()
+            check(toggle.fetchSemanticsNode().config[SemanticsProperties.ToggleableState] ==
+                modalOriginal.getValue(tag)) { "$tag failed to restore initial state" }
+        }
+        rule.onNodeWithText("Zatvori").performClick()
+
+        mainToggles.forEach { tag ->
+            val toggle = rule.onNodeWithTag(tag)
+            toggle.performScrollTo()
+            check(toggle.fetchSemanticsNode().config[SemanticsProperties.ToggleableState] !=
+                original.getValue(tag)) { "Preference $tag did not persist after recreation" }
+            toggle.performClick() // Revert settings; tests must not alter user defaults.
+            rule.waitForIdle()
+            check(toggle.fetchSemanticsNode().config[SemanticsProperties.ToggleableState] ==
+                original.getValue(tag)) { "Preference $tag did not restore initial state" }
+        }
+        rule.onNodeWithTag("privacy-policy").performScrollTo().performClick()
+        rule.onNodeWithText("Sudoku by Brendigo možeš igrati bez registracije i internetske veze.")
+            .assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+    }
+
+    @Test
+    fun gameSettingsReturnToSamePuzzleAfterRecreation() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("game-settings").performClick()
+        waitFor("screen-postavke")
+
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-postavke")
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("sudoku-board")
+        rule.onNodeWithTag("sudoku-cell-80").assertExists()
+        rule.onNodeWithTag("number-9").assertExists()
+    }
+
+    @Test
     fun settingsButtonsAreVisibleAndFunctional() {
         waitFor("home-nova-igra")
         homeTile("postavke")
