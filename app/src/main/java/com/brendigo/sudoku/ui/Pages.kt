@@ -760,7 +760,9 @@ private fun DailyMetric(
 fun DailyPage(controller: SudokuController) {
     val today = rememberToday()
     val scope = rememberCoroutineScope()
-    var showRanking by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showRanking by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
     val formattedDate = remember(today) {
         today.format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
@@ -768,8 +770,53 @@ fun DailyPage(controller: SudokuController) {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
         Spacer(Modifier.height(32.dp))
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 98.dp)
-            .testTag("daily-summary"), Ink.blue) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val compactSummary = maxWidth < 355.dp ||
+                LocalDensity.current.fontScale >= 1.3f
+            NeonPanel(Modifier.fillMaxWidth().heightIn(min = if (compactSummary) 146.dp else 98.dp)
+                .testTag("daily-summary"), Ink.blue) {
+                if (compactSummary) {
+                    Column(
+                        Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("calendar", Modifier.size(25.dp), Ink.blue)
+                            Spacer(Modifier.width(9.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text("D A N A S", color = Ink.muted, fontSize = 10.sp)
+                                Text(formattedDate, color = Ink.white,
+                                    fontWeight = FontWeight.Bold, fontSize = 12.sp,
+                                    lineHeight = 15.sp, maxLines = 2)
+                            }
+                        }
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                BrandIcon("flame", Modifier.size(27.dp), Ink.gold)
+                                Spacer(Modifier.width(5.dp))
+                                Column {
+                                    Text("${controller.currentStreak(today)}", color = Ink.gold,
+                                        fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+                                    Text("DANA U NIZU", color = Ink.muted, fontSize = 9.sp)
+                                }
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                BrandIcon("gift", Modifier.size(27.dp), Ink.gold)
+                                Spacer(Modifier.width(6.dp))
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text("DANAŠNJA NAGRADA", color = Ink.gold,
+                                        fontSize = 9.sp, maxLines = 1)
+                                    Text("Zlatna značka", color = Ink.white,
+                                        fontSize = 12.sp, maxLines = 1)
+                                }
+                            }
+                        }
+                    }
+                } else {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -809,7 +856,12 @@ fun DailyPage(controller: SudokuController) {
                         fontSize = 11.sp, maxLines = 1)
                 }
             }
+                }
+            }
         }
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val compactHero = maxWidth < 355.dp ||
+                LocalDensity.current.fontScale >= 1.3f
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp)
             .testTag("daily-hero"), Ink.gold, warmGlowAlpha = .25f) {
             Column(
@@ -820,27 +872,41 @@ fun DailyPage(controller: SudokuController) {
                     color = Ink.muted, fontSize = 11.sp, maxLines = 1)
                 Text(
                     "Misteriozna planina",
-                    fontSize = 28.sp,
+                    fontSize = if (compactHero) 23.sp else 28.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Ink.white,
-                    maxLines = 1,
+                    maxLines = if (compactHero) 2 else 1,
                 )
                 Text("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!",
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
                 Spacer(Modifier.height(13.dp))
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                Column(
+                    Modifier.fillMaxWidth().testTag("daily-metrics"),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    DailyMetric("statistics", "TEŽINA", "Srednja",
-                        Ink.gold, Modifier.weight(1f))
-                    DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
-                        Ink.cyan, Modifier.weight(1f))
-                    DailyMetric("star", "NAGRADA", "50 bodova",
-                        Ink.gold, Modifier.weight(1f))
+                    if (compactHero) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            DailyMetric("statistics", "TEŽINA", "Srednja",
+                                Ink.gold, Modifier.weight(1f))
+                            DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
+                                Ink.cyan, Modifier.weight(1f))
+                        }
+                        DailyMetric("star", "NAGRADA", "50 bodova",
+                            Ink.gold, Modifier.fillMaxWidth().testTag("daily-reward-metric"))
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            DailyMetric("statistics", "TEŽINA", "Srednja",
+                                Ink.gold, Modifier.weight(1f))
+                            DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
+                                Ink.cyan, Modifier.weight(1f))
+                            DailyMetric("star", "NAGRADA", "50 bodova",
+                                Ink.gold, Modifier.weight(1f).testTag("daily-reward-metric"))
+                        }
+                    }
                 }
             }
+        }
         }
         NeonPanel(Modifier.fillMaxWidth().heightIn(min = 122.dp), Ink.blue) {
             Column(
@@ -860,9 +926,9 @@ fun DailyPage(controller: SudokuController) {
                         modifier = Modifier.weight(.60f))
                 }
                 val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-                val completedDays = controller.stats.completedDailyDates.toSet().ifEmpty {
-                    setOf(controller.stats.lastDaily)
-                }
+                // Include legacy lastDaily even when newer history entries exist.
+                val completedDays = (controller.stats.completedDailyDates +
+                    controller.stats.lastDaily).filter { it.isNotBlank() }.toSet()
                 // Draw a segment only when BOTH neighboring days are complete.
                 // Counting all completions produces misleading fills after missed days.
                 val completedSegments = (0..5).filter { i ->
@@ -913,6 +979,7 @@ fun DailyPage(controller: SudokuController) {
                 when {
                     controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
                     controller.isGenerating -> "Učitavanje…"
+                    controller.hasSavedDailyFor(today) -> "▶   Nastavi današnji izazov"
                     else -> "▶   Pokreni izazov"
                 },
                 { scope.launch { controller.startNew(9, 2, daily = true) } },
