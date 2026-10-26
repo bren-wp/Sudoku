@@ -1,3 +1,15 @@
+## 1.0.31 — Postavke: stabilni prekidači, dijalozi i povratak u igru
+
+- Android ponovno stvaranje aktivnosti sada čuva trenutno otvoren ekran Postavke i porijeklo navigacije; povratak iz postavki pozvanih tijekom igre vraća istu Sudoku partiju umjesto početnog ekrana.
+- Ekran igre vraća se nakon rekreacije kada postoji spremljena partija; već postojeći odabir nove igre ostaje podržan.
+- Otvoreni dijalozi zvuka/vibracije, jezika i pravila privatnosti zadržavaju stanje tijekom rotacije, promjene izgleda i rekreacije aktivnosti.
+- Redovi „Zvuk i vibracija” i „Pravila privatnosti” imaju jasnu semantičku ulogu gumba za pristupačnost.
+- Redovi kategorija i prekidači dobili su sigurno prelamanje opisa i razmak ispred prekidača, bez promjene referentnih boja, visine kontrola ili teksta stranica.
+- Instrumentacijski testovi prebacuju svih sedam stvarnih postavki (tema, animacije, automatske bilješke, provjera greške, isticanje brojeva, zvuk, vibracija) te provjeravaju trajni zapis nakon rekreacije i vraćaju izvorne vrijednosti.
+- Dodatni test potvrđuje očuvanu navigaciju iz igre → Postavke → rekreacija → natrag u istu Sudoku mrežu.
+- Bez izmjena pravila igre, generatora, statistika, privatnosti, brenda i tekstova stranica.
+- Točna pixel-perfect jednakost s izvornim PNG referencama još nije mjerena (#11).
+
 ## 1.0.30 — Dnevni izazov: čitljiv kalendar i nastavak partije
 
 - Na referentnom 941×1672 zaslonu zadržani su postojeći stupci i kartice dnevnog izazova.

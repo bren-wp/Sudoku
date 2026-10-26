@@ -1633,9 +1633,17 @@ fun AchievementsPage(controller: SudokuController) {
 @Composable
 fun SettingsPage(controller: SudokuController) {
     val opts = controller.options
-    var showPrivacy by remember { androidx.compose.runtime.mutableStateOf(false) }
-    var showSound by remember { androidx.compose.runtime.mutableStateOf(false) }
-    var showLanguage by remember { androidx.compose.runtime.mutableStateOf(false) }
+    // Android destroys and recreates Activities for rotation, multi-window,
+    // font scale and theme changes. Preserve any open Settings dialog.
+    var showPrivacy by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    var showSound by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    var showLanguage by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
     PageContent(topPadding = 20.dp) {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -1666,6 +1674,7 @@ fun SettingsPage(controller: SudokuController) {
         NeonPanel(
             Modifier.fillMaxWidth().heightIn(min = 58.dp)
                 .testTag("sound-vibration")
+                .semantics { contentDescription = "Zvuk i vibracija"; role = Role.Button }
                 .clickable { showSound = true },
             Ink.purple,
         ) {
@@ -1707,7 +1716,9 @@ fun SettingsPage(controller: SudokuController) {
                 SettingHeader("info", "O aplikaciji", "Sudoku by Brendigo")
                 NeonPanel(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                        .testTag("privacy-policy").clickable { showPrivacy = true },
+                        .testTag("privacy-policy")
+                        .semantics { contentDescription = "Otvori pravila privatnosti"; role = Role.Button }
+                        .clickable { showPrivacy = true },
                     Ink.blue,
                 ) {
                     Row(
@@ -1825,8 +1836,9 @@ private fun SettingHeader(icon: String, title: String, subtitle: String) {
             BrandIcon(icon, Modifier.size(25.dp), Ink.cyan)
         }
         Spacer(Modifier.width(14.dp))
-        Column {
-            Text(title, fontSize = 18.sp, color = Ink.white, fontWeight = FontWeight.Bold)
+        Column(Modifier.weight(1f)) {
+            Text(title, fontSize = 18.sp, color = Ink.white,
+                fontWeight = FontWeight.Bold, maxLines = 2)
             Subtitle(subtitle)
         }
     }
@@ -1843,9 +1855,11 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
     ) {
         BrandIcon(icon, Modifier.size(21.dp), Ink.cyan)
         Spacer(Modifier.width(13.dp))
-        Column(Modifier.weight(1f)) {
-            Text(title, fontSize = 14.sp, color = Ink.white, fontWeight = FontWeight.SemiBold)
-            Text(caption, color = Ink.muted, fontSize = 11.sp, lineHeight = 13.sp)
+        Column(Modifier.weight(1f).padding(end = 7.dp)) {
+            Text(title, fontSize = 14.sp, color = Ink.white,
+                fontWeight = FontWeight.SemiBold, maxLines = 2, lineHeight = 18.sp)
+            Text(caption, color = Ink.muted, fontSize = 11.sp,
+                lineHeight = 14.sp, maxLines = 3)
         }
         // The Material3 default thumb inherited the app's purple theme.
         // Render the brand switch ourselves; the parent remains the one

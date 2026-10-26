@@ -140,6 +140,10 @@ class SudokuController(context: Context) {
         toast = ""
     }
 
+    /** Used only for restoring the Settings return destination on activity recreation. */
+    fun settingsOpenedFromGame(): Boolean =
+        page == Screen.SETTINGS && settingsOrigin == Screen.GAME
+
     fun back() {
         if (page == Screen.SETTINGS && settingsOrigin == Screen.GAME) {
             page = Screen.GAME
