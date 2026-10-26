@@ -323,7 +323,7 @@ fun HomePage(controller: SudokuController) {
                         fontSize = 10.sp, letterSpacing = 2.sp)
                     Text("Prekinuta igra", color = Ink.white,
                         fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
-                    Text(difficultyLabels[game.level] + " težina",
+                    Text(difficultyTitle(game.level),
                         color = Ink.muted, fontSize = 14.sp)
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)) {
