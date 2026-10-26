@@ -1,3 +1,15 @@
+## 1.0.29 — Igra: sigurna pauza i pristupačan HUD
+
+- Sudoku brojevi i bilješke više nisu vidljivi dok je igra pauzirana; ploča pokazuje oznaku pauze bez mijenjanja spremljene partije.
+- Nakon nastavka vraćaju se ista mreža, potezi i interaktivne numeričke tipke.
+- HUD prelazi u dva retka na iznimno uskim ekranima ili uz uvećani sustavni font, kako bi mjerač, napredak i greške ostali čitljivi.
+- Zaglavlje igre prilagođava širinu naslova, a tipkovnica smanjuje font brojeva samo na vrlo uskim tipkama.
+- Akcije „Bilješke”, „Savjet”, „Poništi” i „Izbriši” prilagođavaju ikone/tekst uskim karticama; semantički status bilježaka i broj preostalih savjeta dostupni su čitačima zaslona.
+- Pojedinačne Sudoku ćelije ne predstavljaju se kao aktivne nakon završetka ili neuspjeha igre.
+- Regresijski test pokreće pravu partiju, provjerava HUD, pauzu, skrivanje ćelija i nastavak sa svim kontrolama.
+- Mehanika igre, generator zagonetki, podaci, statistika i logotip 7–3–9 nisu mijenjani.
+- Pixel-perfect 1:1 nije dokazano jer izvorne dizajnerske PNG reference nisu u GitHub repozitoriju (#11).
+
 ## 1.0.28 — Nova igra: prilagodljiv odabir veličine i težine
 
 - Zadržan postojeći 192 dp odabir 9×9 / 6×6 / 4×4 na referentnom zaslonu; na iznimno uskim uređajima odabir se sužava i ne preklapa gumb za povratak.

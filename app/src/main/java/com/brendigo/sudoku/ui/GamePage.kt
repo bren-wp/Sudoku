@@ -27,6 +27,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
@@ -55,6 +56,9 @@ fun GamePage(controller: SudokuController) {
     }
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxHeight < 730.dp
+        val narrowWidth = maxWidth < 340.dp
+        val tinyTitle = maxWidth < 275.dp
+        val largeText = LocalDensity.current.fontScale >= 1.4f
         val horizontal = if (compact) 12.dp else 20.dp
         // Width is the hard limit: a 216dp minimum previously overflowed
         // narrow multi-window and foldable screens.
@@ -76,7 +80,12 @@ fun GamePage(controller: SudokuController) {
                 BrandIcon("back", Modifier.size(24.dp), Ink.muted)
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                AccentText("Sudoku", if (compact) 36 else 40)
+                AccentText("Sudoku", when {
+                    tinyTitle -> 22
+                    narrowWidth || largeText -> 28
+                    compact -> 36
+                    else -> 40
+                })
                 Subtitle(if (game.daily) "Dnevni izazov" else difficultyLabels[game.level],
                     centered = true)
             }
@@ -86,7 +95,7 @@ fun GamePage(controller: SudokuController) {
                 .clickable { controller.togglePause() }, contentAlignment = Alignment.Center) {
                 BrandIcon(if (game.paused) "play" else "pause", Modifier.size(23.dp), Ink.muted)
             }
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(if (narrowWidth) 4.dp else 8.dp))
             Box(Modifier.size(48.dp).testTag("game-settings")
                 .semantics { contentDescription = "Postavke igre"; role = Role.Button }.background(Color(0x770B2256), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.SETTINGS) }, contentAlignment = Alignment.Center) {
@@ -94,19 +103,54 @@ fun GamePage(controller: SudokuController) {
             }
         }
         Spacer(Modifier.height(if (compact) 1.dp else 4.dp))
+        BoxWithConstraints(Modifier.fillMaxWidth().testTag("game-hud")) {
+            val stackedHud = maxWidth < 305.dp || largeText
+            if (stackedHud) {
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("timer", Modifier.size(19.dp), Ink.muted)
+                            Spacer(Modifier.width(5.dp))
+                            Text(formatTime(game.elapsed), color = Ink.muted,
+                                fontSize = 14.sp, modifier = Modifier.testTag("game-time"))
+                        }
+                        Text(
+                            if (controller.options.checkMistakes)
+                                "Greške: ${game.mistakes}/3" else "Bez ograničenja",
+                            fontSize = 12.sp, color = Ink.muted,
+                            modifier = Modifier.testTag("game-mistakes"))
+                    }
+                    val correct = game.correctCount()
+                    val progress = correct.toFloat() / game.board.size
+                    Column(Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Još ${game.board.size - correct} polja · ${(progress * 100).toInt()}%",
+                            fontSize = 12.sp, color = Ink.cyan)
+                        Spacer(Modifier.height(4.dp))
+                        Box(Modifier.fillMaxWidth().height(6.dp).testTag("game-progress")
+                            .background(Ink.blue.copy(alpha = .27f), RoundedCornerShape(10.dp))) {
+                            Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
+                                .background(Ink.cyan, RoundedCornerShape(10.dp)))
+                        }
+                    }
+                }
+            } else {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 BrandIcon("timer", Modifier.size(21.dp), Ink.muted)
                 Spacer(Modifier.width(5.dp))
-                Text(formatTime(game.elapsed), fontSize = if (compact) 14.sp else 16.sp, color = Ink.muted)
+                Text(formatTime(game.elapsed), fontSize = if (compact) 14.sp else 16.sp,
+                    color = Ink.muted, modifier = Modifier.testTag("game-time"))
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 val correct = game.correctCount()
                 val percentage = correct.toFloat() / game.board.size
                 Text("Još ${game.board.size - correct} polja", color = Ink.muted, fontSize = 11.sp)
                 Spacer(Modifier.height(4.dp))
-                Box(Modifier.fillMaxWidth().height(6.dp)
+                Box(Modifier.fillMaxWidth().height(6.dp).testTag("game-progress")
                     .background(Ink.blue.copy(alpha = .27f), RoundedCornerShape(10.dp))) {
                     Box(Modifier.fillMaxWidth(percentage).fillMaxHeight()
                         .background(Ink.cyan, RoundedCornerShape(10.dp)))
@@ -133,7 +177,10 @@ fun GamePage(controller: SudokuController) {
                     Text("∞", color = Ink.cyan, fontSize = 20.sp)
                 }
                 Text(if (controller.options.checkMistakes) "Greške: ${game.mistakes}/3"
-                    else "Bez ograničenja", color = Ink.muted, fontSize = 10.sp)
+                    else "Bez ograničenja", color = Ink.muted, fontSize = 10.sp,
+                    modifier = Modifier.testTag("game-mistakes"))
+            }
+        }
             }
         }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -233,6 +280,22 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
             .border(2.dp, Ink.blue, RoundedCornerShape(14.dp))
             .padding(6.dp),
     ) {
+        if (game.paused) {
+            // Conceal digits and notes while the stopwatch is stopped.
+            Column(
+                Modifier.fillMaxSize().testTag("sudoku-board-paused")
+                    .semantics { contentDescription = "Sudoku ploča skrivena tijekom pauze" },
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                BrandIcon("lock", Modifier.size(38.dp), Ink.cyan)
+                Spacer(Modifier.height(12.dp))
+                Text("Ploča je skrivena", color = Ink.white,
+                    fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text("Nastavi igru za prikaz brojeva", color = Ink.muted,
+                    fontSize = 12.sp, textAlign = TextAlign.Center)
+            }
+        } else {
         Column(Modifier.fillMaxSize()) {
             repeat(n) { r ->
                 Row(Modifier.weight(1f)) {
@@ -282,7 +345,9 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                             else -> "uneseno ${digit}"
                                         }
                                 }
-                                .clickable { onSelect(index) },
+                                .clickable(enabled = !game.completed && !game.failed) {
+                                    onSelect(index)
+                                },
                             contentAlignment = Alignment.Center,
                         ) {
                             if (digit > 0) {
@@ -322,6 +387,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                     Offset(0f, y), Offset(size.width, y), strokeWidth = 2.2.dp.toPx())
             }
         }
+        }
     }
 }
 
@@ -335,11 +401,17 @@ private fun GameTool(
     NeonPanel(
         modifier.testTag(tag)
             .alpha(if (enabled) 1f else .53f)
-            .semantics { contentDescription = name; role = Role.Button }
+            .semantics {
+                contentDescription = if (badge != null) "$name, preostalo $badge" else name
+                role = Role.Button
+                selected = active
+            }
             .heightIn(min = 48.dp).height(height)
             .clickable(enabled = enabled, onClick = onClick),
         if (active) Ink.cyan else accent, corner = 14.dp,
     ) {
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val narrowTool = maxWidth < 72.dp
         Column(
             Modifier.fillMaxSize().padding(5.dp),
             verticalArrangement = Arrangement.Center,
@@ -353,11 +425,13 @@ private fun GameTool(
                     "Izbriši" -> "erase"
                     else -> "grid"
                 },
-                Modifier.size(25.dp),
+                Modifier.size(if (narrowTool) 20.dp else 25.dp),
                 if (active) Ink.cyan else Ink.muted,
             )
             Spacer(Modifier.height(3.dp))
-            Text(name, color = Ink.white, fontSize = 11.sp, maxLines = 1)
+            Text(name, color = Ink.white,
+                fontSize = if (narrowTool) 10.sp else 11.sp, maxLines = 1)
+        }
         }
         if (badge != null) {
             Box(
@@ -420,6 +494,11 @@ private fun NumberRow(
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val gap = 7.dp
         val keyWidth = (maxWidth - gap * (columns - 1)) / columns
+        val keyFontSize = when {
+            keyWidth < 42.dp -> 20.sp
+            keyWidth < 56.dp -> 25.sp
+            else -> 29.sp
+        }
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
@@ -435,7 +514,7 @@ private fun NumberRow(
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(value.toString(), color = Ink.white,
-                            fontSize = 29.sp, fontWeight = FontWeight.SemiBold)
+                            fontSize = keyFontSize, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
