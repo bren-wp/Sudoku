@@ -298,15 +298,21 @@ fun HomePage(controller: SudokuController) {
         Spacer(Modifier.height(14.dp))
         BrandHeader(Modifier.fillMaxWidth())
         Spacer(Modifier.height(9.dp))
-        Text(
-            "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
-            color = Ink.muted, fontSize = 10.sp, modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            Text(
+                "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
+                color = Ink.muted,
+                fontSize = if (maxWidth < 375.dp) 9.sp else 10.sp,
+                modifier = Modifier.fillMaxWidth().testTag("home-slogan"),
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+            )
+        }
         Spacer(Modifier.height(5.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game")
+                .semantics { contentDescription = "Nastavi spremljenu Sudoku igru"; role = Role.Button }
                 .clickable { controller.go(Screen.GAME) }
                 .heightIn(min = 174.dp), highlight = Ink.blue) {
                 // Decorative, non-interactive canvas behind the real resume action.
@@ -336,6 +342,7 @@ fun HomePage(controller: SudokuController) {
         if (game?.daily == true && controller.hasSavedRegularGame()) {
             NeonPanel(
                 Modifier.fillMaxWidth().testTag("resume-classic")
+                    .semantics { contentDescription = "Nastavi spremljenu klasičnu igru"; role = Role.Button }
                     .clickable { controller.resumeRegularGame() }
                     .heightIn(min = 72.dp),
                 highlight = Ink.teal
@@ -353,29 +360,112 @@ fun HomePage(controller: SudokuController) {
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            HomeTile("Nova igra", "Odaberi težinu\ni započni novu igru", Ink.teal, Modifier.weight(1f)) {
-                controller.go(Screen.NEW_GAME)
-            }
-            HomeTile("Dnevni izazov", "Svaki dan nova\nzagonetka", Ink.gold, Modifier.weight(1f)) {
-                controller.go(Screen.DAILY)
+        // Keep the reference 2+3 card grid on full-size phones. Compact
+        // widths cannot fit three readable tiles and their chevrons in one row.
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth >= 300.dp) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    HomeTile("Nova igra", "Odaberi težinu\ni započni novu igru",
+                        Ink.teal, Modifier.weight(1f)) { controller.go(Screen.NEW_GAME) }
+                    HomeTile("Dnevni izazov", "Svaki dan nova\nzagonetka",
+                        Ink.gold, Modifier.weight(1f)) { controller.go(Screen.DAILY) }
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HomeTile("Nova igra", "Odaberi težinu\ni započni novu igru",
+                        Ink.teal, Modifier.fillMaxWidth()) { controller.go(Screen.NEW_GAME) }
+                    HomeTile("Dnevni izazov", "Svaki dan nova\nzagonetka",
+                        Ink.gold, Modifier.fillMaxWidth()) { controller.go(Screen.DAILY) }
+                }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeTile("Statistika", "Prati svoj napredak", Ink.blue, Modifier.weight(1f), compact = true) {
-                controller.go(Screen.STATS)
-            }
-            HomeTile("Postignuća", "Otkrij sve nagrade", Ink.purple, Modifier.weight(1f), compact = true) {
-                controller.go(Screen.ACHIEVEMENTS)
-            }
-            HomeTile("Postavke", "Prilagodi igru", Ink.muted, Modifier.weight(1f), compact = true) {
-                controller.go(Screen.SETTINGS)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth >= 370.dp) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    HomeTile("Statistika", "Prati svoj napredak",
+                        Ink.blue, Modifier.weight(1f), compact = true) {
+                        controller.go(Screen.STATS)
+                    }
+                    HomeTile("Postignuća", "Otkrij sve nagrade",
+                        Ink.purple, Modifier.weight(1f), compact = true) {
+                        controller.go(Screen.ACHIEVEMENTS)
+                    }
+                    HomeTile("Postavke", "Prilagodi igru",
+                        Ink.muted, Modifier.weight(1f), compact = true) {
+                        controller.go(Screen.SETTINGS)
+                    }
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        HomeTile("Statistika", "Prati svoj napredak",
+                            Ink.blue, Modifier.weight(1f), compact = true) {
+                            controller.go(Screen.STATS)
+                        }
+                        HomeTile("Postignuća", "Otkrij sve nagrade",
+                            Ink.purple, Modifier.weight(1f), compact = true) {
+                            controller.go(Screen.ACHIEVEMENTS)
+                        }
+                    }
+                    HomeTile("Postavke", "Prilagodi igru",
+                        Ink.muted, Modifier.fillMaxWidth(), compact = true) {
+                        controller.go(Screen.SETTINGS)
+                    }
+                }
             }
         }
         NeonPanel(
-            Modifier.fillMaxWidth().heightIn(min = 80.dp),
+            Modifier.fillMaxWidth().heightIn(min = 80.dp)
+                .testTag("home-streak"),
             highlight = Ink.blue,
         ) {
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                if (maxWidth < 370.dp) {
+                    Column(
+                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            BrandIcon("flame", Modifier.size(29.dp), Ink.gold)
+                            Column {
+                                Text("Trenutni niz", fontSize = 10.sp, color = Ink.muted)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("${controller.currentStreak(today)}",
+                                        fontSize = 25.sp, color = Ink.gold,
+                                        fontWeight = FontWeight.ExtraBold)
+                                    Text(" dana", fontSize = 11.sp, color = Ink.muted)
+                                }
+                            }
+                            Spacer(Modifier.weight(1f))
+                            BrandIcon("gift", Modifier.size(24.dp), Ink.gold)
+                            Text("Sljedeća\nnagrada", fontSize = 10.sp,
+                                color = Ink.muted, lineHeight = 12.sp)
+                        }
+                        val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+                        val completed = controller.stats.completedDailyDates.toSet()
+                        val weekdays = listOf("Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned")
+                        val fullDays = listOf("Ponedjeljak", "Utorak", "Srijeda",
+                            "Četvrtak", "Petak", "Subota", "Nedjelja")
+                        Row(
+                            Modifier.fillMaxWidth().testTag("home-week-days"),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            weekdays.forEachIndexed { index, day ->
+                                val checked = monday.plusDays(index.toLong()).toString() in completed
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    StreakMarker(checked, diameter = 18.dp,
+                                        dayLabel = fullDays[index])
+                                    Spacer(Modifier.height(5.dp))
+                                    Text(day, fontSize = 9.sp, color = Ink.muted)
+                                }
+                            }
+                        }
+                    }
+                } else {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -424,6 +514,8 @@ fun HomePage(controller: SudokuController) {
                     }
                     Text("Sljedeća\nnagrada", fontSize = 9.sp,
                         color = Ink.muted, lineHeight = 11.sp, textAlign = TextAlign.Center)
+                }
+            }
                 }
             }
         }
