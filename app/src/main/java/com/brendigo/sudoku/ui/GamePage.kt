@@ -415,7 +415,7 @@ private fun GameTool(
         if (active) Ink.cyan else accent, corner = 14.dp,
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            val narrowTool = maxWidth < 72.dp
+            val narrowTool = maxWidth < 83.dp
             val condensedTool = narrowTool || maxHeight < 58.dp
         Column(
             Modifier.fillMaxSize().padding(5.dp),
