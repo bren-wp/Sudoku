@@ -71,7 +71,9 @@ fun GamePage(controller: SudokuController) {
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(horizontal = horizontal, vertical = if (compact) 6.dp else 12.dp),
-            verticalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 8.dp),
+            // The 941×1672 reference places the board directly below a compact
+            // HUD. 8dp gaps across seven children shifted the entire game down.
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(48.dp).testTag("game-back")
@@ -150,12 +152,16 @@ fun GamePage(controller: SudokuController) {
                 val percentage = correct.toFloat() / game.board.size
                 Text("Još ${game.emptyCells} praznih polja", color = Ink.muted, fontSize = 11.sp)
                 Spacer(Modifier.height(4.dp))
-                Box(Modifier.fillMaxWidth().height(6.dp).testTag("game-progress")
-                    .background(Ink.blue.copy(alpha = .27f), RoundedCornerShape(10.dp))) {
-                    Box(Modifier.fillMaxWidth(percentage).fillMaxHeight()
-                        .background(Ink.cyan, RoundedCornerShape(10.dp)))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.weight(1f).height(6.dp).testTag("game-progress")
+                        .background(Ink.blue.copy(alpha = .27f), RoundedCornerShape(10.dp))) {
+                        Box(Modifier.fillMaxWidth(percentage).fillMaxHeight()
+                            .background(Ink.cyan, RoundedCornerShape(10.dp)))
+                    }
+                    Spacer(Modifier.width(7.dp))
+                    Text("${(percentage * 100).toInt()}%", fontSize = 11.sp,
+                        color = Ink.cyan, maxLines = 1)
                 }
-                Text("${(percentage * 100).toInt()}%", fontSize = 11.sp, color = Ink.cyan)
             }
             Column(horizontalAlignment = Alignment.End) {
                 if (controller.options.checkMistakes) {
