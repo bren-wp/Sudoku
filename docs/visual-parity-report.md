@@ -121,3 +121,15 @@ both sizes, marker reachability and the stateful challenge resume path across
 Android activity recreation. The owner's original design PNG references are
 still missing, so an exact pixel-level match / new MAE/SSIM measurements are
 not claimed; #11 remains open.
+
+## v1.0.31 — Settings screen stability and accessibility
+
+The reference layout retains existing section panels, icons, custom brand
+switches, language information, privacy copy and footer. Small layouts and
+larger Android fonts can wrap setting titles and captions without colliding
+with the 55dp switch. The Sound, Language and Privacy dialogs use Compose
+saveable state, and the Settings origin survives Activity recreation so Back
+returns to the running Sudoku board. UI instrumentation verifies all seven
+persisted settings as well as activity recreation from in-game Settings on
+941×1672 and 720×1280 emulators. Original owner PNGs are still absent from
+this repository; strict MAE/SSIM and 1:1 pixel parity remain unverified (#11).
