@@ -97,3 +97,14 @@ Activity recreation while the configuration is open. UI smoke tests cover the
 selector boundaries, all six difficulty options and an actual generated 6×6
 board after rotation. Full RGB MAE/SSIM comparison against owner PNG source
 files remains unavailable; issue #11 stays open.
+
+## v1.0.29 — Gameplay board and controls
+
+The default/reference-size game keeps existing board, vector-number keypad,
+undo/notes/hint/erase panel dimensions and night background. At very narrow
+widths or large Android font scaling, the timer/completion/mistake HUD stacks,
+headings scale and numeric key text shrinks to fit available key width. Pausing
+now conceals puzzle digits and notes; resuming returns the same state. UI smoke
+tests cover state, accessible controls and the concealed board on both emulator
+sizes. Original reference PNGs remain unavailable; exact visual matching and
+MAE/SSIM zero are unverified, tracked in issue #11.
