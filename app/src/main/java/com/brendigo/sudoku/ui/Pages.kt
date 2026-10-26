@@ -888,18 +888,18 @@ fun DailyPage(controller: SudokuController) {
                     if (compactHero) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             DailyMetric("statistics", "TEŽINA", "Srednja",
-                                Ink.gold, Modifier.weight(1f))
+                                Ink.gold, Modifier.weight(1f).testTag("daily-difficulty-metric"))
                             DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
-                                Ink.cyan, Modifier.weight(1f))
+                                Ink.cyan, Modifier.weight(1f).testTag("daily-time-metric"))
                         }
                         DailyMetric("star", "NAGRADA", "50 bodova",
                             Ink.gold, Modifier.fillMaxWidth().testTag("daily-reward-metric"))
                     } else {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             DailyMetric("statistics", "TEŽINA", "Srednja",
-                                Ink.gold, Modifier.weight(1f))
+                                Ink.gold, Modifier.weight(1f).testTag("daily-difficulty-metric"))
                             DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
-                                Ink.cyan, Modifier.weight(1f))
+                                Ink.cyan, Modifier.weight(1f).testTag("daily-time-metric"))
                             DailyMetric("star", "NAGRADA", "50 bodova",
                                 Ink.gold, Modifier.weight(1f).testTag("daily-reward-metric"))
                         }
@@ -936,7 +936,7 @@ fun DailyPage(controller: SudokuController) {
                         monday.plusDays((i + 1).toLong()).toString() in completedDays
                 }
                 Row(
-                    Modifier.fillMaxWidth().drawBehind {
+                    Modifier.fillMaxWidth().testTag("daily-weekly-streak").drawBehind {
                         val lineY = size.height * .48f
                         drawLine(Ink.blue.copy(alpha = .65f),
                             Offset(size.width * .07f, lineY),
