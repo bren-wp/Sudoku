@@ -423,33 +423,42 @@ private fun GameTool(
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val narrowTool = maxWidth < 83.dp
             val condensedTool = narrowTool || maxHeight < 58.dp
-        Column(
-            Modifier.fillMaxSize().padding(5.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            BrandIcon(
-                when (name) {
-                    "Bilješke" -> "note"
-                    "Savjet" -> "hint"
-                    "Poništi" -> "undo"
-                    "Izbriši" -> "erase"
-                    else -> "grid"
-                },
-                Modifier.size(when {
-                    name == "Bilješke" && condensedTool -> 16.dp
-                    name == "Bilješke" || condensedTool -> 20.dp
-                    else -> 25.dp
-                }),
-                if (active) Ink.cyan else Ink.muted,
-            )
-            Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
-            Text(name, color = Ink.white,
-                fontSize = if (condensedTool) 9.sp else 11.sp, maxLines = 1)
-            if (name == "Bilješke") {
-                Spacer(Modifier.height(if (condensedTool) 0.dp else 3.dp))
+            val isNotes = name == "Bilješke"
+            // Reserve a real, measured bottom slot for the Notes label and pill.
+            // Placing it inside the centered icon column left it unplaced
+            // (0×0 bounds) at 720×1280 / 51dp tool height.
+            Column(
+                Modifier.fillMaxSize().padding(
+                    start = 5.dp, end = 5.dp, top = 4.dp,
+                    bottom = if (isNotes) 17.dp else 5.dp,
+                ),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                BrandIcon(
+                    when (name) {
+                        "Bilješke" -> "note"
+                        "Savjet" -> "hint"
+                        "Poništi" -> "undo"
+                        "Izbriši" -> "erase"
+                        else -> "grid"
+                    },
+                    Modifier.size(when {
+                        isNotes && condensedTool -> 16.dp
+                        isNotes || condensedTool -> 20.dp
+                        else -> 25.dp
+                    }),
+                    if (active) Ink.cyan else Ink.muted,
+                )
+                Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
+                Text(name, color = Ink.white,
+                    fontSize = if (condensedTool) 9.sp else 11.sp, maxLines = 1)
+            }
+            if (isNotes) {
                 Row(
-                    Modifier.testTag("game-notes-status"),
+                    Modifier.align(Alignment.BottomCenter)
+                        .padding(bottom = 3.dp)
+                        .testTag("game-notes-status"),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
@@ -477,7 +486,6 @@ private fun GameTool(
                     }
                 }
             }
-        }
         }
         if (badge != null) {
             Box(
