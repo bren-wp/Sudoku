@@ -329,8 +329,7 @@ fun HomePage(controller: SudokuController) {
                         horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
                         Text(formatTime(game.elapsed), color = Ink.muted, fontSize = 12.sp)
-                        Text("·  Još " +
-                            game.board.indices.count { game.board[it] != game.solution[it] } + " polja",
+                        Text("·  Još " + game.emptyCells + " praznih polja",
                             color = Ink.muted, fontSize = 12.sp)
                     }
                     Spacer(Modifier.height(4.dp))
