@@ -86,7 +86,7 @@ fun GamePage(controller: SudokuController) {
                     compact -> 36
                     else -> 40
                 })
-                Subtitle(if (game.daily) "Dnevni izazov" else difficultyLabels[game.level],
+                Subtitle(if (game.daily) "Dnevni izazov" else difficultyTitle(game.level),
                     centered = true)
             }
             Box(Modifier.size(48.dp).testTag("game-pause")
@@ -126,7 +126,7 @@ fun GamePage(controller: SudokuController) {
                     val progress = correct.toFloat() / game.board.size
                     Column(Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Još ${game.board.size - correct} polja · ${(progress * 100).toInt()}%",
+                        Text("Još ${game.emptyCells} praznih polja · ${(progress * 100).toInt()}%",
                             fontSize = 12.sp, color = Ink.cyan)
                         Spacer(Modifier.height(4.dp))
                         Box(Modifier.fillMaxWidth().height(6.dp).testTag("game-progress")
@@ -148,7 +148,7 @@ fun GamePage(controller: SudokuController) {
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 val correct = game.correctCount()
                 val percentage = correct.toFloat() / game.board.size
-                Text("Još ${game.board.size - correct} polja", color = Ink.muted, fontSize = 11.sp)
+                Text("Još ${game.emptyCells} praznih polja", color = Ink.muted, fontSize = 11.sp)
                 Spacer(Modifier.height(4.dp))
                 Box(Modifier.fillMaxWidth().height(6.dp).testTag("game-progress")
                     .background(Ink.blue.copy(alpha = .27f), RoundedCornerShape(10.dp))) {
@@ -402,7 +402,11 @@ private fun GameTool(
         modifier.testTag(tag)
             .alpha(if (enabled) 1f else .53f)
             .semantics {
-                contentDescription = if (badge != null) "$name, preostalo $badge" else name
+                contentDescription = when {
+                    name == "Bilješke" -> "$name, ${if (active) "uključeno" else "isključeno"}"
+                    badge != null -> "$name, preostalo $badge"
+                    else -> name
+                }
                 role = Role.Button
                 selected = active
             }
@@ -412,6 +416,7 @@ private fun GameTool(
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val narrowTool = maxWidth < 72.dp
+            val condensedTool = narrowTool || maxHeight < 58.dp
         Column(
             Modifier.fillMaxSize().padding(5.dp),
             verticalArrangement = Arrangement.Center,
@@ -425,12 +430,43 @@ private fun GameTool(
                     "Izbriši" -> "erase"
                     else -> "grid"
                 },
-                Modifier.size(if (narrowTool) 20.dp else 25.dp),
+                Modifier.size(if (condensedTool) 20.dp else 25.dp),
                 if (active) Ink.cyan else Ink.muted,
             )
             Spacer(Modifier.height(3.dp))
             Text(name, color = Ink.white,
-                fontSize = if (narrowTool) 10.sp else 11.sp, maxLines = 1)
+                fontSize = if (condensedTool) 10.sp else 11.sp, maxLines = 1)
+            if (name == "Bilješke") {
+                Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
+                Row(
+                    Modifier.testTag("game-notes-status"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        if (active) "Uključeno" else "Isključeno",
+                        color = if (active) Ink.cyan else Ink.muted,
+                        fontSize = if (condensedTool) 7.sp else 9.sp,
+                        maxLines = 1,
+                    )
+                    Box(
+                        Modifier.width(if (condensedTool) 17.dp else 22.dp)
+                            .height(if (condensedTool) 10.dp else 12.dp)
+                            .background(
+                                if (active) Ink.cyan else Color(0xFF294266),
+                                RoundedCornerShape(50),
+                            ),
+                        contentAlignment = if (active) Alignment.CenterEnd
+                            else Alignment.CenterStart,
+                    ) {
+                        Box(
+                            Modifier.padding(horizontal = 1.5.dp)
+                                .size(if (condensedTool) 7.dp else 9.dp)
+                                .background(Ink.white, RoundedCornerShape(50)),
+                        )
+                    }
+                }
+            }
         }
         }
         if (badge != null) {
