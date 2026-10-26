@@ -1,3 +1,16 @@
+## 1.0.30 — Dnevni izazov: čitljiv kalendar i nastavak partije
+
+- Na referentnom 941×1672 zaslonu zadržani su postojeći stupci i kartice dnevnog izazova.
+- Na kompaktnim ekranima ili uz veći sustavni font sažetak prikazuje datum iznad niza i nagrade, bez preklapanja sadržaja.
+- Tri metrike izazova raspoređene su u dva retka (2 + 1), uz puni tekst težine, procijenjenog vremena i bodova.
+- Naslov „Misteriozna planina” može zauzeti dva retka na uskom ekranu, bez rezanja teksta.
+- Gumb na zaslonu Dnevni izazov prikazuje „Nastavi današnji izazov” kada je za taj datum već spremljena nedovršena partija. Nakon dovršetka ostaje zaključan, bez druge nagrade.
+- Tjedni kalendar uključuje i stariji zapis `lastDaily` kada postoji, radi kompatibilnosti s prethodnim statistikama, a segmenti se osvjetljavaju samo između uzastopno dovršenih dana.
+- Prikaz osobne rang-liste čuva otvoreno stanje pri ponovnom stvaranju aktivnosti.
+- Instrumentacijski testovi provjeravaju raspored kartica, svih sedam oznaka tjedna te nastavak iste spremljene partije uz očuvane bilješke nakon Android rekreacije.
+- Nisu mijenjani generator, dodjela bodova, postojeći sadržaj, prava privatnosti ni vizualni identitet.
+- Nema dokazane potpune pikselne jednakosti s originalnim dizajnerskim PNG-ovima; pitanje #11 ostaje otvoreno.
+
 ## 1.0.29 — Igra: sigurna pauza i pristupačan HUD
 
 - Sudoku brojevi i bilješke više nisu vidljivi dok je igra pauzirana; ploča pokazuje oznaku pauze bez mijenjanja spremljene partije.
