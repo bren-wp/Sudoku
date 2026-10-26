@@ -108,3 +108,16 @@ now conceals puzzle digits and notes; resuming returns the same state. UI smoke
 tests cover state, accessible controls and the concealed board on both emulator
 sizes. Original reference PNGs remain unavailable; exact visual matching and
 MAE/SSIM zero are unverified, tracked in issue #11.
+
+## v1.0.30 — Daily challenge adaptive layout
+
+On the 941×1672 reference viewport the daily summary and reward metrics keep
+the established three-column hierarchy. On compact screens the date becomes a
+full-width summary row and the three metrics use a 2+1 arrangement. The local
+calendar retains seven real weekday markers and merges legacy `lastDaily` with
+completed-date history for display. The action now distinguishes between
+starting and resuming the same unfinished daily puzzle. Instrumentation covers
+both sizes, marker reachability and the stateful challenge resume path across
+Android activity recreation. The owner's original design PNG references are
+still missing, so an exact pixel-level match / new MAE/SSIM measurements are
+not claimed; #11 remains open.
