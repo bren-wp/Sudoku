@@ -73,7 +73,7 @@ fun GamePage(controller: SudokuController) {
                 .padding(horizontal = horizontal, vertical = if (compact) 6.dp else 12.dp),
             // The 941×1672 reference places the board directly below a compact
             // HUD. 8dp gaps across seven children shifted the entire game down.
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 2.dp),
         ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(48.dp).testTag("game-back")
@@ -104,7 +104,7 @@ fun GamePage(controller: SudokuController) {
                 BrandIcon("settings", Modifier.size(24.dp), Ink.muted)
             }
         }
-        Spacer(Modifier.height(if (compact) 1.dp else 4.dp))
+        Spacer(Modifier.height(if (compact) 1.dp else 0.dp))
         BoxWithConstraints(Modifier.fillMaxWidth().testTag("game-hud")) {
             val stackedHud = maxWidth < 305.dp || largeText
             if (stackedHud) {
@@ -436,7 +436,7 @@ private fun GameTool(
                     "Izbriši" -> "erase"
                     else -> "grid"
                 },
-                Modifier.size(if (condensedTool) 20.dp else 25.dp),
+                Modifier.size(if (name == "Bilješke" || condensedTool) 20.dp else 25.dp),
                 if (active) Ink.cyan else Ink.muted,
             )
             Spacer(Modifier.height(3.dp))
