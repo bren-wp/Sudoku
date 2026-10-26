@@ -232,7 +232,7 @@ class SudokuVisualSmokeTest {
             .fetchSemanticsNode().boundsInRoot
         val metrics = rule.activity.resources.displayMetrics
         if (metrics.widthPixels in 930..950 && metrics.heightPixels in 1660..1690) {
-            check(boardBounds.top in 225f..300f) {
+            check(boardBounds.top in 230f..275f) {
                 "Reference 941×1672 Sudoku board starts too low/high: " +
                     "top=${boardBounds.top}px, expected near the reference's 250px"
             }
@@ -242,6 +242,12 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-notes-status", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Isključeno", useUnmergedTree = true).assertExists()
         val notesBounds = noteCard.fetchSemanticsNode().boundsInRoot
+        val statusBounds = rule.onNodeWithTag("game-notes-status", useUnmergedTree = true)
+            .fetchSemanticsNode().boundsInRoot
+        check(statusBounds.top >= notesBounds.top - 1f &&
+            statusBounds.bottom <= notesBounds.bottom + 1f) {
+            "Reference Notes label/toggle escapes its card: status=$statusBounds, card=$notesBounds"
+        }
         val hintBounds = rule.onNodeWithTag("game-hint").fetchSemanticsNode().boundsInRoot
         val eraseBounds = rule.onNodeWithTag("game-erase").fetchSemanticsNode().boundsInRoot
         check(notesBounds.right <= hintBounds.left + 1f &&
