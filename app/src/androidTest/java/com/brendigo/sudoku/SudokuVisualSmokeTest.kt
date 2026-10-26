@@ -228,6 +228,15 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-mistakes").assertExists()
         rule.onNodeWithText("Srednja težina").assertExists()
         rule.onNodeWithText("praznih polja", substring = true).assertExists()
+        val boardBounds = rule.onNodeWithTag("sudoku-board")
+            .fetchSemanticsNode().boundsInRoot
+        val metrics = rule.activity.resources.displayMetrics
+        if (metrics.widthPixels in 930..950 && metrics.heightPixels in 1660..1690) {
+            check(boardBounds.top in 225f..300f) {
+                "Reference 941×1672 Sudoku board starts too low/high: " +
+                    "top=${boardBounds.top}px, expected near the reference's 250px"
+            }
+        }
         val noteCard = rule.onNodeWithTag("game-notes")
         noteCard.assertIsNotSelected()
         rule.onNodeWithTag("game-notes-status", useUnmergedTree = true).assertExists()
