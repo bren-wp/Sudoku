@@ -133,3 +133,42 @@ returns to the running Sudoku board. UI instrumentation verifies all seven
 persisted settings as well as activity recreation from in-game Settings on
 941×1672 and 720×1280 emulators. Original owner PNGs are still absent from
 this repository; strict MAE/SSIM and 1:1 pixel parity remain unverified (#11).
+
+## v1.0.32 — Comparison against the ten user-supplied original images
+
+The user supplied **seven 941×1672 RGBA reference screens** (Home, New Game,
+Game, Settings, Daily, Statistics, Achievements), one 941×1672 Splash and
+1254×1254 wordmark and launcher icon. These files were inspected in their
+original pixel dimensions rather than approximating missing references.
+
+A genuine Android visual-smoke artifact from **v1.0.31**, run `40256463515`,
+was extracted and matched by filename. Baseline global per-channel absolute
+pixel difference (RGB MAE, 0–255) is:
+
+| Screen | v1.0.31 baseline MAE |
+|---|---:|
+| 01-home | 29.27 |
+| 02-new-game | 29.06 |
+| 03-game | 23.28 |
+| 04-settings | 27.80 |
+| 05-daily | 29.68 |
+| 06-statistics | 30.99 |
+| 07-achievements | 32.18 |
+
+This is a **diagnostic baseline, not a normalized pixel-perfect score**:
+the examples contain illustrative statistics, game numbers, time and daily
+dates that differ from real live emulator content, and a highly detailed
+nighttime scene compared with the existing procedural vector background.
+Screenshot dimensions do match the references. The game board was visibly
+about 65–70px below the supplied 03-game position, motivating tighter gaps
+and an inline percentage display. Reference controls also require a visible
+Notes state and pill switch; those were implemented using real Compose UI.
+
+The exact original reference PNG bytes have not been committed to GitHub
+because this repository currently has no binary-asset ingestion step.
+The owner's reference archive is retained alongside the development chat;
+place those original files in `references/` as documented in `docs/pixel-qa.md`
+for a fully reproducible comparison. After v1.0.32, re-run the emulator
+screenshots and measure deltas before claiming an improvement. No zero-MAE,
+full screenshot pixel parity or finished icon/wordmark fidelity is claimed.
+Issue #11 remains open for further iterations.
