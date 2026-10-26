@@ -436,14 +436,18 @@ private fun GameTool(
                     "Izbriši" -> "erase"
                     else -> "grid"
                 },
-                Modifier.size(if (name == "Bilješke" || condensedTool) 20.dp else 25.dp),
+                Modifier.size(when {
+                    name == "Bilješke" && condensedTool -> 16.dp
+                    name == "Bilješke" || condensedTool -> 20.dp
+                    else -> 25.dp
+                }),
                 if (active) Ink.cyan else Ink.muted,
             )
-            Spacer(Modifier.height(3.dp))
+            Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
             Text(name, color = Ink.white,
-                fontSize = if (condensedTool) 10.sp else 11.sp, maxLines = 1)
+                fontSize = if (condensedTool) 9.sp else 11.sp, maxLines = 1)
             if (name == "Bilješke") {
-                Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
+                Spacer(Modifier.height(if (condensedTool) 0.dp else 3.dp))
                 Row(
                     Modifier.testTag("game-notes-status"),
                     verticalAlignment = Alignment.CenterVertically,
