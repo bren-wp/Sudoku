@@ -226,11 +226,26 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-time").assertExists()
         rule.onNodeWithTag("game-progress").assertExists()
         rule.onNodeWithTag("game-mistakes").assertExists()
-        rule.onNodeWithTag("game-notes").assertIsNotSelected()
-        rule.onNodeWithTag("game-notes").performClick()
-        rule.onNodeWithTag("game-notes").assertIsSelected()
-        rule.onNodeWithTag("game-notes").performClick()
-        rule.onNodeWithTag("game-notes").assertIsNotSelected()
+        rule.onNodeWithText("Srednja težina").assertExists()
+        rule.onNodeWithText("praznih polja", substring = true).assertExists()
+        val noteCard = rule.onNodeWithTag("game-notes")
+        noteCard.assertIsNotSelected()
+        rule.onNodeWithTag("game-notes-status", useUnmergedTree = true).assertExists()
+        rule.onNodeWithText("Isključeno", useUnmergedTree = true).assertExists()
+        val notesBounds = noteCard.fetchSemanticsNode().boundsInRoot
+        val hintBounds = rule.onNodeWithTag("game-hint").fetchSemanticsNode().boundsInRoot
+        val eraseBounds = rule.onNodeWithTag("game-erase").fetchSemanticsNode().boundsInRoot
+        check(notesBounds.right <= hintBounds.left + 1f &&
+            notesBounds.top == hintBounds.top &&
+            eraseBounds.right > hintBounds.right) {
+            "Gameplay tool cards overlap or lose their reference row order"
+        }
+        noteCard.performClick()
+        noteCard.assertIsSelected()
+        rule.onNodeWithText("Uključeno", useUnmergedTree = true).assertExists()
+        noteCard.performClick()
+        noteCard.assertIsNotSelected()
+        rule.onNodeWithText("Isključeno", useUnmergedTree = true).assertExists()
         rule.onNodeWithTag("sudoku-cell-0").assertExists()
 
         rule.onNodeWithTag("game-pause").performClick()
@@ -666,6 +681,10 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Aplikacija trenutačno podržava hrvatski jezik.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("sound-vibration").performScrollTo().performClick()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("about-app").performScrollTo().performClick()
+        rule.onNodeWithText("Treniraj mozak svaki dan.").assertExists()
+        rule.onNodeWithText("Sudoku by Brendigo").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("privacy-policy").performScrollTo().performClick()
         rule.onNodeWithText("Sudoku by Brendigo možeš igrati bez registracije i internetske veze.")
