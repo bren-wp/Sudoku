@@ -85,3 +85,15 @@ card separation and streak marker containment. The graphics remain native
 Compose components, not flattened screenshots. The owner's original PNG
 references and normalized QA fixture remain unavailable in this repository;
 MAE/SSIM improvement and exact 1:1 parity are **not yet measured** (#11).
+
+## v1.0.28 — New Game responsive configuration
+
+The normal/reference-width screen retains its original 192dp 9×9/6×6/4×4
+selector, six full-width difficulty panels, vector icons and 75%-width start
+button. At very narrow widths, the selector contracts to stay alongside the
+48dp Back button, and large-font/compact difficulties use slightly taller
+panels with more text room. Selections and the New Game destination survive
+Activity recreation while the configuration is open. UI smoke tests cover the
+selector boundaries, all six difficulty options and an actual generated 6×6
+board after rotation. Full RGB MAE/SSIM comparison against owner PNG source
+files remains unavailable; issue #11 stays open.
