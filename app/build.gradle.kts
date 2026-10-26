@@ -10,8 +10,8 @@ android {
         applicationId = "com.brendigo.sudoku"
         minSdk = 26
         targetSdk = 36
-        versionCode = 30
-        versionName = "1.0.29"
+        versionCode = 31
+        versionName = "1.0.30"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     val signingStore = System.getenv("SUDOKU_SIGNING_STORE_FILE")

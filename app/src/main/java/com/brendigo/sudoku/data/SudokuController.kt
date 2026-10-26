@@ -112,6 +112,14 @@ class SudokuController(context: Context) {
         return !regular.daily && !regular.completed && !regular.failed
     }
 
+    /** Only offer Resume for an unfinished puzzle from this calendar day. */
+    fun hasSavedDailyFor(day: LocalDate = LocalDate.now()): Boolean {
+        val date = day.toString()
+        val current = game?.takeIf { it.daily && it.day == date }
+        val saved = current ?: readGame("daily_game") ?: return false
+        return saved.daily && saved.day == date && !saved.completed && !saved.failed
+    }
+
     fun resumeRegularGame(): Boolean {
         val saved = readGame("regular_game") ?: return false
         if (saved.daily || saved.completed || saved.failed) return false

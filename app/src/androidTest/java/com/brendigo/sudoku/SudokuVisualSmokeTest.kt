@@ -455,6 +455,31 @@ class SudokuVisualSmokeTest {
         waitFor("screen-dnevni-izazov")
         rule.onNodeWithTag("daily-summary").assertExists()
         rule.onNodeWithTag("daily-hero").assertExists()
+        val rewardBounds = rule.onNodeWithTag("daily-reward-metric")
+            .fetchSemanticsNode().boundsInRoot
+        val difficultyBounds = rule.onNodeWithTag("daily-difficulty-metric")
+            .fetchSemanticsNode().boundsInRoot
+        val timeBounds = rule.onNodeWithTag("daily-time-metric")
+            .fetchSemanticsNode().boundsInRoot
+        val compactWidthDp = rule.activity.resources.displayMetrics.widthPixels /
+            rule.activity.resources.displayMetrics.density
+        if (compactWidthDp < 410f) {
+            check(difficultyBounds.right <= timeBounds.left + 1f &&
+                rewardBounds.top >= difficultyBounds.bottom - 1f) {
+                "Compact Daily metrics must form 2+1 rows: " +
+                    "difficulty=$difficultyBounds, time=$timeBounds, reward=$rewardBounds"
+            }
+        } else {
+            check(difficultyBounds.right <= timeBounds.left + 1f &&
+                timeBounds.right <= rewardBounds.left + 1f) {
+                "Reference Daily metrics must preserve their three-column layout"
+            }
+        }
+        rule.onNodeWithTag("daily-weekly-streak").performScrollTo().assertIsDisplayed()
+        listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEach { day ->
+            rule.onAllNodes(hasContentDescription("$day:", substring = true))
+                .onFirst().assertExists()
+        }
         val dailyTop = rule.onNodeWithTag("daily-summary")
             .fetchSemanticsNode().boundsInRoot
         val heroTop = rule.onNodeWithTag("daily-hero")
@@ -497,6 +522,34 @@ class SudokuVisualSmokeTest {
         }
         award.performScrollTo().performClick()
         rule.onNodeWithTag("achievement-detail").assertExists()
+    }
+
+    @Test
+    fun savedDailyChallengeIsClearlyMarkedAndResumesWithoutReset() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        // Toggle Notes deliberately: if a new puzzle is generated on Resume,
+        // its default Notes mode would be disabled.
+        val notes = rule.onNodeWithTag("game-notes")
+        if (!notes.fetchSemanticsNode().config[SemanticsProperties.Selected]) {
+            notes.performClick()
+        }
+        notes.assertIsSelected()
+        rule.onNodeWithTag("game-back").performClick()
+        waitFor("home-nova-igra")
+        // Verify disk-backed resume, not only the still-alive controller.
+        rule.activityRule.scenario.recreate()
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        rule.onNodeWithText("Nastavi današnji izazov", substring = true).assertExists()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("game-notes").assertIsSelected()
+        rule.onNodeWithTag("number-1").assertIsEnabled()
     }
 
     @Test
