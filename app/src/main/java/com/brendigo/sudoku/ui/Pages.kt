@@ -1643,6 +1643,9 @@ fun SettingsPage(controller: SudokuController) {
     var showLanguage by androidx.compose.runtime.saveable.rememberSaveable {
         androidx.compose.runtime.mutableStateOf(false)
     }
+    var showAbout by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
     PageContent(topPadding = 20.dp) {
         SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
@@ -1659,13 +1662,13 @@ fun SettingsPage(controller: SudokuController) {
         NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
             Column(Modifier.padding(9.dp)) {
                 SettingHeader("gamepad", "Igra", "Postavke igrivosti i pomoći")
-                SettingToggle("note", "Automatske bilješke", "Ukloni riješene kandidate iz bilješki", opts.autoNotes) {
+                SettingToggle("note", "Automatske bilješke", "Automatski dodaj moguće brojeve u prazna polja", opts.autoNotes) {
                     controller.updateOptions(opts.copy(autoNotes = it))
                 }
-                SettingToggle("warning", "Provjera greške", "Označi netočne unose i prati pogreške", opts.checkMistakes) {
+                SettingToggle("warning", "Provjera greške", "Odmah označi netočne unose", opts.checkMistakes) {
                     controller.updateOptions(opts.copy(checkMistakes = it))
                 }
-                SettingToggle("grid", "Isticanje brojeva", "Naglašavanje jednakih brojeva na ploči", opts.highlightEquals) {
+                SettingToggle("grid", "Isticanje brojeva", "Naglasi sve iste brojeve na ploči", opts.highlightEquals) {
                     controller.updateOptions(opts.copy(highlightEquals = it))
                 }
             }
@@ -1686,7 +1689,7 @@ fun SettingsPage(controller: SudokuController) {
                 Column(Modifier.weight(1f)) {
                     Text("Zvuk i vibracija", fontSize = 17.sp,
                         fontWeight = FontWeight.Bold, color = Ink.white)
-                    Subtitle("Uključi ili isključi efekte", centered = false)
+                    Subtitle("Uključi ili isključi zvučne efekte i vibracije", centered = false)
                 }
                 BrandIcon("next", Modifier.size(20.dp), Ink.muted)
             }
@@ -1700,7 +1703,7 @@ fun SettingsPage(controller: SudokuController) {
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text("Jezik", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-                    Subtitle("Jezik aplikacije")
+                    Subtitle("Odaberi jezik aplikacije")
                 }
                 Text("Hrvatski", color = Ink.muted, fontSize = 13.sp)
                 Spacer(Modifier.width(6.dp))
@@ -1712,7 +1715,20 @@ fun SettingsPage(controller: SudokuController) {
                 Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                SettingHeader("info", "O aplikaciji", "Sudoku by Brendigo")
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 58.dp)
+                        .testTag("about-app")
+                        .semantics {
+                            contentDescription = "O aplikaciji Sudoku by Brendigo"
+                            role = Role.Button
+                        }
+                        .clickable { showAbout = true },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SettingHeader("info", "O aplikaciji", "Sudoku by Brendigo",
+                        Modifier.weight(1f))
+                    BrandIcon("next", Modifier.size(20.dp), Ink.muted)
+                }
                 NeonPanel(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("privacy-policy")
@@ -1787,6 +1803,27 @@ fun SettingsPage(controller: SudokuController) {
             }
         )
     }
+    if (showAbout) {
+        AlertDialog(
+            onDismissRequest = { showAbout = false },
+            containerColor = Color(0xFF081A41),
+            title = { Text("O aplikaciji", color = Ink.white) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Text("Sudoku by Brendigo", color = Ink.white,
+                        fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Subtitle("Treniraj mozak svaki dan.")
+                    Subtitle("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME)
+                    Subtitle("Igra radi bez registracije i internetske veze.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAbout = false }) {
+                    Text("Zatvori", color = Ink.cyan)
+                }
+            },
+        )
+    }
     if (showPrivacy) {
         AlertDialog(
             onDismissRequest = { showPrivacy = false },
@@ -1821,9 +1858,10 @@ fun SettingsPage(controller: SudokuController) {
 }
 
 @Composable
-private fun SettingHeader(icon: String, title: String, subtitle: String) {
+private fun SettingHeader(icon: String, title: String, subtitle: String,
+                          modifier: Modifier = Modifier) {
     Row(
-        Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        modifier.fillMaxWidth().padding(vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
