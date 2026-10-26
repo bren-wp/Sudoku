@@ -57,6 +57,7 @@ fun GamePage(controller: SudokuController) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxHeight < 730.dp
         val narrowWidth = maxWidth < 340.dp
+        val tinyTitle = maxWidth < 275.dp
         val largeText = LocalDensity.current.fontScale >= 1.4f
         val horizontal = if (compact) 12.dp else 20.dp
         // Width is the hard limit: a 216dp minimum previously overflowed
@@ -80,7 +81,7 @@ fun GamePage(controller: SudokuController) {
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 AccentText("Sudoku", when {
-                    maxWidth < 275.dp -> 22
+                    tinyTitle -> 22
                     narrowWidth || largeText -> 28
                     compact -> 36
                     else -> 40
