@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -211,6 +212,38 @@ class SudokuVisualSmokeTest {
         waitFor("sudoku-board", timeoutMs = 60_000)
         rule.onNodeWithTag("sudoku-cell-35").assertExists()
         rule.onNodeWithTag("number-6").assertExists()
+    }
+
+    @Test
+    fun gamePauseConcealsGridAndResumeRestoresControls() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+
+        // HUD values and interaction surfaces stay present on both emulator
+        // resolutions, while the standard two-row keypad remains usable.
+        rule.onNodeWithTag("game-hud").assertExists()
+        rule.onNodeWithTag("game-time").assertExists()
+        rule.onNodeWithTag("game-progress").assertExists()
+        rule.onNodeWithTag("game-mistakes").assertExists()
+        rule.onNodeWithTag("game-notes").assertIsNotSelected()
+        rule.onNodeWithTag("game-notes").performClick()
+        rule.onNodeWithTag("game-notes").assertIsSelected()
+        rule.onNodeWithTag("game-notes").performClick()
+        rule.onNodeWithTag("game-notes").assertIsNotSelected()
+        rule.onNodeWithTag("sudoku-cell-0").assertExists()
+
+        rule.onNodeWithTag("game-pause").performClick()
+        rule.onNodeWithText("Igra je pauzirana").assertExists()
+        rule.onNodeWithTag("sudoku-board-paused").assertExists()
+        rule.onNodeWithTag("sudoku-cell-0").assertDoesNotExist()
+        rule.onNodeWithTag("number-1").assertIsNotEnabled()
+        rule.onNodeWithTag("game-hint").assertIsNotEnabled()
+        rule.onNodeWithText("▶ Nastavi").performClick()
+        rule.onNodeWithTag("sudoku-board-paused").assertDoesNotExist()
+        rule.onNodeWithTag("sudoku-cell-0").assertExists()
+        rule.onNodeWithTag("number-1").assertIsEnabled()
     }
 
     @Test
