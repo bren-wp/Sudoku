@@ -574,43 +574,60 @@ private fun HomeTile(
 @Composable
 fun NewGamePage(controller: SudokuController) {
     val scope = rememberCoroutineScope()
-    var size by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(9) }
-    var level by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(2) }
+    // Keep the selected board and difficulty across Android activity recreation
+    // (rotation, display size change and process-state restoration).
+    var size by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableIntStateOf(9)
+    }
+    var level by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableIntStateOf(2)
+    }
     PageContent {
         // Reference hierarchy: back + board size on the same first row,
         // followed by the large title and the six full-width difficulty cards.
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                Modifier.size(48.dp).testTag("navigate-back")
-                    .semantics { contentDescription = "Natrag"; role = Role.Button }
-                    .background(Color(0x99082150), RoundedCornerShape(14.dp))
-                    .clickable { controller.go(Screen.HOME) },
-                contentAlignment = Alignment.Center,
+        BoxWithConstraints(Modifier.fillMaxWidth().testTag("new-game-size-header")) {
+            // 192dp is the reference width. The selector shrinks with the
+            // viewport instead of pushing the 48dp Back target off-screen.
+            val selectorWidth = minOf(192.dp, (maxWidth - 56.dp).coerceAtLeast(0.dp))
+            val compactSelector = selectorWidth < 175.dp
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandIcon("back", Modifier.size(24.dp), Ink.muted)
-            }
-            Row(Modifier.width(192.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                listOf(9, 6, 4).forEach { option ->
-                    NeonPanel(
-                        Modifier.weight(1f).testTag("size-$option")
-                            .heightIn(min = 48.dp)
-                            .semantics {
-                                contentDescription = "Veličina $option puta $option"
-                                role = Role.Button
-                                selected = size == option
+                Box(
+                    Modifier.size(48.dp).testTag("navigate-back")
+                        .semantics { contentDescription = "Natrag"; role = Role.Button }
+                        .background(Color(0x99082150), RoundedCornerShape(14.dp))
+                        .clickable { controller.go(Screen.HOME) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    BrandIcon("back", Modifier.size(24.dp), Ink.muted)
+                }
+                Row(
+                    Modifier.width(selectorWidth).testTag("new-game-size-selector"),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        if (compactSelector) 3.dp else 5.dp),
+                ) {
+                    listOf(9, 6, 4).forEach { option ->
+                        NeonPanel(
+                            Modifier.weight(1f).testTag("size-$option")
+                                .heightIn(min = 48.dp)
+                                .semantics {
+                                    contentDescription = "Veličina $option puta $option"
+                                    role = Role.RadioButton
+                                    selected = size == option
+                                }
+                                .clickable(enabled = !controller.isGenerating) { size = option },
+                            highlight = if (size == option) Ink.cyan else Ink.line,
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("$option×$option",
+                                    color = if (size == option) Ink.white else Ink.muted,
+                                    fontSize = if (compactSelector) 13.sp else 16.sp,
+                                    maxLines = 1,
+                                    fontWeight = FontWeight.Bold)
                             }
-                            .clickable { size = option },
-                        highlight = if (size == option) Ink.cyan else Ink.line,
-                    ) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("$option×$option",
-                                color = if (size == option) Ink.white else Ink.muted,
-                                fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -622,54 +639,95 @@ fun NewGamePage(controller: SudokuController) {
             Text("Odaberi težinu", color = Ink.muted, fontSize = 18.sp)
         }
         Spacer(Modifier.height(5.dp))
-        difficultyLabels.forEachIndexed { i, _ ->
-            NeonPanel(
-                Modifier.fillMaxWidth().testTag("difficulty-$i").heightIn(min = 75.dp)
-                    .semantics { contentDescription = "Težina ${difficultyLabels[i]}"; role = Role.Button
-                        selected = level == i }
-                    .clickable { level = i },
-                highlight = difficultyColors[i],
-            ) {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier.size(48.dp)
-                            .background(difficultyColors[i].copy(alpha = .11f), RoundedCornerShape(50))
-                            .border(1.5.dp, difficultyColors[i], RoundedCornerShape(50)),
-                        contentAlignment = Alignment.Center,
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val accessibilityCards = maxWidth < 300.dp ||
+                LocalDensity.current.fontScale >= 1.3f
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                difficultyLabels.forEachIndexed { i, label ->
+                    NeonPanel(
+                        Modifier.fillMaxWidth().testTag("difficulty-$i")
+                            .heightIn(min = if (accessibilityCards) 96.dp else 75.dp)
+                            .semantics {
+                                contentDescription = "Težina $label"
+                                role = Role.RadioButton
+                                selected = level == i
+                            }
+                            .clickable(enabled = !controller.isGenerating) { level = i },
+                        highlight = difficultyColors[i],
                     ) {
-                        BrandIcon(
-                            when (i) {
-                                0 -> "leaf"
-                                1 -> "star"
-                                2 -> "double-star"
-                                3 -> "triple-star"
-                                else -> "crown"
-                            },
-                            Modifier.size(28.dp), difficultyColors[i],
-                        )
+                        Row(
+                            Modifier.fillMaxWidth().padding(
+                                horizontal = if (accessibilityCards) 9.dp else 13.dp,
+                                vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            val iconSize = if (accessibilityCards) 41.dp else 48.dp
+                            Box(
+                                Modifier.size(iconSize)
+                                    .background(difficultyColors[i].copy(alpha = .11f),
+                                        RoundedCornerShape(50))
+                                    .border(1.5.dp, difficultyColors[i],
+                                        RoundedCornerShape(50)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                BrandIcon(
+                                    when (i) {
+                                        0 -> "leaf"
+                                        1 -> "star"
+                                        2 -> "double-star"
+                                        3 -> "triple-star"
+                                        else -> "crown"
+                                    },
+                                    Modifier.size(if (accessibilityCards) 25.dp else 28.dp),
+                                    difficultyColors[i],
+                                )
+                            }
+                            Spacer(Modifier.width(if (accessibilityCards) 9.dp else 17.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    label,
+                                    fontSize = if (accessibilityCards) 17.sp else 19.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Ink.white,
+                                    maxLines = 2,
+                                )
+                                Text(
+                                    listOf(
+                                        "Savršeno za početnike",
+                                        "Lagani izazov za vježbu",
+                                        "Uravnotežen izazov",
+                                        "Za iskusne igrače",
+                                        "Ozbiljan izazov",
+                                        "Samo za najbolje",
+                                    )[i],
+                                    color = Ink.muted,
+                                    fontSize = if (accessibilityCards) 12.sp else 13.sp,
+                                    lineHeight = if (accessibilityCards) 15.sp else 17.sp,
+                                    maxLines = if (accessibilityCards) 3 else 2,
+                                )
+                            }
+                            BrandIcon(
+                                "next",
+                                Modifier.size(if (accessibilityCards) 19.dp else 23.dp),
+                                if (level == i) Ink.cyan else difficultyColors[i],
+                            )
+                        }
                     }
-                    Spacer(Modifier.width(17.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(difficultyLabels[i], fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Ink.white)
-                        Text(listOf(
-                            "Savršeno za početnike", "Lagani izazov za vježbu",
-                            "Uravnotežen izazov", "Za iskusne igrače",
-                            "Ozbiljan izazov", "Samo za najbolje",
-                        )[i], color = Ink.muted, fontSize = 13.sp, maxLines = 2)
-                    }
-                    BrandIcon("next", Modifier.size(23.dp),
-                        if (level == i) Ink.cyan else difficultyColors[i])
                 }
             }
         }
         Spacer(Modifier.height(14.dp))
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            SolidAction(
-                if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
-                { scope.launch { controller.startNew(size, level) } },
-                Modifier.fillMaxWidth(.75f), !controller.isGenerating,
-                minHeight = 54.dp,
-            )
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val fullWidthAction = maxWidth < 290.dp
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                SolidAction(
+                    if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
+                    { scope.launch { controller.startNew(size, level) } },
+                    Modifier.fillMaxWidth(if (fullWidthAction) 1f else .75f),
+                    !controller.isGenerating,
+                    minHeight = 54.dp,
+                )
+            }
         }
         if (controller.isGenerating) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally),
             color = Ink.cyan)

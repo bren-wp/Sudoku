@@ -1,3 +1,14 @@
+## 1.0.28 — Nova igra: prilagodljiv odabir veličine i težine
+
+- Zadržan postojeći 192 dp odabir 9×9 / 6×6 / 4×4 na referentnom zaslonu; na iznimno uskim uređajima odabir se sužava i ne preklapa gumb za povratak.
+- Kartice svih šest težina dobivaju prilagodljiv unutarnji raspored, veličine ikonica i više prostora za tekst pri maloj širini ili uvećanom sustavnom fontu.
+- Interaktivne opcije veličine i težine označene su pristupačnom radio-ulogom i stvarnim stanjem odabira.
+- Aktivnost vraća ekran „Nova igra” nakon rotacije, dok Compose `rememberSaveable` vraća odabranu veličinu i težinu; generiranje tijekom pokretanja onemogućuje naknadnu promjenu postavki.
+- Gumb pokretanja širi se na vrlo uskim ekranima, a referentna širina ostaje 75 % kartice.
+- UI testovi provjeravaju granice odabira veličine, svih šest težina, rotaciju i stvarno pokretanje igre 6×6.
+- Nema promjene logike generatora, pravila Sudoku, lokalno spremljenih partija, pozadina ni originalnog brenda 7–3–9.
+- Potpuna pixel-perfect jednakost s korisnikovim PNG-ovima i dalje nije mjerena jer referentne datoteke nedostaju u repozitoriju (#11).
+
 ## 1.0.27 — Početni ekran: responzivna navigacija i tjedni niz
 
 - Očuvan referentni raspored dviju velikih i triju malih navigacijskih kartica na širim Android zaslonima.

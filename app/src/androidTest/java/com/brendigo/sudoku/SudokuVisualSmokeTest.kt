@@ -140,6 +140,18 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("difficulty-2").assertIsSelected()
         val size9 = rule.onNodeWithTag("size-9").fetchSemanticsNode().boundsInRoot
         val size4 = rule.onNodeWithTag("size-4").fetchSemanticsNode().boundsInRoot
+        val backBounds = rule.onNodeWithTag("navigate-back").fetchSemanticsNode().boundsInRoot
+        val sizeHeader = rule.onNodeWithTag("new-game-size-header")
+            .fetchSemanticsNode().boundsInRoot
+        val selector = rule.onNodeWithTag("new-game-size-selector")
+            .fetchSemanticsNode().boundsInRoot
+        check(backBounds.right <= selector.left + 1f &&
+            selector.right <= sizeHeader.right + 1f &&
+            size9.left >= selector.left - 1f &&
+            size4.right <= selector.right + 1f) {
+            "New Game size selection overflows header or overlaps Back: " +
+                "back=$backBounds, selector=$selector, header=$sizeHeader"
+        }
         val selectorWidthDp = (size4.right - size9.left) /
             rule.activity.resources.displayMetrics.density
         check(selectorWidthDp <= 210f) {
@@ -150,7 +162,14 @@ class SudokuVisualSmokeTest {
         check(mainAction.width < difficulty.width * .86f) {
             "New Game primary CTA must be narrower than difficulty cards"
         }
-        rule.onNodeWithTag("size-4").performClick()
+        (0..5).forEach { index ->
+            rule.onNodeWithTag("difficulty-$index").assertExists()
+        }
+        rule.onNodeWithTag("difficulty-5").performScrollTo().performClick()
+        rule.onNodeWithTag("difficulty-5").assertIsSelected()
+        rule.onNodeWithTag("difficulty-2").performScrollTo().performClick()
+        rule.onNodeWithTag("difficulty-2").assertIsSelected()
+        rule.onNodeWithTag("size-4").performScrollTo().performClick()
         rule.onNodeWithTag("size-4").assertIsSelected()
         rule.onNodeWithTag("difficulty-1").performClick()
         rule.onNodeWithTag("difficulty-1").assertIsSelected()
@@ -164,6 +183,30 @@ class SudokuVisualSmokeTest {
         homeTile("nova-igra")
         rule.onNodeWithTag("size-6").performClick()
         rule.onNodeWithTag("difficulty-3").performClick()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("sudoku-cell-35").assertExists()
+        rule.onNodeWithTag("number-6").assertExists()
+    }
+
+    @Test
+    fun newGameSetupSurvivesActivityRecreation() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("size-6").performClick()
+        rule.onNodeWithTag("difficulty-5").performScrollTo().performClick()
+        rule.onNodeWithTag("size-6").assertIsSelected()
+        rule.onNodeWithTag("difficulty-5").assertIsSelected()
+
+        // Activity recreation simulates Android rotations and resource changes.
+        // Both the current screen and unstarted 6x6/Majstor selections must survive.
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-nova-igra")
+        rule.onNodeWithTag("size-6").assertIsSelected()
+        rule.onNodeWithTag("difficulty-5").assertIsSelected()
+        rule.onNodeWithTag("size-9").assertIsNotSelected()
+        rule.onNodeWithTag("difficulty-2").assertIsNotSelected()
+
         rule.onNodeWithTag("primary-action").performScrollTo().performClick()
         waitFor("sudoku-board", timeoutMs = 60_000)
         rule.onNodeWithTag("sudoku-cell-35").assertExists()
