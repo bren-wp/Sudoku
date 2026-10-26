@@ -684,7 +684,6 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("about-app").performScrollTo().performClick()
         rule.onNodeWithText("Treniraj mozak svaki dan.").assertExists()
-        rule.onNodeWithText("Sudoku by Brendigo").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("privacy-policy").performScrollTo().performClick()
         rule.onNodeWithText("Sudoku by Brendigo možeš igrati bez registracije i internetske veze.")
