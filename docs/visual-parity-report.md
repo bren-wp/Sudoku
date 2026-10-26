@@ -73,3 +73,15 @@ to all 24 real awards on emulator viewports. This improves adaptive behavior,
 not measured pixel equality. Original owner PNG references are still required
 to calculate new MAE/SSIM and verify the illustrated background and every icon.
 Issue #11 remains open.
+
+## v1.0.27 — Home responsive navigation
+
+At the reference 941×1672 viewport, Home retains the original 2+3 navigation
+hierarchy and the single-row weekly streak presentation. At compact widths,
+navigation flows to 2+1 compact cards (or single-column primary tiles on very
+narrow devices), and the seven streak day markers occupy a dedicated row.
+Instrumented smoke tests assert the original reference-width ordering, compact
+card separation and streak marker containment. The graphics remain native
+Compose components, not flattened screenshots. The owner's original PNG
+references and normalized QA fixture remain unavailable in this repository;
+MAE/SSIM improvement and exact 1:1 parity are **not yet measured** (#11).

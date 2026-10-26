@@ -246,7 +246,44 @@ class SudokuVisualSmokeTest {
         }
         rule.onNodeWithTag("home-dnevni-izazov").assertExists()
         rule.onNodeWithTag("home-postignuća").assertExists()
-        rule.onNodeWithTag("home-postavke").assertExists()
+        rule.onNodeWithTag("home-postavke").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("home-slogan").assertExists()
+        // Each UI smoke test can inherit an unfinished session and its 174dp
+        // resume banner. Scroll the Settings card into view before measuring
+        // layout bounds; off-viewport semantics coordinates can be clipped.
+        val awardsBounds = rule.onNodeWithTag("home-postignuća")
+            .fetchSemanticsNode().boundsInRoot
+        val settingsBounds = rule.onNodeWithTag("home-postavke")
+            .fetchSemanticsNode().boundsInRoot
+        val statsBounds = compactHome.fetchSemanticsNode().boundsInRoot
+        val screenWidthDp = rule.activity.resources.displayMetrics.widthPixels /
+            rule.activity.resources.displayMetrics.density
+        // Reference width retains the original three-column navigation.
+        // The 720px emulator gets a 2+1 layout with no overlapping cards.
+        if (screenWidthDp < 410f) {
+            check(statsBounds.right <= awardsBounds.left + 1f &&
+                settingsBounds.top >= statsBounds.bottom - 1f) {
+                "Compact Home navigation geometry: width=${screenWidthDp}dp, " +
+                    "stats=$statsBounds, awards=$awardsBounds, settings=$settingsBounds"
+            }
+            rule.onNodeWithTag("home-week-days").assertExists()
+        } else {
+            check(statsBounds.right <= awardsBounds.left + 1f &&
+                awardsBounds.right <= settingsBounds.left + 1f) {
+                "Reference Home navigation must preserve all three columns"
+            }
+        }
+        rule.onNodeWithTag("home-streak").performScrollTo().assertExists()
+        val streakBounds = rule.onNodeWithTag("home-streak")
+            .fetchSemanticsNode().boundsInRoot
+        val mondayMarker = rule.onAllNodes(
+            hasContentDescription("Ponedjeljak:", substring = true)
+        ).onFirst().fetchSemanticsNode().boundsInRoot
+        check(mondayMarker.left >= streakBounds.left - 1f &&
+            mondayMarker.right <= streakBounds.right + 1f &&
+            mondayMarker.bottom <= streakBounds.bottom + 1f) {
+            "Monday progress marker must remain inside the Home streak panel"
+        }
         rule.onNodeWithText("Sljedeća", substring = true).assertExists()
         rule.onAllNodes(hasContentDescription("Ponedjeljak:", substring = true))
             .onFirst().assertExists()
