@@ -62,9 +62,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        // Preserve the unstarted New Game setup during Android rotation.
+        // The rest of the app keeps its existing saved-game navigation policy.
+        outState.putBoolean("sudoku.new_game_setup", sudoku.page == Screen.NEW_GAME)
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sudoku = SudokuController(applicationContext)
+        if (savedInstanceState?.getBoolean("sudoku.new_game_setup") == true) {
+            sudoku.go(Screen.NEW_GAME)
+        }
         setContent {
             SudokuTheme(sudoku.options.dark) { Application(sudoku) }
         }
