@@ -718,11 +718,12 @@ fun NewGamePage(controller: SudokuController) {
         }
         Spacer(Modifier.height(14.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val fullWidthAction = maxWidth < 290.dp
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 SolidAction(
                     if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
                     { scope.launch { controller.startNew(size, level) } },
-                    Modifier.fillMaxWidth(if (maxWidth < 290.dp) 1f else .75f),
+                    Modifier.fillMaxWidth(if (fullWidthAction) 1f else .75f),
                     !controller.isGenerating,
                     minHeight = 54.dp,
                 )
