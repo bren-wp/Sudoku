@@ -1,3 +1,14 @@
+## 1.0.27 — Početni ekran: responzivna navigacija i tjedni niz
+
+- Očuvan referentni raspored dviju velikih i triju malih navigacijskih kartica na širim Android zaslonima.
+- Na kompaktnim telefonima tri manje kartice složene su u dva retka (2 + 1), bez preklapanja naziva i strelica.
+- Na izrazito uskim uređajima dvije velike kartice mogu se složiti u jedan stupac.
+- Tjedni niz na uskim ekranima prikazuje oznake sedam dana u zasebnom redu; stanje je i dalje stvarni lokalno spremljeni napredak.
+- Slogan skaliran na kompaktnom zaslonu te dodani pristupačni opisi nastavka igre.
+- Instrumentacijski testovi potvrđuju geometriju kartica, očuvanje referentnog rasporeda i granice tjednog niza.
+- Nisu mijenjani mehanika igre, pohrana, postojeće pozadinske ilustracije, ikonice 7–3–9 ni sedam marketinških WebP snimki.
+- 1:1 rezultat nije dokazan bez normaliziranih originalnih referentnih PNG-ova (issue #11).
+
 ## 1.0.26 — Prilagodljiv ekran Postignuća
 
 - Sačuvan izvorni dvostupčani raspored i redoslijed osam istaknutih postignuća na referentnom zaslonu.
