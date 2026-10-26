@@ -246,8 +246,11 @@ class SudokuVisualSmokeTest {
         }
         rule.onNodeWithTag("home-dnevni-izazov").assertExists()
         rule.onNodeWithTag("home-postignuća").assertExists()
-        rule.onNodeWithTag("home-postavke").assertExists()
+        rule.onNodeWithTag("home-postavke").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("home-slogan").assertExists()
+        // Each UI smoke test can inherit an unfinished session and its 174dp
+        // resume banner. Scroll the Settings card into view before measuring
+        // layout bounds; off-viewport semantics coordinates can be clipped.
         val awardsBounds = rule.onNodeWithTag("home-postignuća")
             .fetchSemanticsNode().boundsInRoot
         val settingsBounds = rule.onNodeWithTag("home-postavke")
@@ -260,7 +263,8 @@ class SudokuVisualSmokeTest {
         if (screenWidthDp < 410f) {
             check(statsBounds.right <= awardsBounds.left + 1f &&
                 settingsBounds.top >= statsBounds.bottom - 1f) {
-                "Compact Home navigation must form two cards plus a lower Settings card"
+                "Compact Home navigation geometry: width=${screenWidthDp}dp, " +
+                    "stats=$statsBounds, awards=$awardsBounds, settings=$settingsBounds"
             }
             rule.onNodeWithTag("home-week-days").assertExists()
         } else {
