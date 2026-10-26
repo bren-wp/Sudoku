@@ -1,3 +1,15 @@
+## 1.0.32 — Revizija prema deset izvornih 1:1 dizajnerskih referenci
+
+- Preuzete su stvarne screenshot datoteke Android emulatora za prethodnu verziju 1.0.31 i uspoređene sa sedam korisničkih referenci dimenzije 941×1672.
+- Mjerenja prosječne apsolutne razlike RGB (MAE; skala 0–255) prije ove revizije: Home 29,27; Nova igra 29,06; Igra 23,28; Postavke 27,80; Dnevni izazov 29,68; Statistika 30,99; Postignuća 32,18. To nisu savršena poklapanja i sadrže razlike podataka/datumâ, generatora i pozadinskih ilustracija.
+- Referentna kartica „Bilješke” na ekranu igre sada prikazuje i stvarni status uključenosti te malen vizualni prekidač; na uskim zaslonima koristi kompaktne dimenzije.
+- Usklađena hrvatska oznaka težine („Srednja težina”) na ekranu igre i početnom nastavku igre, bez promjene odabranih težina.
+- HUD i kartica nastavka prikazuju stvarni broj praznih polja, ne broj ćelija koje se ne podudaraju s rješenjem.
+- HUD na referentnom zaslonu ima postotak uz traku napretka, a razmaci između kontrola smanjeni su s 8dp na 4dp kako bi Sudoku mreža bila bliže referentnoj vertikalnoj poziciji.
+- Usklađeni su opisi više redaka Postavki prema korisnikovoj referentnoj snimci. Sekcija „O aplikaciji” dobila je pravi gumb i informativni dijalog kao što sugerira referentna strelica.
+- UI testovima dodana je provjera referentne pozicije ploče, četiriju kontrola, naziva težine, statusa bilježaka i interaktivnog „O aplikaciji”.
+- Stvarne originalne slike su sačuvane zasebno za pixel-compare. Ne potvrđuje se MAE=0 ni pixel-perfect dok nisu normalizirani podaci, fontovi, proceduralna pozadina i snimke nakon izmjena; otvoreni #11 ostaje aktivan.
+
 ## 1.0.31 — Postavke: stabilni prekidači, dijalozi i povratak u igru
 
 - Android ponovno stvaranje aktivnosti sada čuva trenutno otvoren ekran Postavke i porijeklo navigacije; povratak iz postavki pozvanih tijekom igre vraća istu Sudoku partiju umjesto početnog ekrana.
