@@ -21,6 +21,29 @@ Copy the seven portrait screenshots into a local `references/` directory using:
 The splash, full logo and adaptive icon are evaluated separately. Do not commit
 personally-identifying system screenshot overlays or test-account information.
 
+### Original design images received 26 October 2026
+
+The actual source PNG images are now available in the user-provided chat
+attachment set. The originals have been packaged **without changing any pixels**
+under these normalized filenames:
+
+- `references/01-home.png` — 941×1672
+- `references/02-new-game.png` — 941×1672
+- `references/03-game.png` — 941×1672
+- `references/04-settings.png` — 941×1672
+- `references/05-daily.png` — 941×1672
+- `references/06-statistics.png` — 941×1672
+- `references/07-achievements.png` — 941×1672
+- `references/08-splash.png` — 941×1672
+- `references/09-wordmark.png` — 1254×1254
+- `references/10-launcher-icon.png` — 1254×1254
+
+The binary PNG assets **are not committed in the repository**; keep the
+original reference ZIP and its SHA-256 manifest as the source of truth for the
+next audit. When comparing with emulator screenshots use only the first seven
+reference names. Do not screenshot-fake the app with whole-screen bitmaps;
+all buttons and state remain real Compose code.
+
 ## Capture and comparison
 
 1. Run the `Android visual smoke` GitHub workflow; it sets the emulator to

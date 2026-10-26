@@ -455,4 +455,15 @@ fun formatTime(seconds: Int): String {
 }
 
 val difficultyLabels = listOf("Vrlo lako", "Lako", "Srednje", "Teško", "Ekspert", "Majstor")
+
+/** Natural Croatian difficulty caption on the game and resume screens. */
+fun difficultyTitle(level: Int): String = when (level) {
+    0 -> "Vrlo laka težina"
+    1 -> "Laka težina"
+    2 -> "Srednja težina"
+    3 -> "Teška težina"
+    4 -> "Ekspert"
+    5 -> "Majstor"
+    else -> "Sudoku"
+}
 val difficultyColors = listOf(Ink.teal, Ink.teal, Ink.blue, Ink.gold, Ink.purple, Ink.red)

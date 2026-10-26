@@ -226,11 +226,41 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-time").assertExists()
         rule.onNodeWithTag("game-progress").assertExists()
         rule.onNodeWithTag("game-mistakes").assertExists()
-        rule.onNodeWithTag("game-notes").assertIsNotSelected()
-        rule.onNodeWithTag("game-notes").performClick()
-        rule.onNodeWithTag("game-notes").assertIsSelected()
-        rule.onNodeWithTag("game-notes").performClick()
-        rule.onNodeWithTag("game-notes").assertIsNotSelected()
+        rule.onNodeWithText("Srednja težina").assertExists()
+        rule.onNodeWithText("praznih polja", substring = true).assertExists()
+        val boardBounds = rule.onNodeWithTag("sudoku-board")
+            .fetchSemanticsNode().boundsInRoot
+        val metrics = rule.activity.resources.displayMetrics
+        if (metrics.widthPixels in 930..950 && metrics.heightPixels in 1660..1690) {
+            check(boardBounds.top in 230f..275f) {
+                "Reference 941×1672 Sudoku board starts too low/high: " +
+                    "top=${boardBounds.top}px, expected near the reference's 250px"
+            }
+        }
+        val noteCard = rule.onNodeWithTag("game-notes")
+        noteCard.assertIsNotSelected()
+        rule.onNodeWithTag("game-notes-status", useUnmergedTree = true).assertExists()
+        rule.onNodeWithText("Isključeno", useUnmergedTree = true).assertExists()
+        val notesBounds = noteCard.fetchSemanticsNode().boundsInRoot
+        val statusBounds = rule.onNodeWithTag("game-notes-status", useUnmergedTree = true)
+            .fetchSemanticsNode().boundsInRoot
+        check(statusBounds.top >= notesBounds.top - 1f &&
+            statusBounds.bottom <= notesBounds.bottom + 1f) {
+            "Reference Notes label/toggle escapes its card: status=$statusBounds, card=$notesBounds"
+        }
+        val hintBounds = rule.onNodeWithTag("game-hint").fetchSemanticsNode().boundsInRoot
+        val eraseBounds = rule.onNodeWithTag("game-erase").fetchSemanticsNode().boundsInRoot
+        check(notesBounds.right <= hintBounds.left + 1f &&
+            notesBounds.top == hintBounds.top &&
+            eraseBounds.right > hintBounds.right) {
+            "Gameplay tool cards overlap or lose their reference row order"
+        }
+        noteCard.performClick()
+        noteCard.assertIsSelected()
+        rule.onNodeWithText("Uključeno", useUnmergedTree = true).assertExists()
+        noteCard.performClick()
+        noteCard.assertIsNotSelected()
+        rule.onNodeWithText("Isključeno", useUnmergedTree = true).assertExists()
         rule.onNodeWithTag("sudoku-cell-0").assertExists()
 
         rule.onNodeWithTag("game-pause").performClick()
@@ -666,6 +696,9 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Aplikacija trenutačno podržava hrvatski jezik.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("sound-vibration").performScrollTo().performClick()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("about-app").performScrollTo().performClick()
+        rule.onNodeWithText("Treniraj mozak svaki dan.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("privacy-policy").performScrollTo().performClick()
         rule.onNodeWithText("Sudoku by Brendigo možeš igrati bez registracije i internetske veze.")
