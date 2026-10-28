@@ -260,7 +260,7 @@ object SudokuBackup {
         }
         for (key in listOf("winsBySize", "levels")) {
             val array = stats.optJSONArray(key) ?: continue
-            if (array.length() != if (key == "levels") 6 else 3 ||
+            if (array.length() != (if (key == "levels") 6 else 3) ||
                 (0 until array.length()).any { array.getInt(it) < 0 }) {
                 throw IOException("Nevaljane vrijednosti statistike.")
             }
