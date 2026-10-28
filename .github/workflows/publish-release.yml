@@ -3,6 +3,14 @@ name: Publish Sudoku release
 # Some GitHub App merges do not start a main push workflow. Build the trusted
 # merge commit after a merged PR, or publish manually from main.
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-release.yml"
+      - "app/**"
+      - "gradle.properties"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
   pull_request:
     types: [closed]
   workflow_dispatch:
@@ -17,7 +25,8 @@ concurrency:
 jobs:
   publish:
     if: >-
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+       github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' &&
        github.event.pull_request.merged == true &&
        github.event.pull_request.base.ref == 'main' &&
