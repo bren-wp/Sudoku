@@ -169,6 +169,63 @@ class SudokuBackupTest {
         }
     }
 
+
+    @Test
+    fun failedDiskCommitRollsBackPreviousLocalSnapshot() = runBlocking {
+        val (base, prefs) = sandbox("rollback")
+        prefs.edit().clear().commit()
+        try {
+            val previousController = SudokuController(base)
+            previousController.startNew(4, 1)
+            previousController.flush()
+            val original = SudokuBackup.snapshot(base)
+
+            val (source, sourcePrefs) = sandbox("rollback_source")
+            sourcePrefs.edit().clear().commit()
+            try {
+                val sourceController = SudokuController(source)
+                sourceController.startNew(9, 0)
+                sourceController.flush()
+                val candidate = SudokuBackup.snapshot(source)
+                assertNotEquals(original, candidate)
+
+                // Simulate a commit that updates the in-memory preferences,
+                // but reports a disk write failure to the import caller.
+                var firstCommit = true
+                val failing = object : ContextWrapper(base) {
+                    override fun getApplicationContext(): Context = this
+                    override fun getSharedPreferences(name: String?, mode: Int):
+                        SharedPreferences = object : SharedPreferences by prefs {
+                        override fun edit(): SharedPreferences.Editor {
+                            val underlying = prefs.edit()
+                            return object : SharedPreferences.Editor by underlying {
+                                override fun commit(): Boolean {
+                                    val result = underlying.commit()
+                                    return if (firstCommit) {
+                                        firstCommit = false
+                                        false
+                                    } else result
+                                }
+                            }
+                        }
+                    }
+                }
+                try {
+                    SudokuBackup.restore(failing, candidate)
+                    fail("Failed commit must not report a successful import")
+                } catch (_: IOException) {
+                    // The original snapshot must survive the failed import.
+                }
+                assertEquals(original, SudokuBackup.snapshot(base))
+                assertEquals(4, requireNotNull(SudokuController(base).game).size)
+            } finally {
+                sourcePrefs.edit().clear().commit()
+            }
+        } finally {
+            prefs.edit().clear().commit()
+        }
+    }
+
     @Test
     fun wrongPasswordTamperingAndBadDataNeverReplaceExistingProgress() = runBlocking {
         val (target, prefs) = sandbox("invalid")
