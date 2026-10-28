@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "app/**"
+      - "docs/screenshots/**"
+      - ".github/scripts/export-emulator-screenshots.sh"
       - ".github/workflows/visual-smoke.yml"
   workflow_dispatch:
 

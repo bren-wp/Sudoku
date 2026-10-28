@@ -36,6 +36,41 @@ import org.junit.runner.RunWith
 class SudokuVisualSmokeTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
+    @Test
+    fun captureRealSplashScreenForReferenceQA() {
+        // The real Compose splash exists for only 850ms on launch. Bring that
+        // same screen back after Home so screenshots are deterministic, without
+        // changing release behavior or substituting a mocked screenshot.
+        waitFor("home-nova-igra")
+        rule.runOnUiThread {
+            val controllerField = MainActivity::class.java.getDeclaredField("sudoku")
+            controllerField.isAccessible = true
+            val controller = controllerField.get(rule.activity)
+                as com.brendigo.sudoku.data.SudokuController
+            controller.go(com.brendigo.sudoku.data.Screen.SPLASH)
+        }
+        waitFor("splash-screen")
+        shot("08-splash")
+    }
+
+    @Test
+    fun productionAppRemainsOfflineAndDisablesAndroidBackup() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val app = context.applicationInfo
+        val info = context.packageManager.getPackageInfo(
+            context.packageName, android.content.pm.PackageManager.GET_PERMISSIONS
+        )
+        check("android.permission.INTERNET" !in (info.requestedPermissions ?: emptyArray())) {
+            "Sudoku must not unexpectedly request Internet access"
+        }
+        check(app.flags and android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP == 0) {
+            "Offline Sudoku history must not be automatically backed up"
+        }
+        check(app.flags and android.content.pm.ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC == 0) {
+            "Cleartext traffic must remain disabled"
+        }
+    }
+
     private fun waitFor(tag: String, timeoutMs: Long = 25_000) {
         rule.waitUntil(timeoutMillis = timeoutMs) {
             rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()

@@ -133,7 +133,8 @@ private fun Application(controller: SudokuController) {
         }
     }
     Box(Modifier.fillMaxSize()) {
-        ScenicBackdrop(Modifier.fillMaxSize(), bright = !controller.options.dark)
+        ScenicBackdrop(Modifier.fillMaxSize(), bright = !controller.options.dark,
+            splash = controller.page == Screen.SPLASH)
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             when (controller.page) {
                 Screen.SPLASH -> SplashPage()

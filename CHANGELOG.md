@@ -1,3 +1,16 @@
+## 1.0.34 — Oporavak napretka, sigurnost i stvarne snimke aplikacije
+
+- Ako je zajednički zapis partije oštećen ili nedostaje, aplikacija pokušava oporaviti valjanu nedovršenu običnu ili današnju dnevnu igru iz postojećih odvojenih zapisa. Za svaki oporavak koristi odgovarajuću povijest poništavanja poteza.
+- Očuvanje aktualne partije prije generiranja nove igre i sinkrono spremanje na `onStop` smanjuju rizik gubitka zadnjih poteza pri prestanku procesa.
+- Spremljene Undo bilješke ograničene su na dopuštene brojeve mreže; dodani su Kotlin/JUnit regresijski testovi za logiku oporavka.
+- Android manifest izričito isključuje cleartext mrežni promet. Data extraction pravila dodatno isključuju internu pohranu, baze i vanjsku pohranu iz cloud backup i device transfer procesa.
+- Dodan instrumentacijski test odsutnosti internetske dozvole, dopuštenja backupa i cleartext prometa.
+- Pravila privatnosti pojašnjavaju što se sprema lokalno, ograničenja Android sandboxa te mogućnost trajnog gubitka podataka bez izvoza/sinkronizacije.
+- Dekorativni dijelovi splasha (mjesec, planine, jezero, japanski paviljon i grane) zasebno su poravnani prema referenci; interaktivni ekrani koriste dosadašnje pozicije.
+- Workflow za README galeriju usmjeren je na aktualnu razvojnu granu i sprema stvarne screenshotove svih osam ekrana (uključujući splash) u punoj referentnoj rezoluciji u WebP formatu. README ne predstavlja konceptualne prikaze kao stvarno korisničko sučelje.
+- Verzija `1.0.34`, `versionCode=35`. Release se objavljuje tek nakon uspješnih provjera.
+- Ograničenja, neprovjerena 1:1 jednakost, i preostali sigurnosni rizici dokumentirani su u `docs/security-and-reliability-v1.0.34.md`.
+
 ## Neobjavljeno — priprema 1.0.33 (provjera u tijeku)
 
 - Splash zaslon zadržava originalni logo 7–3–9, ali ispravlja vertikalno pozicioniranje: logo više nije vezan uz indikator učitavanja, koji je smješten bliže donjem rubu prema referenci.

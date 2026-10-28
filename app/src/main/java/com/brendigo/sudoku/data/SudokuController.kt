@@ -88,7 +88,13 @@ class SudokuController(context: Context) {
         context.applicationContext.getSharedPreferences("sudoku_state_v1", Context.MODE_PRIVATE)
     var page by mutableStateOf(Screen.SPLASH)
         private set
-    var game by mutableStateOf(readGame())
+    // Each game type has its own save. Recover from a valid named snapshot if
+    // the legacy shared snapshot was missing or damaged.
+    private val restoredGame = SavedGameRecovery.choose(
+        readGame("game"), readGame("regular_game"), readGame("daily_game"),
+        LocalDate.now(),
+    )
+    var game by mutableStateOf(restoredGame.session)
         private set
     var stats by mutableStateOf(readStats())
         private set
@@ -98,7 +104,7 @@ class SudokuController(context: Context) {
         private set
     var toast by mutableStateOf("")
         private set
-    private val undoHistory = readUndoHistory()
+    private val undoHistory = readUndoHistory(restoredGame.undoKey, game)
     private var settingsOrigin = Screen.HOME
 
     init {
@@ -154,7 +160,9 @@ class SudokuController(context: Context) {
 
     /** Persist a just-entered move when Android moves the activity into background. */
     fun flush() {
-        saveGame()
+        // Activity.onStop: commit synchronously so Android process death does
+        // not race a queued asynchronous save. Never clear a failed save.
+        saveGame(synchronous = true)
     }
 
     fun clearToast() {
@@ -190,6 +198,9 @@ class SudokuController(context: Context) {
             val result = withContext(Dispatchers.Default) {
                 SudokuEngine.create(size, level, if (daily) today.toEpochDay().toInt() else kotlin.random.Random.nextInt())
             }
+            // Preserve the exact current puzzle before replacing it, even
+            // when its last selection or elapsed seconds were not checkpointed.
+            if (game != null) saveGame(synchronous = true)
             undoHistory.clear()
             game = Session(
                 size = result.size,
@@ -406,7 +417,8 @@ class SudokuController(context: Context) {
                 val value = j.optInt("value", -1)
                 val notes = j.optInt("notes", 0)
                 if (s.isEditable(cell) && value in 0..s.size && notes >= 0) {
-                    saved.addLast(Move(cell, value, notes))
+                    val validBits = (1 shl (s.size + 1)) - 2
+                    saved.addLast(Move(cell, value, notes and validBits))
                     if (saved.size > 100) saved.removeFirst()
                 }
             }
@@ -543,7 +555,7 @@ class SudokuController(context: Context) {
         }.toString()).apply()
     }
 
-    private fun saveGame() {
+    private fun saveGame(synchronous: Boolean = false) {
         val s = game ?: return
         val snapshot = JSONObject().apply {
             put("size", s.size)
@@ -577,7 +589,7 @@ class SudokuController(context: Context) {
         val editor = prefs.edit().putString("game", snapshot).putString("undo", history)
         if (s.daily) editor.putString("daily_game", snapshot).putString("daily_undo", history)
         else editor.putString("regular_game", snapshot).putString("regular_undo", history)
-        editor.apply()
+        if (synchronous) editor.commit() else editor.apply()
     }
 
     private fun readGame(key: String = "game"): Session? {

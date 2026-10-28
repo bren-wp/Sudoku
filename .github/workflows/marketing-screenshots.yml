@@ -1,14 +1,15 @@
 name: Refresh Sudoku marketing screenshots
 
-# This one-off branch workflow captures ACTUAL Compose screens, not concept art.
+# This development branch workflow captures ACTUAL Compose screens, not concept art.
 # It writes only small WebP screenshots on the dedicated development branch.
 on:
   push:
-    branches: ["feature/sudoku-v123-showcase-and-screen-parity"]
+    branches: ["feature/sudoku-v134-reliability-and-real-screens"]
     paths:
       - ".github/workflows/marketing-screenshots.yml"
       - "app/src/main/**"
       - "app/src/androidTest/**"
+      - "app/build.gradle.kts"
   workflow_dispatch:
 
 concurrency:
@@ -40,7 +41,7 @@ jobs:
       - name: Enable KVM
         run: |
           if test -e /dev/kvm; then sudo chmod 666 /dev/kvm; fi
-      - name: Capture seven actual Android screens
+      - name: Capture eight actual Android screens
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -53,7 +54,7 @@ jobs:
             adb shell wm size 941x1672
             adb shell wm density 320
             bash .github/scripts/run-visual-smoke.sh
-      - name: Generate compact marketing WebP thumbnails
+      - name: Generate full-resolution real Android WebP gallery
         run: |
           python -m pip install --disable-pip-version-check 'Pillow>=11,<13'
           python - <<'PY'
@@ -64,7 +65,7 @@ jobs:
           destination.mkdir(parents=True, exist_ok=True)
           expected = [
               "01-home", "02-new-game", "03-game", "04-settings",
-              "05-daily", "06-statistics", "07-achievements",
+              "05-daily", "06-statistics", "07-achievements", "08-splash",
           ]
           for basename in expected:
               filename = source / (basename + ".png")
@@ -73,18 +74,16 @@ jobs:
               with Image.open(filename) as image:
                   if image.size != (941, 1672):
                       raise SystemExit(f"Unexpected emulator size for {filename}: {image.size}")
-                  width = 420
-                  resized = image.convert("RGB").resize(
-                      (width, round(image.height * width / image.width)),
-                      Image.Resampling.LANCZOS,
-                  )
                   output = destination / (basename + ".webp")
-                  resized.save(output, format="WEBP", quality=82, method=6)
+                  # Full native capture resolution, compressed for GitHub README.
+                  image.convert("RGB").save(
+                      output, format="WEBP", quality=85, method=6,
+                  )
                   print(output, output.stat().st_size)
           PY
       - name: Publish verified captures to development branch
         # Never write to main on workflow_dispatch; releases require reviewed PRs.
-        if: github.ref == 'refs/heads/feature/sudoku-v123-showcase-and-screen-parity'
+        if: github.ref == 'refs/heads/feature/sudoku-v134-reliability-and-real-screens'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -94,5 +93,5 @@ jobs:
             exit 0
           fi
           git commit -m "docs(marketing): add real Android UI screenshot gallery [skip ci]"
-          git pull --rebase origin feature/sudoku-v123-showcase-and-screen-parity
-          git push origin HEAD:feature/sudoku-v123-showcase-and-screen-parity
+          git pull --rebase origin feature/sudoku-v134-reliability-and-real-screens
+          git push origin HEAD:feature/sudoku-v134-reliability-and-real-screens
