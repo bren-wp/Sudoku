@@ -97,9 +97,11 @@ python scripts/pixel_compare.py \
 ```
 
 To include the splash screen, supply a **real** `08-splash.png` Android
-capture and use `--include-splash`. The seven-screen emulator artifact does
-not currently contain a launch-splash capture. Do not substitute the original
-reference as its own actual screenshot.
+capture and use `--include-splash`. Since v1.0.34 the instrumented UI test
+`captureRealSplashScreenForReferenceQA` records the actual Compose splash
+after deterministically navigating back to that screen. This is not a painted
+reference screenshot. Do not substitute the original reference as its own
+actual screenshot.
 
 ### v1.0.32 verified baseline from the successful emulator artifact
 
@@ -149,3 +151,21 @@ and scenery-versus-interactive-UI normalized analysis are **still pending**.
 The next visual corrections are tracked in issue #39; do not declare 1:1
 equality, no known crashes, or a completed global security/dead-code audit.
 
+
+## v1.0.34 — full-resolution screenshot provenance
+
+GitHub Actions run [40778309153](https://github.com/bren-wp/Sudoku/actions/runs/40778309153)
+completed successfully and pushed eight **real** WebP screenshot captures to
+`docs/screenshots/` on the v1.0.34 PR branch. The automated exporter checks
+that all eight Android PNG captures exist and have valid PNG signatures. The
+marketing conversion checks 941×1672 resolution before encoding to WebP
+at original dimensions.
+
+The eighth file `08-splash.webp` comes from the real Compose splash, not
+the original concept PNG. README links to these eight artifacts. This validates
+provenance, resolution and capture success; **not** exact visual equality.
+
+The reference 941×1672 pixel-difference measurement should now be repeated
+against the v1.0.34 Android visual-smoke artifact after both emulator jobs
+succeed. Screenshot content remains dynamic and not normalized. Global
+RGB MAE must not be presented as pixel-perfect if differences remain.
