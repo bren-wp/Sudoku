@@ -739,6 +739,16 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Sudoku by Brendigo možeš igrati bez registracije i internetske veze.")
             .assertExists()
         rule.onNodeWithText("Zatvori").performClick()
+
+        // Both offline backup actions must be genuinely interactive,
+        // not decorative UI or an action that writes files automatically.
+        rule.onNodeWithTag("backup-export").performScrollTo().performClick()
+        rule.onNodeWithText("Izvezi sigurnosnu kopiju").assertExists()
+        rule.onNodeWithText("Odustani").performClick()
+        rule.onNodeWithTag("backup-import").performScrollTo().performClick()
+        rule.onNodeWithText("Uvezi sigurnosnu kopiju").assertExists()
+        rule.onNodeWithText("Odustani").performClick()
+
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
 
