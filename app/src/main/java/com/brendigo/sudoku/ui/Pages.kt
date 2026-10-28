@@ -1868,8 +1868,10 @@ fun SettingsPage(
                         "spremaju se lokalno u privatnu pohranu aplikacije na uređaju.")
                     Subtitle("Aplikacija ne koristi oglase, analitiku, praćenje korisnika niti " +
                         "internetsku dozvolu. Podaci se ne šalju na poslužitelj.")
-                    Subtitle("Deinstaliranjem aplikacije lokalni se podaci u pravilu brišu. " +
-                        "Postavke Android sustava mogu utjecati na ponašanje pohrane.")
+                    Subtitle("U postavkama možeš ručno izvesti šifriranu sigurnosnu kopiju " +
+                        "lozinkom i vratiti je uz svoju potvrdu. Izgubljenu lozinku nije moguće obnoviti.")
+                    Subtitle("Deinstalacija bez sigurnosne kopije može trajno ukloniti napredak. " +
+                        "Ako odabereš vanjsku/cloud pohranu, njome upravlja odabrani pružatelj.")
                     Subtitle("Izdavač: Brendigo · verzija " +
                         com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 }
