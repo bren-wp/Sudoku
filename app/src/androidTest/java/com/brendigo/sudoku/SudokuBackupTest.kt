@@ -105,6 +105,70 @@ class SudokuBackupTest {
         }
     }
 
+
+    @Test
+    fun emptyOrMismatchedArchiveCannotEraseExistingProgress() = runBlocking {
+        val (context, prefs) = sandbox("reject_empty")
+        prefs.edit().clear().commit()
+        try {
+            val controller = SudokuController(context)
+            controller.startNew(4, 0)
+            controller.flush()
+            val baseline = SudokuBackup.snapshot(context)
+            val validStats = requireNotNull(baseline["stats"])
+            val invalid = listOf(
+                emptyMap(),
+                mapOf("options" to "{}"),
+                mapOf("stats" to "{}"),
+                mapOf("stats" to validStats, "stats_backup" to """{"played":0,"finished":0}"""),
+            )
+            invalid.forEach { values ->
+                try {
+                    SudokuBackup.restore(context, values)
+                    fail("Invalid backup must never erase current game")
+                } catch (_: IOException) {
+                    // Reject before any preference edit.
+                }
+                try {
+                    SudokuBackup.encrypt(values, password.copyOf())
+                    fail("Invalid backup must never be exported")
+                } catch (_: IOException) {
+                    // A valid key must not authorize a destructive empty archive.
+                }
+                assertEquals(baseline, SudokuBackup.snapshot(context))
+            }
+        } finally {
+            prefs.edit().clear().commit()
+        }
+    }
+
+    @Test
+    fun oldActivityFlushCannotOverwriteRestoredGame() = runBlocking {
+        val (source, sourcePrefs) = sandbox("lock_source")
+        val (target, targetPrefs) = sandbox("lock_target")
+        sourcePrefs.edit().clear().commit()
+        targetPrefs.edit().clear().commit()
+        try {
+            val newProgress = SudokuController(source)
+            newProgress.startNew(6, 0)
+            newProgress.flush()
+            val expected = SudokuBackup.snapshot(source)
+
+            val outgoing = SudokuController(target)
+            outgoing.startNew(4, 1)
+            outgoing.flush()
+            assertTrue(outgoing.prepareForBackupRestore())
+            SudokuBackup.restore(target, expected)
+            // A delayed onStop callback must not write outgoing 4x4 over 6x6.
+            assertTrue(outgoing.flush())
+            assertEquals(expected, SudokuBackup.snapshot(target))
+            assertEquals(6, requireNotNull(SudokuController(target).game).size)
+        } finally {
+            sourcePrefs.edit().clear().commit()
+            targetPrefs.edit().clear().commit()
+        }
+    }
+
     @Test
     fun wrongPasswordTamperingAndBadDataNeverReplaceExistingProgress() = runBlocking {
         val (target, prefs) = sandbox("invalid")
