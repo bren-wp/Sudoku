@@ -68,6 +68,44 @@ class SudokuBackupTest {
     }
 
     @Test
+    fun restoredDailyProgressDoesNotAwardTheSameChallengeTwice() = runBlocking {
+        val (source, sourcePrefs) = sandbox("daily_source")
+        val (target, targetPrefs) = sandbox("daily_target")
+        sourcePrefs.edit().clear().commit()
+        targetPrefs.edit().clear().commit()
+        try {
+            val original = SudokuController(source)
+            original.startNew(4, 0, daily = true)
+            val game = requireNotNull(original.game)
+            for (index in game.board.indices) {
+                if (game.givens[index] == 0) {
+                    original.select(index)
+                    original.enter(game.solution[index])
+                }
+            }
+            assertTrue(requireNotNull(original.game).completed)
+            assertEquals(1, original.stats.dailyWins)
+            original.flush()
+            val encrypted = SudokuBackup.encrypt(
+                SudokuBackup.snapshot(source), password.copyOf()
+            )
+            val validated = SudokuBackup.decrypt(encrypted, password.copyOf())
+            SudokuBackup.restore(target, validated)
+            val restored = SudokuController(target)
+            assertTrue(restored.dailyAlreadyCompleted())
+            assertEquals(1, restored.stats.dailyWins)
+            assertEquals(50, restored.stats.dailyPoints)
+            val beforePlayed = restored.stats.played
+            restored.startNew(4, 0, daily = true)
+            assertEquals(1, restored.stats.dailyWins)
+            assertEquals(beforePlayed, restored.stats.played)
+        } finally {
+            sourcePrefs.edit().clear().commit()
+            targetPrefs.edit().clear().commit()
+        }
+    }
+
+    @Test
     fun wrongPasswordTamperingAndBadDataNeverReplaceExistingProgress() = runBlocking {
         val (target, prefs) = sandbox("invalid")
         prefs.edit().clear().commit()
