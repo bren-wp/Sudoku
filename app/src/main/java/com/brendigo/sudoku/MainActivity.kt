@@ -136,15 +136,19 @@ private fun Application(controller: SudokuController) {
         ScenicBackdrop(Modifier.fillMaxSize(), bright = !controller.options.dark,
             splash = controller.page == Screen.SPLASH)
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            when (controller.page) {
-                Screen.SPLASH -> SplashPage()
-                Screen.HOME -> HomePage(controller)
-                Screen.NEW_GAME -> NewGamePage(controller)
-                Screen.GAME -> GamePage(controller)
-                Screen.DAILY -> DailyPage(controller)
-                Screen.STATS -> StatsPage(controller)
-                Screen.ACHIEVEMENTS -> AchievementsPage(controller)
-                Screen.SETTINGS -> SettingsPage(controller)
+            SudokuBackupFlow(controller) { onExportBackup, onImportBackup ->
+                when (controller.page) {
+                    Screen.SPLASH -> SplashPage()
+                    Screen.HOME -> HomePage(controller)
+                    Screen.NEW_GAME -> NewGamePage(controller)
+                    Screen.GAME -> GamePage(controller)
+                    Screen.DAILY -> DailyPage(controller)
+                    Screen.STATS -> StatsPage(controller)
+                    Screen.ACHIEVEMENTS -> AchievementsPage(controller)
+                    Screen.SETTINGS -> SettingsPage(
+                        controller, onExportBackup, onImportBackup
+                    )
+                }
             }
         }
         if (controller.toast.isNotBlank()) {
