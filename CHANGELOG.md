@@ -7,7 +7,7 @@
 - Dodan instrumentacijski test odsutnosti internetske dozvole, dopuštenja backupa i cleartext prometa.
 - Pravila privatnosti pojašnjavaju što se sprema lokalno, ograničenja Android sandboxa te mogućnost trajnog gubitka podataka bez izvoza/sinkronizacije.
 - Dekorativni dijelovi splasha (mjesec, planine, jezero, japanski paviljon i grane) zasebno su poravnani prema referenci; interaktivni ekrani koriste dosadašnje pozicije.
-- Workflow za README galeriju usmjeren je na aktualnu razvojnu granu i sprema stvarne screenshotove svih sedam ekrana u punoj referentnoj rezoluciji u WebP formatu. README ne predstavlja konceptualne prikaze kao stvarno korisničko sučelje.
+- Workflow za README galeriju usmjeren je na aktualnu razvojnu granu i sprema stvarne screenshotove svih osam ekrana (uključujući splash) u punoj referentnoj rezoluciji u WebP formatu. README ne predstavlja konceptualne prikaze kao stvarno korisničko sučelje.
 - Verzija `1.0.34`, `versionCode=35`. Release se objavljuje tek nakon uspješnih provjera.
 - Ograničenja, neprovjerena 1:1 jednakost, i preostali sigurnosni rizici dokumentirani su u `docs/security-and-reliability-v1.0.34.md`.
 
