@@ -108,13 +108,13 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
         }
         // On the source splash, the moon and horizon sit appreciably higher
         // than behind the dense menu cards. Keep gameplay scenery unchanged.
-        val moonY = if (splash) .685f else .77f
+        val moonY = if (splash) .705f else .77f
         drawCircle(
             Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
             radius = w * .16f, center = Offset(w * .81f, h * moonY),
         )
-        drawCircle(Color(0xFFA2D8FF).copy(alpha = .91f),
-            radius = w * .036f, center = Offset(w * .81f, h * moonY))
+        drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
+            radius = w * .030f, center = Offset(w * .81f, h * moonY))
         // Distant layered mountain silhouettes.
         fun mountains(y: Float, amplitude: Float, color: Color, phase: Float) {
             val path = Path().apply {
@@ -154,7 +154,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
         // Distinctive pagoda on the right, built from paths rather than external art.
         val cx = w * .865f
         val by = h * (if (splash) .855f else .920f)
-        val unit = w * .034f
+        val unit = w * .028f
         // A three-storey lakeside pagoda: tiered roofs, curved eaves, a
         // narrow spire and two glowing lantern openings, all drawn behind UI.
         drawRect(Color(0xFF020B24),
@@ -211,47 +211,39 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
             )
         }
 
-        // Sakura foliage is vector-drawn: larger petals and irregular
-        // clusters bring the lower-left landscape closer to the supplied art.
-        // No screen-sized bitmap or fake interface is used.
-        val branchRise = if (splash) .075f else .018f
-        val branches = Path().apply {
-            moveTo(-w * .07f, h * 1.02f)
-            cubicTo(w * .07f, h * .93f, w * .06f, h * (.85f - branchRise),
-                w * .32f, h * (.84f - branchRise))
-            moveTo(w * .015f, h * .96f)
-            cubicTo(w * .045f, h * .88f, w * .14f, h * (.81f - branchRise),
-                w * .24f, h * (.78f - branchRise))
-            moveTo(-w * .04f, h * .86f)
-            cubicTo(w * .03f, h * .84f, w * .09f, h * (.88f - branchRise),
-                w * .22f, h * (.85f - branchRise))
+        // The owner's night-landscape references feature flowering branches
+        // along the lower left edge. Draw them as deterministic vector petals.
+        val branch = Path().apply {
+            val rise = if (splash) .055f else 0f
+            moveTo(-w * .05f, h * .99f)
+            cubicTo(w * .06f, h * .94f, w * .06f, h * (.87f - rise), w * .23f, h * (.83f - rise))
+            moveTo(w * .02f, h * .93f)
+            cubicTo(w * .04f, h * .88f, w * .12f, h * (.84f - rise), w * .17f, h * (.79f - rise))
         }
-        drawPath(branches, Color(0xFF020B21), style = Stroke(width = w * .011f))
-        for (i in 0 until 125) {
-            val t = ((i * 53 + 7) % 127) / 126f
+        drawPath(branch, Color(0xFF010C24), style = Stroke(width = w * .009f))
+        for (i in 0..87) {
+            val t = ((i * 53 + 7) % 101) / 100f
             val x = w * t * .36f
-            val variation = ((i * 37 + 11) % 109) / 109f
-            val y = h * ((if (splash) .76f else .825f) +
-                (if (splash) .215f else .155f) * variation)
-            val radius = w * (.0041f + (i % 5) * .00115f)
-            val petals = if (i % 4 == 0) Color(0xFFD2BFEB)
-                else if (i % 3 == 0) Color(0xFF91A8DB)
-                else Color(0xFF788CCB)
-            val opacity = if (i % 5 == 0) .81f else .59f
+            val y = h * ((if (splash) .80f else .86f) +
+                (if (splash) .18f else .12f) * ((i * 37 % 103) / 103f))
+            val radius = w * (.0024f + (i % 4) * .0009f)
+            val hue = if (i % 3 == 0) Color(0xFF9A8EC4) else Color(0xFF6477B4)
+            val opacity = if (i % 4 == 0) .70f else .46f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
-                    color = petals.copy(alpha = opacity),
-                    radius = radius * 1.08f,
+                    color = hue.copy(alpha = opacity),
+                    radius = radius * 1.22f,
                     center = Offset(
-                        x + cos(radians) * radius * 1.18f,
-                        y + sin(radians) * radius * 1.18f,
+                        x + cos(radians) * radius * 1.35f,
+                        y + sin(radians) * radius * 1.35f,
                     ),
                 )
             }
             drawCircle(
-                Color(0xFFF1E4F8).copy(alpha = opacity * .76f),
-                radius = radius * .42f, center = Offset(x, y),
+                Color(0xFFD2B4C7).copy(alpha = opacity * .55f),
+                radius = radius * .49f,
+                center = Offset(x, y),
             )
         }
     }
