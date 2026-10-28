@@ -145,10 +145,23 @@ object SudokuBackup {
     fun restore(context: Context, values: Map<String, String>) {
         validate(values)
         val prefs = preferences(context)
+        // SharedPreferences can update its in-memory map even if disk commit
+        // returns false. Keep an independent snapshot to undo that mutation.
+        val previous = keys.mapNotNull { key ->
+            prefs.getString(key, null)?.let { key to it }
+        }.toMap()
         val editor = prefs.edit()
         for (key in keys) editor.remove(key)
         values.forEach { (key, value) -> editor.putString(key, value) }
-        if (!editor.commit()) throw IOException("Nije uspjelo spremanje sigurnosne kopije.")
+        if (!runCatching { editor.commit() }.getOrDefault(false)) {
+            val rollback = prefs.edit()
+            keys.forEach { rollback.remove(it) }
+            previous.forEach { (key, value) -> rollback.putString(key, value) }
+            if (!runCatching { rollback.commit() }.getOrDefault(false)) {
+                throw IOException("Zapis i oporavak kopije nisu uspjeli; provjeri pohranu.")
+            }
+            throw IOException("Spremanje kopije nije uspjelo; prethodni podaci su vraćeni.")
+        }
     }
 
     private fun validate(values: Map<String, String>) {
