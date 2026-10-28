@@ -36,7 +36,7 @@ import java.time.LocalDate
 @Composable
 fun SudokuBackupFlow(
     controller: SudokuController,
-    content: @Composable (export: () -> Unit, import: () -> Unit) -> Unit,
+    content: @Composable (onExport: () -> Unit, onImport: () -> Unit) -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
