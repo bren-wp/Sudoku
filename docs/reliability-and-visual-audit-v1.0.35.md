@@ -44,10 +44,14 @@ Nevaljane Undo bilješke se filtriraju prije obnove.
 Zadržani su nativni elementi: Sudoku mreža, tipkovnica, gumbi, kartice,
 dinamički napredak, animacije te stvarni podaci na svim ekranima.
 
-Proceduralna pozadina ima veću mjesečinu, izraženiji paviljon i slojevite
-vektorske cvjetove. **Ne smatra se ostvarenom pixel-perfect jednakosti**
-s detaljnim ilustracijama. Zajednička pozadina i dalje je najveća vizualna
-razlika u odnosu na izvorne PNG reference.
+Ispitana je izraženija mjesečina, veći paviljon i veći vektorski cvjetovi.
+Prava 941×1672 usporedba iz artefakta `12858047041` pokazala je regresiju
+prosječnog globalnog RGB MAE za sedam glavnih zaslona s **28.907 na 30.557**
+(+1.650), pa je ova promjena u cijelosti **vraćena na provjereni v1.0.34
+vizualni kod**. Nakon ponovljenog snimanja očekuje se isti osnovni izgled,
+bez zamjene interaktivnih Compose elemenata bitmapom. Zajednička pozadina
+i dalje je najveća razlika prema izvornim ilustracijama, a njezino
+izjednačavanje ostaje zaseban QA zadatak.
 
 Prethodno dokumentiran baseline v1.0.34 — globalni nenormalizirani RGB MAE
 po zaslonima: Home 29.311, New Game 29.061, Game 23.387, Settings 27.729,
