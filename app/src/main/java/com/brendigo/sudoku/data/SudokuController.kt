@@ -127,6 +127,8 @@ class SudokuController(context: Context) {
     }
 
     fun resumeRegularGame(): Boolean {
+        // Preserve an in-memory daily session before switching puzzle types.
+        if (game?.daily == true) saveGame(synchronous = true)
         val saved = readGame("regular_game") ?: return false
         if (saved.daily || saved.completed || saved.failed) return false
         game = saved
@@ -185,6 +187,7 @@ class SudokuController(context: Context) {
         if (daily) {
             val saved = readGame("daily_game")
             if (saved != null && saved.daily && saved.day == date && !saved.completed && !saved.failed) {
+                if (game?.daily == false) saveGame(synchronous = true)
                 game = saved
                 undoHistory.clear()
                 undoHistory.addAll(readUndoHistory("daily_undo", saved))
@@ -225,8 +228,7 @@ class SudokuController(context: Context) {
                 day = if (daily) date else "",
             )
             stats = stats.copy(played = stats.played + 1)
-            saveStats()
-            saveGame()
+                saveGame()
             page = Screen.GAME
         } catch (error: Exception) {
             toast = "Igru nije moguće pokrenuti. Pokušaj ponovno."
@@ -409,9 +411,11 @@ class SudokuController(context: Context) {
     private fun readUndoHistory(key: String = "undo", session: Session? = game): ArrayDeque<Move> {
         val saved = ArrayDeque<Move>()
         try {
-            val entries = JSONArray(prefs.getString(key, "[]"))
+            val raw = prefs.getString(key, "[]") ?: "[]"
+            if (raw.length > 64_000) return saved
+            val entries = JSONArray(raw)
             val s = session ?: return saved
-            for (i in 0 until entries.length()) {
+            for (i in maxOf(0, entries.length() - 100) until entries.length()) {
                 val j = entries.optJSONObject(i) ?: continue
                 val cell = j.optInt("cell", -1)
                 val value = j.optInt("value", -1)
@@ -462,7 +466,6 @@ class SudokuController(context: Context) {
             history = (listOf(Completed(s.level, s.size, s.elapsed,
                 date, s.daily, s.hints)) + stats.history).take(50),
         )
-        saveStats()
     }
 
     /** Current active streak, unlike the lifetime best, expires after a missed day. */
@@ -485,8 +488,18 @@ class SudokuController(context: Context) {
         )
     } catch (_: Exception) { Options() }
 
-    private fun readStats(): Statistics = try {
-        val j = JSONObject(prefs.getString("stats", "{}") ?: "{}")
+    private fun readStats(): Statistics {
+        // Both keys contain the same last committed progress snapshot. A
+        // malformed primary key must never silently erase valid history.
+        for (key in listOf("stats", "stats_backup")) {
+            val raw = prefs.getString(key, null) ?: continue
+            if (raw.length > 512_000) continue
+            try {
+                val j = JSONObject(raw)
+                require(j.optInt("played") >= 0 && j.optInt("finished") >= 0 &&
+                    j.optLong("totalSeconds") >= 0L && j.optInt("dailyWins") >= 0 &&
+                    j.optInt("dailyPoints") >= 0)
+
         val levels = j.optJSONArray("levels")
         val history = j.optJSONArray("history")
         Statistics(
@@ -499,7 +512,8 @@ class SudokuController(context: Context) {
             lastDaily = j.optString("lastDaily", ""),
             flawless = j.optInt("flawless"),
             winsByLevel = List(6) { levels?.optInt(it) ?: 0 },
-            history = if (history == null) emptyList() else (0 until history.length()).mapNotNull { i ->
+            history = if (history == null) emptyList() else
+                (0 until minOf(history.length(), 50)).mapNotNull { i ->
                 history.optJSONObject(i)?.let { entry ->
                     Completed(entry.optInt("level").coerceIn(0, 5),
                         entry.optInt("size", 9), entry.optInt("seconds"),
@@ -509,7 +523,7 @@ class SudokuController(context: Context) {
             dailyWins = j.optInt("dailyWins"),
             dailyPoints = j.optInt("dailyPoints", j.optInt("dailyWins", 0) * 50),
             completedDailyDates = j.optJSONArray("completedDailyDates")?.let { dates ->
-                (0 until dates.length()).mapNotNull { index ->
+                (0 until minOf(dates.length(), 4000)).mapNotNull { index ->
                     dates.optString(index).takeIf { day ->
                         runCatching { LocalDate.parse(day) }.isSuccess
                     }
@@ -519,11 +533,17 @@ class SudokuController(context: Context) {
             fastWins = j.optInt("fastWins"),
             longWins = j.optInt("longWins"),
             winsBySize = List(3) { j.optJSONArray("winsBySize")?.optInt(it) ?: 0 },
-        )
-    } catch (_: Exception) { Statistics() }
+        ).also { return it }
+            } catch (_: Exception) {
+                // Try the duplicate committed key before giving up.
+            }
+        }
+        return Statistics()
+    }
 
-    private fun saveStats() {
-        prefs.edit().putString("stats", JSONObject().apply {
+    /** Write stats alongside its game in a single SharedPreferences transaction. */
+    private fun writeStats(editor: SharedPreferences.Editor) {
+        val snapshot = JSONObject().apply {
             put("played", stats.played)
             put("finished", stats.finished)
             put("totalSeconds", stats.totalSeconds)
@@ -552,7 +572,9 @@ class SudokuController(context: Context) {
                     })
                 }
             })
-        }.toString()).apply()
+        }.toString()
+        editor.putString("stats", snapshot)
+        editor.putString("stats_backup", snapshot)
     }
 
     private fun saveGame(synchronous: Boolean = false) {
@@ -587,6 +609,9 @@ class SudokuController(context: Context) {
             }
         }.toString()
         val editor = prefs.edit().putString("game", snapshot).putString("undo", history)
+        // The game result, score, streak and history are atomically committed.
+        // A process death can no longer persist the reward without the win.
+        writeStats(editor)
         if (s.daily) editor.putString("daily_game", snapshot).putString("daily_undo", history)
         else editor.putString("regular_game", snapshot).putString("regular_undo", history)
         if (synchronous) editor.commit() else editor.apply()
@@ -595,6 +620,7 @@ class SudokuController(context: Context) {
     private fun readGame(key: String = "game"): Session? {
         return try {
         val raw = prefs.getString(key, null) ?: return null
+        if (raw.length > 128_000) return null
         val j = JSONObject(raw)
         val size = j.getInt("size")
         if (size !in setOf(4, 6, 9)) return null
@@ -625,7 +651,7 @@ class SudokuController(context: Context) {
                 session.level in 0..5 &&
                 session.selected in -1 until size * size &&
                 session.elapsed >= 0 && session.mistakes in 0..3 &&
-                session.hints >= 0 &&
+                session.hints in 0..MAX_HINTS &&
                 (!session.daily || runCatching { LocalDate.parse(session.day) }.isSuccess) &&
                 SudokuEngine.isValidCompleted(session.solution, size,
                     session.boxRows, session.boxColumns) &&
