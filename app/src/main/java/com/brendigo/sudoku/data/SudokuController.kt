@@ -229,7 +229,7 @@ class SudokuController(context: Context) {
                 day = if (daily) date else "",
             )
             stats = stats.copy(played = stats.played + 1)
-                saveGame()
+            saveGame()
             page = Screen.GAME
         } catch (error: Exception) {
             toast = "Igru nije moguće pokrenuti. Pokušaj ponovno."
