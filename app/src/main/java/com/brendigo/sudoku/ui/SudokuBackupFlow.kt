@@ -133,7 +133,7 @@ fun SudokuBackupFlow(
     if (showExport) {
         AlertDialog(
             onDismissRequest = { if (!busy) { password = ""; showExport = false } },
-            containerColor = Ink.background,
+            containerColor = Ink.navy,
             title = { Text("Izvezi sigurnosnu kopiju", color = Ink.white) },
             text = {
                 Column {
@@ -169,7 +169,7 @@ fun SudokuBackupFlow(
     if (showImport) {
         AlertDialog(
             onDismissRequest = { if (!busy) { importPassword = ""; showImport = false } },
-            containerColor = Ink.background,
+            containerColor = Ink.navy,
             title = { Text("Uvezi sigurnosnu kopiju", color = Ink.white) },
             text = {
                 Column {
@@ -207,7 +207,7 @@ fun SudokuBackupFlow(
     if (showConfirm && imported != null) {
         AlertDialog(
             onDismissRequest = { showConfirm = false; imported = null },
-            containerColor = Ink.background,
+            containerColor = Ink.navy,
             title = { Text("Zamijeniti trenutačni napredak?", color = Ink.white) },
             text = {
                 Text("Kopija je uspješno provjerena i dešifrirana. " +
