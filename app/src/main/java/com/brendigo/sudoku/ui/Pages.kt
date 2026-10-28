@@ -196,9 +196,10 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
 
 @Composable
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier,
-                enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp) {
+                enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp,
+                tag: String = "primary-action") {
     Box(
-        modifier.testTag("primary-action")
+        modifier.testTag(tag)
             .semantics { contentDescription = title; role = Role.Button }
             .heightIn(min = 48.dp).heightIn(min = minHeight)
             .background(
@@ -1773,11 +1774,11 @@ fun SettingsPage(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(Modifier.weight(1f)) {
                         SolidAction("Izvezi kopiju", onExportBackup,
-                            Modifier.fillMaxWidth().testTag("backup-export"), minHeight = 48.dp)
+                            Modifier.fillMaxWidth(), minHeight = 48.dp, tag = "backup-export")
                     }
                     Box(Modifier.weight(1f)) {
                         SolidAction("Uvezi kopiju", onImportBackup,
-                            Modifier.fillMaxWidth().testTag("backup-import"), minHeight = 48.dp)
+                            Modifier.fillMaxWidth(), minHeight = 48.dp, tag = "backup-import")
                     }
                 }
                 Subtitle("Za uvoz je potrebna lozinka. Podaci ne napuštaju uređaj " +
