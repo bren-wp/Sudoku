@@ -1630,7 +1630,11 @@ fun AchievementsPage(controller: SudokuController) {
 }
 
 @Composable
-fun SettingsPage(controller: SudokuController) {
+fun SettingsPage(
+    controller: SudokuController,
+    onExportBackup: () -> Unit,
+    onImportBackup: () -> Unit,
+) {
     val opts = controller.options
     // Android destroys and recreates Activities for rotation, multi-window,
     // font scale and theme changes. Preserve any open Settings dialog.
@@ -1756,6 +1760,28 @@ fun SettingsPage(controller: SudokuController) {
                     Text("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME,
                         color = Ink.muted, fontSize = 13.sp)
                 }
+            }
+        }
+        // Keep the screenshot-matched Settings sections intact and append
+        // user-initiated offline backup actions after the existing content.
+        NeonPanel(Modifier.fillMaxWidth(), Ink.teal) {
+            Column(Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SettingHeader("shield", "Sigurnosna kopija",
+                    "Šifrirano spremanje i vraćanje napretka na uređaju")
+                Row(Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(Modifier.weight(1f)) {
+                        SolidAction("Izvezi kopiju", onExportBackup,
+                            Modifier.fillMaxWidth().testTag("backup-export"), minHeight = 48.dp)
+                    }
+                    Box(Modifier.weight(1f)) {
+                        SolidAction("Uvezi kopiju", onImportBackup,
+                            Modifier.fillMaxWidth().testTag("backup-import"), minHeight = 48.dp)
+                    }
+                }
+                Subtitle("Za uvoz je potrebna lozinka. Podaci ne napuštaju uređaj " +
+                    "osim datoteke koju sami odaberete.")
             }
         }
     }
