@@ -34,6 +34,8 @@ class SudokuStatsDurabilityTest {
             val original = requireNotNull(controller.game)
             assertEquals(1, controller.stats.played)
             assertEquals(0, controller.stats.finished)
+            repeat(10) { controller.tick() }
+            assertEquals(10L, controller.stats.totalPlayedSeconds)
             for (index in original.board.indices) {
                 if (original.givens[index] != 0) continue
                 controller.select(index)
@@ -50,6 +52,8 @@ class SudokuStatsDurabilityTest {
             val restored = SudokuController(isolated)
             assertEquals(1, restored.stats.finished)
             assertEquals(1, restored.stats.played)
+            assertEquals(10L, restored.stats.totalPlayedSeconds)
+            assertEquals(10L, restored.stats.totalSeconds)
             assertTrue(requireNotNull(restored.game).completed)
 
             check(prefs.edit().putString("stats", "{malformed").commit())
