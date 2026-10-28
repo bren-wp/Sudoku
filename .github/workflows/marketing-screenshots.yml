@@ -4,7 +4,7 @@ name: Refresh Sudoku marketing screenshots
 # It writes only small WebP screenshots on the dedicated development branch.
 on:
   push:
-    branches: ["feature/sudoku-v134-reliability-and-real-screens"]
+    branches: ["feature/sudoku-v135-atomic-progress-ui-audit"]
     paths:
       - ".github/workflows/marketing-screenshots.yml"
       - "app/src/main/**"
@@ -83,7 +83,7 @@ jobs:
           PY
       - name: Publish verified captures to development branch
         # Never write to main on workflow_dispatch; releases require reviewed PRs.
-        if: github.ref == 'refs/heads/feature/sudoku-v134-reliability-and-real-screens'
+        if: github.ref == 'refs/heads/feature/sudoku-v135-atomic-progress-ui-audit'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -93,5 +93,5 @@ jobs:
             exit 0
           fi
           git commit -m "docs(marketing): add real Android UI screenshot gallery [skip ci]"
-          git pull --rebase origin feature/sudoku-v134-reliability-and-real-screens
-          git push origin HEAD:feature/sudoku-v134-reliability-and-real-screens
+          git pull --rebase origin feature/sudoku-v135-atomic-progress-ui-audit
+          git push origin HEAD:feature/sudoku-v135-atomic-progress-ui-audit
