@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.33** · Android 8.0+ · Kotlin + Jetpack Compose
+**Izdanje 1.0.34** · Android 8.0+ · Kotlin + Jetpack Compose
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
@@ -53,10 +53,15 @@ napredak i postignuća — sve lokalno na uređaju, bez registracije.
 
 ## 📱 Snimke aplikacije
 
-Ovdje su **stvarne snimke funkcionirajuće Android aplikacije** iz automatskog
-UI testiranja (941 × 1672 px), smanjene radi bržeg učitavanja stranice.
-Nisu prikazane statične imitacije sučelja niti izmišljeni rezultati igrača.
-Ilustrirane dizajnerske reference i dalje su cilj daljnjeg 1:1 usklađivanja.
+U galeriji su **stvarne snimke sedam funkcionalnih ekrana** iz Android emulatora
+(941 × 1672 px), optimizirane u WebP format bez zamjene interaktivnog sučelja
+statičnim slikama. Snimke prikazuju testno stanje aplikacije, a ne izmišljene
+korisničke rezultate. Izvor su provjerljivi instrumentacijski testovi i
+[workflow za stvarne snimke](.github/workflows/marketing-screenshots.yml).
+
+Originalne referentne ilustracije, uključujući splash, logotip i ikonu, ostaju
+cilj daljnje **1:1** usklađenosti. Prolazak testova ne znači da je pikselna
+jednakost svih ekrana već potvrđena.
 
 <table align="center">
 <tr><th>Početni ekran</th><th>Nova igra</th><th>Sudoku ploča</th></tr>
@@ -104,7 +109,8 @@ Bez konfiguriranih izdavačkih ključeva, objavljeni APK je **testni APK**, a AA
 
 Napredak i postavke spremaju se lokalno u privatnom prostoru aplikacije.
 Nema korisničkog računa, oglasa, analitike ni mrežnih dozvola.
-Detalji su u dokumentu [PRIVACY.md](PRIVACY.md).
+Detalji su u dokumentu [PRIVACY.md](PRIVACY.md). Napredak se ne sinkronizira
+s internetom: deinstalacija ili kvar uređaja mogu ga trajno ukloniti.
 
 ---
 
