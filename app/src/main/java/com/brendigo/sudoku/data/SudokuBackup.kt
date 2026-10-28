@@ -155,6 +155,15 @@ object SudokuBackup {
         if (values.keys.any { it !in keys }) throw IOException("Nepoznati podaci u kopiji.")
         if (values.values.sumOf { it.length } > MAX_PLAIN)
             throw IOException("Sigurnosna kopija je prevelika.")
+        // An authenticated archive can still be empty or contain only options.
+        // Never let such a file silently erase games and achievements.
+        if (values["stats"] == null && values["stats_backup"] == null) {
+            throw IOException("Kopija ne sadrži podatke o napretku.")
+        }
+        if (values["stats"] != null && values["stats_backup"] != null &&
+            values["stats"] != values["stats_backup"]) {
+            throw IOException("Nekonzistentni zapisi statistike u kopiji.")
+        }
         try {
             listOf("game", "regular_game", "daily_game").forEach { key ->
                 values[key]?.let { raw -> validateGame(JSONObject(raw), key) }
@@ -241,6 +250,10 @@ object SudokuBackup {
     }
 
     private fun validateStats(stats: JSONObject) {
+        if (!stats.has("played") || !stats.has("finished") ||
+            stats.optInt("finished", -1) > stats.optInt("played", -1)) {
+            throw IOException("Nedostaje vjerodostojna statistika u kopiji.")
+        }
         for (key in listOf("played", "finished", "flawless", "dailyWins", "dailyPoints",
             "streak", "bestStreak", "noHintWins", "fastWins", "longWins")) {
             if (stats.optInt(key) < 0) throw IOException("Nevaljana statistika.")
