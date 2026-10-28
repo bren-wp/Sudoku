@@ -196,9 +196,10 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
 
 @Composable
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier,
-                enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp) {
+                enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp,
+                tag: String = "primary-action") {
     Box(
-        modifier.testTag("primary-action")
+        modifier.testTag(tag)
             .semantics { contentDescription = title; role = Role.Button }
             .heightIn(min = 48.dp).heightIn(min = minHeight)
             .background(
@@ -1630,7 +1631,11 @@ fun AchievementsPage(controller: SudokuController) {
 }
 
 @Composable
-fun SettingsPage(controller: SudokuController) {
+fun SettingsPage(
+    controller: SudokuController,
+    onExportBackup: () -> Unit,
+    onImportBackup: () -> Unit,
+) {
     val opts = controller.options
     // Android destroys and recreates Activities for rotation, multi-window,
     // font scale and theme changes. Preserve any open Settings dialog.
@@ -1758,6 +1763,28 @@ fun SettingsPage(controller: SudokuController) {
                 }
             }
         }
+        // Keep the screenshot-matched Settings sections intact and append
+        // user-initiated offline backup actions after the existing content.
+        NeonPanel(Modifier.fillMaxWidth(), Ink.teal) {
+            Column(Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SettingHeader("shield", "Sigurnosna kopija",
+                    "Šifrirano spremanje i vraćanje napretka na uređaju")
+                Row(Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(Modifier.weight(1f)) {
+                        SolidAction("Izvezi kopiju", onExportBackup,
+                            Modifier.fillMaxWidth(), minHeight = 48.dp, tag = "backup-export")
+                    }
+                    Box(Modifier.weight(1f)) {
+                        SolidAction("Uvezi kopiju", onImportBackup,
+                            Modifier.fillMaxWidth(), minHeight = 48.dp, tag = "backup-import")
+                    }
+                }
+                Subtitle("Za uvoz je potrebna lozinka. Podaci ne napuštaju uređaj " +
+                    "osim datoteke koju sami odaberete.")
+            }
+        }
     }
     if (showLanguage) {
         AlertDialog(
@@ -1842,8 +1869,10 @@ fun SettingsPage(controller: SudokuController) {
                         "spremaju se lokalno u privatnu pohranu aplikacije na uređaju.")
                     Subtitle("Aplikacija ne koristi oglase, analitiku, praćenje korisnika niti " +
                         "internetsku dozvolu. Podaci se ne šalju na poslužitelj.")
-                    Subtitle("Deinstaliranjem aplikacije lokalni se podaci u pravilu brišu. " +
-                        "Postavke Android sustava mogu utjecati na ponašanje pohrane.")
+                    Subtitle("U postavkama možeš ručno izvesti šifriranu sigurnosnu kopiju " +
+                        "lozinkom i vratiti je uz svoju potvrdu. Izgubljenu lozinku nije moguće obnoviti.")
+                    Subtitle("Deinstalacija bez sigurnosne kopije može trajno ukloniti napredak. " +
+                        "Ako odabereš vanjsku/cloud pohranu, njome upravlja odabrani pružatelj.")
                     Subtitle("Izdavač: Brendigo · verzija " +
                         com.brendigo.sudoku.BuildConfig.VERSION_NAME)
                 }

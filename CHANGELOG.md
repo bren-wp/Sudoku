@@ -1,3 +1,14 @@
+## 1.0.36 — Sigurnosna kopija, privatnost i oporavak
+
+- Dodan korisnički izvoz i uvoz **šifrirane offline kopije** putem Android Storage Access Frameworka, bez internetske veze ili širokih dozvola za pohranu.
+- AES-256-GCM s nasumičnim sol/nonce vrijednostima, PBKDF2-HMAC-SHA256 (240 000 iteracija), integritetom i verzioniranim formatom datoteke.
+- Sigurni limiti veličine, provjera svih spremljenih Sudoku partija, Undo poteza, statistike i dnevnih izazova **prije** uvoza.
+- Obavezna zasebna potvrda zamjene lokalnog napretka; pogrešna lozinka i neispravan sadržaj ne smiju pokrenuti vraćanje.
+- Spriječeno da Activity onStop odmah nakon uvoza prepiše vraćeno stanje starim podacima.
+- Nova Android instrumentacijska ispitivanja za round-trip 4×4 i dnevne nagrade, odbacivanje izmijenjene kopije i pogrešne lozinke.
+- Postavke su dopunjene funkcionalnim gumbima, uz zadržavanje postojećih vizualnih elemenata. README koristi stvarne emulator screenshotove.
+- `versionName=1.0.36`, `versionCode=37`. Za objavu na Google Playu i dalje je potreban valjan izdavački certifikat.
+
 ## 1.0.35 — Pouzdanost napretka, točno vrijeme i vizualna dorada
 
 - Dovršena Sudoku partija, statistika i postignuća spremaju se jednim atomskim lokalnim zapisom kako bi se smanjio rizik dvostrukog rezultata pri rušenju procesa.

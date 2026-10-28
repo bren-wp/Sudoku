@@ -1,93 +1,128 @@
 name: Publish Sudoku release
 
+# Some GitHub App merges do not start a main push workflow. Build the trusted
+# merge commit after a merged PR, or publish manually from main.
 on:
-  workflow_run:
-    workflows: ["Android CI"]
-    types: [completed]
-    branches: [main]
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
 
 permissions:
-  actions: read
   contents: write
+
+concurrency:
+  group: sudoku-publish-${{ github.event.pull_request.merge_commit_sha || github.sha }}
+  cancel-in-progress: false
 
 jobs:
   publish:
     if: >-
-      ${{ github.event.workflow_run.conclusion == 'success' &&
-          (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') &&
-          github.event.workflow_run.head_repository.full_name == github.repository }}
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true &&
+       github.event.pull_request.base.ref == 'main' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
-      RUN_ID: ${{ github.event.workflow_run.id }}
-      SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
-      - name: Checkout successfully tested commit
+      - name: Checkout merged, trusted source
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
           persist-credentials: false
-      - name: Identify version
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Android SDK 36
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)"
+          test -x "$SDKMANAGER"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
+      - name: Gradle 8.13
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Version and release check
+        id: version
         shell: bash
         run: |
           set -euo pipefail
           VERSION="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n 1)"
-          test -n "$VERSION"
-          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Invalid release version: $VERSION"
-            exit 1
-          fi
-          echo "RELEASE_TAG=v$VERSION" >> "$GITHUB_ENV"
-      - name: Skip already published version
-        id: existing
-        shell: bash
-        run: |
-          if gh release view "$RELEASE_TAG" --repo "$REPO" >/dev/null 2>&1; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Version $RELEASE_TAG already exists."
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VERSION" --repo "$REPO" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
           else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Retrieve signed or preview Android files
-        if: steps.existing.outputs.skip != 'true'
+      - name: Configure optional publisher signing
+        if: steps.version.outputs.exists != 'true'
         shell: bash
+        env:
+          SUDOKU_KEYSTORE_BASE64: ${{ secrets.SUDOKU_KEYSTORE_BASE64 }}
+          SUDOKU_SIGNING_KEY_ALIAS: ${{ secrets.SUDOKU_SIGNING_KEY_ALIAS }}
+          SUDOKU_SIGNING_STORE_PASSWORD: ${{ secrets.SUDOKU_SIGNING_STORE_PASSWORD }}
+          SUDOKU_SIGNING_KEY_PASSWORD: ${{ secrets.SUDOKU_SIGNING_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          mkdir -p release-work/assets release-work/raw
-          if gh run download "$RUN_ID" -R "$REPO" -n Sudoku-signed-release-apk -D release-work/raw >/dev/null 2>&1; then
-            APK="$(find release-work/raw -type f -name '*.apk' | head -n 1)"
-            test -n "$APK"
-            cp "$APK" "release-work/assets/Sudoku-$RELEASE_TAG.apk"
-            rm -f release-work/raw/*.apk
-            gh run download "$RUN_ID" -R "$REPO" -n Sudoku-signed-release-aab -D release-work/raw
-            AAB="$(find release-work/raw -type f -name '*.aab' | head -n 1)"
-            test -n "$AAB"
-            cp "$AAB" "release-work/assets/Sudoku-$RELEASE_TAG.aab"
-            echo "PREVIEW=false" >> "$GITHUB_ENV"
-            printf '%s\n'               "Sudoku $RELEASE_TAG • by Brendigo"               ""               "Potpisani release APK i AAB iz uspješne Android CI izgradnje."               "Potrebno je još završno testiranje i provjera certifikata za Google Play."               > release-work/notes.md
+          if [[ -n "$SUDOKU_KEYSTORE_BASE64" && -n "$SUDOKU_SIGNING_KEY_ALIAS" &&
+                -n "$SUDOKU_SIGNING_STORE_PASSWORD" && -n "$SUDOKU_SIGNING_KEY_PASSWORD" ]]; then
+            printf '%s' "$SUDOKU_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/sudoku-publisher.jks"
+            echo "SUDOKU_SIGNING_STORE_FILE=$RUNNER_TEMP/sudoku-publisher.jks" >> "$GITHUB_ENV"
+            echo "SUDOKU_SIGNING_KEY_ALIAS=$SUDOKU_SIGNING_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "SUDOKU_SIGNING_STORE_PASSWORD=$SUDOKU_SIGNING_STORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "SUDOKU_SIGNING_KEY_PASSWORD=$SUDOKU_SIGNING_KEY_PASSWORD" >> "$GITHUB_ENV"
+            echo "PUBLISHER_SIGNED=true" >> "$GITHUB_ENV"
           else
-            gh run download "$RUN_ID" -R "$REPO" -n Sudoku-debug-apk -D release-work/raw
-            APK="$(find release-work/raw -type f -name '*.apk' | head -n 1)"
-            test -n "$APK"
-            cp "$APK" "release-work/assets/Sudoku-$RELEASE_TAG-test.apk"
-            rm -f release-work/raw/*.apk
-            gh run download "$RUN_ID" -R "$REPO" -n Sudoku-unsigned-release-aab -D release-work/raw
-            AAB="$(find release-work/raw -type f -name '*.aab' | head -n 1)"
-            test -n "$AAB"
-            cp "$AAB" "release-work/assets/Sudoku-$RELEASE_TAG-unsigned.aab"
-            echo "PREVIEW=true" >> "$GITHUB_ENV"
-            printf '%s\n'               "Sudoku $RELEASE_TAG • by Brendigo"               ""               "**TESTNO IZDANJE**. APK je debug potpisan i namijenjen instalacijskom testiranju."               "AAB nema izdavački potpis i **nije spreman za učitavanje na Google Play**."               "Za produkcijski potpis potrebne su zaštićene GitHub Actions tajne:"               "SUDOKU_KEYSTORE_BASE64, SUDOKU_SIGNING_KEY_ALIAS,"               "SUDOKU_SIGNING_STORE_PASSWORD i SUDOKU_SIGNING_KEY_PASSWORD."               > release-work/notes.md
+            echo "PUBLISHER_SIGNED=false" >> "$GITHUB_ENV"
           fi
-          test "$(find release-work/assets -type f | wc -l)" -eq 2
-      - name: Publish GitHub release
-        if: steps.existing.outputs.skip != 'true'
+      - name: Test, lint and build Android release from merge commit
+        if: steps.version.outputs.exists != 'true'
+        run: |
+          gradle --no-daemon :app:testDebugUnitTest :app:lintDebug \
+            :app:assembleDebug :app:assembleRelease :app:bundleRelease
+      - name: Publish APK and AAB (signed only when publisher key is configured)
+        if: steps.version.outputs.exists != 'true'
         shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
           set -euo pipefail
-          EXTRA=()
-          if [[ "$PREVIEW" == "true" ]]; then EXTRA+=(--prerelease); fi
-          gh release create "$RELEASE_TAG" release-work/assets/* \
-            -R "$REPO" --target "$SOURCE_SHA" --title "Sudoku $RELEASE_TAG" \
-            --notes-file release-work/notes.md "${EXTRA[@]}"
+          mkdir -p release-assets
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          if [[ "$PUBLISHER_SIGNED" == 'true' ]]; then
+            APK="$(find app/build/outputs/apk/release -type f -name '*release.apk' | head -n 1)"
+            AAB="$(find app/build/outputs/bundle/release -type f -name '*.aab' | head -n 1)"
+            test -s "$APK" && test -s "$AAB"
+            cp "$APK" "release-assets/Sudoku-$RELEASE_TAG.apk"
+            cp "$AAB" "release-assets/Sudoku-$RELEASE_TAG.aab"
+            printf '%s\n' "Sudoku $RELEASE_TAG • by Brendigo" "" \
+              "Potpisani Android APK i AAB izrađeni su iz testiranog merge commita." \
+              "Prije objave na Google Playu provjerite certifikat i provedite završnu provjeru aplikacije." \
+              > release-notes.md
+            gh release create "$RELEASE_TAG" release-assets/* -R "$REPO" \
+              --target "$SOURCE_SHA" --title "Sudoku $RELEASE_TAG" \
+              --notes-file release-notes.md
+          else
+            APK="$(find app/build/outputs/apk/debug -type f -name '*.apk' | head -n 1)"
+            AAB="$(find app/build/outputs/bundle/release -type f -name '*.aab' | head -n 1)"
+            test -s "$APK" && test -s "$AAB"
+            cp "$APK" "release-assets/Sudoku-$RELEASE_TAG-test.apk"
+            cp "$AAB" "release-assets/Sudoku-$RELEASE_TAG-unsigned.aab"
+            printf '%s\n' "Sudoku $RELEASE_TAG • by Brendigo" "" \
+              "**TESTNO IZDANJE**: APK je debug potpisan; AAB je nepotpisan." \
+              "**Nije spremno za Google Play.** Za izdavački potpis potrebne su " \
+              "SUDOKU_KEYSTORE_BASE64, SUDOKU_SIGNING_KEY_ALIAS, " \
+              "SUDOKU_SIGNING_STORE_PASSWORD i SUDOKU_SIGNING_KEY_PASSWORD." \
+              > release-notes.md
+            gh release create "$RELEASE_TAG" release-assets/* -R "$REPO" \
+              --target "$SOURCE_SHA" --title "Sudoku $RELEASE_TAG" \
+              --notes-file release-notes.md --prerelease
+          fi

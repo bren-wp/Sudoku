@@ -107,6 +107,7 @@ class SudokuController(context: Context) {
         private set
     private val undoHistory = readUndoHistory(restoredGame.undoKey, game)
     private var settingsOrigin = Screen.HOME
+    private var importingBackup = false
 
     init {
         // Migrate the in-progress classic game created by versions <= 1.0.3
@@ -163,6 +164,7 @@ class SudokuController(context: Context) {
 
     /** Persist a just-entered move when Android moves the activity into background. */
     fun flush() {
+        if (importingBackup) return
         // Activity.onStop: commit synchronously so Android process death does
         // not race a queued asynchronous save. Never clear a failed save.
         saveGame(synchronous = true)
@@ -170,6 +172,15 @@ class SudokuController(context: Context) {
 
     fun clearToast() {
         toast = ""
+    }
+
+    /** Prevent the outgoing Activity from overwriting a restored backup. */
+    fun prepareForBackupRestore() {
+        importingBackup = true
+    }
+
+    fun showMessage(message: String) {
+        toast = message
     }
 
     suspend fun startNew(size: Int, level: Int, daily: Boolean = false) {
@@ -585,6 +596,7 @@ class SudokuController(context: Context) {
     }
 
     private fun saveGame(synchronous: Boolean = false) {
+        if (importingBackup) return
         val s = game ?: return
         val snapshot = JSONObject().apply {
             put("size", s.size)
