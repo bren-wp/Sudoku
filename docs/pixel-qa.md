@@ -74,3 +74,51 @@ artifact for the original-size comparison only.
 Real 1:1 validation requires normalized screen content, date, puzzle seed,
 statistics and font environment. Screenshot fixtures must never alter
 production gameplay or masquerade as working interface components.
+
+## v1.0.33 candidate: separate UI and scenery diagnostics
+
+The script now treats an RGB pixel as within tolerance **only if all three
+channels** are within 12 or 24 levels of the reference; a grayscale-luminance
+difference no longer hides large single-channel changes.
+
+For a component-versus-background diagnosis, provide an optional directory
+of 941×1672 grayscale binary PNG masks matching the seven screen names:
+**white (255) selects live UI, black (0) selects background/scenery**.
+The script reports `ui_region_mae` and `scenery_region_mae` alongside the
+unmasked global MAE, while maintaining the global error as the definitive
+metric. The masks are analysis annotations only, never rendered in the app.
+
+```bash
+python scripts/pixel_compare.py \
+  --reference-dir references \
+  --actual-dir screenshots \
+  --ui-mask-dir qa-ui-masks \
+  --output-dir qa-pixel-diff
+```
+
+To include the splash screen, supply a **real** `08-splash.png` Android
+capture and use `--include-splash`. The seven-screen emulator artifact does
+not currently contain a launch-splash capture. Do not substitute the original
+reference as its own actual screenshot.
+
+### v1.0.32 verified baseline from the successful emulator artifact
+
+On 28 October 2026 the original user-provided references were compared
+against the actual 941×1672 screenshots from successful visual-smoke
+run `40261033976`, artifact `12624264725`:
+
+| Screen | Actual v1.0.32 RGB MAE (0–255) |
+|---|---:|
+| Home | 29.312 |
+| New game | 29.061 |
+| Game | 23.121 |
+| Settings | 27.727 |
+| Daily | 29.682 |
+| Statistics | 30.986 |
+| Achievements | 32.184 |
+
+These are raw full-screen metrics, including differing live data, layout,
+typography and procedural scenery; they are not normalized component-parity
+results. The splash layout and optional-note recovery changes in the
+v1.0.33 candidate are **not yet verified** by a new emulator screenshot
+comparison. Do not report the values above as post-change improvements.
