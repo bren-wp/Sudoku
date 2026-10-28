@@ -1,6 +1,6 @@
 # Privatnost — Sudoku by Brendigo
 
-**Ažurirano:** 28. listopada 2026. · Aplikacija za Android
+**Ažurirano:** 29. listopada 2026. · Aplikacija za Android
 
 Sudoku by Brendigo radi **bez registracije i internetske veze**. Aplikacija ne
 traži dozvolu `INTERNET` i ne sadrži oglase, analitiku, oglasne identifikatore
@@ -29,11 +29,25 @@ gubitka ili kvara cijelog uređaja.
 
 ## Sigurnosne kopije i gubitak podataka
 
-Aplikacija u Android manifestu isključuje standardni sigurnosni backup i
-izuzela je lokalnu pohranu iz Androidovih pravila za cloud backup i prijenos
-između uređaja. **Napredak se trenutačno ne sinkronizira i ne može se vratiti
-s poslužitelja.** Brisanje podataka aplikacije, deinstalacija, kvar ili zamjena
-uređaja mogu trajno ukloniti taj napredak.
+Aplikacija u Android manifestu isključuje standardni automatski backup.
+Nema cloud sinkronizacije, korisničkog računa ni pristupa poslužitelju.
+
+U **Postavke → Sigurnosna kopija** korisnik može dobrovoljno izvesti
+šifriranu lokalnu datoteku pomoću Androidova odabira dokumenta. Kopija sadrži
+podatke o igrama, uključujući cjelovita rješenja zagonetki, statistiku i
+postavke, ali je zaštićena AES-256-GCM enkripcijom i korisničkom lozinkom
+(PBKDF2-HMAC-SHA256; nasumična sol i nonce). Lozinka se ne pohranjuje
+u aplikaciji, ne šalje se mrežom i nije ju moguće obnoviti.
+
+Izvoz može završiti u direktoriju ili servisu koji korisnik sam odabere,
+uključujući eventualnu cloud pohranu pružatelja dokumenata izvan
+kontrole aplikacije. Brendigo datoteku ne šalje samoinicijativno.
+
+Prije uvoza aplikacija provjerava format, integritet i podatke te zahtijeva
+jasnu potvrdu zamjene postojećih rezultata. Kriva lozinka ili nevaljan format
+ne smiju uzrokovati namjernu promjenu lokalnog stanja. Gubitak lozinke,
+datoteke, brisanje aplikacije bez izvoza ili kvar uređaja i dalje mogu
+uzrokovati trajni gubitak napretka.
 
 Nadogradnja aplikacije s istim identifikatorom paketa i valjanim kompatibilnim
 potpisom inače zadržava lokalne podatke. Novi kod nastoji oporaviti valjane
