@@ -9,6 +9,7 @@ on:
       - ".github/workflows/marketing-screenshots.yml"
       - "app/src/main/**"
       - "app/src/androidTest/**"
+      - "app/build.gradle.kts"
   workflow_dispatch:
 
 concurrency:
