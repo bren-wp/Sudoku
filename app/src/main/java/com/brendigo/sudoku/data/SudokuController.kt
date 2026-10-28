@@ -594,7 +594,13 @@ class SudokuController(context: Context) {
         Session(
             size = size, boxRows = j.getInt("boxRows"), boxColumns = j.getInt("boxColumns"),
             level = j.getInt("level"), solution = array("solution"),
-            givens = array("givens"), board = array("board"), notes = array("notes"),
+            givens = array("givens"), board = array("board"),
+            notes = SavedNotesRecovery.recover(
+                size,
+                j.optJSONArray("notes")?.let { saved ->
+                    IntArray(minOf(saved.length(), size * size)) { saved.optInt(it, 0) }
+                },
+            ),
             selected = j.optInt("selected", -1),
             elapsed = j.optInt("elapsed"), mistakes = j.optInt("mistakes"),
             hints = j.optInt("hints"), notesMode = j.optBoolean("notesMode"),

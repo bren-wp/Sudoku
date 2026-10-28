@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.32** · Android 8.0+ · Kotlin + Jetpack Compose
+**Izdanje 1.0.33** · Android 8.0+ · Kotlin + Jetpack Compose
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
@@ -18,7 +18,7 @@
 &nbsp;·&nbsp;
 <a href="#-što-sudoku-nudi">Mogućnosti</a>
 &nbsp;·&nbsp;
-<a href="#-razvoj-i-testiranje">Za razvojne programere</a>
+<a href="#-preuzimanje-i-instalacija">Preuzimanje</a>
 
 </div>
 
@@ -100,37 +100,11 @@ Bez konfiguriranih izdavačkih ključeva, objavljeni APK je **testni APK**, a AA
 
 **Android 8.0+** (API 26) · Paket `com.brendigo.sudoku` · Izdavač **Brendigo**.
 
-## 🛠️ Razvoj i testiranje
-
-Izvorni kod: **Kotlin + Jetpack Compose**, Android SDK 36, JDK 17, Gradle 8.13.
-Reproduciranje provjera lokalno:
-
-```bash
-gradle :app:testDebugUnitTest
-gradle :app:lintDebug
-gradle :app:assembleDebug
-gradle :app:bundleRelease
-```
-
-GitHub Actions testira i snima sedam ekrana na **941×1672** i kompaktnom
-**720×1280** emulatoru. Snimke u ovoj galeriji nastaju automatski iz stvarne
-aplikacije i mogu se osvježiti postupkom
-[`marketing-screenshots.yml`](.github/workflows/marketing-screenshots.yml).
-
-**Vizualna 1:1 jednakost još nije potvrđena.** Rezultati i preostale razlike
-prate se u [issueu #11](https://github.com/bren-wp/Sudoku/issues/11).
-Prolazak funkcionalnih UI testova ne znači nultu pikselnu razliku.
-
-Za tehnički dizajn vidi [docs/DESIGN.md](docs/DESIGN.md), za usporedbe
-[docs/pixel-qa.md](docs/pixel-qa.md), a za promjene
-[CHANGELOG.md](CHANGELOG.md).
-
 ## 🔐 Privatnost i sigurnost
 
 Napredak i postavke spremaju se lokalno u privatnom prostoru aplikacije.
 Nema korisničkog računa, oglasa, analitike ni mrežnih dozvola.
-Detalji su u dokumentu [PRIVACY.md](PRIVACY.md). Privatne ključeve
-za potpisivanje treba držati u zaštićenim GitHub Actions tajnama; nikad u repozitoriju.
+Detalji su u dokumentu [PRIVACY.md](PRIVACY.md).
 
 ---
 

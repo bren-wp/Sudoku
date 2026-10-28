@@ -1926,21 +1926,35 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
 
 @Composable
 fun SplashPage() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    // The reference places the 7-3-9 mark at roughly 26% of the viewport
+    // height and the spinner close to the bottom. Anchoring both independently
+    // avoids moving the logo when the display becomes taller.
+    BoxWithConstraints(Modifier.fillMaxSize().testTag("splash-screen")) {
+        val shortScreen = maxHeight < 700.dp
         Column(
-            Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            Modifier.align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(top = maxHeight * if (shortScreen) .19f else .255f),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
         ) {
-            SudokuLogo(122.dp)
-            Spacer(Modifier.height(30.dp))
-            AccentText("Sudoku", 64)
-            Text("by Brendigo", color = Ink.muted, letterSpacing = 5.sp, fontSize = 16.sp)
-            Spacer(Modifier.height(32.dp))
+            SudokuLogo(if (shortScreen) 92.dp else 122.dp)
+            Spacer(Modifier.height(if (shortScreen) 18.dp else 30.dp))
+            AccentText("Sudoku", if (shortScreen) 48 else 64)
+            Text("by Brendigo", color = Ink.muted, letterSpacing = 5.sp,
+                fontSize = if (shortScreen) 13.sp else 16.sp)
+            Spacer(Modifier.height(if (shortScreen) 20.dp else 32.dp))
             Text("T R E N I R A J   M O Z A K   S V A K I   D A N",
-                color = Ink.cyan, fontSize = 11.sp, textAlign = TextAlign.Center)
-            Spacer(Modifier.height(90.dp))
-            CircularProgressIndicator(color = Ink.cyan, strokeWidth = 3.dp, modifier = Modifier.size(36.dp))
+                color = Ink.cyan, fontSize = if (shortScreen) 9.sp else 11.sp,
+                textAlign = TextAlign.Center)
         }
+        CircularProgressIndicator(
+            color = Ink.cyan,
+            strokeWidth = 3.dp,
+            modifier = Modifier.align(Alignment.BottomCenter)
+                .padding(bottom = if (shortScreen) 24.dp else 58.dp)
+                .size(if (shortScreen) 30.dp else 36.dp)
+                .testTag("splash-loading"),
+        )
     }
 }

@@ -1,3 +1,12 @@
+## Neobjavljeno — priprema 1.0.33 (provjera u tijeku)
+
+- Splash zaslon zadržava originalni logo 7–3–9, ali ispravlja vertikalno pozicioniranje: logo više nije vezan uz indikator učitavanja, koji je smješten bliže donjem rubu prema referenci.
+- Učitavanje spremljene partije otpornije je na nepotpune ili nevaljane pomoćne bilješke. Valjana Sudoku mreža ostaje dostupna, a nevaljani bitovi kandidata se čiste bez destruktivne migracije.
+- Regresijski JUnit testovi pokrivaju nedostajuće, skraćene, preduge i oštećene bilješke.
+- Pixel-compare sada nudi odvojeno mjerenje UI-regije i pozadine uz opcionalne maske; postotak bliskih piksela temelji se na sva tri RGB kanala.
+- Python testovi QA metrike uključeni su u Android CI, a dokumentirana je stvarna v1.0.32 osnovica prema artefaktu emulatora.
+- Nema promjene verzije, produkcijskog potpisa ili tvrdnje o pixel-perfect jednakosti prije uspješnog CI-ja, novih snimki i pregledanog PR-a.
+
 ## 1.0.32 — Revizija prema deset izvornih 1:1 dizajnerskih referenci
 
 - Preuzete su stvarne screenshot datoteke Android emulatora za prethodnu verziju 1.0.31 i uspoređene sa sedam korisničkih referenci dimenzije 941×1672.

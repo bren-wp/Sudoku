@@ -15,7 +15,7 @@ import argparse
 import csv
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageEnhance, ImageStat
+from PIL import Image, ImageChops, ImageEnhance, ImageOps, ImageStat
 
 SCREENS = (
     "01-home",
@@ -28,7 +28,9 @@ SCREENS = (
 )
 REFERENCE_SIZE = (941, 1672)
 
-def compare(reference: Path, actual: Path, destination: Path) -> dict[str, str | float]:
+def compare(
+    reference: Path, actual: Path, destination: Path, ui_mask: Path | None = None
+) -> dict[str, str | float | None]:
     with Image.open(reference) as r, Image.open(actual) as a:
         expected = r.convert("RGB")
         observed = a.convert("RGB")
@@ -40,10 +42,38 @@ def compare(reference: Path, actual: Path, destination: Path) -> dict[str, str |
     difference = ImageChops.difference(expected, observed)
     mean_r, mean_g, mean_b = ImageStat.Stat(difference).mean
     mae = (mean_r + mean_g + mean_b) / 3
-    histogram = difference.convert("L").histogram()
     pixel_count = expected.width * expected.height
-    within_12 = sum(histogram[:13]) / pixel_count
-    within_24 = sum(histogram[:25]) / pixel_count
+
+    def within_tolerance(threshold: int) -> float:
+        # A pixel is within tolerance only when EACH RGB channel is close,
+        # not merely when the grayscale brightness of the difference is low.
+        near = [difference.getchannel(channel).point(
+            lambda value: 255 if value <= threshold else 0
+        ) for channel in ("R", "G", "B")]
+        return ImageChops.multiply(
+            ImageChops.multiply(near[0], near[1]), near[2]
+        ).histogram()[255] / pixel_count
+
+    within_12 = within_tolerance(12)
+    within_24 = within_tolerance(24)
+    ui_error = None
+    scenery_error = None
+    if ui_mask is not None:
+        with Image.open(ui_mask) as mask_image:
+            if mask_image.size != REFERENCE_SIZE:
+                raise ValueError(
+                    f"{ui_mask.name}: mask size {mask_image.size} != {REFERENCE_SIZE}"
+                )
+            mask = mask_image.convert("L").point(
+                lambda value: 255 if value >= 128 else 0
+            )
+        def masked_mae(region: Image.Image) -> float | None:
+            if region.histogram()[255] == 0:
+                return None
+            return round(sum(ImageStat.Stat(difference, mask=region).mean) / 3, 3)
+
+        ui_error = masked_mae(mask)
+        scenery_error = masked_mae(ImageOps.invert(mask))
 
     destination.mkdir(parents=True, exist_ok=True)
     Image.blend(expected, observed, .5).save(destination / "overlay.png", optimize=True)
@@ -55,6 +85,8 @@ def compare(reference: Path, actual: Path, destination: Path) -> dict[str, str |
         "mean_error_0_to_255": round(mae, 3),
         "pixels_within_12_pct": round(within_12 * 100, 2),
         "pixels_within_24_pct": round(within_24 * 100, 2),
+        "ui_region_mae": ui_error,
+        "scenery_region_mae": scenery_error,
     }
 
 def main() -> int:
@@ -62,15 +94,23 @@ def main() -> int:
     parser.add_argument("--reference-dir", required=True, type=Path)
     parser.add_argument("--actual-dir", required=True, type=Path)
     parser.add_argument("--output-dir", default=Path("qa-pixel-diff"), type=Path)
+    parser.add_argument("--ui-mask-dir", type=Path, default=None,
+        help="Optional 941x1672 binary masks: white = interactive UI, black = scenery.")
+    parser.add_argument("--include-splash", action="store_true",
+        help="Include 08-splash when a real launch capture is available.")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     rows = []
-    for name in SCREENS:
+    screens = SCREENS + (("08-splash",) if args.include_splash else ())
+    for name in screens:
         ref = args.reference_dir / f"{name}.png"
         actual = args.actual_dir / f"{name}.png"
         if not ref.is_file() or not actual.is_file():
             raise FileNotFoundError(f"Missing reference or screenshot for {name}: {ref} / {actual}")
-        row = compare(ref, actual, args.output_dir / name)
+        ui_mask = args.ui_mask_dir / f"{name}.png" if args.ui_mask_dir else None
+        if ui_mask is not None and not ui_mask.is_file():
+            raise FileNotFoundError(f"Missing optional UI mask for {name}: {ui_mask}")
+        row = compare(ref, actual, args.output_dir / name, ui_mask)
         rows.append(row)
         print(f'{name}: mean channel error {row["mean_error_0_to_255"]} / 255; '
               f'within 12 = {row["pixels_within_12_pct"]}%')
