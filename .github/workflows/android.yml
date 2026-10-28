@@ -37,6 +37,13 @@ jobs:
           gradle-version: "8.13"
       - name: Unit tests
         run: gradle --no-daemon :app:testDebugUnitTest
+      - name: Pixel QA metric regression tests
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/sudoku-pixel-qa"
+          source "$RUNNER_TEMP/sudoku-pixel-qa/bin/activate"
+          python -m pip install --disable-pip-version-check "Pillow>=11,<13"
+          python -m unittest discover -s scripts -p 'test_pixel_compare.py' -v
       - name: Static analysis
         run: gradle --no-daemon :app:lintDebug
       - name: Configure optional publisher signature
