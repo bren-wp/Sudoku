@@ -29,7 +29,7 @@ mrtvi kod.
 - Izgradnja debug APK i release AAB (potpis samo preko zaštićenih tajni)
 - Android instrumentacijski testovi na 941×1672 i 720×1280
 - Instrumentacijska provjera manifest dozvola, backupa i cleartext zastavice
-- Stvarne WebP snimke svih sedam navigacijskih ekrana u README
+- Stvarne WebP snimke svih osam zaslona (uključujući splash) u README
 - Provjera da PR nije spojen bez zelenih provjera
 
 ## Preostala ograničenja i rizici
@@ -56,5 +56,7 @@ mrtvi kod.
 Primarne reference su deset korisničkih PNG datoteka (sedam interaktivnih
 ekrana, splash, wordmark, ikona). Kao provjerljive stvarne snimke služe
 `docs/screenshots/*.webp` iz emulatora, a mjerenja se izvode prema
-`docs/pixel-qa.md`. Splash nema još automatiziran usporediv screenshot, pa
-njegove nove pozicije zahtijevaju zasebnu vizualnu provjeru.
+`docs/pixel-qa.md`. Stvarni Compose splash sada se snima instrumentacijski,
+a svih osam WebP datoteka u grani osvježio je uspješan GitHub Actions workflow
+`40778309153`. Precizno vizualno podudaranje splasha s originalom
+i dalje zahtijeva usporedni MAE/SSIM pregled.
