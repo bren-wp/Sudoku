@@ -37,6 +37,23 @@ class SudokuVisualSmokeTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
     @Test
+    fun captureRealSplashScreenForReferenceQA() {
+        // The real Compose splash exists for only 850ms on launch. Bring that
+        // same screen back after Home so screenshots are deterministic, without
+        // changing release behavior or substituting a mocked screenshot.
+        waitFor("home-nova-igra")
+        rule.runOnUiThread {
+            val controllerField = MainActivity::class.java.getDeclaredField("sudoku")
+            controllerField.isAccessible = true
+            val controller = controllerField.get(rule.activity)
+                as com.brendigo.sudoku.data.SudokuController
+            controller.go(com.brendigo.sudoku.data.Screen.SPLASH)
+        }
+        waitFor("splash-screen")
+        shot("08-splash")
+    }
+
+    @Test
     fun productionAppRemainsOfflineAndDisablesAndroidBackup() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val app = context.applicationInfo
