@@ -75,7 +75,7 @@ fun SudokuBackupFlow(
                     }
                     controller.showMessage("Šifrirana sigurnosna kopija uspješno je spremljena.")
                 } catch (_: Exception) {
-                    controller.showMessage("Izvoz nije uspio. Provjeri slobodan prostor i pokušaj ponovno.")
+                    controller.showMessage("Izvoz nije uspio. Provjeri postoji li spremljen napredak i dovoljno slobodnog prostora.")
                 } finally {
                     busy = false
                 }
