@@ -174,9 +174,19 @@ class SudokuController(context: Context) {
         toast = ""
     }
 
-    /** Prevent the outgoing Activity from overwriting a restored backup. */
+    /**
+     * Freeze persistent writes before the restore transaction starts.
+     * Otherwise onStop() can race the imported SharedPreferences commit and
+     * overwrite it with an older in-memory game.
+     */
     fun prepareForBackupRestore() {
+        flush()
         importingBackup = true
+    }
+
+    /** A failed import must not permanently disable autosaving. */
+    fun cancelBackupRestore() {
+        importingBackup = false
     }
 
     fun showMessage(message: String) {
