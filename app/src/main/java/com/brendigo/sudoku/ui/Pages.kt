@@ -1059,7 +1059,7 @@ fun StatsPage(controller: SudokuController) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-            StatTile("Ukupno vrijeme", formatTime(stats.totalSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
+            StatTile("Ukupno vrijeme", formatTime(stats.totalPlayedSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
                 Ink.blue, Modifier.weight(1f)) {
                 metricInfo = "Ukupno vrijeme provedeno u dovršenim Sudoku partijama."
             }
