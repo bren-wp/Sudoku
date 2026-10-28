@@ -226,7 +226,10 @@ fun SudokuBackupFlow(
                         }
                         // Lock the old controller synchronously BEFORE any disk write;
                         // Activity.onStop can be called while SAF/IO is running.
-                        controller.prepareForBackupRestore()
+                        if (!controller.prepareForBackupRestore()) {
+                            controller.showMessage("Spremanje trenutačne igre nije uspjelo. Uvoz je otkazan.")
+                            return@TextButton
+                        }
                         busy = true
                         scope.launch {
                             try {
