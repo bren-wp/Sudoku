@@ -502,7 +502,7 @@ class SudokuController(context: Context) {
 
         val levels = j.optJSONArray("levels")
         val history = j.optJSONArray("history")
-        Statistics(
+        return Statistics(
             played = j.optInt("played"),
             finished = j.optInt("finished"),
             totalSeconds = j.optLong("totalSeconds"),
@@ -533,7 +533,7 @@ class SudokuController(context: Context) {
             fastWins = j.optInt("fastWins"),
             longWins = j.optInt("longWins"),
             winsBySize = List(3) { j.optJSONArray("winsBySize")?.optInt(it) ?: 0 },
-        ).also { return it }
+        )
             } catch (_: Exception) {
                 // Try the duplicate committed key before giving up.
             }
