@@ -19,6 +19,14 @@ su pod kontrolom Androidove izolacije aplikacija i zaštite uređaja. Zato
 preporučujemo zaključavanje uređaja i ažuriranje Androida. Kod rutiranih ili
 kompromitiranih uređaja izolacija pohrane nije zajamčena.
 
+## Pouzdanost lokalnog spremanja
+
+Podaci o aktivnoj partiji i statistika sada se zapisuju zajedno u jednoj
+Androidovoj lokalnoj transakciji spremanja. Statistika ima i drugi lokalni
+zapis za oporavak u slučaju oštećenog primarnog zapisa. Oba su zapisa u istom
+privatnom prostoru aplikacije, **nisu cloud sigurnosne kopije** i ne štite od
+gubitka ili kvara cijelog uređaja.
+
 ## Sigurnosne kopije i gubitak podataka
 
 Aplikacija u Android manifestu isključuje standardni sigurnosni backup i

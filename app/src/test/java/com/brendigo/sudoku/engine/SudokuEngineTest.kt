@@ -27,6 +27,14 @@ class SudokuEngineTest {
         assertArrayEquals(a.solution, b.solution)
     }
 
+    @Test fun rejectsUnsupportedDimensionsWithoutCrashing() {
+        assertFalse(SudokuEngine.isValidCompleted(IntArray(0), 0, 0, 0))
+        assertEquals(0, SudokuEngine.countSolutions(IntArray(0), 0, 0, 0))
+        assertFalse(SudokuEngine.isValidCompleted(IntArray(16), 4, -2, -2))
+        assertEquals(0, SudokuEngine.countSolutions(IntArray(16), 4, -2, -2))
+        assertEquals(0, SudokuEngine.countSolutions(IntArray(81), 9, 0, 0))
+    }
+
     @Test fun rejectsContradictoryGivens() {
         val board = IntArray(81)
         board[0] = 5

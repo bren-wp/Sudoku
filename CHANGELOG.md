@@ -1,3 +1,17 @@
+## 1.0.35 — Pouzdanost napretka, točno vrijeme i vizualna dorada
+
+- Dovršena Sudoku partija, statistika i postignuća spremaju se jednim atomskim lokalnim zapisom kako bi se smanjio rizik dvostrukog rezultata pri rušenju procesa.
+- Statistika se može oporaviti iz drugog valjanog lokalnog zapisa ako je prvi oštećen; učitavanje povijesti i Undo zapisa ograničeno je i provjeravano.
+- Ukupno vrijeme igranja sada uključuje i nedovršene partije. Stari rezultati migriraju bez brisanja; postignuće za 10 sati u dovršenim igrama koristi dosadašnji podatak.
+- Sigurno se odbijaju neispravne veličine Sudoku mreže i regije (0×0 i negativne dimenzije), uz dodatne JUnit testove.
+- Nova Android regresija provjerava dovršenje 4×4 partije, zajedničko spremanje partije i statistike, ponovno pokretanje, oporavak oštećene statistike i neponavljanje nagrade.
+- Izvršena je stvarna 941×1672 pixel QA usporedba osam ekrana. Vizualna promjena pozadine povećala je RGB MAE (prosjek sedam glavnih zaslona 28.907 → 30.557), zato je **poništena**. Zadržan je dosadašnji nativni UI dok novi dizajn ne pokaže mjerljivo poboljšanje.
+- README sadrži stvarnu galeriju osam zaslona; workflow osvježava slike iz Android emulatora za ovu verziju.
+- Android `versionCode=36`, `versionName=1.0.35`. Potpisano izdanje ovisi o sigurnoj konfiguraciji izdavačkog ključa.
+- Workflow izdavanja može pratiti i ručno pokrenutu, uspješnu Android CI provjeru na `main`, ako se automatski push workflow ne aktivira.
+
+**Napomena:** potpuno pixel-perfect 1:1 podudaranje i odsutnost svih mogućih padova ne mogu se potvrditi samo prolaskom testova.
+
 ## 1.0.34 — Oporavak napretka, sigurnost i stvarne snimke aplikacije
 
 - Ako je zajednički zapis partije oštećen ili nedostaje, aplikacija pokušava oporaviti valjanu nedovršenu običnu ili današnju dnevnu igru iz postojećih odvojenih zapisa. Za svaki oporavak koristi odgovarajuću povijest poništavanja poteza.

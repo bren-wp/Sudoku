@@ -52,7 +52,8 @@ object SudokuEngine {
     }
 
     fun isValidCompleted(board: IntArray, size: Int, br: Int, bc: Int): Boolean {
-        if (board.size != size * size || br * bc != size) return false
+        if (size !in setOf(4, 6, 9) || br <= 0 || bc <= 0 || br * bc != size ||
+            board.size != size * size) return false
         val expected = (1..size).toSet()
         for (r in 0 until size) {
             if ((0 until size).map { board[r * size + it] }.toSet() != expected) return false
@@ -71,7 +72,8 @@ object SudokuEngine {
 
     /** Counts at most limit solutions, using a minimum-remaining-values search. */
     fun countSolutions(input: IntArray, size: Int, br: Int, bc: Int, limit: Int = 2): Int {
-        if (input.size != size * size || br * bc != size || limit < 1) return 0
+        if (size !in setOf(4, 6, 9) || br <= 0 || bc <= 0 || br * bc != size ||
+            input.size != size * size || limit < 1) return 0
         val board = input.clone()
         var solutions = 0
         fun candidates(index: Int): Int {
