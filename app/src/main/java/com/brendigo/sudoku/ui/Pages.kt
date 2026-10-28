@@ -1061,7 +1061,7 @@ fun StatsPage(controller: SudokuController) {
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("Ukupno vrijeme", formatTime(stats.totalPlayedSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()),
                 Ink.blue, Modifier.weight(1f)) {
-                metricInfo = "Ukupno vrijeme provedeno u dovršenim Sudoku partijama."
+                metricInfo = "Ukupno aktivno vrijeme igranja, uključujući nedovršene partije. Vrijeme pauze nije uključeno."
             }
             StatTile("Dnevni niz", controller.currentStreak().toString(), Ink.gold, Modifier.weight(1f)) {
                 metricInfo = "Broj uzastopnih dana s riješenim dnevnim izazovom."
