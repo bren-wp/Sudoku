@@ -55,8 +55,10 @@ fun SudokuBackupFlow(
         password = ""
         if (uri == null) {
             key.fill('\u0000')
+        } else if (!controller.flush()) {
+            key.fill('\u0000')
+            controller.showMessage("Nije moguće sigurno spremiti napredak; izvoz je otkazan.")
         } else {
-            controller.flush()
             busy = true
             scope.launch {
                 try {
