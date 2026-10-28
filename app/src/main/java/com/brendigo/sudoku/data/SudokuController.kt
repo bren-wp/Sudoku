@@ -38,7 +38,8 @@ data class Completed(
 data class Statistics(
     val played: Int = 0,
     val finished: Int = 0,
-    val totalSeconds: Long = 0L,
+    val totalSeconds: Long = 0L, // legacy: time spent in completed puzzles
+    val totalPlayedSeconds: Long = 0L, // all gameplay, including unfinished games
     val best: Int = 0,
     val streak: Int = 0,
     val bestStreak: Int = 0,
@@ -377,6 +378,7 @@ class SudokuController(context: Context) {
         val s = game ?: return
         if (page != Screen.GAME || s.paused || s.completed || s.failed) return
         game = s.copy(elapsed = s.elapsed + 1)
+        stats = stats.copy(totalPlayedSeconds = stats.totalPlayedSeconds + 1)
         if (game!!.elapsed % 10 == 0) saveGame()
     }
 
@@ -497,7 +499,9 @@ class SudokuController(context: Context) {
             try {
                 val j = JSONObject(raw)
                 require(j.optInt("played") >= 0 && j.optInt("finished") >= 0 &&
-                    j.optLong("totalSeconds") >= 0L && j.optInt("dailyWins") >= 0 &&
+                    j.optLong("totalSeconds") >= 0L &&
+                    j.optLong("totalPlayedSeconds", j.optLong("totalSeconds")) >= 0L &&
+                    j.optInt("dailyWins") >= 0 &&
                     j.optInt("dailyPoints") >= 0)
 
         val levels = j.optJSONArray("levels")
@@ -506,6 +510,8 @@ class SudokuController(context: Context) {
             played = j.optInt("played"),
             finished = j.optInt("finished"),
             totalSeconds = j.optLong("totalSeconds"),
+            totalPlayedSeconds = j.optLong("totalPlayedSeconds",
+                j.optLong("totalSeconds")).coerceAtLeast(j.optLong("totalSeconds")),
             best = j.optInt("best"),
             streak = j.optInt("streak"),
             bestStreak = j.optInt("bestStreak", j.optInt("streak")),
@@ -547,6 +553,7 @@ class SudokuController(context: Context) {
             put("played", stats.played)
             put("finished", stats.finished)
             put("totalSeconds", stats.totalSeconds)
+            put("totalPlayedSeconds", stats.totalPlayedSeconds)
             put("best", stats.best)
             put("streak", stats.streak)
             put("bestStreak", stats.bestStreak)
