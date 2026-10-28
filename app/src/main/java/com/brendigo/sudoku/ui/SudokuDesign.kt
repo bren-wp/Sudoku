@@ -59,7 +59,7 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
 
 /** Custom original vector scenery: no bitmap stretching and no photo/network assets. */
 @Composable
-fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
+fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splash: Boolean = false) {
     Canvas(modifier) {
         val w = size.width
         val h = size.height
@@ -106,12 +106,15 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             drawCircle(Ink.white.copy(alpha = .10f + (i % 4) * .055f),
                 radius = if (i % 7 == 0) 1.4f else .7f, center = Offset(x, y))
         }
+        // On the source splash, the moon and horizon sit appreciably higher
+        // than behind the dense menu cards. Keep gameplay scenery unchanged.
+        val moonY = if (splash) .705f else .77f
         drawCircle(
             Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
-            radius = w * .16f, center = Offset(w * .81f, h * .77f),
+            radius = w * .16f, center = Offset(w * .81f, h * moonY),
         )
         drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
-            radius = w * .030f, center = Offset(w * .81f, h * .77f))
+            radius = w * .030f, center = Offset(w * .81f, h * moonY))
         // Distant layered mountain silhouettes.
         fun mountains(y: Float, amplitude: Float, color: Color, phase: Float) {
             val path = Path().apply {
@@ -127,27 +130,30 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
             }
             drawPath(path, color)
         }
-        mountains(h * .847f, h * .035f, Color(0xFF102B60).copy(alpha = .82f), 2.2f)
-        mountains(h * .875f, h * .048f, Color(0xFF08214A), .1f)
-        mountains(h * .910f, h * .034f, Color(0xFF031533), 1.5f)
+        val distantMountainY = if (splash) .756f else .847f
+        val nearMountainY = if (splash) .806f else .875f
+        val lakeHorizon = if (splash) .843f else .910f
+        mountains(h * distantMountainY, h * .035f, Color(0xFF102B60).copy(alpha = .82f), 2.2f)
+        mountains(h * nearMountainY, h * .048f, Color(0xFF08214A), .1f)
+        mountains(h * lakeHorizon, h * .034f, Color(0xFF031533), 1.5f)
         drawRect(
             Brush.verticalGradient(
                 listOf(Color(0x00226BD0), Color(0x88305CA0), Color(0xFF02112E)),
-                startY = h * .88f, endY = h,
+                startY = h * (lakeHorizon - .03f), endY = h,
             ),
-            topLeft = Offset(0f, h * .88f),
-            size = androidx.compose.ui.geometry.Size(w, h * .12f),
+            topLeft = Offset(0f, h * (lakeHorizon - .03f)),
+            size = androidx.compose.ui.geometry.Size(w, h * (1.03f - lakeHorizon)),
         )
         // Fine moonlit ripples across the lake.
         for (i in 0..100) {
-            val y = h * (.90f + (i / 100f) * .10f)
+            val y = h * (lakeHorizon + (i / 100f) * (1f - lakeHorizon))
             val x = (i * 83 % 100) / 100f * w
             drawLine(Ink.cyan.copy(alpha = .04f + i % 5 * .02f),
                 Offset(x, y), Offset(x + w * .045f, y), 1.2f)
         }
         // Distinctive pagoda on the right, built from paths rather than external art.
         val cx = w * .865f
-        val by = h * .920f
+        val by = h * (if (splash) .855f else .920f)
         val unit = w * .028f
         // A three-storey lakeside pagoda: tiered roofs, curved eaves, a
         // narrow spire and two glowing lantern openings, all drawn behind UI.
@@ -208,16 +214,18 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false) {
         // The owner's night-landscape references feature flowering branches
         // along the lower left edge. Draw them as deterministic vector petals.
         val branch = Path().apply {
+            val rise = if (splash) .055f else 0f
             moveTo(-w * .05f, h * .99f)
-            cubicTo(w * .06f, h * .94f, w * .06f, h * .87f, w * .23f, h * .83f)
+            cubicTo(w * .06f, h * .94f, w * .06f, h * (.87f - rise), w * .23f, h * (.83f - rise))
             moveTo(w * .02f, h * .93f)
-            cubicTo(w * .04f, h * .88f, w * .12f, h * .84f, w * .17f, h * .79f)
+            cubicTo(w * .04f, h * .88f, w * .12f, h * (.84f - rise), w * .17f, h * (.79f - rise))
         }
         drawPath(branch, Color(0xFF010C24), style = Stroke(width = w * .009f))
         for (i in 0..87) {
             val t = ((i * 53 + 7) % 101) / 100f
             val x = w * t * .36f
-            val y = h * (.86f + .12f * ((i * 37 % 103) / 103f))
+            val y = h * ((if (splash) .80f else .86f) +
+                (if (splash) .18f else .12f) * ((i * 37 % 103) / 103f))
             val radius = w * (.0024f + (i % 4) * .0009f)
             val hue = if (i % 3 == 0) Color(0xFF9A8EC4) else Color(0xFF6477B4)
             val opacity = if (i % 4 == 0) .70f else .46f
