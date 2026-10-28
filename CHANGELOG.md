@@ -1,3 +1,13 @@
+## 1.0.37 — Zaštita napretka pri uvozu i izvozu
+
+- Šifrirana sigurnosna kopija više ne smije biti prazna ili sadržavati samo postavke bez provjerljive statistike; takve datoteke ne mogu izbrisati postojeći napredak.
+- Odbijaju se nepotpuni ili proturječni primarni i rezervni zapisi statistike prije zamjene lokalnog stanja.
+- Uvoz zaključava lokalno spremanje **prije** upisivanja vraćene kopije, kako asinkroni Android `onStop` ne bi prepisao obnovljenu partiju starom memorijskom verzijom.
+- Neuspjeli uvoz ponovno omogućuje automatsko spremanje. Neuspješan sinkroni zapis trenutačne igre blokira uvoz i izvoz.
+- Novi instrumentacijski regresijski testovi: prazna i međusobno proturječna kopija, očuvanje trenutačne igre nakon odbijenog uvoza te zaštita od kasnog upisa stare Activity.
+- Osam stvarnih screenshotova iz Android emulatora i nastavak mjerljive QA usporedbe. Izgled i postojeća funkcionalnost zadržani; puni pixel-perfect 1:1 još nije potvrđen.
+- `versionName=1.0.37`, `versionCode=38`. Objavljeni APK/AAB ostaju testni ako nema pouzdanog izdavačkog potpisa.
+
 ## 1.0.36 — Sigurnosna kopija, privatnost i oporavak
 
 - Dodan korisnički izvoz i uvoz **šifrirane offline kopije** putem Android Storage Access Frameworka, bez internetske veze ili širokih dozvola za pohranu.

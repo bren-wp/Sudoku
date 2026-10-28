@@ -145,16 +145,38 @@ object SudokuBackup {
     fun restore(context: Context, values: Map<String, String>) {
         validate(values)
         val prefs = preferences(context)
+        // SharedPreferences can update its in-memory map even if disk commit
+        // returns false. Keep an independent snapshot to undo that mutation.
+        val previous = keys.mapNotNull { key ->
+            prefs.getString(key, null)?.let { key to it }
+        }.toMap()
         val editor = prefs.edit()
         for (key in keys) editor.remove(key)
         values.forEach { (key, value) -> editor.putString(key, value) }
-        if (!editor.commit()) throw IOException("Nije uspjelo spremanje sigurnosne kopije.")
+        if (!runCatching { editor.commit() }.getOrDefault(false)) {
+            val rollback = prefs.edit()
+            keys.forEach { rollback.remove(it) }
+            previous.forEach { (key, value) -> rollback.putString(key, value) }
+            if (!runCatching { rollback.commit() }.getOrDefault(false)) {
+                throw IOException("Zapis i oporavak kopije nisu uspjeli; provjeri pohranu.")
+            }
+            throw IOException("Spremanje kopije nije uspjelo; prethodni podaci su vraćeni.")
+        }
     }
 
     private fun validate(values: Map<String, String>) {
         if (values.keys.any { it !in keys }) throw IOException("Nepoznati podaci u kopiji.")
         if (values.values.sumOf { it.length } > MAX_PLAIN)
             throw IOException("Sigurnosna kopija je prevelika.")
+        // An authenticated archive can still be empty or contain only options.
+        // Never let such a file silently erase games and achievements.
+        if (values["stats"] == null && values["stats_backup"] == null) {
+            throw IOException("Kopija ne sadrži podatke o napretku.")
+        }
+        if (values["stats"] != null && values["stats_backup"] != null &&
+            values["stats"] != values["stats_backup"]) {
+            throw IOException("Nekonzistentni zapisi statistike u kopiji.")
+        }
         try {
             listOf("game", "regular_game", "daily_game").forEach { key ->
                 values[key]?.let { raw -> validateGame(JSONObject(raw), key) }
@@ -241,6 +263,10 @@ object SudokuBackup {
     }
 
     private fun validateStats(stats: JSONObject) {
+        if (!stats.has("played") || !stats.has("finished") ||
+            stats.optInt("finished", -1) > stats.optInt("played", -1)) {
+            throw IOException("Nedostaje vjerodostojna statistika u kopiji.")
+        }
         for (key in listOf("played", "finished", "flawless", "dailyWins", "dailyPoints",
             "streak", "bestStreak", "noHintWins", "fastWins", "longWins")) {
             if (stats.optInt(key) < 0) throw IOException("Nevaljana statistika.")

@@ -105,6 +105,127 @@ class SudokuBackupTest {
         }
     }
 
+
+    @Test
+    fun emptyOrMismatchedArchiveCannotEraseExistingProgress() = runBlocking {
+        val (context, prefs) = sandbox("reject_empty")
+        prefs.edit().clear().commit()
+        try {
+            val controller = SudokuController(context)
+            controller.startNew(4, 0)
+            controller.flush()
+            val baseline = SudokuBackup.snapshot(context)
+            val validStats = requireNotNull(baseline["stats"])
+            val invalid = listOf(
+                emptyMap(),
+                mapOf("options" to "{}"),
+                mapOf("stats" to "{}"),
+                mapOf("stats" to validStats, "stats_backup" to """{"played":0,"finished":0}"""),
+            )
+            invalid.forEach { values ->
+                try {
+                    SudokuBackup.restore(context, values)
+                    fail("Invalid backup must never erase current game")
+                } catch (_: IOException) {
+                    // Reject before any preference edit.
+                }
+                try {
+                    SudokuBackup.encrypt(values, password.copyOf())
+                    fail("Invalid backup must never be exported")
+                } catch (_: IOException) {
+                    // A valid key must not authorize a destructive empty archive.
+                }
+                assertEquals(baseline, SudokuBackup.snapshot(context))
+            }
+        } finally {
+            prefs.edit().clear().commit()
+        }
+    }
+
+    @Test
+    fun oldActivityFlushCannotOverwriteRestoredGame() = runBlocking {
+        val (source, sourcePrefs) = sandbox("lock_source")
+        val (target, targetPrefs) = sandbox("lock_target")
+        sourcePrefs.edit().clear().commit()
+        targetPrefs.edit().clear().commit()
+        try {
+            val newProgress = SudokuController(source)
+            newProgress.startNew(6, 0)
+            newProgress.flush()
+            val expected = SudokuBackup.snapshot(source)
+
+            val outgoing = SudokuController(target)
+            outgoing.startNew(4, 1)
+            outgoing.flush()
+            assertTrue(outgoing.prepareForBackupRestore())
+            SudokuBackup.restore(target, expected)
+            // A delayed onStop callback must not write outgoing 4x4 over 6x6.
+            assertTrue(outgoing.flush())
+            assertEquals(expected, SudokuBackup.snapshot(target))
+            assertEquals(6, requireNotNull(SudokuController(target).game).size)
+        } finally {
+            sourcePrefs.edit().clear().commit()
+            targetPrefs.edit().clear().commit()
+        }
+    }
+
+
+    @Test
+    fun failedDiskCommitRollsBackPreviousLocalSnapshot() = runBlocking {
+        val (base, prefs) = sandbox("rollback")
+        prefs.edit().clear().commit()
+        try {
+            val previousController = SudokuController(base)
+            previousController.startNew(4, 1)
+            previousController.flush()
+            val original = SudokuBackup.snapshot(base)
+
+            val (source, sourcePrefs) = sandbox("rollback_source")
+            sourcePrefs.edit().clear().commit()
+            try {
+                val sourceController = SudokuController(source)
+                sourceController.startNew(9, 0)
+                sourceController.flush()
+                val candidate = SudokuBackup.snapshot(source)
+                assertNotEquals(original, candidate)
+
+                // Simulate a commit that updates the in-memory preferences,
+                // but reports a disk write failure to the import caller.
+                var firstCommit = true
+                val failing = object : ContextWrapper(base) {
+                    override fun getApplicationContext(): Context = this
+                    override fun getSharedPreferences(name: String?, mode: Int):
+                        SharedPreferences = object : SharedPreferences by prefs {
+                        override fun edit(): SharedPreferences.Editor {
+                            val underlying = prefs.edit()
+                            return object : SharedPreferences.Editor by underlying {
+                                override fun commit(): Boolean {
+                                    val result = underlying.commit()
+                                    return if (firstCommit) {
+                                        firstCommit = false
+                                        false
+                                    } else result
+                                }
+                            }
+                        }
+                    }
+                }
+                try {
+                    SudokuBackup.restore(failing, candidate)
+                    fail("Failed commit must not report a successful import")
+                } catch (_: IOException) {
+                    // The original snapshot must survive the failed import.
+                }
+                assertEquals(original, SudokuBackup.snapshot(base))
+                assertEquals(4, requireNotNull(SudokuController(base).game).size)
+            } finally {
+                sourcePrefs.edit().clear().commit()
+            }
+        } finally {
+            prefs.edit().clear().commit()
+        }
+    }
+
     @Test
     fun wrongPasswordTamperingAndBadDataNeverReplaceExistingProgress() = runBlocking {
         val (target, prefs) = sandbox("invalid")

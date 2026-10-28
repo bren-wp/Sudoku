@@ -30,6 +30,8 @@ Nije moguće jamčiti oporavak izgubljene datoteke ili neispravne pohrane.
 
 ## Zaštita od kvarova
 
+Od verzije 1.0.37 prazne i međusobno proturječne kopije statistike odbacuju se prije bilo kakve zamjene. Ako je aktualnu partiju nemoguće sinkrono spremiti, uvoz ili izvoz se otkazuje. Zaštita od upisa starog Activity stanja uključuje se **prije** vraćanja datoteke, a nakon neuspjeha ponovno se omogućuje normalno lokalno spremanje.
+
 Prije promjene lokalnog stanja provjeravaju se duljine, Sudoku dimenzije
 (4×4, 6×6, 9×9), valjana rješenja, konzistentnost zadanih polja,
 bilješke, pogreške, savjeti, datumi, statistika, granice

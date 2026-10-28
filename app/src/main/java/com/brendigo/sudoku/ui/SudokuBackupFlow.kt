@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.brendigo.sudoku.data.SudokuBackup
 import com.brendigo.sudoku.data.SudokuController
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,8 +56,10 @@ fun SudokuBackupFlow(
         password = ""
         if (uri == null) {
             key.fill('\u0000')
+        } else if (!controller.flush()) {
+            key.fill('\u0000')
+            controller.showMessage("Nije moguće sigurno spremiti napredak; izvoz je otkazan.")
         } else {
-            controller.flush()
             busy = true
             scope.launch {
                 try {
@@ -73,7 +76,7 @@ fun SudokuBackupFlow(
                     }
                     controller.showMessage("Šifrirana sigurnosna kopija uspješno je spremljena.")
                 } catch (_: Exception) {
-                    controller.showMessage("Izvoz nije uspio. Provjeri slobodan prostor i pokušaj ponovno.")
+                    controller.showMessage("Izvoz nije uspio. Provjeri postoji li spremljen napredak i dovoljno slobodnog prostora.")
                 } finally {
                     busy = false
                 }
@@ -220,6 +223,16 @@ fun SudokuBackupFlow(
                     enabled = !busy,
                     onClick = {
                         val values = imported ?: return@TextButton
+                        val activity = context as? Activity ?: run {
+                            controller.showMessage("Vraćanje podataka zahtijeva aktivan zaslon aplikacije.")
+                            return@TextButton
+                        }
+                        // Lock the old controller synchronously BEFORE any disk write;
+                        // Activity.onStop can be called while SAF/IO is running.
+                        if (!controller.prepareForBackupRestore()) {
+                            controller.showMessage("Spremanje trenutačne igre nije uspjelo. Uvoz je otkazan.")
+                            return@TextButton
+                        }
                         busy = true
                         scope.launch {
                             try {
@@ -228,11 +241,15 @@ fun SudokuBackupFlow(
                                 }
                                 imported = null
                                 showConfirm = false
-                                // onStop() must not overwrite the imported game.
-                                controller.prepareForBackupRestore()
-                                (context as? Activity)?.recreate()
+                                activity.recreate()
+                            } catch (cancelled: CancellationException) {
+                                // A destroyed Activity may cancel the awaiting coroutine
+                                // even after the IO thread committed restored progress.
+                                // Its stale controller must never resume writing.
+                                throw cancelled
                             } catch (_: Exception) {
-                                controller.showMessage("Nije uspjelo vraćanje kopije. Postojeći napredak nije namjerno brisan.")
+                                controller.cancelBackupRestore()
+                                controller.showMessage("Vraćanje kopije nije uspjelo. Provjeri dostupnu pohranu.")
                             } finally {
                                 busy = false
                             }

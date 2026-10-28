@@ -163,20 +163,30 @@ class SudokuController(context: Context) {
     }
 
     /** Persist a just-entered move when Android moves the activity into background. */
-    fun flush() {
-        if (importingBackup) return
-        // Activity.onStop: commit synchronously so Android process death does
-        // not race a queued asynchronous save. Never clear a failed save.
-        saveGame(synchronous = true)
+    fun flush(): Boolean {
+        if (importingBackup) return true
+        // A failed commit must prevent an export/restore from using older data.
+        return saveGame(synchronous = true)
     }
 
     fun clearToast() {
         toast = ""
     }
 
-    /** Prevent the outgoing Activity from overwriting a restored backup. */
-    fun prepareForBackupRestore() {
+    /**
+     * Freeze persistent writes before the restore transaction starts.
+     * Otherwise onStop() can race the imported SharedPreferences commit and
+     * overwrite it with an older in-memory game.
+     */
+    fun prepareForBackupRestore(): Boolean {
+        if (!flush()) return false
         importingBackup = true
+        return true
+    }
+
+    /** A failed import must not permanently disable autosaving. */
+    fun cancelBackupRestore() {
+        importingBackup = false
     }
 
     fun showMessage(message: String) {
@@ -595,9 +605,9 @@ class SudokuController(context: Context) {
         editor.putString("stats_backup", snapshot)
     }
 
-    private fun saveGame(synchronous: Boolean = false) {
-        if (importingBackup) return
-        val s = game ?: return
+    private fun saveGame(synchronous: Boolean = false): Boolean {
+        if (importingBackup) return true
+        val s = game ?: return true
         val snapshot = JSONObject().apply {
             put("size", s.size)
             put("boxRows", s.boxRows)
@@ -633,7 +643,12 @@ class SudokuController(context: Context) {
         writeStats(editor)
         if (s.daily) editor.putString("daily_game", snapshot).putString("daily_undo", history)
         else editor.putString("regular_game", snapshot).putString("regular_undo", history)
-        if (synchronous) editor.commit() else editor.apply()
+        return runCatching {
+            if (synchronous) editor.commit() else {
+                editor.apply()
+                true
+            }
+        }.getOrDefault(false)
     }
 
     private fun readGame(key: String = "game"): Session? {
