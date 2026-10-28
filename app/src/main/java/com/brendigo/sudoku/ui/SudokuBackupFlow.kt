@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.brendigo.sudoku.data.SudokuBackup
 import com.brendigo.sudoku.data.SudokuController
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -241,6 +242,11 @@ fun SudokuBackupFlow(
                                 imported = null
                                 showConfirm = false
                                 activity.recreate()
+                            } catch (cancelled: CancellationException) {
+                                // A destroyed Activity may cancel the awaiting coroutine
+                                // even after the IO thread committed restored progress.
+                                // Its stale controller must never resume writing.
+                                throw cancelled
                             } catch (_: Exception) {
                                 controller.cancelBackupRestore()
                                 controller.showMessage("Vraćanje kopije nije uspjelo. Provjeri dostupnu pohranu.")
