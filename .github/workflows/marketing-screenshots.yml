@@ -41,7 +41,7 @@ jobs:
       - name: Enable KVM
         run: |
           if test -e /dev/kvm; then sudo chmod 666 /dev/kvm; fi
-      - name: Capture seven actual Android screens
+      - name: Capture eight actual Android screens
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -65,7 +65,7 @@ jobs:
           destination.mkdir(parents=True, exist_ok=True)
           expected = [
               "01-home", "02-new-game", "03-game", "04-settings",
-              "05-daily", "06-statistics", "07-achievements",
+              "05-daily", "06-statistics", "07-achievements", "08-splash",
           ]
           for basename in expected:
               filename = source / (basename + ".png")
