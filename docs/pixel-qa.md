@@ -119,6 +119,33 @@ run `40261033976`, artifact `12624264725`:
 
 These are raw full-screen metrics, including differing live data, layout,
 typography and procedural scenery; they are not normalized component-parity
-results. The splash layout and optional-note recovery changes in the
-v1.0.33 candidate are **not yet verified** by a new emulator screenshot
-comparison. Do not report the values above as post-change improvements.
+results. ## v1.0.33 emulator capture and result (28 October 2026)
+
+The candidate code at commit `19890afdf6a5d869718ee1d6e72c978c7ce385cc`
+passed Android CI run `40774194155` (unit tests, pixel metric regression tests,
+Android lint and APK/AAB build) and visual-smoke run `40774194240`.
+Both reference-size 941×1672 and compact 720×1280 emulator jobs succeeded.
+
+The original reference PNGs were compared with the **actual** 941×1672
+visual-smoke screenshots from artifact `12853763946` and the previous
+v1.0.32 screenshots from artifact `12624264725`.
+
+| Screen | v1.0.32 raw RGB MAE | v1.0.33 raw RGB MAE | Change |
+|---|---:|---:|---:|
+| Home | 29.312 | 29.312 | 0.000 |
+| New game | 29.061 | 29.061 | 0.000 |
+| Game | 23.121 | 23.068 | -0.053 |
+| Settings | 27.727 | 27.727 | 0.000 |
+| Daily challenge | 29.682 | 29.686 | +0.004 |
+| Statistics | 30.986 | 30.986 | 0.000 |
+| Achievements | 32.184 | 32.184 | 0.000 |
+| **Average** | **28.868** | **28.861** | **-0.007** |
+
+The delta is too small to claim substantive pixel-parity improvement,
+particularly because date, puzzle state and live statistics differ between
+captures. This iteration primarily improves splash layout, session recovery
+and verifiable QA metrics. A splash capture, icon/wordmark direct comparison,
+and scenery-versus-interactive-UI normalized analysis are **still pending**.
+The next visual corrections are tracked in issue #39; do not declare 1:1
+equality, no known crashes, or a completed global security/dead-code audit.
+
