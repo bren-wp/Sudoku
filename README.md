@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.35** · Android 8.0+ · Bez oglasa · Bez interneta
+**Izdanje 1.0.36** · Android 8.0+ · Bez oglasa · Bez interneta
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
@@ -128,3 +128,8 @@ s internetom: deinstalacija ili kvar uređaja mogu ga trajno ukloniti.
 [Licencija](LICENSE)
 
 </div>
+
+
+### Privatna sigurnosna kopija
+
+Uz Sudoku 1.0.36 možete ručno izvesti lokalni napredak u šifriranu `.sudoku` datoteku i vratiti ga uz svoju lozinku i izričitu potvrdu. Kopija se sprema tamo gdje sami odaberete u Androidovu pregledniku datoteka — aplikacija ne zahtijeva internetsku vezu niti račun. Zaštitite lozinku: nije moguće obnoviti zaboravljenu lozinku. Sve slike zaslona iznad stvarne su snimke emulatora, ne dizajnerski prikazi.
