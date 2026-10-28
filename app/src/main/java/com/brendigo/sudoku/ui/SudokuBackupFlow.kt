@@ -220,6 +220,13 @@ fun SudokuBackupFlow(
                     enabled = !busy,
                     onClick = {
                         val values = imported ?: return@TextButton
+                        val activity = context as? Activity ?: run {
+                            controller.showMessage("Vraćanje podataka zahtijeva aktivan zaslon aplikacije.")
+                            return@TextButton
+                        }
+                        // Lock the old controller synchronously BEFORE any disk write;
+                        // Activity.onStop can be called while SAF/IO is running.
+                        controller.prepareForBackupRestore()
                         busy = true
                         scope.launch {
                             try {
@@ -228,11 +235,10 @@ fun SudokuBackupFlow(
                                 }
                                 imported = null
                                 showConfirm = false
-                                // onStop() must not overwrite the imported game.
-                                controller.prepareForBackupRestore()
-                                (context as? Activity)?.recreate()
+                                activity.recreate()
                             } catch (_: Exception) {
-                                controller.showMessage("Nije uspjelo vraćanje kopije. Postojeći napredak nije namjerno brisan.")
+                                controller.cancelBackupRestore()
+                                controller.showMessage("Vraćanje kopije nije uspjelo. Provjeri dostupnu pohranu.")
                             } finally {
                                 busy = false
                             }
