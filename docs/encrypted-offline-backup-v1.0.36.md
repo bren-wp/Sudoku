@@ -61,3 +61,27 @@ kvar uređaja, zlonamjeran pružatelj dokumenata, potpuno kompromitiran Android
 i niski prostor pohrane. Osoba koja kontrolira otključani uređaj ima pristup
 dešifriranim podacima aplikacije. Bez nezavisnog potpisnog certifikata nema
 produkcijski potpisanog AAB-a.
+
+
+## 1.0.39 — sigurniji povrat s pregledom i provjerama integriteta
+
+- Kod izvoza istu lozinku treba upisati dvaput. Gumb za spremanje
+  dostupan je tek kada se oba unosa podudaraju i imaju 12–128 znakova.
+- Prije potvrde uvoza vidi se **sažetak provjerene kopije** (broj odigranih
+  i završenih partija, dnevne pobjede i vrste spremljenih partija),
+  usporedno sa stvarnim lokalnim brojevima.
+- Ako kopija ima manje završenih igara od uređaja, prikazuje se posebno
+  upozorenje da rezultati **nisu spojivi** i da će se zamijeniti.
+- Kontroliraju se duplikati datuma dnevnih izazova, zadnji datum,
+  formati datuma i granice zapisa povijesti igara.
+- Provjere se izvršavaju **prije** promjene SharedPreferences stanja.
+  Nevaljana ili oštećena kopija ne smije obrisati valjan lokalni napredak.
+- Instrumentirani regresijski testovi pokrivaju pregled, odbacivanje
+  oštećenog JSON-a/povijesti i povrat starijeg v1 formata bez novijih
+  neobaveznih polja.
+
+Kopija ostaje potpuno offline i dobrovoljna. Podaci se namjerno ne
+spajaju s drugim uređajem: to bi kod dnevnih nagrada otvorilo problem
+dvostrukog bodovanja. Korisnik mora prvo sačuvati postojeći lokalni
+napredak prije potvrde zamjene. Oporavak se ne može jamčiti ako nema
+valjane datoteke i lozinke.
