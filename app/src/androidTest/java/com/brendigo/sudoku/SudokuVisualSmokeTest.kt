@@ -3,6 +3,17 @@ package com.brendigo.sudoku
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color as ComposeColor
+import com.brendigo.sudoku.ui.BrandHeader
+import com.brendigo.sudoku.ui.SudokuTheme
 import android.content.ContentValues
 import android.os.Environment
 import android.provider.MediaStore
@@ -775,6 +786,95 @@ class SudokuVisualSmokeTest {
     }
 
     /**
+     * QA-only render of the REAL in-app Compose header. The test places the
+     * branded Compose component on a black canvas, crops its actual pixels,
+     * and centers the crop inside a 1254px square to compare with the owner's
+     * standalone wordmark artwork. No application preferences are modified.
+     */
+    @Test
+    fun captureActualComposeWordmarkForTenReferenceQa() {
+        waitFor("home-nova-igra")
+        rule.runOnUiThread {
+            rule.activity.setContent {
+                SudokuTheme {
+                    Box(Modifier.fillMaxSize().background(ComposeColor.Black),
+                        contentAlignment = Alignment.Center) {
+                        BrandHeader(Modifier.fillMaxWidth())
+                    }
+                }
+            }
+        }
+        rule.waitForIdle()
+        Thread.sleep(350)
+        val shot = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+            ?: error("No real Compose logo screenshot")
+        try {
+            var minX = shot.width
+            var minY = shot.height
+            var maxX = -1
+            var maxY = -1
+            for (y in shot.height / 4 until shot.height * 3 / 4 step 2) {
+                for (x in 0 until shot.width step 2) {
+                    val c = shot.getPixel(x, y)
+                    if (Color.red(c) > 48 || Color.green(c) > 48 ||
+                        Color.blue(c) > 84) {
+                        minX = minOf(minX, x)
+                        minY = minOf(minY, y)
+                        maxX = maxOf(maxX, x)
+                        maxY = maxOf(maxY, y)
+                    }
+                }
+            }
+            check(maxX - minX > 100 && maxY - minY > 30) {
+                "Could not find original Compose brand header on screenshot"
+            }
+            val crop = Bitmap.createBitmap(
+                shot, minX, minY, maxX - minX + 1, maxY - minY + 1
+            )
+            try {
+                val width = 1160
+                val height = (crop.height.toFloat() / crop.width * width).toInt()
+                check(height in 50..1100) { "Invalid Compose wordmark aspect ratio" }
+                val scaled = Bitmap.createScaledBitmap(crop, width, height, true)
+                try {
+                    val full = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
+                    try {
+                        val canvas = Canvas(full)
+                        canvas.drawColor(Color.BLACK)
+                        canvas.drawBitmap(scaled, (1254 - width) / 2f,
+                            (1254 - height) / 2f, Paint(Paint.FILTER_BITMAP_FLAG))
+                        saveBrandingQaPng("09-wordmark.png", full)
+                    } finally { full.recycle() }
+                } finally { scaled.recycle() }
+            } finally { crop.recycle() }
+        } finally { shot.recycle() }
+    }
+
+    private fun saveBrandingQaPng(name: String, bitmap: Bitmap) {
+        val resolver = rule.activity.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, name)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + "/SudokuQA")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            ?: error("Cannot create $name")
+        try {
+            resolver.openOutputStream(uri)?.use { output ->
+                check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+            } ?: error("Cannot write $name")
+            check(resolver.update(uri, ContentValues().apply {
+                put(MediaStore.Images.Media.IS_PENDING, 0)
+            }, null, null) == 1)
+        } catch (error: Exception) {
+            resolver.delete(uri, null, null)
+            throw error
+        }
+    }
+
+    /**
      * Native Android launcher resource rendered at the original square
      * reference resolution. This is NOT a copy of the owner's PNG; it exercises
      * the actual adaptive icon packaged in the installed APK.
@@ -792,27 +892,7 @@ class SudokuVisualSmokeTest {
             canvas.drawColor(Color.BLACK)
             launcher.setBounds(0, 0, 1254, 1254)
             launcher.draw(canvas)
-            val values = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, "10-launcher-icon.png")
-                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                put(MediaStore.Images.Media.RELATIVE_PATH,
-                    Environment.DIRECTORY_PICTURES + "/SudokuQA")
-                put(MediaStore.Images.Media.IS_PENDING, 1)
-            }
-            val uri = context.contentResolver.insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
-            ) ?: error("Cannot create native adaptive launcher proof")
-            try {
-                context.contentResolver.openOutputStream(uri)?.use { output ->
-                    check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
-                } ?: error("Cannot write native adaptive launcher proof")
-                check(context.contentResolver.update(uri, ContentValues().apply {
-                    put(MediaStore.Images.Media.IS_PENDING, 0)
-                }, null, null) == 1)
-            } catch (error: Exception) {
-                context.contentResolver.delete(uri, null, null)
-                throw error
-            }
+            saveBrandingQaPng("10-launcher-icon.png", bitmap)
         } finally {
             bitmap.recycle()
         }
