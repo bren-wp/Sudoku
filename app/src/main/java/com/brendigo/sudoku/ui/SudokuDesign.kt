@@ -73,12 +73,31 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
                 startY = 0f, endY = h,
             )
         )
-        // Faint oversized sudoku grid, like the supplied artwork.
-        val spacing = w / 3.5f
-        for (i in -2..8) {
-            val x = i * spacing
-            drawLine(Ink.blue.copy(alpha = .20f), Offset(x, 0f), Offset(x + w * .25f, h * .28f), 2.5f)
-            drawLine(Ink.blue.copy(alpha = .16f), Offset(0f, x), Offset(w, x - w * .20f), 2.5f)
+        // The reference has TWO separate angled Sudoku grids flanking
+        // a dark central title area, not one grid crossing the full screen.
+        // Geometry is anchored to viewport width, not device pixel density.
+        // Keep it purely decorative so Compose buttons retain touch semantics.
+        for (i in -1..5) {
+            val x = i * w * .105f
+            val leftColor = Color(0xFF1267BD).copy(alpha = if (i % 3 == 0) .46f else .27f)
+            drawLine(leftColor, Offset(x, 0f),
+                Offset(x + w * .20f, h * .275f), strokeWidth = w * .0029f)
+            val y = i * w * .095f
+            if (y < h * .30f) {
+                drawLine(Color(0xFF146FC0).copy(alpha = .30f),
+                    Offset(0f, y), Offset(w * .52f, y - w * .145f),
+                    strokeWidth = w * .0028f)
+            }
+            val rightX = w * (.66f + i * .093f)
+            drawLine(Color(0xFF1268C5).copy(alpha = if (i % 3 == 0) .46f else .26f),
+                Offset(rightX, 0f), Offset(rightX - w * .16f, h * .29f),
+                strokeWidth = w * .0026f)
+            val rightY = i * w * .090f
+            if (rightY < h * .30f) {
+                drawLine(Color(0xFF0D5AAE).copy(alpha = .24f),
+                    Offset(w * .59f, rightY - w * .045f),
+                    Offset(w, rightY + w * .110f), strokeWidth = w * .0028f)
+            }
         }
         // Large translucent Sudoku digits are part of the original visual motif.
         // Native canvas text here is decoration, never interactive content.
