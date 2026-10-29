@@ -2,6 +2,7 @@ name: Publish Sudoku release
 
 # Some GitHub App merges do not start a main push workflow. Build the trusted
 # merge commit after a merged PR, or publish manually from main.
+# Verified v1.0.38 all-screen visual-parity release; workflow self-checks version and artifacts.
 on:
   push:
     branches: [main]
