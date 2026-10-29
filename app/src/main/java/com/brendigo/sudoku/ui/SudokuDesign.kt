@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.geometry.Offset
@@ -344,10 +345,16 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
 }
 
 @Composable
-fun SudokuLogo(size: Dp) {
+fun SudokuLogo(size: Dp, glowing: Boolean = false) {
     val values = listOf("7", "", "", "", "3", "", "", "", "9")
     Column(
         Modifier.size(size)
+            .then(if (glowing) Modifier.shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(13.dp),
+                ambientColor = Ink.cyan,
+                spotColor = Ink.blue,
+            ) else Modifier)
             .clearAndSetSemantics {
                 contentDescription = "Sudoku by Brendigo, logotip 7, 3, 9"
             }
