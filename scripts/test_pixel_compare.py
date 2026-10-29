@@ -44,6 +44,53 @@ class PixelCompareTest(unittest.TestCase):
             self.assertGreater(measured["mean_error_0_to_255"], 0)
             self.assertLess(measured["pixels_within_12_pct"], 100)
 
+    def test_branding_uses_real_square_reference_resolution(self):
+        from pixel_compare import BRANDING_SIZE
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", BRANDING_SIZE, (8, 16, 64)).save(
+                folder / "wordmark.png"
+            )
+            measured = compare(
+                folder / "wordmark.png", folder / "wordmark.png",
+                folder / "brand-result", expected_size=BRANDING_SIZE,
+            )
+            self.assertEqual(0, measured["mean_error_0_to_255"])
+            with self.assertRaises(ValueError):
+                compare(
+                    folder / "wordmark.png", folder / "wordmark.png",
+                    folder / "wrong-size-result",
+                )
+
+    def test_volatile_mask_measures_stable_content_without_hiding_global_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            observed = reference.copy()
+            observed.paste((90, 0, 0), (0, 0, 80, 80))
+            mask = Image.new("L", REFERENCE_SIZE, 0)
+            mask.paste(255, (0, 0, 80, 80))
+            reference.save(folder / "ref.png")
+            observed.save(folder / "actual.png")
+            mask.save(folder / "volatile.png")
+            measured = compare(
+                folder / "ref.png", folder / "actual.png",
+                folder / "result", volatile_mask=folder / "volatile.png",
+            )
+            self.assertEqual(0, measured["stable_region_mae"])
+            self.assertGreater(measured["mean_error_0_to_255"], 0)
+
+    def test_rejects_mask_excluding_every_pixel(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "ref.png")
+            Image.new("L", REFERENCE_SIZE, 255).save(folder / "all.png")
+            with self.assertRaisesRegex(ValueError, "entire image"):
+                compare(
+                    folder / "ref.png", folder / "ref.png",
+                    folder / "result", volatile_mask=folder / "all.png",
+                )
+
     def test_rejects_masks_at_incorrect_resolution(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
