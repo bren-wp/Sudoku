@@ -69,7 +69,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
                     Color(0xFF163D79), Color(0xFF255A9C),
                     Color(0xFF12376F), Color(0xFF091F46)
                 )
-                else listOf(Color(0xFF001335), Color(0xFF041C48), Color(0xFF05204C), Color(0xFF01102B)),
+                else listOf(Color(0xFF001132), Color(0xFF03173D), Color(0xFF031A43), Color(0xFF010D26)),
                 startY = 0f, endY = h,
             )
         )
@@ -133,12 +133,12 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
         val distantMountainY = if (splash) .756f else .847f
         val nearMountainY = if (splash) .806f else .875f
         val lakeHorizon = if (splash) .843f else .910f
-        mountains(h * distantMountainY, h * .035f, Color(0xFF102B60).copy(alpha = .82f), 2.2f)
-        mountains(h * nearMountainY, h * .048f, Color(0xFF08214A), .1f)
-        mountains(h * lakeHorizon, h * .034f, Color(0xFF031533), 1.5f)
+        mountains(h * distantMountainY, h * .035f, Color(0xFF091F50).copy(alpha = .87f), 2.2f)
+        mountains(h * nearMountainY, h * .048f, Color(0xFF061B40), .1f)
+        mountains(h * lakeHorizon, h * .034f, Color(0xFF02132D), 1.5f)
         drawRect(
             Brush.verticalGradient(
-                listOf(Color(0x00226BD0), Color(0x88305CA0), Color(0xFF02112E)),
+                listOf(Color(0x00226BD0), Color(0x88234993), Color(0xFF010D27)),
                 startY = h * (lakeHorizon - .03f), endY = h,
             ),
             topLeft = Offset(0f, h * (lakeHorizon - .03f)),
@@ -227,8 +227,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
             val y = h * ((if (splash) .80f else .86f) +
                 (if (splash) .18f else .12f) * ((i * 37 % 103) / 103f))
             val radius = w * (.0024f + (i % 4) * .0009f)
-            val hue = if (i % 3 == 0) Color(0xFF9A8EC4) else Color(0xFF6477B4)
-            val opacity = if (i % 4 == 0) .70f else .46f
+            val hue = if (i % 3 == 0) Color(0xFF8274AE) else Color(0xFF485C96)
+            val opacity = if (i % 4 == 0) .60f else .38f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
@@ -343,8 +343,10 @@ fun NeonPanel(
                     listOf(Color(0xFC04132F), Color(0xF4091B3A),
                         Color(0xF940311A)),
                 ) else Brush.linearGradient(
-                    listOf(highlight.copy(alpha = .23f),
-                        Color(0xF3071C42), Color(0xFB03102B)),
+                    // Reference surfaces are substantially darker than the
+                    // previous electric-blue glass treatment.
+                    listOf(highlight.copy(alpha = .14f),
+                        Color(0xF3051739), Color(0xFB030F29)),
                 ),
             )
             .border(1.dp, highlight.copy(alpha = .88f),
