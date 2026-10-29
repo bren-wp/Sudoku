@@ -59,4 +59,29 @@ class SavedGameRecoveryTest {
         val restored = SavedGameRecovery.choose(null, mislabeled, null, today)
         assertNull(restored.session)
     }
+
+    @Test fun finishedPrimaryDoesNotHideUnfinishedRegularPuzzle() {
+        val finishedPrimary = session(completed = true)
+        val unfinishedRegular = session()
+        val restored = SavedGameRecovery.choose(
+            finishedPrimary, unfinishedRegular, null, today,
+        )
+        assertSame(unfinishedRegular, restored.session)
+        assertEquals("regular_undo", restored.undoKey)
+    }
+
+    @Test fun expiredDailyPrimaryDoesNotHideCurrentDayChallenge() {
+        val expired = session(daily = true, day = today.minusDays(1).toString())
+        val current = session(daily = true, day = today.toString())
+        val restored = SavedGameRecovery.choose(expired, null, current, today)
+        assertSame(current, restored.session)
+        assertEquals("daily_undo", restored.undoKey)
+    }
+
+    @Test fun completedPrimaryIsPreservedIfNoOtherPuzzleCanResume() {
+        val finishedPrimary = session(completed = true)
+        val restored = SavedGameRecovery.choose(finishedPrimary, null, null, today)
+        assertSame(finishedPrimary, restored.session)
+        assertEquals("undo", restored.undoKey)
+    }
 }
