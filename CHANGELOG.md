@@ -1,3 +1,13 @@
+## 1.0.38 — Mjerljiva vizualna usklađenost s izvornim 1:1 referencama
+
+- Značajnija revizija svih osam Compose zaslona bez uklanjanja postojećih funkcija i bez screenshotova umjesto interaktivnih elemenata.
+- Korišten optimizirani originalni **neinteraktivni donji krajolik** iz korisnikove referentne slike (236 × 162 WebP, 2692 B): mjesec, planine, jezero, cvjetne grane, paviljon. Gornji rub postepeno prelazi u Compose proceduralnu pozadinu.
+- Preoblikovane dekorativne Sudoku mreže na dvije naglašene ukošene skupine. Zatamnjene zajedničke plave kartice, planine i jezero prema izmjerenim bojama iz originalnih PNG-ova.
+- Poboljšan stvarni RGB MAE na 941×1672 na **svih osam** snimljenih zaslona; konkretne izmjerene vrijednosti u `docs/pixel-parity-v1.0.38.md`.
+- Izvorni Android UI ostaje interaktivan i responzivan, uključujući 4×4/6×6/9×9 igre, statistiku, postignuća, Settings i sigurnosne kopije.
+- Android CI i oba emulatora prošli su s modificiranom vizualnom implementacijom. Raspored i ponašanje na malim zaslonima dodatno su pokriveni smoke testovima.
+- `versionName=1.0.38`, `versionCode=39`. Postizanje točnog pixel-perfect 1:1 nije potvrđeno; ne predstavljati MAE=0.
+
 ## 1.0.37 — Zaštita napretka pri uvozu i izvozu
 
 - Šifrirana sigurnosna kopija više ne smije biti prazna ili sadržavati samo postavke bez provjerljive statistike; takve datoteke ne mogu izbrisati postojeći napredak.

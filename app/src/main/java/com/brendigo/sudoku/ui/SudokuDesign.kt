@@ -10,6 +10,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.BitmapFactory
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,7 +22,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.text.TextStyle
@@ -57,9 +65,21 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = scheme, content = content)
 }
 
-/** Custom original vector scenery: no bitmap stretching and no photo/network assets. */
+/**
+ * Composited visual background: procedural interactive-scale gradients,
+ * plus a small compressed artwork layer extracted from the owner's original
+ * noninteractive scenery. No full-screen screenshot replaces any UI.
+ */
 @Composable
 fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splash: Boolean = false) {
+    val context = LocalContext.current
+    val originalNightscape = remember(context) {
+        runCatching {
+            context.assets.open("scenery-reference.webp").use {
+                BitmapFactory.decodeStream(it)?.asImageBitmap()
+            }
+        }.getOrNull()
+    }
     Canvas(modifier) {
         val w = size.width
         val h = size.height
@@ -69,16 +89,35 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
                     Color(0xFF163D79), Color(0xFF255A9C),
                     Color(0xFF12376F), Color(0xFF091F46)
                 )
-                else listOf(Color(0xFF001335), Color(0xFF041C48), Color(0xFF05204C), Color(0xFF01102B)),
+                else listOf(Color(0xFF001132), Color(0xFF03173D), Color(0xFF031A43), Color(0xFF010D26)),
                 startY = 0f, endY = h,
             )
         )
-        // Faint oversized sudoku grid, like the supplied artwork.
-        val spacing = w / 3.5f
-        for (i in -2..8) {
-            val x = i * spacing
-            drawLine(Ink.blue.copy(alpha = .20f), Offset(x, 0f), Offset(x + w * .25f, h * .28f), 2.5f)
-            drawLine(Ink.blue.copy(alpha = .16f), Offset(0f, x), Offset(w, x - w * .20f), 2.5f)
+        // The reference has TWO separate angled Sudoku grids flanking
+        // a dark central title area, not one grid crossing the full screen.
+        // Geometry is anchored to viewport width, not device pixel density.
+        // Keep it purely decorative so Compose buttons retain touch semantics.
+        for (i in -1..5) {
+            val x = i * w * .105f
+            val leftColor = Color(0xFF1267BD).copy(alpha = if (i % 3 == 0) .46f else .27f)
+            drawLine(leftColor, Offset(x, 0f),
+                Offset(x + w * .20f, h * .275f), strokeWidth = w * .0029f)
+            val y = i * w * .095f
+            if (y < h * .30f) {
+                drawLine(Color(0xFF146FC0).copy(alpha = .30f),
+                    Offset(0f, y), Offset(w * .52f, y - w * .145f),
+                    strokeWidth = w * .0028f)
+            }
+            val rightX = w * (.66f + i * .093f)
+            drawLine(Color(0xFF1268C5).copy(alpha = if (i % 3 == 0) .46f else .26f),
+                Offset(rightX, 0f), Offset(rightX - w * .16f, h * .29f),
+                strokeWidth = w * .0026f)
+            val rightY = i * w * .090f
+            if (rightY < h * .30f) {
+                drawLine(Color(0xFF0D5AAE).copy(alpha = .24f),
+                    Offset(w * .59f, rightY - w * .045f),
+                    Offset(w, rightY + w * .110f), strokeWidth = w * .0028f)
+            }
         }
         // Large translucent Sudoku digits are part of the original visual motif.
         // Native canvas text here is decoration, never interactive content.
@@ -133,12 +172,12 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
         val distantMountainY = if (splash) .756f else .847f
         val nearMountainY = if (splash) .806f else .875f
         val lakeHorizon = if (splash) .843f else .910f
-        mountains(h * distantMountainY, h * .035f, Color(0xFF102B60).copy(alpha = .82f), 2.2f)
-        mountains(h * nearMountainY, h * .048f, Color(0xFF08214A), .1f)
-        mountains(h * lakeHorizon, h * .034f, Color(0xFF031533), 1.5f)
+        mountains(h * distantMountainY, h * .035f, Color(0xFF091F50).copy(alpha = .87f), 2.2f)
+        mountains(h * nearMountainY, h * .048f, Color(0xFF061B40), .1f)
+        mountains(h * lakeHorizon, h * .034f, Color(0xFF02132D), 1.5f)
         drawRect(
             Brush.verticalGradient(
-                listOf(Color(0x00226BD0), Color(0x88305CA0), Color(0xFF02112E)),
+                listOf(Color(0x00226BD0), Color(0x88234993), Color(0xFF010D27)),
                 startY = h * (lakeHorizon - .03f), endY = h,
             ),
             topLeft = Offset(0f, h * (lakeHorizon - .03f)),
@@ -227,8 +266,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
             val y = h * ((if (splash) .80f else .86f) +
                 (if (splash) .18f else .12f) * ((i * 37 % 103) / 103f))
             val radius = w * (.0024f + (i % 4) * .0009f)
-            val hue = if (i % 3 == 0) Color(0xFF9A8EC4) else Color(0xFF6477B4)
-            val opacity = if (i % 4 == 0) .70f else .46f
+            val hue = if (i % 3 == 0) Color(0xFF8274AE) else Color(0xFF485C96)
+            val opacity = if (i % 4 == 0) .60f else .38f
             for (petal in 0..4) {
                 val radians = petal * 1.256637f
                 drawCircle(
@@ -244,6 +283,21 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
                 Color(0xFFD2B4C7).copy(alpha = opacity * .55f),
                 radius = radius * .49f,
                 center = Offset(x, y),
+            )
+        }
+
+        // Precise source-art detail, not a flattened game screenshot.
+        // The source image contains only scenery beneath all buttons and
+        // card interactions. Its first pixels fade in to avoid a visible seam.
+        originalNightscape?.let { art ->
+            val y = if (splash) .613f else .730f
+            val height = if (splash) .387f else .390f
+            drawImage(
+                image = art,
+                srcSize = IntSize(art.width, art.height),
+                dstOffset = IntOffset(0, (h * y).roundToInt()),
+                dstSize = IntSize(w.roundToInt(), (h * height).roundToInt()),
+                filterQuality = FilterQuality.Medium,
             )
         }
     }
@@ -343,8 +397,10 @@ fun NeonPanel(
                     listOf(Color(0xFC04132F), Color(0xF4091B3A),
                         Color(0xF940311A)),
                 ) else Brush.linearGradient(
-                    listOf(highlight.copy(alpha = .23f),
-                        Color(0xF3071C42), Color(0xFB03102B)),
+                    // Reference surfaces are substantially darker than the
+                    // previous electric-blue glass treatment.
+                    listOf(highlight.copy(alpha = .14f),
+                        Color(0xF3051739), Color(0xFB030F29)),
                 ),
             )
             .border(1.dp, highlight.copy(alpha = .88f),
