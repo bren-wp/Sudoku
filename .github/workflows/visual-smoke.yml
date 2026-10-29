@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "app/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
       - "docs/screenshots/**"
       - ".github/scripts/export-emulator-screenshots.sh"
       - ".github/workflows/visual-smoke.yml"
@@ -43,7 +46,7 @@ jobs:
       - name: Configure Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.13"
+          gradle-version: "9.6.0"
       - name: Enable KVM
         run: |
           if test -e /dev/kvm; then sudo chmod 666 /dev/kvm; fi
