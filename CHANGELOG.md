@@ -1,3 +1,11 @@
+## 1.0.40 — zaštita spremljenih partija pri promjeni načina igre
+
+- Prije zamjene postojeće Sudoku partije novom, kao i prije prijelaza između redovne i dnevne igre, obavezan je uspješan sinkroni zapis. Ako zapis ne uspije, trenutačna mreža, potezi i statistika ostaju u memoriji, a korisnik dobiva jasnu poruku.
+- Ako je primarni zapis već završen, ali postoji druga nedovršena partija, pri ponovnom pokretanju prednost dobiva partija koju je moguće nastaviti. Undo se učitava iz odgovarajućeg zapisa iste partije.
+- Dodani su regresijski JUnit testovi odabira spremljene partije i instrumentirani testovi s namjerno odbijenim `SharedPreferences.commit()` pozivima za običnu i dnevnu igru.
+- Paket ostaje `com.brendigo.sudoku`; `versionCode=41`, `versionName=1.0.40`. Ovo nije potvrda da je app 100% pixel-perfect ili produkcijski potpisan.
+- Prije spajanja i izdavanja obavezni su prolazak CI-ja, instrumentacijskih testova te provjera vizualnih referenci; rezultat tih provjera ne pretpostavlja se unaprijed.
+
 ## 1.0.39 — provjera sigurnosnih kopija i precizniji vizualni QA
 
 - **Issue #41:** Prije izvoza obvezna ponovna potvrda lokalne lozinke (12–128 znakova). Dešifrirana kopija prikazuje provjerene brojeve odigranih i završenih igara i dnevnih pobjeda, usporedno s lokalnim napretkom, uz posebno upozorenje na starije kopije. I dalje je potreban izričit pristanak za potpunu zamjenu.
