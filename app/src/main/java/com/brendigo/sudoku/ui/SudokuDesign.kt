@@ -10,6 +10,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.BitmapFactory
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,7 +22,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.text.TextStyle
@@ -57,9 +65,21 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = scheme, content = content)
 }
 
-/** Custom original vector scenery: no bitmap stretching and no photo/network assets. */
+/**
+ * Composited visual background: procedural interactive-scale gradients,
+ * plus a small compressed artwork layer extracted from the owner's original
+ * noninteractive scenery. No full-screen screenshot replaces any UI.
+ */
 @Composable
 fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splash: Boolean = false) {
+    val context = LocalContext.current
+    val originalNightscape = remember(context) {
+        runCatching {
+            context.assets.open("scenery-reference.webp").use {
+                BitmapFactory.decodeStream(it)?.asImageBitmap()
+            }
+        }.getOrNull()
+    }
     Canvas(modifier) {
         val w = size.width
         val h = size.height
@@ -263,6 +283,21 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
                 Color(0xFFD2B4C7).copy(alpha = opacity * .55f),
                 radius = radius * .49f,
                 center = Offset(x, y),
+            )
+        }
+
+        // Precise source-art detail, not a flattened game screenshot.
+        // The source image contains only scenery beneath all buttons and
+        // card interactions. Its first pixels fade in to avoid a visible seam.
+        originalNightscape?.let { art ->
+            val y = if (splash) .613f else .730f
+            val height = if (splash) .387f else .390f
+            drawImage(
+                image = art,
+                srcSize = IntSize(art.width, art.height),
+                dstOffset = IntOffset(0, (h * y).roundToInt()),
+                dstSize = IntSize(w.roundToInt(), (h * height).roundToInt()),
+                filterQuality = FilterQuality.Medium,
             )
         }
     }
