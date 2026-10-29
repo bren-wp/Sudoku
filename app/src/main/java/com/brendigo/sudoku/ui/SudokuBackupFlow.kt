@@ -42,11 +42,15 @@ fun SudokuBackupFlow(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var importPassword by remember { mutableStateOf("") }
     var showExport by remember { mutableStateOf(false) }
     var showImport by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var imported by remember { mutableStateOf<Map<String, String>?>(null) }
+    var importedPreview by remember {
+        mutableStateOf<com.brendigo.sudoku.data.SudokuBackupPreview?>(null)
+    }
     var showConfirm by remember { mutableStateOf(false) }
 
     val createFile = rememberLauncherForActivityResult(
@@ -54,6 +58,7 @@ fun SudokuBackupFlow(
     ) { uri: Uri? ->
         val key = password.toCharArray()
         password = ""
+        confirmPassword = ""
         if (uri == null) {
             key.fill('\u0000')
         } else if (!controller.flush()) {
@@ -112,12 +117,14 @@ fun SudokuBackupFlow(
                                 }
                                 output.toByteArray()
                             }
-                            SudokuBackup.decrypt(bytes, key)
+                            val decrypted = SudokuBackup.decrypt(bytes, key)
+                            decrypted to SudokuBackup.preview(decrypted)
                         } finally {
                             key.fill('\u0000')
                         }
                     }
-                    imported = restored
+                    imported = restored.first
+                    importedPreview = restored.second
                     showConfirm = true
                 } catch (_: Exception) {
                     controller.showMessage("Uvoz nije uspio: provjeri lozinku i valjanost kopije.")
@@ -129,13 +136,15 @@ fun SudokuBackupFlow(
     }
 
     content(
-        { if (!busy) { password = ""; showExport = true } },
+        { if (!busy) { password = ""; confirmPassword = ""; showExport = true } },
         { if (!busy) { importPassword = ""; showImport = true } },
     )
 
     if (showExport) {
         AlertDialog(
-            onDismissRequest = { if (!busy) { password = ""; showExport = false } },
+            onDismissRequest = {
+                if (!busy) { password = ""; confirmPassword = ""; showExport = false }
+            },
             containerColor = Ink.navy,
             title = { Text("Izvezi sigurnosnu kopiju", color = Ink.white) },
             text = {
@@ -150,11 +159,23 @@ fun SudokuBackupFlow(
                         visualTransformation = PasswordVisualTransformation(),
                         singleLine = true,
                     )
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { if (it.length <= 128) confirmPassword = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Ponovi lozinku") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                    )
+                    if (confirmPassword.isNotEmpty() && password != confirmPassword) {
+                        Text("Lozinke se ne podudaraju.", color = Ink.gold)
+                    }
                 }
             },
             confirmButton = {
                 TextButton(
-                    enabled = !busy && password.length in 12..128,
+                    enabled = !busy && password.length in 12..128 &&
+                        password == confirmPassword,
                     onClick = {
                         showExport = false
                         createFile.launch("Sudoku-Brendigo-${LocalDate.now()}.sudoku")
@@ -162,7 +183,11 @@ fun SudokuBackupFlow(
                 ) { Text("Odaberi mjesto spremanja", color = Ink.cyan) }
             },
             dismissButton = {
-                TextButton(onClick = { password = ""; showExport = false }) {
+                TextButton(onClick = {
+                    password = ""
+                    confirmPassword = ""
+                    showExport = false
+                }) {
                     Text("Odustani", color = Ink.muted)
                 }
             },
@@ -209,14 +234,45 @@ fun SudokuBackupFlow(
 
     if (showConfirm && imported != null) {
         AlertDialog(
-            onDismissRequest = { showConfirm = false; imported = null },
+            onDismissRequest = {
+                showConfirm = false
+                imported = null
+                importedPreview = null
+            },
             containerColor = Ink.navy,
             title = { Text("Zamijeniti trenutačni napredak?", color = Ink.white) },
             text = {
-                Text("Kopija je uspješno provjerena i dešifrirana. " +
-                    "Uvoz će ZAMIJENITI tvoje lokalne igre, statistiku i postavke. " +
-                    "Ovaj postupak nije moguće poništiti. Preporučujemo da " +
-                    "prvo izvezeš kopiju postojećeg stanja.", color = Ink.muted)
+                val summary = importedPreview
+                Column(
+                    modifier = Modifier.heightIn(max = 380.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    Text("Kopija je provjerena i dešifrirana.", color = Ink.muted)
+                    if (summary != null) {
+                        Text("U kopiji: ${summary.played} odigranih, " +
+                            "${summary.finished} završenih igara, " +
+                            "${summary.dailyWins} dnevnih pobjeda.",
+                            color = Ink.white)
+                        Text(
+                            "Spremljene partije: " +
+                                (if (summary.savedRegularGame) "obična " else "") +
+                                (if (summary.savedDailyGame) "dnevna" else ""),
+                            color = Ink.muted,
+                        )
+                    }
+                    Text("Na uređaju: ${controller.stats.played} odigranih, " +
+                        "${controller.stats.finished} završenih igara.",
+                        color = Ink.white)
+                    if (summary != null && summary.finished < controller.stats.finished) {
+                        Text("UPOZORENJE: kopija ima manje završenih igara " +
+                            "od ovog uređaja. Njihovi se rezultati NEĆE spojiti.",
+                            color = Ink.gold)
+                    }
+                    Text("Potvrdom ćeš ZAMIJENITI sve lokalne igre, statistiku " +
+                        "i postavke. Postupak nije moguće poništiti. " +
+                        "Preporučujemo prvo izvesti trenutni napredak.",
+                        color = Ink.muted)
+                }
             },
             confirmButton = {
                 TextButton(
@@ -240,6 +296,7 @@ fun SudokuBackupFlow(
                                     SudokuBackup.restore(context, values)
                                 }
                                 imported = null
+                                importedPreview = null
                                 showConfirm = false
                                 activity.recreate()
                             } catch (cancelled: CancellationException) {
@@ -258,7 +315,11 @@ fun SudokuBackupFlow(
                 ) { Text("Zamijeni podatke", color = Ink.gold) }
             },
             dismissButton = {
-                TextButton(onClick = { showConfirm = false; imported = null }) {
+                TextButton(onClick = {
+                    showConfirm = false
+                    imported = null
+                    importedPreview = null
+                }) {
                     Text("Zadrži sadašnji napredak", color = Ink.cyan)
                 }
             },

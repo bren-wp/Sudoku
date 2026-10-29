@@ -23,6 +23,15 @@ import javax.crypto.spec.SecretKeySpec
  * Files contain the COMPLETE puzzle solution as well as player progress.
  * Do not expose the plaintext, password or decryption failures in logs.
  */
+data class SudokuBackupPreview(
+    val played: Int,
+    val finished: Int,
+    val dailyWins: Int,
+    val dailyHistoryDays: Int,
+    val savedRegularGame: Boolean,
+    val savedDailyGame: Boolean,
+)
+
 object SudokuBackup {
     private const val PREFERENCES = "sudoku_state_v1"
     private val HEADER = "BRENDIGO-SUDOKU-BACKUP-1\n".toByteArray(StandardCharsets.US_ASCII)
@@ -139,6 +148,27 @@ object SudokuBackup {
         } finally {
             plain.fill(0)
         }
+    }
+
+    /**
+     * Validate and describe an archive before an irreversible restore decision.
+     * Only progress metadata is returned; never reveal the embedded solutions.
+     * Caller must separately compare the preview with the current local state.
+     */
+    fun preview(values: Map<String, String>): SudokuBackupPreview {
+        validate(values)
+        val stats = JSONObject(values["stats"] ?: requireNotNull(values["stats_backup"]))
+        return SudokuBackupPreview(
+            played = stats.getInt("played"),
+            finished = stats.getInt("finished"),
+            dailyWins = stats.optInt("dailyWins"),
+            dailyHistoryDays = stats.optJSONArray("completedDailyDates")?.length()
+                ?: if (stats.optString("lastDaily").isNotBlank()) 1 else 0,
+            savedRegularGame = values.containsKey("regular_game") ||
+                (values["game"]?.let { !JSONObject(it).optBoolean("daily") } ?: false),
+            savedDailyGame = values.containsKey("daily_game") ||
+                (values["game"]?.let { JSONObject(it).optBoolean("daily") } ?: false),
+        )
     }
 
     /** Imported data completely replaces *only* known Sudoku keys on approval. */
@@ -274,15 +304,33 @@ object SudokuBackup {
         for (key in listOf("totalSeconds", "totalPlayedSeconds")) {
             if (stats.optLong(key) < 0) throw IOException("Nevaljano vrijeme statistike.")
         }
+        val lastDaily = stats.optString("lastDaily", "")
+        if (lastDaily.isNotBlank() &&
+            runCatching { LocalDate.parse(lastDaily) }.isFailure) {
+            throw IOException("Nevaljan zadnji dnevni izazov.")
+        }
         val history = stats.optJSONArray("history")
         if (history != null && history.length() > 50)
             throw IOException("Prevelika povijest igara.")
+        for (i in 0 until (history?.length() ?: 0)) {
+            val entry = history!!.getJSONObject(i)
+            if (entry.getInt("level") !in 0..5 ||
+                entry.getInt("size") !in setOf(4, 6, 9) ||
+                entry.getInt("seconds") < 0 ||
+                entry.optInt("hints") !in 0..SudokuController.MAX_HINTS ||
+                runCatching { LocalDate.parse(entry.getString("date")) }.isFailure) {
+                throw IOException("Nevaljana povijest odigranih igara.")
+            }
+        }
         val dates = stats.optJSONArray("completedDailyDates")
         if (dates != null && dates.length() > 4000)
             throw IOException("Prevelika povijest dnevnih izazova.")
+        val seenDates = HashSet<String>()
         for (i in 0 until (dates?.length() ?: 0)) {
-            if (runCatching { LocalDate.parse(dates!!.getString(i)) }.isFailure)
-                throw IOException("Nevaljan datum u statistici.")
+            val date = dates!!.getString(i)
+            if (runCatching { LocalDate.parse(date) }.isFailure || !seenDates.add(date)) {
+                throw IOException("Nevaljan ili dvostruki dnevni izazov.")
+            }
         }
         for (key in listOf("winsBySize", "levels")) {
             val array = stats.optJSONArray(key) ?: continue

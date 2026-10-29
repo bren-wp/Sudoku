@@ -169,3 +169,47 @@ The reference 941×1672 pixel-difference measurement should now be repeated
 against the v1.0.34 Android visual-smoke artifact after both emulator jobs
 succeed. Screenshot content remains dynamic and not normalized. Global
 RGB MAE must not be presented as pixel-perfect if differences remain.
+
+
+## 1.0.39 — reproducible ten-reference QA and dynamic data masking
+
+Use the real original 941×1672 PNG reference files for the eight app screens.
+The final two original references are 1254×1254 PNGs and are **not**
+interchangeable with the launcher raster currently embedded in the APK.
+The current comparison utility can validate these additional branding
+exports only if independently generated **actual** files exist under the same
+names; it never silently substitutes the owner's reference for the actual.
+
+```bash
+python scripts/pixel_compare.py \
+  --reference-dir references \
+  --actual-dir actual \
+  --include-splash \
+  --include-branding \
+  --volatile-mask-dir qa-volatile-masks \
+  --ui-mask-dir qa-ui-masks \
+  --baseline-report previous-report.csv \
+  --allow-imperfect \
+  --output-dir qa-pixel-diff
+```
+
+- `--include-branding` requires `09-wordmark.png` and
+  `10-launcher-icon.png` in both directories, each 1254×1254.
+  These **must** originate from a real design/resource render, not from
+  copying source reference pixels.
+- `--volatile-mask-dir`: white marks date, timer, random Sudoku board,
+  or live counters *only*, and excludes these regions **only** from
+  `stable_region_mae`; the full image error is always reported.
+- `--ui-mask-dir`: pre-existing explicit UI/background diagnostic masks.
+- `--baseline-report`: fails with exit code 3 if any screen's **full**
+  MAE exceeds the previous run; missing baselines are an error.
+- `--allow-imperfect`: allows use as a regression test without claiming
+  exact pixel equality. Without it, the original strict 1:1 check exits 2
+  unless every screen has MAE=0.
+- The scripts never inject or overwrite user accounts, live statistics or
+  stored puzzles; reference masks are local QA inputs only.
+
+**Issue #39 remains open** until all ten references have audited,
+normalized results and separately verified launcher adaptive/monochrome
+rendering, interactions, geometry and accessibility. Passing CI or having a
+lower raw full-screen MAE is not sufficient to certify 1:1.

@@ -27,17 +27,21 @@ SCREENS = (
     "07-achievements",
 )
 REFERENCE_SIZE = (941, 1672)
+BRANDING_SIZE = (1254, 1254)
+BRANDING = ("09-wordmark", "10-launcher-icon")
 
 def compare(
-    reference: Path, actual: Path, destination: Path, ui_mask: Path | None = None
+    reference: Path, actual: Path, destination: Path, ui_mask: Path | None = None,
+    expected_size: tuple[int, int] = REFERENCE_SIZE,
+    volatile_mask: Path | None = None,
 ) -> dict[str, str | float | None]:
     with Image.open(reference) as r, Image.open(actual) as a:
         expected = r.convert("RGB")
         observed = a.convert("RGB")
-    if expected.size != REFERENCE_SIZE:
-        raise ValueError(f"{reference.name}: expected {REFERENCE_SIZE}, found {expected.size}")
-    if observed.size != REFERENCE_SIZE:
-        raise ValueError(f"{actual.name}: emulator resolution {observed.size}, expected {REFERENCE_SIZE}")
+    if expected.size != expected_size:
+        raise ValueError(f"{reference.name}: expected {expected_size}, found {expected.size}")
+    if observed.size != expected_size:
+        raise ValueError(f"{actual.name}: actual resolution {observed.size}, expected {expected_size}")
 
     difference = ImageChops.difference(expected, observed)
     mean_r, mean_g, mean_b = ImageStat.Stat(difference).mean
@@ -60,9 +64,9 @@ def compare(
     scenery_error = None
     if ui_mask is not None:
         with Image.open(ui_mask) as mask_image:
-            if mask_image.size != REFERENCE_SIZE:
+            if mask_image.size != expected_size:
                 raise ValueError(
-                    f"{ui_mask.name}: mask size {mask_image.size} != {REFERENCE_SIZE}"
+                    f"{ui_mask.name}: mask size {mask_image.size} != {expected_size}"
                 )
             mask = mask_image.convert("L").point(
                 lambda value: 255 if value >= 128 else 0
@@ -74,6 +78,24 @@ def compare(
 
         ui_error = masked_mae(mask)
         scenery_error = masked_mae(ImageOps.invert(mask))
+
+    # Optional QA-only volatile-area mask (white = differing date, timer,
+    # generated puzzle, or other changing content). The full-screen MAE
+    # remains reported separately so these masks cannot disguise regressions.
+    stable_error = None
+    if volatile_mask is not None:
+        with Image.open(volatile_mask) as mask_image:
+            if mask_image.size != expected_size:
+                raise ValueError(
+                    f"{volatile_mask.name}: mask size {mask_image.size} != {expected_size}"
+                )
+            volatile = mask_image.convert("L").point(
+                lambda value: 255 if value >= 128 else 0
+            )
+        stable = ImageOps.invert(volatile)
+        if stable.histogram()[255] == 0:
+            raise ValueError("Volatile mask cannot exclude the entire image")
+        stable_error = round(sum(ImageStat.Stat(difference, mask=stable).mean) / 3, 3)
 
     destination.mkdir(parents=True, exist_ok=True)
     Image.blend(expected, observed, .5).save(destination / "overlay.png", optimize=True)
@@ -87,6 +109,7 @@ def compare(
         "pixels_within_24_pct": round(within_24 * 100, 2),
         "ui_region_mae": ui_error,
         "scenery_region_mae": scenery_error,
+        "stable_region_mae": stable_error,
     }
 
 def main() -> int:
@@ -98,19 +121,36 @@ def main() -> int:
         help="Optional 941x1672 binary masks: white = interactive UI, black = scenery.")
     parser.add_argument("--include-splash", action="store_true",
         help="Include 08-splash when a real launch capture is available.")
+    parser.add_argument("--include-branding", action="store_true",
+        help="Also compare real 1254x1254 PNG exports for logo and adaptive icon.")
+    parser.add_argument("--volatile-mask-dir", type=Path, default=None,
+        help="Optional 941x1672 masks: white = changing QA-only content.")
+    parser.add_argument("--baseline-report", type=Path, default=None,
+        help="Previous report.csv; fail if any screen raw MAE regresses.")
+    parser.add_argument("--allow-imperfect", action="store_true",
+        help="Exit 0 for a valid non-exact audit (never claim pixel-perfect).")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     rows = []
-    screens = SCREENS + (("08-splash",) if args.include_splash else ())
+    screens = SCREENS + (("08-splash",) if args.include_splash else ()) + (
+        BRANDING if args.include_branding else ()
+    )
     for name in screens:
         ref = args.reference_dir / f"{name}.png"
         actual = args.actual_dir / f"{name}.png"
         if not ref.is_file() or not actual.is_file():
             raise FileNotFoundError(f"Missing reference or screenshot for {name}: {ref} / {actual}")
-        ui_mask = args.ui_mask_dir / f"{name}.png" if args.ui_mask_dir else None
-        if ui_mask is not None and not ui_mask.is_file():
-            raise FileNotFoundError(f"Missing optional UI mask for {name}: {ui_mask}")
-        row = compare(ref, actual, args.output_dir / name, ui_mask)
+        is_branding = name in BRANDING
+        ui_mask = args.ui_mask_dir / f"{name}.png" if args.ui_mask_dir and not is_branding else None
+        volatile_mask = (args.volatile_mask_dir / f"{name}.png"
+                         if args.volatile_mask_dir and not is_branding else None)
+        for mask in (ui_mask, volatile_mask):
+            if mask is not None and not mask.is_file():
+                raise FileNotFoundError(f"Missing QA mask for {name}: {mask}")
+        row = compare(
+            ref, actual, args.output_dir / name, ui_mask,
+            BRANDING_SIZE if is_branding else REFERENCE_SIZE, volatile_mask,
+        )
         rows.append(row)
         print(f'{name}: mean channel error {row["mean_error_0_to_255"]} / 255; '
               f'within 12 = {row["pixels_within_12_pct"]}%')
@@ -120,7 +160,20 @@ def main() -> int:
         writer.writerows(rows)
     exact = all(float(row["mean_error_0_to_255"]) == 0 for row in rows)
     print("Exact pixel match across all screens:", exact)
-    return 0 if exact else 2
+    if args.baseline_report is not None:
+        with args.baseline_report.open(newline="", encoding="utf-8") as source:
+            baseline = {r["screen"]: float(r["mean_error_0_to_255"])
+                        for r in csv.DictReader(source)}
+        missing = set(screens) - baseline.keys()
+        if missing:
+            raise ValueError(f"Baseline missing screens: {sorted(missing)}")
+        regressed = [(r["screen"], r["mean_error_0_to_255"], baseline[r["screen"]])
+                     for r in rows
+                     if float(r["mean_error_0_to_255"]) > baseline[r["screen"]]]
+        if regressed:
+            print("Pixel QA regression(s):", regressed)
+            return 3
+    return 0 if exact or args.allow_imperfect else 2
 
 if __name__ == "__main__":
     raise SystemExit(main())

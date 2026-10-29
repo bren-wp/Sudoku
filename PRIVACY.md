@@ -43,8 +43,11 @@ Izvoz može završiti u direktoriju ili servisu koji korisnik sam odabere,
 uključujući eventualnu cloud pohranu pružatelja dokumenata izvan
 kontrole aplikacije. Brendigo datoteku ne šalje samoinicijativno.
 
-Prije uvoza aplikacija provjerava format, integritet, prisutnost statistike i podatke te zahtijeva
-jasnu potvrdu zamjene postojećih rezultata. Prazne, nepotpune ili međusobno proturječne sigurnosne kopije odbijaju se prije zamjene napretka. Kriva lozinka ili nevaljan format
+Prije uvoza aplikacija provjerava format, integritet, statistiku, dnevne datume i
+povijest, te prikazuje pregled broja igara iz kopije u usporedbi s lokalnim
+napretkom. Zamjena se obavlja samo nakon izričite potvrde; ako kopija ima manje
+završenih igara, aplikacija to posebno naglašava. Izvoz zahtijeva ponovni
+unos lozinke radi izbjegavanja pogreške pri tipkanju. Prazne, nepotpune ili međusobno proturječne sigurnosne kopije odbijaju se prije zamjene napretka. Kriva lozinka ili nevaljan format
 ne smiju uzrokovati namjernu promjenu lokalnog stanja. Gubitak lozinke,
 datoteke, brisanje aplikacije bez izvoza ili kvar uređaja i dalje mogu
 uzrokovati trajni gubitak napretka.
