@@ -4,9 +4,9 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Uniform scaling keeps 7-3-9 centered while increasing launcher visibility. -->
+    <!-- Source reference has intentional dark breathing room around the neon tile. Keep adaptive scaling inside the mask. -->
     <group android:pivotX="54" android:pivotY="54"
-        android:scaleX="1.06" android:scaleY="1.06">
+        android:scaleX="0.88" android:scaleY="0.88">
     <!-- Adaptive-safe foreground: all meaningful strokes stay within the
          72dp circle centered at 54,54, even under round launcher masks. -->
     <path
