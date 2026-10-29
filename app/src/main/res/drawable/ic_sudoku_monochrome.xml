@@ -4,9 +4,9 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Uniform scaling keeps 7-3-9 centered while increasing launcher visibility. -->
+    <!-- Keep the monochrome icon aligned with the smaller source-framed adaptive mark. -->
     <group android:pivotX="54" android:pivotY="54"
-        android:scaleX="1.06" android:scaleY="1.06">
+        android:scaleX="0.88" android:scaleY="0.88">
     <!-- Themed icons use ALPHA as their mask: never paint an opaque black
          backing tile, or Android renders one solid square with no numbers. -->
     <path
