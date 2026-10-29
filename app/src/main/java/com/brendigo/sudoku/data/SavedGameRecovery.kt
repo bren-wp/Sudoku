@@ -17,7 +17,12 @@ internal object SavedGameRecovery {
         daily: Session?,
         today: LocalDate,
     ): Restored {
-        if (primary != null) return Restored(primary, "undo")
+        // Keep the currently active puzzle and its own Undo stack when valid.
+        // A completed/failed primary is not a reason to hide a different
+        // unfinished regular or today's daily puzzle.
+        if (primary != null && !primary.completed && !primary.failed &&
+            (!primary.daily || primary.day == today.toString())
+        ) return Restored(primary, "undo")
         if (regular != null && !regular.completed && !regular.failed && !regular.daily) {
             return Restored(regular, "regular_undo")
         }
@@ -26,6 +31,8 @@ internal object SavedGameRecovery {
         ) {
             return Restored(daily, "daily_undo")
         }
-        return Restored(null, "undo")
+        // Preserve the last completed game for existing result screens and
+        // upgrade compatibility when there is no resumable named snapshot.
+        return Restored(primary, "undo")
     }
 }
