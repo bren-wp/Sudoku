@@ -774,6 +774,50 @@ class SudokuVisualSmokeTest {
         sample.recycle()
     }
 
+    /**
+     * Native Android launcher resource rendered at the original square
+     * reference resolution. This is NOT a copy of the owner's PNG; it exercises
+     * the actual adaptive icon packaged in the installed APK.
+     */
+    @Test
+    fun captureNativeLauncherForTenReferenceQa() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val launcher = context.packageManager.getApplicationIcon(context.packageName)
+        check(launcher is android.graphics.drawable.AdaptiveIconDrawable) {
+            "Android launcher icon is not the expected adaptive resource"
+        }
+        val bitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
+        try {
+            val canvas = Canvas(bitmap)
+            canvas.drawColor(Color.BLACK)
+            launcher.setBounds(0, 0, 1254, 1254)
+            launcher.draw(canvas)
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, "10-launcher-icon.png")
+                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                put(MediaStore.Images.Media.RELATIVE_PATH,
+                    Environment.DIRECTORY_PICTURES + "/SudokuQA")
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+            val uri = context.contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
+            ) ?: error("Cannot create native adaptive launcher proof")
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { output ->
+                    check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+                } ?: error("Cannot write native adaptive launcher proof")
+                check(context.contentResolver.update(uri, ContentValues().apply {
+                    put(MediaStore.Images.Media.IS_PENDING, 0)
+                }, null, null) == 1)
+            } catch (error: Exception) {
+                context.contentResolver.delete(uri, null, null)
+                throw error
+            }
+        } finally {
+            bitmap.recycle()
+        }
+    }
+
     @Test
     fun screenNavigationAndGameplayControls() {
         waitFor("home-nova-igra")
