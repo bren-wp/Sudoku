@@ -1,3 +1,11 @@
+## 1.0.39 — provjera sigurnosnih kopija i precizniji vizualni QA
+
+- **Issue #41:** Prije izvoza obvezna ponovna potvrda lokalne lozinke (12–128 znakova). Dešifrirana kopija prikazuje provjerene brojeve odigranih i završenih igara i dnevnih pobjeda, usporedno s lokalnim napretkom, uz posebno upozorenje na starije kopije. I dalje je potreban izričit pristanak za potpunu zamjenu.
+- **Issue #41:** Stroža provjera duplih datuma dnevnih izazova, povijesti, formata datuma i granica statistike; odbacivanje prije upisa. Dodatni instrumentirani testovi provjeravaju pregled i kompatibilnost starijeg v1 formata.
+- **Issue #39:** Pixel QA sada može zasebno usporediti sve 10 originalnih referenci, uključujući 1254×1254 logotip i adaptive ikonu, kao i maskirati dinamične vrijednosti *samo u dijagnostičkoj metrici*. Nezaklonjeni globalni RGB MAE ostaje dostupan, s provjerom regresije prema prethodnom CSV-u.
+- Korisnički napredak se ne mijenja tijekom QA usporedbe. Više u `docs/pixel-qa.md` i `docs/encrypted-offline-backup-v1.0.36.md`.
+- Issue #39 ostaje otvoren dok se ne potvrdi sva 1:1 vizualna geometrija na stvarnim snimkama, bez podmetanja screenshotova umjesto UI-ja.
+
 ## 1.0.38 — Mjerljiva vizualna usklađenost s izvornim 1:1 referencama
 
 - Značajnija revizija svih osam Compose zaslona bez uklanjanja postojećih funkcija i bez screenshotova umjesto interaktivnih elemenata.
