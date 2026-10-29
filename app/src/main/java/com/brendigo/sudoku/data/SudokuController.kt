@@ -130,7 +130,7 @@ class SudokuController(context: Context) {
 
     fun resumeRegularGame(): Boolean {
         // Preserve an in-memory daily session before switching puzzle types.
-        if (game?.daily == true) saveGame(synchronous = true)
+        if (game?.daily == true && !checkpointBeforeSwitch()) return false
         val saved = readGame("regular_game") ?: return false
         if (saved.daily || saved.completed || saved.failed) return false
         game = saved
@@ -193,6 +193,22 @@ class SudokuController(context: Context) {
         toast = message
     }
 
+    /**
+     * Never replace an in-memory puzzle until its latest progress has been
+     * durably checkpointed. An unsuccessful commit can occur on full or
+     * unavailable device storage. In that case the current session stays
+     * playable and the user can retry after resolving the storage problem.
+     */
+    private fun checkpointBeforeSwitch(): Boolean {
+        if (importingBackup) {
+            toast = "Povrat sigurnosne kopije je u tijeku. Pokušaj ponovno."
+            return false
+        }
+        if (game == null || saveGame(synchronous = true)) return true
+        toast = "Spremanje napretka nije uspjelo. Provjeri pohranu i pokušaj ponovno."
+        return false
+    }
+
     suspend fun startNew(size: Int, level: Int, daily: Boolean = false) {
         if (isGenerating) return
         val today = LocalDate.now()
@@ -209,7 +225,7 @@ class SudokuController(context: Context) {
         if (daily) {
             val saved = readGame("daily_game")
             if (saved != null && saved.daily && saved.day == date && !saved.completed && !saved.failed) {
-                if (game?.daily == false) saveGame(synchronous = true)
+                if (game?.daily == false && !checkpointBeforeSwitch()) return
                 game = saved
                 undoHistory.clear()
                 undoHistory.addAll(readUndoHistory("daily_undo", saved))
@@ -225,7 +241,7 @@ class SudokuController(context: Context) {
             }
             // Preserve the exact current puzzle before replacing it, even
             // when its last selection or elapsed seconds were not checkpointed.
-            if (game != null) saveGame(synchronous = true)
+            if (!checkpointBeforeSwitch()) return
             undoHistory.clear()
             game = Session(
                 size = result.size,
