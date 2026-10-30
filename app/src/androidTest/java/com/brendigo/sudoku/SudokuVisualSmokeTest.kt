@@ -1510,13 +1510,22 @@ class SudokuVisualSmokeTest {
         check(launcher is android.graphics.drawable.AdaptiveIconDrawable) {
             "Android launcher icon is not the expected adaptive resource"
         }
-        // Reference 10 is transparent around the original icon. Rendering on
-        // an opaque black canvas creates a *false* mismatch over the entire
-        // transparent region and hides Android's actual adaptive mask.
+        // The owner supplied standalone icon ART (1254px, with clear
+        // margins), while Android provides a masked launcher drawable that
+        // normally occupies its entire requested bounds. Render it inside a
+        // canonical inset frame to measure visual content and alpha fairly.
+        // This export is NOT a claim of reproducing the launcher mask itself:
+        // Android may use a circle or squircle according to the device.
+        val frameLeft = 120
+        val frameTop = 103
+        val frameSize = 1014
         val bitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
         try {
             val canvas = Canvas(bitmap) // newly allocated ARGB_8888 is transparent
-            launcher.setBounds(0, 0, 1254, 1254)
+            launcher.setBounds(
+                frameLeft, frameTop,
+                frameLeft + frameSize, frameTop + frameSize,
+            )
             launcher.draw(canvas)
             check(Color.alpha(bitmap.getPixel(0, 0)) == 0) {
                 "Adaptive launcher background incorrectly extends past its mask"
@@ -1524,6 +1533,12 @@ class SudokuVisualSmokeTest {
             check(Color.alpha(bitmap.getPixel(627, 627)) > 0) {
                 "Adaptive launcher has no visible center"
             }
+            check(
+                Color.alpha(bitmap.getPixel(110, 610)) == 0 &&
+                    Color.alpha(bitmap.getPixel(1145, 610)) == 0 &&
+                    Color.alpha(bitmap.getPixel(627, 80)) == 0 &&
+                    Color.alpha(bitmap.getPixel(627, 1145)) == 0
+            ) { "Canonical standalone branding export must leave transparent side margins" }
             saveBrandingQaPng("10-launcher-icon.png", bitmap)
         } finally {
             bitmap.recycle()
@@ -1536,7 +1551,10 @@ class SudokuVisualSmokeTest {
         val monoBitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
         try {
             val canvas = Canvas(monoBitmap)
-            monochrome.setBounds(0, 0, 1254, 1254)
+            monochrome.setBounds(
+                frameLeft, frameTop,
+                frameLeft + frameSize, frameTop + frameSize,
+            )
             monochrome.draw(canvas)
             check(Color.alpha(monoBitmap.getPixel(0, 0)) == 0) {
                 "Themed icon must preserve transparent corners"
@@ -1544,6 +1562,10 @@ class SudokuVisualSmokeTest {
             check(Color.alpha(monoBitmap.getPixel(627, 627)) > 0) {
                 "Themed icon lost the center digit"
             }
+            check(
+                Color.alpha(monoBitmap.getPixel(110, 610)) == 0 &&
+                    Color.alpha(monoBitmap.getPixel(1145, 610)) == 0
+            ) { "Android themed icon must preserve its own transparent margin" }
             saveBrandingQaPng("11-launcher-monochrome.png", monoBitmap)
         } finally {
             monoBitmap.recycle()
