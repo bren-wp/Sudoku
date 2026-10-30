@@ -96,12 +96,23 @@ fun BoxScope.DailyHeroBackdrop() {
                 filterQuality = FilterQuality.High,
             )
         }
-        // Deep blue gradient ensures readable real labels on the left.
+        // Seamless navy-to-art feather at the left side of the decorative
+        // bitmap. The source contains no text, so real Compose labels still
+        // own the readable foreground on every viewport.
         drawRect(
             Brush.horizontalGradient(
-                listOf(Color(0xFE04152F), Color(0xE8041733),
-                    Color(0x25031733), Color.Transparent),
-                startX = 0f, endX = w * .86f,
+                listOf(Color(0xFF04152F), Color(0xFF04152F),
+                    Color(0x5604152F), Color.Transparent),
+                startX = w * .46f, endX = w * .98f,
+            ),
+            topLeft = Offset(w * .46f, 0f),
+            size = Size(w * .54f, h * .70f),
+        )
+        drawRect(
+            Brush.horizontalGradient(
+                listOf(Color(0xFE04152F), Color(0xD8041733),
+                    Color(0x13031733), Color.Transparent),
+                startX = 0f, endX = w * .68f,
             ),
         )
         // Match the reference: the metric row floats above navy shadows,
