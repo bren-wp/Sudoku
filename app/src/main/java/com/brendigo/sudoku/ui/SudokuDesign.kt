@@ -235,12 +235,14 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         // On the source splash, the moon and horizon sit appreciably higher
         // than behind the dense menu cards. Keep gameplay scenery unchanged.
         val moonY = if (splash) .705f else .77f
-        drawCircle(
-            Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
-            radius = w * .16f, center = Offset(w * .81f, h * moonY),
-        )
-        drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
-            radius = w * .030f, center = Offset(w * .81f, h * moonY))
+        if (!gameplay) {
+            drawCircle(
+                Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
+                radius = w * .16f, center = Offset(w * .81f, h * moonY),
+            )
+            drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
+                radius = w * .030f, center = Offset(w * .81f, h * moonY))
+        }
         // Distant layered mountain silhouettes.
         fun mountains(y: Float, amplitude: Float, color: Color, phase: Float) {
             val path = Path().apply {
