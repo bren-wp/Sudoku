@@ -732,8 +732,9 @@ fun NewGamePage(controller: SudokuController) {
             }
         }
         Spacer(Modifier.height(2.dp))
-        Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")) {
-            AccentText("Nova igra", 50)
+        Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
+            .padding(start = 5.dp)) {
+            AccentText("Nova igra", 55)
             Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp)
         }
         Spacer(Modifier.height(1.dp))
@@ -764,17 +765,18 @@ fun NewGamePage(controller: SudokuController) {
                                 Modifier.size(iconSize)
                                     .background(newGameAccents[i].copy(alpha = .11f),
                                         RoundedCornerShape(50))
-                                    .border(1.5.dp, newGameAccents[i],
+                                    .border(2.dp, newGameAccents[i],
                                         RoundedCornerShape(50)),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 BrandIcon(
                                     when (i) {
-                                        0 -> "leaf"
-                                        1 -> "star"
-                                        2 -> "double-star"
-                                        3 -> "triple-star"
-                                        else -> "crown"
+                                        0 -> "leaf-solid"
+                                        1 -> "star-solid"
+                                        2 -> "double-star-solid"
+                                        3 -> "triple-star-solid"
+                                        4 -> "crown-solid"
+                                        else -> "crown-royal"
                                     },
                                     Modifier.size(if (accessibilityCards) 25.dp else 28.dp),
                                     newGameAccents[i],
