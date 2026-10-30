@@ -733,7 +733,7 @@ fun NewGamePage(controller: SudokuController) {
         }
         Spacer(Modifier.height(2.dp))
         Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
-            .padding(start = 5.dp)) {
+            .offset(y = (-8).dp).padding(start = 5.dp)) {
             AccentText("Nova igra", 55)
             Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp)
         }
@@ -823,7 +823,7 @@ fun NewGamePage(controller: SudokuController) {
                 NewGameStartAction(
                     title = if (controller.isGenerating) "Pripremam zagonetku…" else "Započni igru",
                     onClick = { scope.launch { controller.startNew(size, level) } },
-                    modifier = Modifier.fillMaxWidth(if (fullWidthAction) 1f else .74f),
+                    modifier = Modifier.fillMaxWidth(if (fullWidthAction) 1f else .75f),
                     enabled = !controller.isGenerating,
                 )
             }
