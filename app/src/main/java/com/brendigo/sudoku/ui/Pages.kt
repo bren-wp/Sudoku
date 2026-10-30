@@ -968,7 +968,9 @@ fun DailyPage(controller: SudokuController) {
                             }
                         }
                         Row(Modifier.weight(1.15f), verticalAlignment = Alignment.CenterVertically) {
-                            DailyRewardEmblem(Modifier.size(52.dp))
+                            DailyRewardEmblem(
+                                Modifier.size(52.dp).testTag("daily-reward-emblem")
+                            )
                             Spacer(Modifier.width(5.dp))
                             Column {
                                 Text("DANAŠNJA\nNAGRADA", color = Ink.gold,
@@ -1081,7 +1083,10 @@ fun DailyPage(controller: SudokuController) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED")
                         .forEachIndexed { index, label ->
                             val date = monday.plusDays(index.toLong())
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                Modifier.testTag("daily-weekday-$index"),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
                                 Text(label, color = Ink.muted, fontSize = 10.sp)
                                 Spacer(Modifier.height(3.dp))
                                 DailyWeekMarker(date.toString() in completedDays,
@@ -1116,19 +1121,34 @@ fun DailyPage(controller: SudokuController) {
         }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             DailyFrame(
-                Modifier.fillMaxWidth(.63f).heightIn(min = 46.dp)
+                Modifier.fillMaxWidth(.63f).heightIn(min = 48.dp)
                     .testTag("daily-leaderboard")
                     .semantics {
                         contentDescription = "Otvori osobnu rang-listu"
                         role = Role.Button
                     }
                     .clickable { showRanking = true },
+                // Rounded violet accent matches the source leaderboard pill
+                // while retaining the actual offline ranking dialog.
+                highlight = Ink.purple,
+                radius = 25.dp,
             ) {
                 Row(
                     Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
-                    BrandIcon("trophy", Modifier.size(29.dp), Ink.purple)
+                    Box(
+                        Modifier.size(33.dp)
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Ink.purple.copy(alpha = .30f), Color.Transparent)
+                                ),
+                                RoundedCornerShape(50),
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        BrandIcon("trophy", Modifier.size(29.dp), Ink.purple)
+                    }
                     Spacer(Modifier.width(9.dp))
                     Text("Pogledaj rang-listu", color = Ink.white,
                         fontWeight = FontWeight.Bold, fontSize = 16.sp,
