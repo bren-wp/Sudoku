@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -242,49 +243,59 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
     Canvas(modifier) {
         val w = size.width
         val h = size.height
-        fun boardPoint(col: Float, row: Float) = Offset(
-            w * (.56f + col * .155f - row * .026f),
-            h * (.03f + row * .315f),
+        // The reference keeps the decorative board behind the right half of
+        // the card; no puzzle values or UI actions are ever baked into artwork.
+        drawRect(
+            Brush.horizontalGradient(
+                listOf(Color.Transparent, Color(0x33010B27), Color(0x99010B27)),
+                startX = w * .35f, endX = w,
+            ),
         )
-        val lineColor = Color(0xFF168CFA).copy(alpha = .46f)
-        val glowColor = Ink.cyan.copy(alpha = .18f)
+        fun boardPoint(col: Float, row: Float) = Offset(
+            w * (.61f + col * .142f - row * .043f),
+            h * (-.035f + row * .355f),
+        )
+        val lineColor = Color(0xFF238EFF).copy(alpha = .44f)
         for (line in 0..3) {
             val a = boardPoint(line.toFloat(), 0f)
             val b = boardPoint(line.toFloat(), 3f)
-            drawLine(glowColor, a, b, strokeWidth = 3.5f)
-            drawLine(lineColor, a, b, strokeWidth = 1.4f)
+            drawLine(lineColor.copy(alpha = .20f), a, b, strokeWidth = 5f)
+            drawLine(lineColor, a, b, strokeWidth = 2.0f)
             val c = boardPoint(0f, line.toFloat())
             val d = boardPoint(3f, line.toFloat())
-            drawLine(lineColor, c, d, strokeWidth = 1.6f)
+            drawLine(lineColor.copy(alpha = .75f), c, d, strokeWidth = 2.0f)
         }
-        val bright = boardPoint(1.5f, 1.5f)
+        val glow = Offset(w * .785f, h * .37f)
         drawCircle(
-            Brush.radialGradient(
-                colors = listOf(Ink.cyan.copy(alpha = .28f), Color.Transparent),
-                center = bright, radius = w * .14f,
+            brush = Brush.radialGradient(
+                colors = listOf(Ink.cyan.copy(alpha = .27f), Color.Transparent),
+                center = glow, radius = w * .15f,
             ),
-            radius = w * .14f,
-            center = bright,
+            radius = w * .15f, center = glow,
         )
         drawIntoCanvas { canvas ->
             val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                textSize = h * .13f
+                textSize = h * .145f
                 typeface = android.graphics.Typeface.create(
-                    android.graphics.Typeface.DEFAULT,
-                    android.graphics.Typeface.BOLD,
+                    android.graphics.Typeface.DEFAULT, android.graphics.Typeface.NORMAL,
                 )
                 textAlign = android.graphics.Paint.Align.CENTER
             }
             listOf(
-                Triple(1f, 0f, "5"), Triple(1f, 1f, "3"),
-                Triple(2f, 2f, "6"),
-                Triple(2f, 0f, "9"), Triple(1f, 2f, "8"),
-            ).forEach { (col, row, value) ->
-                val center = boardPoint(col + .5f, row + .67f)
-                paint.color = if (value == "3")
-                    android.graphics.Color.CYAN else android.graphics.Color.rgb(77, 143, 220)
-                canvas.nativeCanvas.drawText(value, center.x, center.y, paint)
+                Triple("5", .73f, .17f), Triple("3", .78f, .40f),
+                Triple("1", .70f, .59f), Triple("6", .87f, .67f),
+                Triple("8", .73f, .85f),
+            ).forEach { (digit, x, y) ->
+                paint.color = if (digit == "3")
+                    android.graphics.Color.rgb(27, 204, 255)
+                    else android.graphics.Color.rgb(81, 150, 245)
+                paint.setShadowLayer(
+                    if (digit == "3") 18f else 0f, 0f, 0f,
+                    android.graphics.Color.rgb(0, 165, 255),
+                )
+                canvas.nativeCanvas.drawText(digit, w * x, h * y, paint)
             }
+            paint.clearShadowLayer()
         }
     }
 }
@@ -298,12 +309,13 @@ fun HomePage(controller: SudokuController) {
     ) {
         Spacer(Modifier.height(14.dp))
         BrandHeader(Modifier.fillMaxWidth())
-        Spacer(Modifier.height(9.dp))
+        Spacer(Modifier.height(3.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             Text(
                 "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
                 color = Ink.muted,
                 fontSize = if (maxWidth < 375.dp) 9.sp else 10.sp,
+                letterSpacing = 1.sp,
                 modifier = Modifier.fillMaxWidth().testTag("home-slogan"),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
@@ -315,17 +327,18 @@ fun HomePage(controller: SudokuController) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game")
                 .semantics { contentDescription = "Nastavi spremljenu Sudoku igru"; role = Role.Button }
                 .clickable { controller.go(Screen.GAME) }
-                .heightIn(min = 174.dp), highlight = Ink.blue) {
+                .heightIn(min = 190.dp), highlight = Ink.blue) {
                 // Decorative, non-interactive canvas behind the real resume action.
                 // It recreates the illuminated Sudoku-board motif, not a bitmap UI.
                 ResumeBoardArtwork(Modifier.matchParentSize())
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Column(Modifier.padding(start = 20.dp, top = 9.dp, end = 12.dp, bottom = 9.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text("N A S T A V I  I G R U", color = Ink.cyan,
                         fontSize = 10.sp, letterSpacing = 2.sp)
                     Text("Prekinuta igra", color = Ink.white,
-                        fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+                        fontWeight = FontWeight.ExtraBold, fontSize = 23.sp)
                     Text(difficultyTitle(game.level),
-                        color = Ink.muted, fontSize = 14.sp)
+                        color = Ink.muted, fontSize = 13.sp)
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
@@ -335,9 +348,10 @@ fun HomePage(controller: SudokuController) {
                     }
                     Spacer(Modifier.height(4.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
-                        Modifier.fillMaxWidth(.50f), minHeight = 42.dp)
+                        Modifier.fillMaxWidth(.45f), minHeight = 42.dp)
                 }
             }
+            Spacer(Modifier.height(6.dp))
         }
         if (game?.daily == true && controller.hasSavedRegularGame()) {
             NeonPanel(
@@ -430,7 +444,7 @@ fun HomePage(controller: SudokuController) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            BrandIcon("flame", Modifier.size(29.dp), Ink.gold)
+                            BrandIcon("flame-solid", Modifier.size(34.dp), Ink.gold)
                             Column {
                                 Text("Trenutni niz", fontSize = 10.sp, color = Ink.muted)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -471,7 +485,7 @@ fun HomePage(controller: SudokuController) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                BrandIcon("flame", Modifier.size(33.dp), Ink.gold)
+                BrandIcon("flame-solid", Modifier.size(38.dp), Ink.gold)
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text("Trenutni niz", fontSize = 10.sp, color = Ink.muted)
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -480,6 +494,7 @@ fun HomePage(controller: SudokuController) {
                         Text(" dana", fontSize = 11.sp, color = Ink.muted)
                     }
                 }
+                Spacer(Modifier.width(9.dp))
                 Row(
                     Modifier.weight(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -523,6 +538,100 @@ fun HomePage(controller: SudokuController) {
     }
 }
 
+/**
+ * Home-only illustrated card treatment. This is scalable, non-interactive
+ * Canvas scenery underneath real Compose labels, buttons and accessibility.
+ * In particular the gold panel keeps the reference's moonlit pavilion instead
+ * of drawing a flat yellow disc behind the text.
+ */
+@Composable
+private fun HomeTileArtwork(accent: Color, compact: Boolean) {
+    if (compact) return
+    Canvas(Modifier.matchParentSize()) {
+        val w = size.width
+        val h = size.height
+        if (accent == Ink.gold) {
+            drawRect(Brush.horizontalGradient(listOf(
+                Color(0xFF16283B), Color(0xFF493829), Color(0xFF624524),
+            )))
+            val moon = Offset(w * .76f, h * .19f)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(Color(0xAAFFCD65), Color.Transparent),
+                    center = moon, radius = w * .37f,
+                ), radius = w * .37f, center = moon,
+            )
+            drawCircle(Color(0xFFFFDD83), radius = h * .115f, center = moon)
+            // Two hand-drawn mountain ridges are restricted to the card's
+            // decorative right side, preserving contrast for navigation copy.
+            for (ridge in 0..1) {
+                val mountain = Path().apply {
+                    moveTo(w * .41f, h)
+                    lineTo(w * .41f, h * (.63f + ridge * .12f))
+                    for (index in 0..28) {
+                        val x = w * (.41f + index / 28f * .59f)
+                        val wave = kotlin.math.sin(index * .55f + ridge) * .10f +
+                            kotlin.math.sin(index * .19f + 2f * ridge) * .07f
+                        lineTo(x, h * (.62f + ridge * .16f - wave))
+                    }
+                    lineTo(w, h)
+                    close()
+                }
+                drawPath(mountain, if (ridge == 0) Color(0xB21B2535)
+                    else Color(0xD10B1A29))
+            }
+            val px = w * .89f
+            val py = h * .80f
+            val u = w * .034f
+            drawRect(Color(0xFF05142A),
+                topLeft = Offset(px - u, py - u * 3f),
+                size = androidx.compose.ui.geometry.Size(u * 2f, u * 3f))
+            for (tier in 0..2) {
+                val y = py - u * (1f + tier * 1.1f)
+                val roof = Path().apply {
+                    moveTo(px - u * 2.0f, y)
+                    quadraticTo(px, y - u * 1.22f, px + u * 2.0f, y)
+                    lineTo(px + u * 1.5f, y + u * .28f)
+                    quadraticTo(px, y - u * .41f, px - u * 1.5f, y + u * .28f)
+                    close()
+                }
+                drawPath(roof, Color(0xFF041027))
+            }
+            drawRect(
+                brush = Brush.verticalGradient(
+                    listOf(Color.Transparent, Color(0xD307132B)),
+                    startY = h * .47f, endY = h,
+                ),
+            )
+        } else if (accent == Ink.teal) {
+            drawRect(
+                Brush.horizontalGradient(
+                    listOf(Color(0xFF003B42), Color(0xFF004652), Color(0xFF036078)),
+                ),
+            )
+            val focus = Offset(w * .83f, h * .10f)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(Ink.teal.copy(alpha = .45f), Color.Transparent),
+                    center = focus, radius = w * .64f,
+                ), radius = w * .64f, center = focus,
+            )
+            for (i in -1..5) {
+                val x = w * (.56f + i * .12f)
+                drawLine(Ink.teal.copy(alpha = .27f),
+                    Offset(x, 0f), Offset(x - w * .20f, h), 1.6f)
+                val y = h * (.13f + i * .18f)
+                drawLine(Ink.teal.copy(alpha = .17f),
+                    Offset(w * .38f, y), Offset(w, y + h * .10f), 1.5f)
+            }
+            drawRect(Brush.verticalGradient(
+                listOf(Color.Transparent, Color(0xAA001B31)),
+                startY = h * .45f, endY = h,
+            ))
+        }
+    }
+}
+
 @Composable
 private fun HomeTile(
     title: String, subtitle: String, accent: Color,
@@ -535,10 +644,11 @@ private fun HomeTile(
             .clickable(onClick = onClick),
         highlight = accent,
     ) {
+        HomeTileArtwork(accent = accent, compact = compact)
         Column(
             Modifier.fillMaxWidth()
-                .padding(start = if (compact) 10.dp else 17.dp,
-                    top = if (compact) 12.dp else 16.dp,
+                .padding(start = if (compact) 20.dp else 21.dp,
+                    top = if (compact) 12.dp else 19.dp,
                     end = if (compact) 16.dp else 20.dp,
                     bottom = if (compact) 10.dp else 15.dp),
             verticalArrangement = Arrangement.spacedBy(if (compact) 3.dp else 6.dp),
@@ -558,7 +668,7 @@ private fun HomeTile(
                 }
             }
             Text(title, color = Ink.white, fontWeight = FontWeight.ExtraBold,
-                fontSize = if (compact) 14.sp else 19.sp, maxLines = 2)
+                fontSize = if (compact) 15.sp else 19.sp, maxLines = 2)
             Text(subtitle, color = Ink.muted,
                 fontSize = if (compact) 10.sp else 12.sp,
                 lineHeight = if (compact) 13.sp else 17.sp)
