@@ -101,12 +101,12 @@ fun BoxScope.DailyHeroBackdrop() {
         // own the readable foreground on every viewport.
         drawRect(
             Brush.horizontalGradient(
-                listOf(Color(0xFF04152F), Color(0xFF04152F),
-                    Color(0x5604152F), Color.Transparent),
-                startX = w * .46f, endX = w * .98f,
+                listOf(Color(0xE0041733), Color(0xE0041733),
+                    Color(0x66041733), Color.Transparent),
+                startX = 0f, endX = w * .98f,
             ),
-            topLeft = Offset(w * .46f, 0f),
-            size = Size(w * .54f, h * .70f),
+            topLeft = Offset.Zero,
+            size = Size(w, h * .70f),
         )
         drawRect(
             Brush.horizontalGradient(
