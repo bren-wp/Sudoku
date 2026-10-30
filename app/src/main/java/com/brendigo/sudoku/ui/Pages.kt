@@ -482,7 +482,10 @@ fun HomePage(controller: SudokuController) {
                         ) {
                             weekdays.forEachIndexed { index, day ->
                                 val checked = monday.plusDays(index.toLong()).toString() in completed
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Column(
+                                    Modifier.testTag("home-weekday-$index"),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
                                     StreakMarker(checked, diameter = 18.dp,
                                         dayLabel = fullDays[index])
                                     Spacer(Modifier.height(5.dp))
@@ -508,7 +511,19 @@ fun HomePage(controller: SudokuController) {
                 }
                 Spacer(Modifier.width(9.dp))
                 Row(
-                    Modifier.weight(1f),
+                    Modifier.weight(1f)
+                        .testTag("home-week-days")
+                        .drawBehind {
+                            // The source reference includes a fine baseline
+                            // beneath seven separate, real daily markers.
+                            val y = 18.dp.toPx() + 5.dp.toPx()
+                            drawLine(
+                                Ink.line.copy(alpha = .60f),
+                                Offset(size.width * .045f, y),
+                                Offset(size.width * .955f, y),
+                                strokeWidth = 1.dp.toPx(),
+                            )
+                        },
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -519,7 +534,10 @@ fun HomePage(controller: SudokuController) {
                         "Četvrtak", "Petak", "Subota", "Nedjelja")
                     weekdays.forEachIndexed { index, day ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            Modifier.testTag("home-weekday-$index"),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
                             StreakMarker(checked, diameter = 18.dp, dayLabel = fullDays[index])
                             Spacer(Modifier.height(6.dp))
                             Text(day, fontSize = 9.sp, color = Ink.muted)
