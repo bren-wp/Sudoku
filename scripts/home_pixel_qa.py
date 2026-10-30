@@ -31,7 +31,10 @@ HOME_REGIONS = {
 }
 
 
-def measure_home(reference: Path, actual: Path, output_dir: Path) -> list[dict]:
+def measure_regions(
+    reference: Path, actual: Path, output_dir: Path,
+    regions: dict[str, tuple[int, int, int, int]],
+) -> list[dict]:
     with Image.open(reference) as source, Image.open(actual) as captured:
         if source.size != REFERENCE_SIZE or captured.size != REFERENCE_SIZE:
             raise ValueError(
@@ -48,7 +51,7 @@ def measure_home(reference: Path, actual: Path, output_dir: Path) -> list[dict]:
     ImageEnhance.Contrast(raw_diff).enhance(2).save(output_dir / "difference.png")
 
     report = []
-    for name, bounds in HOME_REGIONS.items():
+    for name, bounds in regions.items():
         diff = raw_diff.crop(bounds)
         error = sum(ImageStat.Stat(diff).mean) / 3
         pixel_count = diff.width * diff.height
@@ -71,6 +74,12 @@ def measure_home(reference: Path, actual: Path, output_dir: Path) -> list[dict]:
         writer.writeheader()
         writer.writerows(report)
     return report
+
+
+
+def measure_home(reference: Path, actual: Path, output_dir: Path) -> list[dict]:
+    """Backward-compatible Home-specific view of the shared region comparator."""
+    return measure_regions(reference, actual, output_dir, HOME_REGIONS)
 
 
 def main() -> int:
