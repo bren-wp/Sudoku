@@ -1,5 +1,8 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni vizualni prolaz **7/10 — Postignuća**: suptilno obojene aure oko pravih vektorskih nagrada (zaključane ostaju zaključane), zasebni pristupačni testTagovi za stvarni napredak svih 24 postignuća i stabilan prikaz popisa/detalja pri rekreaciji Android Activityja.
+- Novi instrumentacijski test potvrđuje proširenih 24 postignuća i očuvani detalj nakon rekreacije. Dodani `scripts/achievements_pixel_qa.py` i dva Python regresijska testa na osam nepromjenjivih područja. Povijesni stvarni v1.0.47 RGB MAE **28.930/255** dokumentiran u `docs/achievements-qa-followup-v1.0.48.md`; **nije** rezultat novih izmjena niti dokaz konačne jednakosti 1:1.
+
 - Završni vizualni prolaz **6/10 — Statistika**: četiri neovisno obojene kartice postignuća (tirkizna, plava, ljubičasta, cijan) i u zaključanom stanju, čitljiv prikaz 4 kartice na 941×1672 i prilagodljiva 2×2 mreža na 720×1280 / povećanom fontu; stvarni napredak ostaje iz baze podataka.
 - Statistički dijalozi pamte otvoreno stanje pri Android rekreaciji aktivnosti; dodani testni tagovi postotka dovršenosti i prazne povijesti te novi instrumentacijski test četiri nagradne kartice i povijesti.
 - Dodani `scripts/statistics_pixel_qa.py` i Python testovi sedam fiksnih ROI područja. Povijesni v1.0.47 globalni RGB MAE bio je **26.637/255**, detalji i izvorni SHA-256 u `docs/statistics-qa-followup-v1.0.48.md`. **To nije rezultat novog HEAD-a i ne dokazuje pixel 1:1.**
