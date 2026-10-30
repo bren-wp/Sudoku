@@ -1358,6 +1358,27 @@ class SudokuVisualSmokeTest {
         val black = captureStudio(ComposeColor.Black)
         val white = captureStudio(ComposeColor.White)
         try {
+            // Assert the actual Compose semantics layout, independently
+            // of the later alpha/matting image comparison.
+            val logoBounds = rule.onNodeWithTag(
+                "wordmark-symbol", useUnmergedTree = true
+            ).fetchSemanticsNode().boundsInRoot
+            val titleBounds = rule.onNodeWithTag(
+                "wordmark-title", useUnmergedTree = true
+            ).fetchSemanticsNode().boundsInRoot
+            val bylineBounds = rule.onNodeWithTag(
+                "wordmark-byline", useUnmergedTree = true
+            ).fetchSemanticsNode().boundsInRoot
+            val tolerance = rule.activity.resources.displayMetrics.density * 3f
+            check(
+                logoBounds.width > 0f &&
+                    logoBounds.right <= titleBounds.left + tolerance &&
+                    titleBounds.bottom <= bylineBounds.top + tolerance &&
+                    kotlin.math.abs(bylineBounds.right - titleBounds.right) <= tolerance
+            ) {
+                "Wordmark source requires a left 7-3-9 logo, right-aligned byline " +
+                    "and no overlap: $logoBounds / $titleBounds / $bylineBounds"
+            }
             check(black.width == white.width && black.height == white.height) {
                 "Wordmark dual-background shots differ in resolution"
             }
