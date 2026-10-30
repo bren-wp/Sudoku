@@ -68,6 +68,15 @@ jobs:
             adb shell wm size
             adb shell wm density
             bash .github/scripts/run-visual-smoke.sh
+      - name: Upload instrumentation failure reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sudoku-test-failure-${{ matrix.layout }}
+          path: |
+            app/build/outputs/androidTest-results/connected/**
+            app/build/reports/androidTests/connected/**
+          if-no-files-found: warn
       - name: Upload actual Android screenshots
         if: always()
         uses: actions/upload-artifact@v4

@@ -59,15 +59,25 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                 "back" -> poly(15f,4f,7f,12f,15f,20f)
                 "next" -> poly(9f,4f,17f,12f,9f,20f)
                 "plus" -> {circle(12f,12f,9f);line(12f,7f,12f,17f);line(7f,12f,17f,12f)}
+                "plus-plain" -> {line(12f,4f,12f,20f);line(4f,12f,20f,12f)}
                 "play" -> {poly(8f,5f,19f,12f,8f,19f,8f,5f)}
                 "pause" -> {rectangle(6f,4f,9f,20f,1f);rectangle(15f,4f,18f,20f,1f)}
                 "settings" -> {
-                    circle(12f,12f,3.5f)
-                    for(i in 0 until 8) {
-                        val a=i*Math.PI/4.0
-                        line(12f+cos(a).toFloat()*7f,12f+sin(a).toFloat()*7f,
-                            12f+cos(a).toFloat()*10f,12f+sin(a).toFloat()*10f)
+                    // A real eight-tooth gear, not a sun/rays icon.
+                    val gear = Path()
+                    for (i in 0 until 32) {
+                        val angle = Math.PI * 2 * i / 32 - Math.PI / 2
+                        val radius = if (i % 4 == 0 || i % 4 == 3) 10.6f else 8.3f
+                        val x = 12f + cos(angle).toFloat() * radius
+                        val y = 12f + sin(angle).toFloat() * radius
+                        if (i == 0) gear.moveTo(x, y) else gear.lineTo(x, y)
                     }
+                    gear.close()
+                    canvas.drawPath(gear, filled)
+                    val bore = Paint(filled).apply {
+                        color = android.graphics.Color.rgb(8, 28, 60)
+                    }
+                    canvas.drawCircle(12f, 12f, 3.7f, bore)
                 }
                 "palette" -> {
                     // Outline palette with thumb rest and three paint dots.
@@ -104,6 +114,22 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     rectangle(3f,5f,21f,21f);line(3f,10f,21f,10f)
                     line(8f,3f,8f,7f);line(16f,3f,16f,7f)
                     poly(8f,15f,11f,18f,17f,12f)
+                }
+                "calendar-star" -> {
+                    rectangle(3f, 5f, 21f, 21f, 1.7f)
+                    line(3f, 10f, 21f, 10f)
+                    line(8f, 3f, 8f, 7f)
+                    line(16f, 3f, 16f, 7f)
+                    val inner = Path()
+                    for (i in 0 until 10) {
+                        val angle = Math.PI * (i * .2 - .5)
+                        val r = if (i % 2 == 0) 5.0f else 2.25f
+                        val x = 12f + cos(angle).toFloat() * r
+                        val y = 15.4f + sin(angle).toFloat() * r
+                        if (i == 0) inner.moveTo(x, y) else inner.lineTo(x, y)
+                    }
+                    inner.close()
+                    canvas.drawPath(inner, filled)
                 }
                 "calendar-seven" -> {
                     rectangle(3f,5f,21f,21f);line(3f,10f,21f,10f)
@@ -196,6 +222,34 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     canvas.drawPath(p,stroke);line(12f,6f,12f,18f)
                 }
                 "bolt" -> poly(14f,2f,6f,13f,12f,13f,10f,22f,19f,10f,13f,10f,14f,2f)
+                "flame-solid" -> {
+                    val outer = Path().apply {
+                        moveTo(12f, 1f)
+                        cubicTo(19f, 8f, 20.5f, 12f, 20.5f, 16f)
+                        cubicTo(20.5f, 23f, 3.5f, 24f, 3.5f, 16f)
+                        cubicTo(3.5f, 11f, 7f, 7f, 8f, 5f)
+                        cubicTo(8.4f, 12f, 12f, 12f, 12f, 1f)
+                        close()
+                    }
+                    val glow = Paint(filled).apply {
+                        shader = android.graphics.LinearGradient(
+                            0f, 0f, 24f, 22f,
+                            android.graphics.Color.rgb(255, 230, 117),
+                            android.graphics.Color.rgb(255, 130, 52),
+                            android.graphics.Shader.TileMode.CLAMP,
+                        )
+                    }
+                    canvas.drawPath(outer, glow)
+                    val inner = Path().apply {
+                        moveTo(12f, 13f)
+                        cubicTo(14.2f, 17f, 15f, 18f, 14f, 21f)
+                        cubicTo(9f, 23f, 8f, 19f, 12f, 13f)
+                        close()
+                    }
+                    canvas.drawPath(inner, Paint(filled).apply {
+                        color = android.graphics.Color.rgb(8, 25, 53)
+                    })
+                }
                 "flame" -> {
                     val p=Path();p.moveTo(12f,2f)
                     p.cubicTo(20f,10f,19f,12f,20f,16f)
@@ -251,8 +305,8 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
 }
 
 fun homeIconFor(title: String): String = when (title) {
-    "Nova igra" -> "plus"
-    "Dnevni izazov" -> "calendar"
+    "Nova igra" -> "plus-plain"
+    "Dnevni izazov" -> "calendar-star"
     "Statistika" -> "statistics"
     "Postignuća" -> "trophy"
     "Postavke" -> "settings"

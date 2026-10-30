@@ -398,11 +398,20 @@ class SudokuVisualSmokeTest {
         check(largeBounds.height > smallBounds.height) {
             "Primary home cards must be taller than compact navigation cards"
         }
-        rule.onNodeWithTag("home-dnevni-izazov").assertExists()
+        val dailyTile = rule.onNodeWithTag("home-dnevni-izazov")
+        dailyTile.assertExists()
+        val dailyBounds = dailyTile.fetchSemanticsNode().boundsInRoot
+        val density = rule.activity.resources.displayMetrics.density
+        check(largeBounds.right <= dailyBounds.left + density &&
+            kotlin.math.abs(largeBounds.top - dailyBounds.top) <= density * 2f &&
+            kotlin.math.abs(largeBounds.bottom - dailyBounds.bottom) <= density * 2f) {
+            "Home primary cards must remain a level, non-overlapping reference pair: " +
+                "$largeBounds and $dailyBounds"
+        }
         rule.onNodeWithTag("home-postignuća").assertExists()
         rule.onNodeWithTag("home-postavke").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("home-slogan").assertExists()
-        // Each UI smoke test can inherit an unfinished session and its 174dp
+        // Each UI smoke test can inherit an unfinished session and its 190dp
         // resume banner. Scroll the Settings card into view before measuring
         // layout bounds; off-viewport semantics coordinates can be clipped.
         val awardsBounds = rule.onNodeWithTag("home-postignuća")
