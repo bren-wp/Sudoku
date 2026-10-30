@@ -1,5 +1,9 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Dodatni PR #55 prolaz za Splash/branding: očuvan raspored reference 941×1672 pri standardnom fontu; za uske zaslone i font scale >135% uvedena zaštita od prelijevanja naslova i gesla.
+- Android 12+ sustavni splash koristi lokalni 7–3–9 vektorski simbol i brendiranu pozadinu; dodani instrumentacijski testovi sustavne teme i geometrije Splash elemenata pri font scale 180%.
+- Vizualne metrike nove iteracije još su otvorene; detalji i preostali uvjeti navedeni su u `docs/splash-branding-followup-v1.0.48.md`. Bez tvrdnje o 1:1, potpisu ili objavi prije provjere.
+
 - Nastavak PR-a #55: akcija „Pravila privatnosti” ima najmanje 48dp aktivne dodirne površine; instrumentacijski test sprječava regresiju pristupačnosti.
 - Workflow za stvarne marketinške snimke više nije vezan uz zastarjelu granu v1.0.38: sada snima osam stvarnih Android zaslona na aktivnoj `feature/sudoku-*` grani te objavljuje PNG i WebP QA artefakte.
 - Release workflow dodatno pokreće `lintRelease`, objavljuje `SHA256SUMS` i prisilno označuje nepotpisana testna izdanja kao prerelease. Nije izvršena objava iz PR-a.
