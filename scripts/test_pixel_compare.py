@@ -16,6 +16,7 @@ from daily_pixel_qa import REGIONS as DAILY_REGIONS
 from statistics_pixel_qa import REGIONS as STATISTICS_REGIONS
 from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
 from splash_pixel_qa import REGIONS as SPLASH_REGIONS
+from wordmark_pixel_qa import WORDMARK_REGIONS, opaque_bounds, wordmark_report
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -37,6 +38,41 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_wordmark_alpha_and_byline_regions_are_separate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
+            reference.paste((0, 190, 255, 255), (80, 480, 300, 760))
+            reference.paste((255, 255, 255, 255), (450, 520, 1050, 675))
+            reference.paste((145, 160, 200, 255), (690, 720, 1050, 750))
+            actual = reference.copy()
+            # Same exact RGB, but byline alpha is too low: old RGB-only
+            # comparison was blind to this regression.
+            actual.paste((145, 160, 200, 45), (690, 720, 1050, 750))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            report = wordmark_report(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence",
+            )
+            regions = {row["region"]: row for row in report["regions"]}
+            self.assertEqual(set(WORDMARK_REGIONS), set(regions))
+            self.assertEqual(0, regions["symbol_739"]["alpha_mae"])
+            self.assertEqual(0, regions["title_sudoku"]["alpha_mae"])
+            self.assertGreater(regions["byline_brendigo"]["alpha_mae"], 0)
+            self.assertGreater(report["summary"]["alpha_mae_0_to_255"], 0)
+            self.assertNotEqual(
+                report["source_visible_bbox"], report["actual_visible_bbox"]
+            )
+            for filename in ("alpha-difference.png", "wordmark-regions.csv",
+                             "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / filename).is_file())
+
+    def test_wordmark_alpha_bounds_need_correct_resolution(self):
+        img = Image.new("RGBA", (720, 1280), (0, 0, 0, 0))
+        with self.assertRaisesRegex(ValueError, "1254"):
+            opaque_bounds(img)
 
     def test_splash_qa_detects_logo_only_drift(self):
         with tempfile.TemporaryDirectory() as tmp:
