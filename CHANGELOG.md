@@ -1,5 +1,8 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni prolaz zaslona **5/10 — Dnevni izazov**: lokalna rang-lista dobila je referentni zaobljeni ljubičasti obrub (25dp), tihi ljubičasti sjaj ikone i najmanje 48dp interaktivne visine. Dnevna nagrada sada koristi nativni zlatni medaljon s posudicom i zvijezdom, umjesto generičkog poklona.
+- Dodane stabilne Compose oznake sedam stvarnih datuma i nagrade, Android UI test lokalne rang-liste i kalendarskih granica, te `scripts/daily_pixel_qa.py` s devet referentnih ROI područja i Python regresijskim testovima. Stvarni prethodni v1.0.47 RGB MAE bio je **23.594/255**, detalji u `docs/daily-qa-followup-v1.0.48.md`. Novi pikseli 1:1 još nisu potvrđeni.
+
 - Završni vizualni prolaz **4/10 — Postavke**: u `SettingsPage` usklađen plavi vanjski obrub panela Jezik uz tirkizni globus, dodane stabilne QA oznake jezičnog selektora i stvarne verzije.
 - Novi Android test `settingsReferenceRowsKeepTouchTargetsAndCorrectContent` provjerava pet pristupačnih 48dp prekidača, granice odabira jezika, stvarnu verziju i dostupnost offline sigurnosnih kopija.
 - Dodani `scripts/settings_pixel_qa.py` i Python regresijski testovi osam fiksnih vizualnih područja. Stvarni povijesni v1.0.47 screenshot pokazuje **24.519/255 RGB MAE** globalno; detalji i SHA-256 izvornih PNG-ova u `docs/settings-qa-followup-v1.0.48.md`. To **nije** rezultat novog commita i ne dokazuje 1:1.
