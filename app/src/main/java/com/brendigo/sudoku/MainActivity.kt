@@ -76,6 +76,14 @@ class MainActivity : ComponentActivity() {
         when (savedInstanceState?.getString("sudoku.active_screen")) {
             Screen.NEW_GAME.name -> sudoku.go(Screen.NEW_GAME)
             Screen.GAME.name -> if (sudoku.game != null) sudoku.go(Screen.GAME)
+            // The previous restore switch silently discarded these screens
+            // and returned to Splash/Home. That broke both emulator jobs when
+            // an opened achievement detail survived Activity recreation.
+            // Restore navigation, while rememberSaveable restores local UI
+            // dialog state and SudokuController supplies actual progress.
+            Screen.DAILY.name -> sudoku.go(Screen.DAILY)
+            Screen.STATS.name -> sudoku.go(Screen.STATS)
+            Screen.ACHIEVEMENTS.name -> sudoku.go(Screen.ACHIEVEMENTS)
             Screen.SETTINGS.name -> {
                 if (savedInstanceState.getBoolean("sudoku.settings_from_game") &&
                     sudoku.game != null) {
