@@ -75,7 +75,8 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
 fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                    splash: Boolean = false, home: Boolean = false,
                    newGame: Boolean = false, gameplay: Boolean = false,
-                   daily: Boolean = false, stats: Boolean = false) {
+                   daily: Boolean = false, stats: Boolean = false,
+                   settings: Boolean = false) {
     val context = LocalContext.current
     val originalNightscape = remember(context) {
         runCatching {
@@ -134,7 +135,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 listOf(Ink.cyan.copy(alpha = .36f), Color.Transparent),
                 center = selected, radius = w * .12f),
                 radius = w * .12f, center = selected)
-        } else if (home || daily || stats) {
+        } else if (home || daily || stats || settings) {
             // The original Home reference has two isolated, slanted boards.
             // The old shared grid crossed the title and bled behind the cards.
             for (i in -2..5) {
@@ -235,7 +236,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         }
         // On the source splash, the moon and horizon sit appreciably higher
         // than behind the dense menu cards. Keep gameplay scenery unchanged.
-        val moonY = if (splash) .705f else .77f
+        val moonY = if (splash) .705f else if (settings) .875f else .77f
         if (!gameplay) {
             drawCircle(
                 Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
@@ -402,6 +403,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 splash -> .613f
                 newGame -> .800f
                 gameplay -> .795f
+                settings -> .830f
                 else -> .730f
             }
             val height = 1f - y
