@@ -201,6 +201,7 @@ fun GamePage(controller: SudokuController) {
                 feedback()
             }
         }
+        Spacer(Modifier.height(if (compact) 2.dp else 6.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)) {
             GameTool("Bilješke", if (game.notesMode) Ink.teal else Ink.line,
                 Modifier.weight(1f), height = toolHeight, active = game.notesMode,
@@ -214,6 +215,7 @@ fun GamePage(controller: SudokuController) {
             GameTool("Izbriši", Ink.blue, Modifier.weight(1f), height = toolHeight,
                 enabled = controller.canErase(), tag = "game-erase") { controller.erase(); feedback() }
         }
+        Spacer(Modifier.height(if (compact) 2.dp else 6.dp))
         val numbers = (1..game.size).toList()
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
         Column(
