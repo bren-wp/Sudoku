@@ -139,7 +139,8 @@ private fun Application(controller: SudokuController) {
             newGame = controller.page == Screen.NEW_GAME,
             gameplay = controller.page == Screen.GAME,
             daily = controller.page == Screen.DAILY,
-            stats = controller.page == Screen.STATS)
+            stats = controller.page == Screen.STATS,
+            settings = controller.page == Screen.SETTINGS)
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             SudokuBackupFlow(controller) { onExportBackup, onImportBackup ->
                 when (controller.page) {
