@@ -729,7 +729,6 @@ fun NewGamePage(controller: SudokuController) {
             // 192dp is the reference width. The selector shrinks with the
             // viewport instead of pushing the 48dp Back target off-screen.
             val selectorWidth = minOf(192.dp, (maxWidth - 56.dp).coerceAtLeast(0.dp))
-            val compactSelector = selectorWidth < 175.dp
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -756,14 +755,16 @@ fun NewGamePage(controller: SudokuController) {
         Spacer(Modifier.height(2.dp))
         Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
             .padding(start = 5.dp)) {
-            AccentText("Nova igra", 55)
-            Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp)
+            AccentText("Nova igra", 55, Modifier.testTag("new-game-title"))
+            Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp,
+                modifier = Modifier.testTag("new-game-subtitle"))
         }
         Spacer(Modifier.height(1.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val accessibilityCards = maxWidth < 300.dp ||
                 LocalDensity.current.fontScale >= 1.3f
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.testTag("new-game-difficulty-list"),
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 difficultyLabels.forEachIndexed { i, label ->
                     NewGameDifficultySurface(
                         i,
