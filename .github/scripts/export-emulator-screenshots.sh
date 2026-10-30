@@ -4,7 +4,7 @@ OUT="$GITHUB_WORKSPACE/screenshots"
 mkdir -p "$OUT"
 adb pull /sdcard/Pictures/SudokuQA/. "$OUT/"
 count=0
-for picture in 01-home 02-new-game 03-game 04-settings 05-daily 06-statistics 07-achievements 08-splash 09-wordmark 10-launcher-icon; do
+for picture in 01-home 02-new-game 03-game 04-settings 05-daily 06-statistics 07-achievements 08-splash 09-wordmark 10-launcher-icon 11-launcher-monochrome; do
   path="$OUT/$picture.png"
   test -s "$path" || { echo "::error::Missing $picture screenshot"; exit 1; }
   actual="$(od -An -N8 -tx1 "$path" | tr -d ' \n')"
@@ -12,7 +12,7 @@ for picture in 01-home 02-new-game 03-game 04-settings 05-daily 06-statistics 07
     echo "::error::Not a valid PNG: $picture"
     exit 1
   fi
-  if [[ "$picture" == "09-wordmark" || "$picture" == "10-launcher-icon" ]]; then
+  if [[ "$picture" == "09-wordmark" || "$picture" == "10-launcher-icon" || "$picture" == "11-launcher-monochrome" ]]; then
     # Branding assets are real instrumented PNG renders at 1254².
     dimensions="$(python3 - "$path" <<'PY'
 import struct, sys
