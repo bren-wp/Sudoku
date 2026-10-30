@@ -1,5 +1,13 @@
 package com.brendigo.sudoku.ui
 
+import android.graphics.BitmapFactory
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.roundToInt
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +41,22 @@ fun AchievementSurface(
     radius: Dp = 12.dp,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val context = LocalContext.current
+    val art = remember(context, title) {
+        val resource = when (title) {
+            "Prva pobjeda" -> "achievement-gold-art.webp"
+            "Bez greške" -> "achievement-warm-art.webp"
+            "Sedam dana zaredom", "Vrući niz" -> "achievement-blue-art.webp"
+            else -> null
+        }
+        resource?.let {
+            runCatching {
+                context.assets.open(it).use { stream ->
+                    BitmapFactory.decodeStream(stream)?.asImageBitmap()
+                }
+            }.getOrNull()
+        }
+    }
     val warm = title == "Prva pobjeda" || title == "Bez greške"
     val lunar = title == "Sedam dana zaredom" || title == "Vrući niz"
     val brain = title == "Majstor logike"
@@ -144,6 +168,26 @@ fun AchievementSurface(
                         Offset(w, y + h * .40f), strokeWidth = 1.5f
                     )
                 }
+            }
+            // Owner-provided artwork is a small text-free crop of only
+            // mountains/clouds/moon. Scores, rewards, labels and progress
+            // remain live Compose UI drawn above this decorative layer.
+            if (art != null) {
+                drawImage(
+                    image = art,
+                    dstOffset = IntOffset((w * .47f).roundToInt(), (h * .025f).roundToInt()),
+                    dstSize = IntSize((w * .53f).roundToInt(), (h * .69f).roundToInt()),
+                    alpha = if (warm) .80f else .82f,
+                    filterQuality = FilterQuality.High,
+                )
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        listOf(Color(0xF4071935), Color(0xB7061935), Color.Transparent),
+                        startX = w * .34f, endX = w * .81f,
+                    ),
+                    topLeft = Offset(w * .34f, 0f),
+                    size = Size(w * .66f, h * .72f),
+                )
             }
             drawRect(
                 brush = Brush.verticalGradient(
