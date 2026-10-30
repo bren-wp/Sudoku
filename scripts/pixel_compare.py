@@ -36,8 +36,12 @@ def compare(
     volatile_mask: Path | None = None,
 ) -> dict[str, str | float | None]:
     with Image.open(reference) as r, Image.open(actual) as a:
-        expected = r.convert("RGB")
-        observed = a.convert("RGB")
+        # Keep alpha for 1254px transparent logo/icon references: flattening
+        # both images to RGB silently misses opaque-background regressions.
+        reference_rgba = r.convert("RGBA")
+        actual_rgba = a.convert("RGBA")
+        expected = reference_rgba.convert("RGB")
+        observed = actual_rgba.convert("RGB")
     if expected.size != expected_size:
         raise ValueError(f"{reference.name}: expected {expected_size}, found {expected.size}")
     if observed.size != expected_size:
@@ -60,6 +64,39 @@ def compare(
 
     within_12 = within_tolerance(12)
     within_24 = within_tolerance(24)
+    alpha_mae = None
+    rgba_mae = None
+    rgba_within_12 = None
+    navy_composite_mae = None
+    if expected_size == BRANDING_SIZE:
+        alpha_difference = ImageChops.difference(
+            reference_rgba.getchannel("A"), actual_rgba.getchannel("A")
+        )
+        alpha_mae = round(ImageStat.Stat(alpha_difference).mean[0], 3)
+        rgba_mae = round((mean_r + mean_g + mean_b +
+                          alpha_mae) / 4, 3)
+        close_alpha = alpha_difference.point(
+            lambda value: 255 if value <= 12 else 0
+        )
+        rgb_close = [difference.getchannel(c).point(
+            lambda value: 255 if value <= 12 else 0
+        ) for c in ("R", "G", "B")]
+        full_close = close_alpha
+        for channel in rgb_close:
+            full_close = ImageChops.multiply(full_close, channel)
+        rgba_within_12 = round(
+            full_close.histogram()[255] * 100 / pixel_count, 2
+        )
+        # A second, practical view of the artwork on its real navy backing.
+        # Report both raw RGBA differences and rendered-on-background RGB;
+        # neither is a substitute for a real emulator screenshot.
+        navy = Image.new("RGBA", expected_size, (2, 21, 56, 255))
+        ref_navy = Image.alpha_composite(navy, reference_rgba).convert("RGB")
+        actual_navy = Image.alpha_composite(navy, actual_rgba).convert("RGB")
+        navy_diff = ImageChops.difference(ref_navy, actual_navy)
+        navy_composite_mae = round(
+            sum(ImageStat.Stat(navy_diff).mean) / 3, 3
+        )
     ui_error = None
     scenery_error = None
     if ui_mask is not None:
@@ -110,6 +147,10 @@ def compare(
         "ui_region_mae": ui_error,
         "scenery_region_mae": scenery_error,
         "stable_region_mae": stable_error,
+        "alpha_mae_0_to_255": alpha_mae,
+        "rgba_mae_0_to_255": rgba_mae,
+        "rgba_within_12_pct": rgba_within_12,
+        "navy_composited_rgb_mae": navy_composite_mae,
     }
 
 def main() -> int:
@@ -122,7 +163,7 @@ def main() -> int:
     parser.add_argument("--include-splash", action="store_true",
         help="Include 08-splash when a real launch capture is available.")
     parser.add_argument("--include-branding", action="store_true",
-        help="Also compare real 1254x1254 PNG exports for logo and adaptive icon.")
+        help="Also compare real 1254x1254 PNG exports for logo and adaptive icon, including alpha.")
     parser.add_argument("--volatile-mask-dir", type=Path, default=None,
         help="Optional 941x1672 masks: white = changing QA-only content.")
     parser.add_argument("--baseline-report", type=Path, default=None,
@@ -158,7 +199,12 @@ def main() -> int:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-    exact = all(float(row["mean_error_0_to_255"]) == 0 for row in rows)
+    exact = all(
+        float(row["mean_error_0_to_255"]) == 0 and
+        (row["alpha_mae_0_to_255"] is None or
+         float(row["alpha_mae_0_to_255"]) == 0)
+        for row in rows
+    )
     print("Exact pixel match across all screens:", exact)
     if args.baseline_report is not None:
         with args.baseline_report.open(newline="", encoding="utf-8") as source:
