@@ -10,6 +10,7 @@ from PIL import Image
 from pixel_compare import REFERENCE_SIZE, compare
 from home_pixel_qa import measure_home, measure_regions
 from new_game_pixel_qa import REGIONS as NEW_GAME_REGIONS
+from gameplay_pixel_qa import REGIONS as GAMEPLAY_REGIONS
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -31,6 +32,37 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_gameplay_qa_reports_board_only_difference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((0, 0, 120), (250, 400, 350, 500))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            measurements = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", GAMEPLAY_REGIONS,
+            )
+            by_name = {row["region"]: row for row in measurements}
+            self.assertEqual(set(GAMEPLAY_REGIONS), set(by_name))
+            self.assertGreater(by_name["board"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_name["hud"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_name["keypad"]["rgb_mae_0_to_255"])
+            self.assertGreater(by_name["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+            self.assertTrue((folder / "evidence" / "overlay.png").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+
+    def test_gameplay_qa_rejects_compact_screenshot_as_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", GAMEPLAY_REGIONS)
 
     def test_new_game_qa_measures_all_reference_regions(self):
         with tempfile.TemporaryDirectory() as tmp:
