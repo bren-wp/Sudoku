@@ -70,7 +70,7 @@ fun DailyFrame(
  * UI controls, dates, scores or other dynamic content.
  */
 @Composable
-fun DailyHeroBackdrop() {
+fun BoxScope.DailyHeroBackdrop() {
     val context = LocalContext.current
     val scenery = remember(context) {
         runCatching {
