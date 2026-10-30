@@ -456,6 +456,21 @@ class SudokuVisualSmokeTest {
         // Content-sized compact cards must contain their real description text.
         val firstCard = rule.onNodeWithTag("achievement-prva-pobjeda")
             .fetchSemanticsNode().boundsInRoot
+        val secondCard = rule.onNodeWithTag("achievement-sedam-dana-zaredom")
+            .fetchSemanticsNode().boundsInRoot
+        val thirdCard = rule.onNodeWithTag("achievement-majstor-logike")
+            .fetchSemanticsNode().boundsInRoot
+        val pxTolerance = rule.activity.resources.displayMetrics.density * 2f
+        check(
+            firstCard.right <= secondCard.left + pxTolerance &&
+                kotlin.math.abs(firstCard.top - secondCard.top) <= pxTolerance &&
+                kotlin.math.abs(firstCard.bottom - secondCard.bottom) <= pxTolerance &&
+                thirdCard.top >= firstCard.bottom - pxTolerance
+        ) {
+            "Achievement cards must keep 2-column aligned rows: " +
+                "first=$firstCard, second=$secondCard, third=$thirdCard"
+        }
+        rule.onNodeWithTag("achievement-summary").assertExists()
         val firstDescription = rule.onNodeWithTag(
             "achievement-description-prva-pobjeda", useUnmergedTree = true
         ).fetchSemanticsNode().boundsInRoot
