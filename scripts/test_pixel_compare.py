@@ -43,7 +43,7 @@ class PixelCompareTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
             reference = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
-            reference.paste((0, 190, 255, 255), (80, 480, 300, 760))
+            reference.paste((0, 190, 255, 255), (80, 480, 300, 710))
             reference.paste((255, 255, 255, 255), (450, 520, 1050, 675))
             reference.paste((145, 160, 200, 255), (690, 720, 1050, 750))
             actual = reference.copy()
