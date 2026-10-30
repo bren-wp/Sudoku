@@ -1985,7 +1985,7 @@ fun SplashPage() {
         // tests and for users who disable animations.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (shortScreen) 24.dp else 58.dp)
+                .padding(bottom = if (shortScreen) 24.dp else 70.dp)
                 .size(if (shortScreen) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
@@ -2000,7 +2000,7 @@ fun SplashPage() {
             drawArc(
                 color = Ink.cyan,
                 startAngle = -93f,
-                sweepAngle = 245f,
+                sweepAngle = 145f,
                 useCenter = false,
                 style = Stroke(width = 3.5.dp.toPx(), cap = StrokeCap.Round),
             )
