@@ -993,6 +993,64 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("number-9").assertExists()
     }
 
+    /**
+     * The five Settings panels remain real accessible controls. Check the
+     * tappable row, native dropdown value and release version at both emulator
+     * viewports instead of using the owner's flat reference as a fake UI.
+     */
+    @Test
+    fun settingsReferenceRowsKeepTouchTargetsAndCorrectContent() {
+        waitFor("home-nova-igra")
+        homeTile("postavke")
+        waitFor("screen-postavke")
+        val density = rule.activity.resources.displayMetrics.density
+        val screenWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+
+        val switches = listOf(
+            "setting-tamna-tema",
+            "setting-animacije",
+            "setting-automatske-bilješke",
+            "setting-provjera-greške",
+            "setting-isticanje-brojeva",
+        )
+        switches.forEach { tag ->
+            val node = rule.onNodeWithTag(tag)
+            node.performScrollTo().assertIsDisplayed()
+            val bounds = node.fetchSemanticsNode().boundsInRoot
+            check(bounds.height >= 48f * density - 1f &&
+                bounds.left >= -density &&
+                bounds.right <= screenWidth + density) {
+                "Settings switch $tag is too short or clipped: $bounds"
+            }
+            check(node.fetchSemanticsNode().config.contains(
+                SemanticsProperties.ToggleableState
+            )) { "Settings switch $tag must remain natively toggleable" }
+        }
+
+        val language = rule.onNodeWithTag("language-settings")
+        language.performScrollTo().assertIsDisplayed()
+        val languagePanel = language.fetchSemanticsNode().boundsInRoot
+        val value = rule.onNodeWithTag(
+            "settings-language-value", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        check(value.width > 0f && value.height > 0f &&
+            value.left >= languagePanel.left - density &&
+            value.right <= languagePanel.right + density &&
+            value.top >= languagePanel.top - density &&
+            value.bottom <= languagePanel.bottom + density) {
+            "Croatian language selector must fit in the blue language panel"
+        }
+        rule.onNodeWithText("Hrvatski", useUnmergedTree = true).assertExists()
+
+        rule.onNodeWithTag("settings-version").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText(
+            "Verzija " + BuildConfig.VERSION_NAME, useUnmergedTree = true
+        ).assertExists()
+        rule.onNodeWithTag("privacy-policy").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("about-app").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("settings-backup").assertExists()
+    }
+
     @Test
     fun settingsButtonsAreVisibleAndFunctional() {
         waitFor("home-nova-igra")
