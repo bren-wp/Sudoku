@@ -1,3 +1,13 @@
+## 1.0.48 — Postavke, zaslon 8/8
+
+- Usklađene stvarne Compose sekcije Izgled, Igra, Zvuk i vibracija, Jezik i O aplikaciji prema vlasnikovoj referenci.
+- Uvedeni lokalni tamni paneli s tankim rubovima i ravnim razdjelnicima te novi tirkizni, ljubičasti i plavi držači ikonica, bez grid-dekoracije preko teksta.
+- Usklađeni 48dp prekidači, donji opisi, razmaci i obrubljeni odabir jezika sa strelicom prema dolje.
+- Privatnost i verzija premještene u kompaktne, odvojene redove. Sve šifrirane sigurnosne kopije i stvarna lokalna pohrana ostaju funkcionalne.
+- Zasebna prigušena pozadina za Postavke i donji krajolik prema uzorku. Zadržan responsivni raspored, pristupačnost i postojeći dijalozi.
+- Android UI test provjerava međusobni redoslijed, širine i margine pet panela na 941×1672 i 720×1280.
+- v1.0.48, versionCode 49, nepromijenjen identitet paketa i API 36. Početni RGB MAE i ograničenja: `docs/settings-qa-v1.0.48.md`.
+
 ## 1.0.47 — Postignuća, zaslon 7/8
 
 - Pixel-QA dorada stvarnog Compose zaslona Postignuća prema vlasnikovoj slici 941×1672: zbroj bodova, 8 istaknutih kartica, bodovne značke, boje, tipografija i progress barovi.
