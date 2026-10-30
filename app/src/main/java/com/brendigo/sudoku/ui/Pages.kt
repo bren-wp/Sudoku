@@ -1916,7 +1916,9 @@ fun SettingsPage(
                     role = Role.Button
                 }
                 .clickable { showLanguage = true },
-            accent = Ink.teal,
+            // The owner's reference uses a BLUE outer panel border with a
+            // turquoise globe glyph, not a fully turquoise panel.
+            accent = Ink.blue,
         ) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 9.dp),
@@ -1931,7 +1933,7 @@ fun SettingsPage(
                         color = Ink.muted, fontSize = 11.sp, maxLines = 2)
                 }
                 Row(
-                    Modifier
+                    Modifier.testTag("settings-language-value")
                         .background(Color(0xB0082452), RoundedCornerShape(10.dp))
                         .border(.8.dp, Ink.blue.copy(alpha = .72f), RoundedCornerShape(10.dp))
                         .padding(horizontal = 11.dp, vertical = 10.dp),
@@ -1980,6 +1982,7 @@ fun SettingsPage(
                 SettingsRule()
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 28.dp)
+                        .testTag("settings-version")
                         .padding(horizontal = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
