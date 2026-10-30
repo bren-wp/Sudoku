@@ -377,11 +377,18 @@ fun HomePage(controller: SudokuController) {
         // widths cannot fit three readable tiles and their chevrons in one row.
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             if (maxWidth >= 300.dp) {
+                // At narrow widths the longer Croatian title wraps. Give both
+                // primary cards the same taller minimum, preserving a level row.
+                val primaryHeight = if (maxWidth < 410.dp) 184.dp else 146.dp
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     HomeTile("Nova igra", "Odaberi težinu\ni započni novu igru",
-                        Ink.teal, Modifier.weight(1f)) { controller.go(Screen.NEW_GAME) }
+                        Ink.teal, Modifier.weight(1f).heightIn(min = primaryHeight)) {
+                        controller.go(Screen.NEW_GAME)
+                    }
                     HomeTile("Dnevni izazov", "Svaki dan nova\nzagonetka",
-                        Ink.gold, Modifier.weight(1f)) { controller.go(Screen.DAILY) }
+                        Ink.gold, Modifier.weight(1f).heightIn(min = primaryHeight)) {
+                        controller.go(Screen.DAILY)
+                    }
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
