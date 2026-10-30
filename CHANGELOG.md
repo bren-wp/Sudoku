@@ -1,5 +1,9 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni vizualni prolaz **6/10 — Statistika**: četiri neovisno obojene kartice postignuća (tirkizna, plava, ljubičasta, cijan) i u zaključanom stanju, čitljiv prikaz 4 kartice na 941×1672 i prilagodljiva 2×2 mreža na 720×1280 / povećanom fontu; stvarni napredak ostaje iz baze podataka.
+- Statistički dijalozi pamte otvoreno stanje pri Android rekreaciji aktivnosti; dodani testni tagovi postotka dovršenosti i prazne povijesti te novi instrumentacijski test četiri nagradne kartice i povijesti.
+- Dodani `scripts/statistics_pixel_qa.py` i Python testovi sedam fiksnih ROI područja. Povijesni v1.0.47 globalni RGB MAE bio je **26.637/255**, detalji i izvorni SHA-256 u `docs/statistics-qa-followup-v1.0.48.md`. **To nije rezultat novog HEAD-a i ne dokazuje pixel 1:1.**
+
 - Završni prolaz zaslona **5/10 — Dnevni izazov**: lokalna rang-lista dobila je referentni zaobljeni ljubičasti obrub (25dp), tihi ljubičasti sjaj ikone i najmanje 48dp interaktivne visine. Dnevna nagrada sada koristi nativni zlatni medaljon s posudicom i zvijezdom, umjesto generičkog poklona.
 - Dodane stabilne Compose oznake sedam stvarnih datuma i nagrade, Android UI test lokalne rang-liste i kalendarskih granica, te `scripts/daily_pixel_qa.py` s devet referentnih ROI područja i Python regresijskim testovima. Stvarni prethodni v1.0.47 RGB MAE bio je **23.594/255**, detalji u `docs/daily-qa-followup-v1.0.48.md`. Novi pikseli 1:1 još nisu potvrđeni.
 
