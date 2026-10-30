@@ -1874,7 +1874,7 @@ fun SettingsPage(
             accent = Ink.blue,
         ) {
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 9.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 13.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 SettingsGlyph("speaker", Ink.purple, size = 36.dp)
@@ -1973,7 +1973,8 @@ fun SettingsPage(
         }
         // Offline encrypted backups remain accessible by scrolling below the
         // reference viewport. Keep their real callbacks and persistence.
-        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-backup"), Ink.teal) {
+        SettingsSurface(Modifier.fillMaxWidth().padding(top = 25.dp)
+            .testTag("settings-backup"), Ink.teal) {
             Column(
                 Modifier.fillMaxWidth().padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -2129,7 +2130,7 @@ private fun SettingToggle(
 ) {
     val tag = "setting-" + title.lowercase().replace(" ", "-")
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 48.dp)
+        Modifier.fillMaxWidth().heightIn(min = 52.dp)
             .testTag(tag)
             .toggleable(value = checked, role = Role.Switch, onValueChange = change)
             .semantics {
