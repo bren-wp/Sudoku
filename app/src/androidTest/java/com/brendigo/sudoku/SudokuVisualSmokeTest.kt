@@ -795,6 +795,54 @@ class SudokuVisualSmokeTest {
         waitFor("home-nova-igra")
     }
 
+    /**
+     * Day counts/dates are always real device/user data. Verify the layout
+     * instead of changing completed days just to reproduce an illustration.
+     */
+    @Test
+    fun dailyWeekdayGeometryAndLeaderboardRemainAccessible() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        val density = rule.activity.resources.displayMetrics.density
+        val width = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val week = rule.onNodeWithTag("daily-weekly-streak")
+        week.performScrollTo().assertIsDisplayed()
+        val row = week.fetchSemanticsNode().boundsInRoot
+        val days = (0..6).map { i ->
+            rule.onNodeWithTag("daily-weekday-$i")
+                .fetchSemanticsNode().boundsInRoot
+        }
+        check(days.size == 7 && days.all {
+            it.width > 0f && it.height > 0f &&
+                it.left >= row.left - density &&
+                it.right <= row.right + density &&
+                it.left >= -density &&
+                it.right <= width + density
+        }) { "Seven real calendar days must fit inside the Daily timeline" }
+        days.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + density &&
+                kotlin.math.abs(left.top - right.top) <= density * 2f) {
+                "Daily week markers are out of order or overlap: $left / $right"
+            }
+        }
+        rule.onNodeWithTag("daily-reward-emblem", useUnmergedTree = true)
+            .assertExists()
+        val action = rule.onNodeWithTag("daily-leaderboard")
+        action.performScrollTo().assertIsDisplayed()
+        val bounds = action.fetchSemanticsNode().boundsInRoot
+        check(bounds.height >= 48f * density - 1f &&
+            bounds.left >= -density && bounds.right <= width + density) {
+            "Offline leaderboard action is clipped or smaller than 48dp: $bounds"
+        }
+        action.performClick()
+        rule.onNodeWithText("Osobna rang-lista").assertExists()
+        rule.onNodeWithText(
+            "Offline rezultati na ovom uređaju. Nema globalne rang-liste."
+        ).assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+    }
+
     @Test
     fun dailyAndAchievementReferencePanelsRemainInteractive() {
         waitFor("home-nova-igra")
