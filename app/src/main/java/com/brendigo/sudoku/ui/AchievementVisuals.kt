@@ -193,25 +193,3 @@ fun AchievementSummarySurface(
     }
 }
 
-@Composable
-fun AchievementProgress(
-    fraction: Float,
-    color: Color,
-    modifier: Modifier = Modifier,
-) {
-    val amount = fraction.coerceIn(0f, 1f)
-    val shape = RoundedCornerShape(50)
-    Box(
-        modifier
-            .background(Color(0xD0042043), shape)
-            .border(0.7.dp, color.copy(alpha = .65f), shape)
-    ) {
-        if (amount > 0f) Box(
-            Modifier.matchParentSize()
-        ) {
-            Box(
-                Modifier.fillMaxWidth(amount).matchParentSize()
-            )
-        }
-    }
-}
