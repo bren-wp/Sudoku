@@ -14,6 +14,7 @@ from gameplay_pixel_qa import REGIONS as GAMEPLAY_REGIONS
 from settings_pixel_qa import REGIONS as SETTINGS_REGIONS
 from daily_pixel_qa import REGIONS as DAILY_REGIONS
 from statistics_pixel_qa import REGIONS as STATISTICS_REGIONS
+from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -35,6 +36,37 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_achievements_roi_separates_first_row_from_footer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((175, 25, 45), (200, 390, 320, 520))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            rows = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", ACHIEVEMENTS_REGIONS,
+            )
+            areas = {item["region"]: item for item in rows}
+            self.assertEqual(set(ACHIEVEMENTS_REGIONS), set(areas))
+            self.assertGreater(areas["first_award_row"]["rgb_mae_0_to_255"], 0)
+            self.assertGreater(areas["whole"]["rgb_mae_0_to_255"], 0)
+            for name in ("header", "summary", "second_award_row",
+                         "third_award_row", "fourth_award_row", "bottom_scenery"):
+                self.assertEqual(0, areas[name]["rgb_mae_0_to_255"])
+            for name in ("regions.csv", "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / name).is_file())
+
+    def test_achievements_roi_rejects_mismatched_720p_screen(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", ACHIEVEMENTS_REGIONS)
 
     def test_statistics_reference_roi_reports_achievement_card_change(self):
         with tempfile.TemporaryDirectory() as tmp:
