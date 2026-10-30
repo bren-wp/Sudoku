@@ -1194,8 +1194,14 @@ private data class PreviewAward(
 @Composable
 fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
-    var metricInfo by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
-    var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
+    // Keep open Statistics dialogs stable across device rotation and
+    // activity recreation; actual data always comes from SudokuController.
+    var metricInfo by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf<String?>(null)
+    }
+    var showHistory by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
     PageContent(topPadding = 23.dp, horizontalPadding = 18.dp) {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 5.dp)
@@ -1250,7 +1256,11 @@ fun StatsPage(controller: SudokuController) {
                     Spacer(Modifier.width(4.dp))
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
-                if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
+                if (stats.history.isEmpty()) {
+                    Box(Modifier.testTag("stats-history-empty")) {
+                        Subtitle("Još nema dovršenih igara.")
+                    }
+                }
                 stats.history.take(4).forEach { record ->
                     Row(
                         Modifier.fillMaxWidth().heightIn(min = 26.dp)
@@ -1516,7 +1526,8 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("$percentage%", color = Ink.white, fontSize = 26.sp,
-                        fontWeight = FontWeight.ExtraBold)
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.testTag("stats-completion-percent"))
                     Text("Dovršene igre", color = Ink.muted, fontSize = 9.sp, maxLines = 1)
                 }
             }
