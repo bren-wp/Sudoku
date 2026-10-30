@@ -523,6 +523,26 @@ class SudokuVisualSmokeTest {
             playedTile.bottom <= totalTile.top + 1f) {
             "Statistics metric cards overlap on a compact viewport"
         }
+        // Verify that the four metric cards and chart pair match the
+        // reference hierarchy without overlapping on either emulator width.
+        val chart = rule.onNodeWithTag("stats-difficulty-chart")
+            .fetchSemanticsNode().boundsInRoot
+        val ring = rule.onNodeWithTag("stats-completion-ring")
+            .fetchSemanticsNode().boundsInRoot
+        val statsDensity = rule.activity.resources.displayMetrics.density
+        if (screenWidthDp >= 410f) {
+            check(chart.right <= ring.left + statsDensity &&
+                kotlin.math.abs(chart.top - ring.top) <= statsDensity * 2f &&
+                kotlin.math.abs(chart.bottom - ring.bottom) <= statsDensity * 3f) {
+                "Reference Stats chart and ring must share one level row: $chart, $ring"
+            }
+        } else {
+            check(chart.bottom <= ring.top + statsDensity) {
+                "Compact Stats chart and ring must stack without overlap: $chart, $ring"
+            }
+        }
+        rule.onNodeWithTag("stats-history-panel").assertExists()
+        rule.onNodeWithTag("stats-achievements").assertExists()
         rule.onNodeWithTag("stat-tile-best").performClick()
         rule.onNodeWithText("Najbrže vrijeme dovršene Sudoku partije.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
