@@ -1345,8 +1345,6 @@ fun StatsPage(controller: SudokuController) {
 
 @Composable
 private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
-    // Four visual groups match the reference design while preserving all six
-    // internal difficulty tiers (the first two and last two are aggregated).
     val counts = listOf(
         stats.winsByLevel[0] + stats.winsByLevel[1],
         stats.winsByLevel[2],
@@ -1354,37 +1352,47 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
         stats.winsByLevel[4] + stats.winsByLevel[5],
     )
     val colors = listOf(Ink.teal, Ink.blue, Ink.purple, Ink.gold)
-    val labels = listOf("Lako", "Srednje", "Teško", "Stručno")
+    val names = listOf("Lako", "Srednje", "Teško", "Stručno")
     val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
-    NeonPanel(modifier.heightIn(min = 210.dp), Ink.blue) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 11.dp, vertical = 12.dp)) {
+    StatisticsSurface(
+        modifier.heightIn(min = 182.dp).testTag("stats-difficulty-chart")
+    ) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 BrandIcon("statistics", Modifier.size(20.dp), Ink.cyan)
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(7.dp))
                 Text("Riješene igre po težini", color = Ink.white,
-                    fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+                    fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 2)
             }
-            Spacer(Modifier.height(6.dp))
-            Row(Modifier.fillMaxWidth().height(148.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.Bottom) {
-                counts.forEachIndexed { index, amount ->
-                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(amount.toString(), color = Ink.white, fontSize = 12.sp)
-                        Spacer(Modifier.height(4.dp))
-                        Box(
-                            Modifier.fillMaxWidth(.75f)
-                                .height(if (amount == 0) 2.dp else (12 + 85 * amount / ceiling).dp)
-                                .background(
-                                    Brush.verticalGradient(listOf(
-                                        colors[index], colors[index].copy(alpha = .35f)
-                                    )),
-                                    RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
-                                )
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(labels[index], color = Ink.muted, fontSize = 9.sp,
-                            maxLines = 1, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(10.dp))
+            Box(Modifier.fillMaxWidth().height(116.dp)) {
+                StatisticsChartGrid(Modifier.fillMaxSize().padding(bottom = 16.dp))
+                Row(
+                    Modifier.fillMaxSize().padding(horizontal = 5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    counts.forEachIndexed { index, count ->
+                        Column(Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(count.toString(), color = Ink.white, fontSize = 11.sp, maxLines = 1)
+                            Spacer(Modifier.height(3.dp))
+                            val heightDp = if (count == 0) 2.dp else
+                                (10 + 61 * count / ceiling).dp
+                            Box(
+                                Modifier.fillMaxWidth(.73f).height(heightDp)
+                                    .background(
+                                        Brush.verticalGradient(listOf(
+                                            colors[index].copy(alpha = .98f),
+                                            colors[index].copy(alpha = .52f),
+                                        )),
+                                        RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+                                    )
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(names[index], color = Ink.muted, fontSize = 9.sp,
+                                maxLines = 1, textAlign = TextAlign.Center)
+                        }
                     }
                 }
             }
@@ -1394,108 +1402,119 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
 
 @Composable
 private fun CompletionRing(stats: Statistics, modifier: Modifier) {
-    val fraction = if (stats.played > 0)
+    val fraction = if (stats.played == 0) 0f else
         (stats.finished.toFloat() / stats.played).coerceIn(0f, 1f)
-    else 0f
     val percentage = (fraction * 100).toInt()
-    NeonPanel(modifier.heightIn(min = 210.dp), Ink.cyan) {
-        Column(Modifier.fillMaxSize().padding(11.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                BrandIcon("statistics", Modifier.size(19.dp), Ink.cyan)
-                Spacer(Modifier.width(5.dp))
+    StatisticsSurface(
+        modifier.heightIn(min = 182.dp).testTag("stats-completion-ring")
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                BrandIcon("statistics", Modifier.size(20.dp), Ink.cyan)
+                Spacer(Modifier.width(6.dp))
                 Text("Postotak dovršenosti", color = Ink.white,
-                    fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+                    fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                    maxLines = 2, lineHeight = 14.sp)
             }
-            Spacer(Modifier.height(5.dp))
-            Box(Modifier.fillMaxWidth().height(126.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(105.dp)) {
-                    drawArc(Ink.blue.copy(alpha = .27f), 0f, 360f, false,
+            Spacer(Modifier.height(6.dp))
+            Box(Modifier.fillMaxWidth().height(106.dp),
+                contentAlignment = Alignment.Center) {
+                Canvas(Modifier.size(101.dp)) {
+                    drawArc(Ink.blue.copy(alpha = .28f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
-                    drawArc(Ink.cyan, -90f, fraction * 360f, false,
-                        style = Stroke(12.dp.toPx(), cap = StrokeCap.Round))
+                    if (fraction > 0f) {
+                        drawArc(
+                            Brush.sweepGradient(listOf(Ink.blue, Ink.cyan, Ink.blue)),
+                            -90f, fraction * 360f, false,
+                            style = Stroke(11.dp.toPx(), cap = StrokeCap.Round),
+                        )
+                    }
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("$percentage%", fontSize = 29.sp, color = Ink.white,
+                    Text("$percentage%", color = Ink.white, fontSize = 26.sp,
                         fontWeight = FontWeight.ExtraBold)
-                    Text("Dovršene igre", color = Ink.muted, fontSize = 10.sp, maxLines = 1)
+                    Text("Dovršene igre", color = Ink.muted, fontSize = 9.sp, maxLines = 1)
                 }
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(10.dp).background(Ink.cyan, RoundedCornerShape(50)))
-                Spacer(Modifier.width(6.dp))
+                Box(Modifier.size(9.dp).background(Ink.cyan, RoundedCornerShape(50)))
+                Spacer(Modifier.width(5.dp))
                 Text("Dovršene igre", color = Ink.muted,
-                    fontSize = 11.sp, modifier = Modifier.weight(1f))
-                Text("${stats.finished}", color = Ink.white, fontSize = 12.sp,
+                    fontSize = 10.sp, modifier = Modifier.weight(1f), maxLines = 1)
+                Text("${stats.finished}", color = Ink.white, fontSize = 11.sp,
                     fontWeight = FontWeight.Bold)
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(10.dp)
-                    .background(Ink.blue.copy(alpha = .50f), RoundedCornerShape(50)))
-                Spacer(Modifier.width(6.dp))
+                Box(Modifier.size(9.dp).background(Ink.blue.copy(alpha = .52f),
+                    RoundedCornerShape(50)))
+                Spacer(Modifier.width(5.dp))
                 Text("Prekinute igre", color = Ink.muted,
-                    fontSize = 11.sp, modifier = Modifier.weight(1f))
-                Text("${(stats.played - stats.finished).coerceAtLeast(0)}", color = Ink.white, fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold)
+                    fontSize = 10.sp, modifier = Modifier.weight(1f), maxLines = 1)
+                Text("${(stats.played - stats.finished).coerceAtLeast(0)}",
+                    color = Ink.white, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
 
 @Composable
-private fun StatTile(label: String, value: String, color: Color,
-                     modifier: Modifier, onClick: () -> Unit) {
-    val tileId = when (label) {
+private fun StatTile(
+    label: String, value: String, color: Color, modifier: Modifier,
+    onClick: () -> Unit,
+) {
+    val id = when (label) {
         "Odigrane igre" -> "played"
         "Najbolje vrijeme" -> "best"
         "Ukupno vrijeme" -> "total"
         "Dnevni niz" -> "streak"
         else -> "other"
     }
-    NeonPanel(modifier.heightIn(min = 86.dp)
-        .testTag("stat-tile-$tileId")
-        .semantics { contentDescription = "$label: $value"; role = Role.Button }
-        .clickable(onClick = onClick), color) {
+    StatisticsSurface(
+        modifier.heightIn(min = 78.dp)
+            .testTag("stat-tile-$id")
+            .semantics { contentDescription = "$label: $value"; role = Role.Button }
+            .clickable(onClick = onClick),
+        accent = color, background = metricCardColors(id), corner = 12.dp,
+    ) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            // The 941px reference and compact emulator give each tile less
-            // than 180dp. Scale decorations instead of truncating the label.
-            val compact = maxWidth < 180.dp
+            val compact = maxWidth < 176.dp
             Row(
                 Modifier.fillMaxWidth().padding(
-                    horizontal = if (compact) 7.dp else 10.dp,
-                    vertical = 8.dp,
+                    horizontal = if (compact) 9.dp else 13.dp,
+                    vertical = 9.dp,
                 ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandIcon(when (label) {
-                    "Odigrane igre" -> "gamepad"
-                    "Najbolje vrijeme" -> "timer"
-                    "Ukupno vrijeme" -> "timer"
-                    "Dnevni niz" -> "flame"
-                    else -> "statistics"
-                }, Modifier.size(if (compact) 27.dp else 37.dp), color)
-                Spacer(Modifier.width(if (compact) 5.dp else 9.dp))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        label, color = Ink.muted,
+                BrandIcon(
+                    when (id) {
+                        "played" -> "gamepad"
+                        "best" -> "timer"
+                        "total" -> "timer"
+                        "streak" -> "flame-solid"
+                        else -> "statistics"
+                    },
+                    Modifier.size(if (compact) 30.dp else 40.dp), color,
+                )
+                Spacer(Modifier.width(if (compact) 7.dp else 10.dp))
+                Column(Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(label, color = Ink.muted,
                         fontSize = if (compact) 10.sp else 12.sp,
-                        lineHeight = if (compact) 12.sp else 14.sp,
-                        maxLines = 2,
-                    )
-                    Text(
-                        value, color = Ink.white,
-                        fontSize = if (compact && value.length > 7) 14.sp
-                            else if (compact) 18.sp else 22.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        maxLines = 1,
+                        lineHeight = if (compact) 12.sp else 14.sp, maxLines = 2)
+                    Text(value, color = Ink.white,
+                        fontSize = if (compact && value.length > 7) 15.sp
+                            else if (compact) 19.sp else 23.sp,
+                        fontWeight = FontWeight.ExtraBold, maxLines = 1,
                     )
                 }
-                BrandIcon("next", Modifier.size(if (compact) 12.dp else 17.dp), color)
+                BrandIcon("next", Modifier.size(if (compact) 12.dp else 15.dp), color)
             }
         }
     }
 }
-
 
 private data class Achievement(
     val icon: String, val title: String, val text: String, val goal: Int,
