@@ -998,20 +998,43 @@ class SudokuVisualSmokeTest {
                 shot, minX, minY, maxX - minX + 1, maxY - minY + 1
             )
             try {
-                val width = 1160
-                val height = (crop.height.toFloat() / crop.width * width).toInt()
-                check(height in 50..1100) { "Invalid Compose wordmark aspect ratio" }
-                val scaled = Bitmap.createScaledBitmap(crop, width, height, true)
+                // A screen screenshot is inherently opaque. Make the QA-only
+                // black studio backdrop transparent before resizing; the
+                // owner's 1254px wordmark reference has an alpha channel.
+                // The actual 7-3-9 tile stays opaque (its dark blue is NOT black).
+                val transparent = crop.copy(Bitmap.Config.ARGB_8888, true)
+                    ?: error("Cannot allocate transparent wordmark QA image")
+                try {
+                    val pixels = IntArray(crop.width * crop.height)
+                    transparent.getPixels(pixels, 0, crop.width, 0, 0,
+                        crop.width, crop.height)
+                    for (index in pixels.indices) {
+                        val c = pixels[index]
+                        if (Color.red(c) <= 4 && Color.green(c) <= 4 &&
+                            Color.blue(c) <= 4) pixels[index] = Color.TRANSPARENT
+                    }
+                    transparent.setPixels(pixels, 0, crop.width, 0, 0,
+                        crop.width, crop.height)
+                    val width = 1160
+                    val height = (transparent.height.toFloat() /
+                        transparent.width * width).toInt()
+                    check(height in 50..1100) {
+                        "Invalid Compose wordmark aspect ratio"
+                    }
+                    val scaled = Bitmap.createScaledBitmap(
+                        transparent, width, height, true
+                    )
                 try {
                     val full = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
                     try {
                         val canvas = Canvas(full)
-                        canvas.drawColor(Color.BLACK)
+                        // Keep outside-logo pixels transparent, not black.
                         canvas.drawBitmap(scaled, (1254 - width) / 2f,
                             (1254 - height) / 2f, Paint(Paint.FILTER_BITMAP_FLAG))
                         saveBrandingQaPng("09-wordmark.png", full)
                     } finally { full.recycle() }
                 } finally { scaled.recycle() }
+                } finally { transparent.recycle() }
             } finally { crop.recycle() }
         } finally { shot.recycle() }
     }
