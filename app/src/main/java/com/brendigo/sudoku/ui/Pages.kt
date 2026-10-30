@@ -1415,8 +1415,8 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                 BrandIcon("statistics", Modifier.size(20.dp), Ink.cyan)
                 Spacer(Modifier.width(6.dp))
                 Text("Postotak dovršenosti", color = Ink.white,
-                    fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                    maxLines = 2, lineHeight = 14.sp)
+                    fontSize = 10.sp, fontWeight = FontWeight.Bold,
+                    maxLines = 1, lineHeight = 12.sp)
             }
             Spacer(Modifier.height(6.dp))
             Box(Modifier.fillMaxWidth().height(106.dp),
