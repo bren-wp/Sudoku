@@ -545,7 +545,7 @@ fun HomePage(controller: SudokuController) {
  * of drawing a flat yellow disc behind the text.
  */
 @Composable
-private fun HomeTileArtwork(accent: Color, compact: Boolean) {
+private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
     if (compact) return
     Canvas(Modifier.matchParentSize()) {
         val w = size.width
