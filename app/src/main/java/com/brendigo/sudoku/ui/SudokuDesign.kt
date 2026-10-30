@@ -72,7 +72,9 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
  * noninteractive scenery. No full-screen screenshot replaces any UI.
  */
 @Composable
-fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splash: Boolean = false, home: Boolean = false) {
+fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
+                   splash: Boolean = false, home: Boolean = false,
+                   newGame: Boolean = false) {
     val context = LocalContext.current
     val originalNightscape = remember(context) {
         runCatching {
@@ -98,7 +100,29 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
         // a dark central title area, not one grid crossing the full screen.
         // Geometry is anchored to viewport width, not device pixel density.
         // Keep it purely decorative so Compose buttons retain touch semantics.
-        if (home) {
+        if (newGame) {
+            // Only the upper-right tilted board belongs to the New Game
+            // reference. Never draw the giant full-screen decorative grid.
+            val boardTint = Color(0xFF167AF2)
+            for (i in 0..5) {
+                val x = w * (.67f + i * .102f)
+                drawLine(boardTint.copy(alpha = if (i == 2) .65f else .38f),
+                    Offset(x + w * .07f, 0f),
+                    Offset(x - w * .13f, h * .24f),
+                    strokeWidth = if (i == 2) 3.0f else 2.2f)
+            }
+            for (row in 0..5) {
+                val y = h * (-.045f + row * .061f)
+                drawLine(boardTint.copy(alpha = if (row == 3) .58f else .34f),
+                    Offset(w * .60f, y - h * .055f),
+                    Offset(w * 1.06f, y + h * .06f), strokeWidth = 2.5f)
+            }
+            val selected = Offset(w * .80f, h * .152f)
+            drawCircle(Brush.radialGradient(
+                listOf(Ink.cyan.copy(alpha = .36f), Color.Transparent),
+                center = selected, radius = w * .12f),
+                radius = w * .12f, center = selected)
+        } else if (home) {
             // The original Home reference has two isolated, slanted boards.
             // The old shared grid crossed the title and bled behind the cards.
             for (i in -2..5) {
@@ -164,11 +188,29 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
                     android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.NORMAL
                 )
             }
-            listOf(
+            val digits = if (newGame) listOf(
+                Triple("5", .73f, .095f), Triple("9", .96f, .127f),
+                Triple("3", .80f, .176f), Triple("1", .70f, .215f),
+                Triple("6", .85f, .231f)
+            ) else listOf(
                 Triple("9", .10f, .034f), Triple("5", .86f, .021f),
                 Triple("3", .20f, .11f), Triple("1", .70f, .095f),
                 Triple("6", .92f, .18f)
-            ).forEach { (digit, x, y) ->
+            )
+            if (newGame) {
+                paint.textSize = w * .052f
+                paint.alpha = 180
+            }
+            digits.forEach { (digit, x, y) ->
+                if (newGame && digit == "3") {
+                    paint.color = android.graphics.Color.rgb(26, 213, 255)
+                    paint.alpha = 245
+                    paint.setShadowLayer(w * .025f, 0f, 0f, paint.color)
+                } else if (newGame) {
+                    paint.color = android.graphics.Color.rgb(37, 121, 228)
+                    paint.alpha = 165
+                    paint.clearShadowLayer()
+                }
                 canvas.nativeCanvas.drawText(digit, w * x, h * y, paint)
             }
         }
@@ -324,8 +366,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
         // The source image contains only scenery beneath all buttons and
         // card interactions. Its first pixels fade in to avoid a visible seam.
         originalNightscape?.let { art ->
-            val y = if (splash) .613f else .730f
-            val height = if (splash) .387f else .390f
+            val y = if (splash) .613f else if (newGame) .800f else .730f
+            val height = if (splash) .387f else if (newGame) .200f else .390f
             drawImage(
                 image = art,
                 srcSize = IntSize(art.width, art.height),
