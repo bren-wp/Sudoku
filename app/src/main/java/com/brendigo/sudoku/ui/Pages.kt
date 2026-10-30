@@ -844,7 +844,7 @@ private fun DailyMetric(
 ) {
     DailyFrame(modifier.heightIn(min = 57.dp), Ink.blue, radius = 12.dp) {
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 11.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BrandIcon(icon, Modifier.size(29.dp), color)
@@ -872,7 +872,7 @@ fun DailyPage(controller: SudokuController) {
     PageContent(topPadding = 21.dp, showFooter = false, horizontalPadding = 18.dp) {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 16.dp)
-        Spacer(Modifier.height(31.dp))
+        Spacer(Modifier.height(25.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val compactSummary = maxWidth < 355.dp ||
                 LocalDensity.current.fontScale >= 1.3f
@@ -966,11 +966,11 @@ fun DailyPage(controller: SudokuController) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val compactHero = maxWidth < 355.dp ||
                 LocalDensity.current.fontScale >= 1.3f
-        DailyFrame(Modifier.fillMaxWidth().heightIn(min = 196.dp)
+        DailyFrame(Modifier.fillMaxWidth().heightIn(min = 202.dp)
             .testTag("daily-hero"), Ink.blue) {
             DailyHeroBackdrop()
             Column(
-                Modifier.fillMaxWidth().heightIn(min = 196.dp)
+                Modifier.fillMaxWidth().heightIn(min = 202.dp)
                     .padding(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
@@ -978,15 +978,16 @@ fun DailyPage(controller: SudokuController) {
                     color = Ink.muted, fontSize = 11.sp, maxLines = 1)
                 Text(
                     "Misteriozna planina",
-                    fontSize = if (compactHero) 23.sp else 28.sp,
+                    fontSize = if (compactHero) 23.sp else 25.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Ink.white,
                     maxLines = if (compactHero) 2 else 1,
                 )
                 Text("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!",
+                    modifier = Modifier.fillMaxWidth(if (compactHero) 1f else .62f),
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(32.dp))
                 Column(
                     Modifier.fillMaxWidth().testTag("daily-metrics"),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
