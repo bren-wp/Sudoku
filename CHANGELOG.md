@@ -1,5 +1,9 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni prolaz **9/10 — Wordmark**: stvarni Compose 7–3–9 znak ima suptilan cijan sjaj; potpis `by Brendigo` poravnat je s desnim rubom natpisa `Sudoku` bez nepostojeće vodoravne crte, a natpis koristi prijelaz bijela→cijan→tirkizna. Dodani su `wordmark-*` testTagovi i Android geometrijski test.
+- Nativni `09-wordmark.png` instrumentacijski izvoz sada rekonstruira alfa-kanal iz **dvije stvarne Compose snimke, na bijeloj i crnoj podlozi**, umjesto brisanja gotovo crnih piksela; omjer dimenzija ostaje očuvan. Dodani `scripts/wordmark_pixel_qa.py` i Python regresije alfa-pogrešaka s odvojenim izvještajem za znak, natpis i potpis.
+- Provjereni originalni 1254² RGBA PNG ima alpha≥128 granice **(63,443,1204,779)**. SHA-256, postupak, ograničenja i prihvatni kriteriji u `docs/wordmark-qa-followup-v1.0.48.md`. Konačan stvarni 1:1 rezultat **nije potvrđen**; novi QA export još mora proći Android CI.
+
 - Završni vizualni prolaz **8/10 — Splash**: na stvarnom Compose logotipu 7–3–9 dodan je cijan/plavi halo s fokusom na donjem lijevom rubu i zaobljeniji kutovi samo za svjetleći Splash znak; svi drugi mali logotipi ostaju nepromijenjeni.
 - Instrumentacija sada mjeri centriranje, vertikalni redoslijed i nepreklapanje logotipa, natpisa, slogana i indikatora učitavanja na dvije rezolucije; dodani `scripts/splash_pixel_qa.py` i Python regresije šest fiksnih područja. Iz stvarne prethodne v1.0.47 emulatorske snimke izmjeren je RGB MAE **12.498/255** (detalji i SHA-256 u `docs/splash-qa-followup-v1.0.48.md`); ovo **nije** rezultat novog commita i ne potvrđuje 1:1.
 
