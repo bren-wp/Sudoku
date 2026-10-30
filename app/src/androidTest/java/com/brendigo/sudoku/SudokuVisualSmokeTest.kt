@@ -1323,91 +1323,134 @@ class SudokuVisualSmokeTest {
     }
 
     /**
-     * QA-only render of the REAL in-app Compose header. The test places the
-     * branded Compose component on a black canvas, crops its actual pixels,
-     * and centers the crop inside a 1254px square to compare with the owner's
-     * standalone wordmark artwork. No application preferences are modified.
+     * Export the actual Compose wordmark as an RGBA 1254x1254 QA image.
+     *
+     * A system screenshot is opaque even when a view draws translucent
+     * strokes. Taking REAL Compose screenshots on BOTH black and white
+     * canvases lets us recover glyph and halo alpha instead of incorrectly
+     * marking every near-black pixel fully transparent. Nothing from the
+     * owner's artwork is pasted into the app or the test export.
      */
     @Test
     fun captureActualComposeWordmarkForTenReferenceQa() {
         waitFor("home-nova-igra")
-        rule.runOnUiThread {
-            rule.activity.setContent {
-                SudokuTheme {
-                    Box(Modifier.fillMaxSize().background(ComposeColor.Black),
-                        contentAlignment = Alignment.Center) {
-                        BrandHeader(Modifier.fillMaxWidth())
+
+        fun captureStudio(backdrop: ComposeColor): Bitmap {
+            rule.runOnUiThread {
+                rule.activity.setContent {
+                    SudokuTheme {
+                        Box(
+                            Modifier.fillMaxSize().background(backdrop),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            BrandHeader(Modifier.fillMaxWidth())
+                        }
                     }
                 }
             }
+            rule.waitForIdle()
+            Thread.sleep(250)
+            return InstrumentationRegistry.getInstrumentation()
+                .uiAutomation.takeScreenshot()
+                ?: error("No real Compose wordmark screenshot")
         }
-        rule.waitForIdle()
-        Thread.sleep(350)
-        val shot = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
-            ?: error("No real Compose logo screenshot")
+
+        val black = captureStudio(ComposeColor.Black)
+        val white = captureStudio(ComposeColor.White)
         try {
-            var minX = shot.width
-            var minY = shot.height
-            var maxX = -1
-            var maxY = -1
-            for (y in shot.height / 4 until shot.height * 3 / 4 step 2) {
-                for (x in 0 until shot.width step 2) {
-                    val c = shot.getPixel(x, y)
-                    if (Color.red(c) > 48 || Color.green(c) > 48 ||
-                        Color.blue(c) > 84) {
-                        minX = minOf(minX, x)
-                        minY = minOf(minY, y)
-                        maxX = maxOf(maxX, x)
-                        maxY = maxOf(maxY, y)
+            check(black.width == white.width && black.height == white.height) {
+                "Wordmark dual-background shots differ in resolution"
+            }
+            val count = black.width * black.height
+            val darkPixels = IntArray(count)
+            val lightPixels = IntArray(count)
+            val recovered = IntArray(count)
+            black.getPixels(darkPixels, 0, black.width, 0, 0, black.width, black.height)
+            white.getPixels(lightPixels, 0, white.width, 0, 0, white.width, white.height)
+
+            var left = black.width
+            var top = black.height
+            var right = -1
+            var bottom = -1
+            for (y in black.height / 4 until black.height * 3 / 4) {
+                for (x in 0 until black.width) {
+                    val offset = y * black.width + x
+                    val dark = darkPixels[offset]
+                    val light = lightPixels[offset]
+                    // W = alpha*foreground + (1-alpha)*white;
+                    // B = alpha*foreground. Recover alpha using W - B.
+                    val delta = (
+                        (Color.red(light) - Color.red(dark)) +
+                            (Color.green(light) - Color.green(dark)) +
+                            (Color.blue(light) - Color.blue(dark))
+                        ) / 3
+                    val alpha = (255 - delta).coerceIn(0, 255)
+                    if (alpha < 5) continue
+                    recovered[offset] = Color.argb(
+                        alpha,
+                        (Color.red(dark) * 255 / alpha).coerceIn(0, 255),
+                        (Color.green(dark) * 255 / alpha).coerceIn(0, 255),
+                        (Color.blue(dark) * 255 / alpha).coerceIn(0, 255),
+                    )
+                    if (alpha >= 12) {
+                        left = minOf(left, x)
+                        top = minOf(top, y)
+                        right = maxOf(right, x)
+                        bottom = maxOf(bottom, y)
                     }
                 }
             }
-            check(maxX - minX > 100 && maxY - minY > 30) {
-                "Could not find original Compose brand header on screenshot"
+            check(right - left > 100 && bottom - top > 30) {
+                "Native wordmark must contain an opaque visible logo and text"
             }
-            val crop = Bitmap.createBitmap(
-                shot, minX, minY, maxX - minX + 1, maxY - minY + 1
+            val capture = Bitmap.createBitmap(
+                black.width, black.height, Bitmap.Config.ARGB_8888
             )
             try {
-                // A screen screenshot is inherently opaque. Make the QA-only
-                // black studio backdrop transparent before resizing; the
-                // owner's 1254px wordmark reference has an alpha channel.
-                // The actual 7-3-9 tile stays opaque (its dark blue is NOT black).
-                val transparent = crop.copy(Bitmap.Config.ARGB_8888, true)
-                    ?: error("Cannot allocate transparent wordmark QA image")
+                capture.setPixels(recovered, 0, black.width,
+                    0, 0, black.width, black.height)
+                val crop = Bitmap.createBitmap(
+                    capture, left, top, right - left + 1, bottom - top + 1
+                )
                 try {
-                    val pixels = IntArray(crop.width * crop.height)
-                    transparent.getPixels(pixels, 0, crop.width, 0, 0,
-                        crop.width, crop.height)
-                    for (index in pixels.indices) {
-                        val c = pixels[index]
-                        if (Color.red(c) <= 4 && Color.green(c) <= 4 &&
-                            Color.blue(c) <= 4) pixels[index] = Color.TRANSPARENT
-                    }
-                    transparent.setPixels(pixels, 0, crop.width, 0, 0,
-                        crop.width, crop.height)
-                    val width = 1160
-                    val height = (transparent.height.toFloat() /
-                        transparent.width * width).toInt()
-                    check(height in 50..1100) {
-                        "Invalid Compose wordmark aspect ratio"
+                    // Fixed marketing placement at the user's 1254px reference
+                    // size. Do NOT distort the wordmark aspect ratio or
+                    // overwrite alpha to cosmetically improve its pixel MAE.
+                    val targetWidth = 1141
+                    val targetHeight = (
+                        crop.height.toDouble() * targetWidth / crop.width
+                    ).toInt()
+                    check(targetHeight in 150..650) {
+                        "Unexpected native wordmark proportions: " +
+                            "${crop.width}x${crop.height}"
                     }
                     val scaled = Bitmap.createScaledBitmap(
-                        transparent, width, height, true
+                        crop, targetWidth, targetHeight, true
                     )
-                try {
-                    val full = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
                     try {
-                        val canvas = Canvas(full)
-                        // Keep outside-logo pixels transparent, not black.
-                        canvas.drawBitmap(scaled, (1254 - width) / 2f,
-                            (1254 - height) / 2f, Paint(Paint.FILTER_BITMAP_FLAG))
-                        saveBrandingQaPng("09-wordmark.png", full)
-                    } finally { full.recycle() }
-                } finally { scaled.recycle() }
-                } finally { transparent.recycle() }
-            } finally { crop.recycle() }
-        } finally { shot.recycle() }
+                        val full = Bitmap.createBitmap(
+                            1254, 1254, Bitmap.Config.ARGB_8888
+                        )
+                        try {
+                            val leftMargin = 63f
+                            val topMargin = 611f - targetHeight / 2f
+                            Canvas(full).drawBitmap(
+                                scaled, leftMargin, topMargin,
+                                Paint(Paint.FILTER_BITMAP_FLAG)
+                            )
+                            check(Color.alpha(full.getPixel(0, 0)) == 0) {
+                                "QA wordmark export must keep transparent margins"
+                            }
+                            check(Color.alpha(full.getPixel(1253, 1253)) == 0)
+                            saveBrandingQaPng("09-wordmark.png", full)
+                        } finally { full.recycle() }
+                    } finally { scaled.recycle() }
+                } finally { crop.recycle() }
+            } finally { capture.recycle() }
+        } finally {
+            black.recycle()
+            white.recycle()
+        }
     }
 
     private fun saveBrandingQaPng(name: String, bitmap: Bitmap) {
