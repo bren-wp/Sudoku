@@ -419,7 +419,7 @@ private fun GameTool(
     active: Boolean = false, badge: String? = null,
     enabled: Boolean = true, tag: String = "", onClick: () -> Unit,
 ) {
-    NeonPanel(
+    Box(
         modifier.testTag(tag)
             .alpha(if (enabled) 1f else .53f)
             .semantics {
@@ -432,8 +432,19 @@ private fun GameTool(
                 selected = active
             }
             .heightIn(min = 48.dp).height(height)
+            .clip(RoundedCornerShape(13.dp))
+            .background(
+                Brush.verticalGradient(
+                    if (active) listOf(Color(0xFF00626D), Color(0xFF003B52), Color(0xFF032B45))
+                    else listOf(Color(0xFF0A2350), Color(0xFF061C46), Color(0xFF081C44))
+                )
+            )
+            .border(
+                if (active) 1.6.dp else 1.dp,
+                if (active) Ink.cyan else Ink.blue.copy(alpha = .75f),
+                RoundedCornerShape(13.dp),
+            )
             .clickable(enabled = enabled, onClick = onClick),
-        if (active) Ink.cyan else accent, corner = 14.dp,
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val narrowTool = maxWidth < 83.dp
@@ -459,15 +470,15 @@ private fun GameTool(
                         else -> "grid"
                     },
                     Modifier.size(when {
-                        isNotes && condensedTool -> 16.dp
-                        isNotes || condensedTool -> 20.dp
-                        else -> 25.dp
+                        isNotes && condensedTool -> 19.dp
+                        isNotes || condensedTool -> 23.dp
+                        else -> 29.dp
                     }),
                     if (active) Ink.cyan else Ink.muted,
                 )
                 Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
                 Text(name, color = Ink.white,
-                    fontSize = if (condensedTool) 9.sp else 11.sp, maxLines = 1)
+                    fontSize = if (condensedTool) 9.sp else 13.sp, maxLines = 1)
             }
             if (isNotes) {
                 Row(
@@ -480,7 +491,7 @@ private fun GameTool(
                     Text(
                         if (active) "Uključeno" else "Isključeno",
                         color = if (active) Ink.cyan else Ink.muted,
-                        fontSize = if (condensedTool) 7.sp else 9.sp,
+                        fontSize = if (condensedTool) 7.sp else 10.sp,
                         maxLines = 1,
                     )
                     Box(
@@ -561,7 +572,7 @@ private fun NumberRow(
     enabled: Boolean, columns: Int, onClick: (Int) -> Unit,
 ) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val gap = 7.dp
+        val gap = 6.dp
         val keyWidth = (maxWidth - gap * (columns - 1)) / columns
         val keyFontSize = when {
             keyWidth < 42.dp -> 20.sp
@@ -573,13 +584,19 @@ private fun NumberRow(
             horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
         ) {
             values.forEach { value ->
-                NeonPanel(
+                Box(
                     Modifier.width(keyWidth).testTag("number-$value")
                         .alpha(if (enabled) 1f else .50f)
                         .semantics { contentDescription = "Unesi broj $value"; role = Role.Button }
                         .heightIn(min = 48.dp).height(height)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF103773), Color(0xFF0B2B63), Color(0xFF092452))
+                            )
+                        )
+                        .border(1.dp, Color(0xFF2377ED), RoundedCornerShape(10.dp))
                         .clickable(enabled = enabled) { onClick(value) },
-                    highlight = Ink.blue, corner = 13.dp,
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(value.toString(), color = Ink.white,
