@@ -62,6 +62,41 @@ class PixelCompareTest(unittest.TestCase):
                     folder / "wrong-size-result",
                 )
 
+    def test_transparent_logo_rejects_opaque_black_even_when_rgb_is_identical(self):
+        from pixel_compare import BRANDING_SIZE
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGBA", BRANDING_SIZE, (0, 0, 0, 0))
+            observed = Image.new("RGBA", BRANDING_SIZE, (0, 0, 0, 255))
+            reference.save(folder / "ref.png")
+            observed.save(folder / "observed.png")
+            measured = compare(
+                folder / "ref.png", folder / "observed.png",
+                folder / "result", expected_size=BRANDING_SIZE,
+            )
+            # The old RGB-only comparator falsely reported a perfect match.
+            self.assertEqual(0, measured["mean_error_0_to_255"])
+            self.assertEqual(255, measured["alpha_mae_0_to_255"])
+            self.assertEqual(63.75, measured["rgba_mae_0_to_255"])
+            self.assertEqual(0, measured["rgba_within_12_pct"])
+            self.assertGreater(measured["navy_composited_rgb_mae"], 0)
+
+    def test_identical_transparent_branding_has_zero_alpha_error(self):
+        from pixel_compare import BRANDING_SIZE
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGBA", BRANDING_SIZE, (0, 0, 0, 0))
+            reference.putpixel((500, 500), (1, 210, 240, 255))
+            reference.save(folder / "logo.png")
+            measured = compare(
+                folder / "logo.png", folder / "logo.png",
+                folder / "result", expected_size=BRANDING_SIZE,
+            )
+            self.assertEqual(0, measured["alpha_mae_0_to_255"])
+            self.assertEqual(0, measured["rgba_mae_0_to_255"])
+            self.assertEqual(100, measured["rgba_within_12_pct"])
+            self.assertEqual(0, measured["navy_composited_rgb_mae"])
+
     def test_volatile_mask_measures_stable_content_without_hiding_global_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
