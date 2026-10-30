@@ -11,6 +11,7 @@ from pixel_compare import REFERENCE_SIZE, compare
 from home_pixel_qa import measure_home, measure_regions
 from new_game_pixel_qa import REGIONS as NEW_GAME_REGIONS
 from gameplay_pixel_qa import REGIONS as GAMEPLAY_REGIONS
+from settings_pixel_qa import REGIONS as SETTINGS_REGIONS
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -32,6 +33,38 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_settings_qa_detects_sound_panel_difference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            # Only sound card changes, not the underlying owner reference.
+            actual.paste((0, 0, 110), (120, 1000, 270, 1090))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            rows = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", SETTINGS_REGIONS,
+            )
+            by_region = {row["region"]: row for row in rows}
+            self.assertEqual(set(SETTINGS_REGIONS), set(by_region))
+            self.assertGreater(by_region["sound"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_region["appearance"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_region["language"]["rgb_mae_0_to_255"])
+            self.assertGreater(by_region["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+            self.assertTrue((folder / "evidence" / "overlay.png").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+
+    def test_settings_qa_rejects_incorrect_reference_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", SETTINGS_REGIONS)
 
     def test_gameplay_qa_reports_board_only_difference(self):
         with tempfile.TemporaryDirectory() as tmp:
