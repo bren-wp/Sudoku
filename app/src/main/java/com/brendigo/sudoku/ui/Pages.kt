@@ -1392,7 +1392,9 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
     val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
     val earned = fraction >= 1f
     StatisticsSurface(
-        modifier.heightIn(min = 74.dp),
+        modifier.heightIn(
+            min = if (LocalDensity.current.fontScale >= 1.3f) 100.dp else 84.dp
+        ),
         // Original's four previews retain their independent teal, blue,
         // purple and cyan accents even when the underlying award is locked.
         accent = award.tint.copy(alpha = if (earned) 1f else .72f),
