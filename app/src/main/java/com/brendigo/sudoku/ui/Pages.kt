@@ -1295,47 +1295,38 @@ fun StatsPage(controller: SudokuController) {
                     Text("Pogledaj sve", color = Ink.cyan, fontSize = 11.sp)
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    listOf(
-                        PreviewAward("Prva pobjeda", "star", stats.finished, 1, Ink.teal),
-                        PreviewAward("Brzinac", "timer", stats.fastWins, 1, Ink.blue),
-                        PreviewAward("Pobjednički niz", "flame-solid", stats.bestStreak, 7, Ink.purple),
-                        PreviewAward("Majstor logike", "brain", stats.winsByLevel[3], 50, Ink.cyan),
-                    ).forEach { award ->
-                        val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
-                        StatisticsSurface(
-                            Modifier.weight(1f).heightIn(min = 72.dp),
-                            accent = if (fraction >= 1f) award.tint else Ink.blue,
-                            background = listOf(
-                                award.tint.copy(alpha = .24f),
-                                Color(0xFF081C40),
-                            ),
-                            corner = 9.dp,
-                        ) {
-                            Column(
-                                Modifier.fillMaxWidth().padding(6.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(3.dp),
-                            ) {
-                                BrandIcon(
-                                    if (fraction >= 1f) award.icon else "lock",
-                                    Modifier.size(20.dp),
-                                    if (fraction >= 1f) award.tint else Ink.muted,
-                                )
-                                Text(award.title, color = Ink.white, fontSize = 9.sp,
-                                    maxLines = 1, textAlign = TextAlign.Center)
-                                Box(
-                                    Modifier.fillMaxWidth().height(4.dp)
-                                        .background(Ink.blue.copy(alpha = .30f),
-                                            RoundedCornerShape(8.dp)),
-                                ) {
-                                    Box(
-                                        Modifier.fillMaxWidth(fraction).fillMaxHeight()
-                                            .background(award.tint, RoundedCornerShape(8.dp)),
-                                    )
+                val previews = listOf(
+                    PreviewAward("Prva pobjeda", "star", stats.finished, 1, Ink.teal),
+                    PreviewAward("Brzinac", "timer", stats.fastWins, 1, Ink.blue),
+                    PreviewAward("Pobjednički niz", "flame-solid", stats.bestStreak, 7, Ink.purple),
+                    PreviewAward("Majstor logike", "brain", stats.winsByLevel[3], 50, Ink.cyan),
+                )
+                // Four across on the owner's 941px reference; a legible 2x2
+                // grid on narrower devices or when the system font is enlarged.
+                BoxWithConstraints(Modifier.fillMaxWidth().testTag("stats-award-grid")) {
+                    val compactAwards = maxWidth < 350.dp ||
+                        LocalDensity.current.fontScale >= 1.3f
+                    if (compactAwards) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            previews.chunked(2).forEachIndexed { row, pair ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    pair.forEachIndexed { column, award ->
+                                        StatsAwardPreview(
+                                            award,
+                                            Modifier.weight(1f)
+                                                .testTag("stats-award-preview-${row * 2 + column}"),
+                                        )
+                                    }
                                 }
-                                Text("${award.current.coerceAtMost(award.goal)}/${award.goal}",
-                                    color = Ink.muted, fontSize = 9.sp)
+                            }
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                            previews.forEachIndexed { index, award ->
+                                StatsAwardPreview(
+                                    award,
+                                    Modifier.weight(1f).testTag("stats-award-preview-$index"),
+                                )
                             }
                         }
                     }
@@ -1381,6 +1372,55 @@ fun StatsPage(controller: SudokuController) {
                 TextButton(onClick = { showHistory = false }) { Text("Zatvori", color = Ink.cyan) }
             },
         )
+    }
+}
+
+
+/** A real, locked-or-earned achievement tile; never fabricate progress. */
+@Composable
+private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
+    val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
+    val earned = fraction >= 1f
+    StatisticsSurface(
+        modifier.heightIn(min = 74.dp),
+        // Original's four previews retain their independent teal, blue,
+        // purple and cyan accents even when the underlying award is locked.
+        accent = award.tint.copy(alpha = if (earned) 1f else .72f),
+        background = listOf(
+            award.tint.copy(alpha = if (earned) .27f else .17f),
+            Color(0xFF081C40),
+        ),
+        corner = 9.dp,
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            BrandIcon(
+                if (earned) award.icon else "lock",
+                Modifier.size(20.dp),
+                if (earned) award.tint else Ink.muted,
+            )
+            Text(
+                award.title, color = Ink.white, fontSize = 9.sp,
+                maxLines = 2, lineHeight = 11.sp, textAlign = TextAlign.Center,
+            )
+            Box(
+                Modifier.fillMaxWidth().height(4.dp)
+                    .background(Ink.blue.copy(alpha = .30f),
+                        RoundedCornerShape(8.dp)),
+            ) {
+                Box(
+                    Modifier.fillMaxWidth(fraction).fillMaxHeight()
+                        .background(award.tint, RoundedCornerShape(8.dp)),
+                )
+            }
+            Text(
+                "${award.current.coerceAtMost(award.goal)}/${award.goal}",
+                color = Ink.muted, fontSize = 9.sp,
+            )
+        }
     }
 }
 
