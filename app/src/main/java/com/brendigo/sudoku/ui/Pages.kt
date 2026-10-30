@@ -1155,7 +1155,7 @@ fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
     var metricInfo by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
-    PageContent(topPadding = 18.dp) {
+    PageContent(topPadding = 14.dp, horizontalPadding = 18.dp) {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true, onBack = { controller.go(Screen.HOME) })
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("Odigrane igre", stats.played.toString(), Ink.teal, Modifier.weight(1f)) {
@@ -1175,10 +1175,10 @@ fun StatsPage(controller: SudokuController) {
             }
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            if (maxWidth >= 348.dp) {
+            if (maxWidth >= 348.dp && LocalDensity.current.fontScale < 1.3f) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    DifficultyChart(stats, Modifier.weight(1.25f))
-                    CompletionRing(stats, Modifier.weight(1f))
+                    DifficultyChart(stats, Modifier.weight(1.18f))
+                    CompletionRing(stats, Modifier.weight(.92f))
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -1187,7 +1187,11 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 132.dp), Ink.blue) {
+        StatisticsSurface(
+            Modifier.fillMaxWidth().heightIn(
+                min = if (stats.history.isEmpty()) 78.dp else 136.dp
+            ).testTag("stats-history-panel")
+        ) {
             Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
@@ -1196,7 +1200,7 @@ fun StatsPage(controller: SudokuController) {
                         .clickable { showHistory = true },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    BrandIcon("grid", Modifier.size(19.dp), Ink.cyan)
+                    BrandIcon("statistics", Modifier.size(21.dp), Ink.cyan)
                     Spacer(Modifier.width(8.dp))
                     Text("Nedavni napredak", color = Ink.white, fontSize = 16.sp,
                         modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
@@ -1205,25 +1209,38 @@ fun StatsPage(controller: SudokuController) {
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
                 if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
-                stats.history.take(4).forEach {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        BrandIcon("grid", Modifier.size(21.dp), difficultyColors[it.level])
-                        Spacer(Modifier.width(9.dp))
-                        Text(difficultyLabels[it.level], color = Ink.white, modifier = Modifier.weight(1f))
-                        Text(formatTime(it.seconds), color = Ink.muted, fontSize = 13.sp)
+                stats.history.take(4).forEach { record ->
+                    Row(
+                        Modifier.fillMaxWidth().heightIn(min = 26.dp)
+                            .background(Color(0xA6061A42), RoundedCornerShape(7.dp))
+                            .border(.5.dp, Ink.blue.copy(alpha = .38f),
+                                RoundedCornerShape(7.dp))
+                            .padding(horizontal = 8.dp, vertical = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        BrandIcon("grid", Modifier.size(17.dp), difficultyColors[record.level])
                         Spacer(Modifier.width(8.dp))
-                        Text(it.date, color = Ink.muted, fontSize = 11.sp)
+                        Text(difficultyLabels[record.level],
+                            color = difficultyColors[record.level],
+                            modifier = Modifier.weight(1f), fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold, maxLines = 1)
+                        BrandIcon("timer", Modifier.size(15.dp), Ink.muted)
+                        Spacer(Modifier.width(4.dp))
+                        Text(formatTime(record.seconds), color = Ink.muted, fontSize = 10.sp)
+                        Spacer(Modifier.width(8.dp))
+                        Text(record.date, color = Ink.muted, fontSize = 10.sp, maxLines = 1)
+                        BrandIcon("next", Modifier.size(12.dp), Ink.cyan)
                     }
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 109.dp)
+        StatisticsSurface(Modifier.fillMaxWidth().heightIn(min = 108.dp)
             .testTag("stats-achievements")
             .semantics {
                 contentDescription = "Otvori svih 24 postignuća"
                 role = Role.Button
             }
-            .clickable { controller.go(Screen.ACHIEVEMENTS) }, Ink.blue) {
+            .clickable { controller.go(Screen.ACHIEVEMENTS) }) {
             Column(
                 Modifier.fillMaxWidth().padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1240,14 +1257,19 @@ fun StatsPage(controller: SudokuController) {
                     listOf(
                         PreviewAward("Prva pobjeda", "star", stats.finished, 1, Ink.teal),
                         PreviewAward("Brzinac", "timer", stats.fastWins, 1, Ink.blue),
-                        PreviewAward("Sedam dana", "flame", stats.bestStreak, 7, Ink.purple),
+                        PreviewAward("Pobjednički niz", "flame-solid", stats.bestStreak, 7, Ink.purple),
                         PreviewAward("Majstor logike", "brain", stats.winsByLevel[3], 50, Ink.cyan),
                     ).forEach { award ->
                         val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
-                        NeonPanel(
-                            Modifier.weight(1f).heightIn(min = 67.dp),
-                            if (fraction >= 1f) award.tint else Ink.line,
-                            corner = 10.dp,
+                        StatisticsSurface(
+                            Modifier.weight(1f).heightIn(min = 72.dp),
+                            accent = if (fraction >= 1f) award.tint else Ink.blue,
+                            background = listOf(
+                                award.tint.copy(alpha = .24f)
+                                    .compositeOver(Color(0xFF031936)),
+                                Color(0xFF081C40),
+                            ),
+                            corner = 9.dp,
                         ) {
                             Column(
                                 Modifier.fillMaxWidth().padding(6.dp),
