@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,25 +60,27 @@ fun GamePage(controller: SudokuController) {
         val narrowWidth = maxWidth < 340.dp
         val tinyTitle = maxWidth < 275.dp
         val largeText = LocalDensity.current.fontScale >= 1.4f
-        val horizontal = if (compact) 12.dp else 20.dp
+        val horizontal = if (compact) 12.dp else 21.dp
         // Width is the hard limit: a 216dp minimum previously overflowed
         // narrow multi-window and foldable screens.
         val availableWidth = (maxWidth - horizontal * 2).coerceAtLeast(1.dp)
         val availableHeight = (maxHeight - if (compact) 255.dp else 300.dp)
             .coerceAtLeast(216.dp)
-        val boardSize = minOf(availableWidth, availableHeight)
-        val toolHeight = if (compact) 51.dp else 65.dp
-        val numberHeight = if (compact) 48.dp else 54.dp
+        val boardSize = (minOf(availableWidth, availableHeight) - if (compact) 0.dp else 4.dp)
+            .coerceAtLeast(1.dp)
+        val toolHeight = if (compact) 51.dp else 66.dp
+        val numberHeight = if (compact) 48.dp else 47.dp
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(horizontal = horizontal, vertical = if (compact) 6.dp else 12.dp),
+                .padding(horizontal = horizontal, vertical = if (compact) 6.dp else 7.dp),
             // The 941×1672 reference places the board directly below a compact
             // HUD. 8dp gaps across seven children shifted the entire game down.
             verticalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 2.dp),
         ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(48.dp).testTag("game-back")
-                .semantics { contentDescription = "Natrag na početni ekran"; role = Role.Button }.background(Color(0x770B2256), RoundedCornerShape(14.dp))
+                .semantics { contentDescription = "Natrag na početni ekran"; role = Role.Button }.background(Color(0xB0092050), RoundedCornerShape(14.dp))
+                .border(1.dp, Ink.blue.copy(alpha = .68f), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.HOME) }, contentAlignment = Alignment.Center) {
                 BrandIcon("back", Modifier.size(24.dp), Ink.muted)
             }
@@ -93,13 +96,15 @@ fun GamePage(controller: SudokuController) {
             }
             Box(Modifier.size(48.dp).testTag("game-pause")
                 .semantics { contentDescription = "Pauziraj ili nastavi igru"; role = Role.Button }
-                .background(Color(0x770B2256), RoundedCornerShape(14.dp))
+                .background(Color(0xB0092050), RoundedCornerShape(14.dp))
+                .border(1.dp, Ink.blue.copy(alpha = .68f), RoundedCornerShape(14.dp))
                 .clickable { controller.togglePause() }, contentAlignment = Alignment.Center) {
                 BrandIcon(if (game.paused) "play" else "pause", Modifier.size(23.dp), Ink.muted)
             }
             Spacer(Modifier.width(if (narrowWidth) 4.dp else 8.dp))
             Box(Modifier.size(48.dp).testTag("game-settings")
-                .semantics { contentDescription = "Postavke igre"; role = Role.Button }.background(Color(0x770B2256), RoundedCornerShape(14.dp))
+                .semantics { contentDescription = "Postavke igre"; role = Role.Button }.background(Color(0xB0092050), RoundedCornerShape(14.dp))
+                .border(1.dp, Ink.blue.copy(alpha = .68f), RoundedCornerShape(14.dp))
                 .clickable { controller.go(Screen.SETTINGS) }, contentAlignment = Alignment.Center) {
                 BrandIcon("settings", Modifier.size(24.dp), Ink.muted)
             }
@@ -211,12 +216,22 @@ fun GamePage(controller: SudokuController) {
         }
         val numbers = (1..game.size).toList()
         val split = if (game.size == 9) 5 else if (game.size == 6) 3 else 4
-        NumberRow(numbers.take(split), numberHeight, controller.canEnter(), split) {
-            controller.enter(it); feedback()
-        }
-        if (numbers.size > split) {
-            NumberRow(numbers.drop(split), numberHeight, controller.canEnter(), split) {
+        Column(
+            Modifier.fillMaxWidth().testTag("game-number-panel")
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0xB4031A43))
+                .border(1.dp, Ink.blue.copy(alpha = .65f), RoundedCornerShape(14.dp))
+                .padding(horizontal = if (compact) 8.dp else 12.dp,
+                    vertical = if (compact) 5.dp else 6.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            NumberRow(numbers.take(split), numberHeight, controller.canEnter(), split) {
                 controller.enter(it); feedback()
+            }
+            if (numbers.size > split) {
+                NumberRow(numbers.drop(split), numberHeight, controller.canEnter(), split) {
+                    controller.enter(it); feedback()
+                }
             }
         }
         // On shorter screens, the board and keypad remain usable through scroll.
@@ -282,8 +297,8 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
     Box(
         modifier.aspectRatio(1f).testTag("sudoku-board")
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xF8041336))
-            .border(2.dp, Ink.blue, RoundedCornerShape(14.dp))
+            .background(Color(0xFA03132D))
+            .border(1.5.dp, Ink.cyan.copy(alpha = .77f), RoundedCornerShape(14.dp))
             .padding(6.dp),
     ) {
         if (game.paused) {
@@ -318,7 +333,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                         val equal = highlight && selectionNumber > 0 && digit == selectionNumber
                         val wrong = showErrors && digit > 0 && digit != game.solution[index]
                         val bg = when {
-                            isSelected -> Color(0xFF006D93).copy(alpha = .72f)
+                            isSelected -> Color(0xFF007A9A).copy(alpha = .68f)
                             wrong -> Ink.red.copy(alpha = .17f)
                             equal -> Ink.blue.copy(alpha = .27f)
                             isPeer -> Ink.blue.copy(alpha = .12f)
@@ -365,7 +380,7 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                         else -> Color(0xFF65A6FF)
                                     },
                                     fontSize = when (n) {
-                                        9 -> 21.sp
+                                        9 -> 25.sp
                                         6 -> 29.sp
                                         else -> 39.sp
                                     },
@@ -384,13 +399,13 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
             val cellH = size.height / n
             for (c in 1 until n) if (c % game.boxColumns == 0) {
                 val x = c * cellW
-                drawLine(Ink.blue.copy(alpha = .78f),
-                    Offset(x, 0f), Offset(x, size.height), strokeWidth = 2.2.dp.toPx())
+                drawLine(Color(0xFF478FDB).copy(alpha = .87f),
+                    Offset(x, 0f), Offset(x, size.height), strokeWidth = 2.dp.toPx())
             }
             for (r in 1 until n) if (r % game.boxRows == 0) {
                 val y = r * cellH
-                drawLine(Ink.blue.copy(alpha = .78f),
-                    Offset(0f, y), Offset(size.width, y), strokeWidth = 2.2.dp.toPx())
+                drawLine(Color(0xFF478FDB).copy(alpha = .87f),
+                    Offset(0f, y), Offset(size.width, y), strokeWidth = 2.dp.toPx())
             }
         }
         }
