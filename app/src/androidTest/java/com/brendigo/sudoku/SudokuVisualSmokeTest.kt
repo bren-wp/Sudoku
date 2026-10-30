@@ -123,6 +123,25 @@ class SudokuVisualSmokeTest {
     }
 
     @Test
+    fun android12SystemSplashUsesSudokuBrandedIcon() {
+        if (android.os.Build.VERSION.SDK_INT < 31) return
+        val icon = android.util.TypedValue()
+        check(rule.activity.theme.resolveAttribute(
+            android.R.attr.windowSplashScreenAnimatedIcon, icon, true
+        )) { "Android 12+ system splash icon is not configured" }
+        check(icon.resourceId == R.drawable.ic_sudoku) {
+            "System launch splash does not use the branded 7-3-9 icon"
+        }
+        val background = android.util.TypedValue()
+        check(rule.activity.theme.resolveAttribute(
+            android.R.attr.windowSplashScreenBackground, background, true
+        )) { "Android 12+ system splash background is missing" }
+        check(background.data == rule.activity.getColor(R.color.launcher_background)) {
+            "System launch splash and adaptive icon backgrounds do not match"
+        }
+    }
+
+    @Test
     fun productionAppRemainsOfflineAndDisablesAndroidBackup() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val app = context.applicationInfo
