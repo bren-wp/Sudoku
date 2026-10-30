@@ -1,3 +1,15 @@
+## 1.0.46 — Statistika, zaslon 6/8
+
+- Usklađeni layout i boje četiri statističke kartice, ikone i tipografija na stvarnom Compose zaslonu.
+- Dva grafička panela za težine i postotak dovršenosti sada imaju izjednačenu visinu, nepreklapajući raspored i čišće grid/arc prikaze.
+- Raspored na užim zaslonima koristi zasebni stupčasti prikaz te zadržava accessibility i kontrole.
+- Uklonjena velika dekorativna mreža preko grafova; zasebni tamni gradijenti koriste se samo na statistici.
+- Nedavne igre koriste prave spremljene rezultate, odvojene redove i pošten prikaz kada je povijest prazna.
+- Mini-kartice postignuća zadržavaju pravi napredak i zaključano/otključano stanje.
+- Nova instrumentirana provjera geometrije grafova i pristupačnosti na različitim emulatorima.
+- Verzija 1.0.46, versionCode 47. Zadržani AGP 9.5.0, Gradle 9.6.0, Android API 36 i identitet paketa. Dokumentacija: `docs/statistics-qa-v1.0.46.md`.
+- Potpuna 1:1 jednakost ne tvrdi se dok ne prođu stvarni emulator, globalne i regionalne pixel provjere.
+
 ## 1.0.45 — zaslon 5/8: Dnevni izazov
 
 - Ciljana pixel QA dorada stvarnog Compose sučelja dnevnog izazova (naslov, dnevni sažetak, ilustrirana kartica, dnevni niz i gumbi). Nema renderiranih statičnih screenshotova umjesto interaktivnih elemenata.
