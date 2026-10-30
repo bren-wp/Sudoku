@@ -70,6 +70,7 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
             when(kind) {
                 "back" -> poly(15f,4f,7f,12f,15f,20f)
                 "next" -> poly(9f,4f,17f,12f,9f,20f)
+                "down" -> poly(4f,9f,12f,17f,20f,9f)
                 "plus" -> {circle(12f,12f,9f);line(12f,7f,12f,17f);line(7f,12f,17f,12f)}
                 "plus-plain" -> {line(12f,4f,12f,20f);line(4f,12f,20f,12f)}
                 "play" -> {poly(8f,5f,19f,12f,8f,19f,8f,5f)}

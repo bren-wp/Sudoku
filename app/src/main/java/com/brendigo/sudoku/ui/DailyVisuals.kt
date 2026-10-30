@@ -17,6 +17,9 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.asImageBitmap
@@ -144,7 +147,53 @@ fun DailyRewardEmblem(modifier: Modifier = Modifier) {
             .border(1.6.dp, Ink.gold, RoundedCornerShape(50)),
         contentAlignment = Alignment.Center,
     ) {
-        BrandIcon("gift", Modifier.fillMaxSize(.62f), Ink.gold)
+        // Owner's reference shows a small golden award jar with a star,
+        // not a generic gift bow. Render native vectors at any density; the
+        // surrounding true-day reward text remains independently selectable.
+        Canvas(Modifier.fillMaxSize(.72f)) {
+            val w = size.width
+            val h = size.height
+            val jar = Offset(w * .18f, h * .39f)
+            val jarSize = Size(w * .64f, h * .48f)
+            drawRoundRect(
+                color = Color(0xFF231A22),
+                topLeft = jar,
+                size = jarSize,
+                cornerRadius = CornerRadius(w * .07f),
+            )
+            drawRoundRect(
+                color = Ink.gold,
+                topLeft = jar,
+                size = jarSize,
+                cornerRadius = CornerRadius(w * .07f),
+                style = Stroke(width = w * .06f),
+            )
+            // Two short cap handles and the arched handle of the original
+            // medal motif; art only, with no touch handler or fake state.
+            drawLine(
+                Ink.gold, Offset(w * .16f, h * .34f),
+                Offset(w * .84f, h * .34f),
+                strokeWidth = w * .09f, cap = StrokeCap.Round,
+            )
+            drawArc(
+                color = Ink.gold,
+                startAngle = 180f, sweepAngle = 180f,
+                useCenter = false,
+                topLeft = Offset(w * .30f, h * .10f),
+                size = Size(w * .40f, h * .38f),
+                style = Stroke(width = w * .065f, cap = StrokeCap.Round),
+            )
+            val star = Path()
+            for (point in 0 until 10) {
+                val angle = -Math.PI / 2.0 + point * Math.PI / 5.0
+                val radius = if (point % 2 == 0) w * .165f else w * .074f
+                val x = w * .5f + kotlin.math.cos(angle).toFloat() * radius
+                val y = h * .615f + kotlin.math.sin(angle).toFloat() * radius
+                if (point == 0) star.moveTo(x, y) else star.lineTo(x, y)
+            }
+            star.close()
+            drawPath(star, Ink.gold)
+        }
     }
 }
 

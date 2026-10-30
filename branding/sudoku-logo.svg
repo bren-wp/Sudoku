@@ -6,8 +6,26 @@
 </defs>
 <rect width="1400" height="420" fill="none"/>
 <rect x="35" y="55" width="310" height="310" rx="72" fill="url(#grid)" stroke="#1bdcff" stroke-width="10"/>
+<!-- Original reference: nine rounded inset navy tiles, selected cyan centre and
+     separate bevel/highlight; no flattened screenshot or fake controls. -->
+<g fill="#06183e" stroke="#147bde" stroke-width="2.8">
+<rect x="44" y="64" width="85" height="85" rx="13"/>
+<rect x="147" y="64" width="85" height="85" rx="13"/>
+<rect x="251" y="64" width="85" height="85" rx="13"/>
+<rect x="44" y="167" width="85" height="85" rx="13"/>
+<rect x="147" y="167" width="85" height="85" rx="13"/>
+<rect x="251" y="167" width="85" height="85" rx="13"/>
+<rect x="44" y="270" width="85" height="85" rx="13"/>
+<rect x="147" y="270" width="85" height="85" rx="13"/>
+<rect x="251" y="270" width="85" height="85" rx="13"/>
+</g>
+<g fill="#237feb" opacity=".28">
+<path d="M58 69H115V82H58Z M161 69H218V82H161Z M265 69H322V82H265Z
+M58 172H115V185H58Z M265 172H322V185H265Z
+M58 275H115V288H58Z M161 275H218V288H161Z M265 275H322V288H265Z"/>
+</g>
 <path d="M138 55V365 M242 55V365 M35 158H345 M35 262H345" stroke="#17dffd" stroke-width="4"/>
-<rect x="138" y="158" width="104" height="104" fill="#0785e8"/>
+<rect x="145" y="165" width="89" height="89" rx="12" fill="#04d0e9" opacity=".88" stroke="#91ffff" stroke-width="3"/>
 <g font-family="Arial, sans-serif" fill="#fff" font-size="72" font-weight="700" text-anchor="middle"><text x="86" y="132">7</text><text x="190" y="238">3</text><text x="294" y="342">9</text></g>
 <text x="378" y="246" fill="#0da8ff" opacity=".5" filter="url(#glow)" font-family="Arial, sans-serif" font-weight="800" font-size="189">Sudoku</text>
 <text x="378" y="246" fill="url(#letters)" font-family="Arial, sans-serif" font-weight="800" font-size="189" letter-spacing="-9">Sudoku</text>

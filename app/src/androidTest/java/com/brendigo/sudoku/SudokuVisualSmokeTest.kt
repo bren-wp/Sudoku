@@ -64,7 +64,113 @@ class SudokuVisualSmokeTest {
         // The loader remains a visible, accessible Compose element even when
         // system animation duration scales are set to zero by the emulator.
         rule.onNodeWithTag("splash-loading").assertIsDisplayed()
+        val screen = rule.onNodeWithTag("splash-screen")
+            .fetchSemanticsNode().boundsInRoot
+        val logo = rule.onNodeWithTag("splash-logo")
+            .fetchSemanticsNode().boundsInRoot
+        val title = rule.onNodeWithTag("splash-title")
+            .fetchSemanticsNode().boundsInRoot
+        val byline = rule.onNodeWithTag("splash-byline")
+            .fetchSemanticsNode().boundsInRoot
+        val tagline = rule.onNodeWithTag("splash-tagline")
+            .fetchSemanticsNode().boundsInRoot
+        val indicator = rule.onNodeWithTag("splash-loading")
+            .fetchSemanticsNode().boundsInRoot
+        val dp = rule.activity.resources.displayMetrics.density
+        val middle = (screen.left + screen.right) / 2f
+        check(logo.width >= 90f * dp &&
+            logo.height >= 90f * dp &&
+            kotlin.math.abs(logo.center.x - middle) <= 3f * dp &&
+            logo.top >= screen.top + screen.height * .17f &&
+            logo.top <= screen.top + screen.height * .35f) {
+            "Actual Splash 7-3-9 logo is mis-sized or off-axis: $logo / $screen"
+        }
+        check(logo.bottom <= title.top + 2f * dp &&
+            title.bottom <= byline.top + 2f * dp &&
+            byline.bottom <= tagline.top + 2f * dp &&
+            tagline.bottom + 8f * dp < indicator.top) {
+            "Real Splash logo, heading, subtitle, slogan and loader overlap"
+        }
+        check(
+            kotlin.math.abs(indicator.center.x - middle) <= 3f * dp &&
+                indicator.bottom <= screen.bottom + dp &&
+                indicator.top >= screen.top + screen.height * .70f
+        ) { "Actual Splash loading ring must remain centered at the bottom" }
         shot("08-splash")
+    }
+
+    /**
+     * Splash branding must remain real, readable Compose UI at increased font
+     * scale on both 941x1672 and 720x1280 emulator viewports. This protects
+     * geometric accessibility; an image-level 1:1 comparison remains separate.
+     */
+    @Test
+    fun splashBrandDoesNotOverlapLoadingIndicatorAtLargeFontScale() {
+        waitFor("home-nova-igra")
+        val displayDensity = rule.activity.resources.displayMetrics.density
+        rule.runOnUiThread {
+            rule.activity.setContent {
+                androidx.compose.runtime.CompositionLocalProvider(
+                    androidx.compose.ui.platform.LocalDensity provides
+                        androidx.compose.ui.unit.Density(displayDensity, 1.8f)
+                ) {
+                    SudokuTheme {
+                        Box(Modifier.fillMaxSize()) {
+                            com.brendigo.sudoku.ui.SplashPage()
+                        }
+                    }
+                }
+            }
+        }
+        rule.waitForIdle()
+        val screen = rule.onNodeWithTag("splash-screen").fetchSemanticsNode().boundsInRoot
+        val brand = rule.onNodeWithTag("splash-brand").fetchSemanticsNode().boundsInRoot
+        val logo = rule.onNodeWithTag("splash-logo").fetchSemanticsNode().boundsInRoot
+        val title = rule.onNodeWithTag("splash-title").fetchSemanticsNode().boundsInRoot
+        val byline = rule.onNodeWithTag("splash-byline").fetchSemanticsNode().boundsInRoot
+        val tagline = rule.onNodeWithTag("splash-tagline").fetchSemanticsNode().boundsInRoot
+        val loading = rule.onNodeWithTag("splash-loading").fetchSemanticsNode().boundsInRoot
+        val slack = displayDensity * 2f
+        check(brand.left >= screen.left - slack &&
+            brand.right <= screen.right + slack) {
+            "Splash branding overflowed the available width"
+        }
+        check(title.left >= screen.left - slack &&
+            title.right <= screen.right + slack) {
+            "Splash title overflowed at 1.8x system font scale"
+        }
+        check(logo.bottom <= title.top + slack &&
+            title.bottom <= byline.top + slack &&
+            byline.bottom <= tagline.top + slack) {
+            "Splash logo, title, byline and tagline overlap"
+        }
+        check(tagline.bottom <= brand.bottom + slack &&
+            brand.bottom + 8f * displayDensity < loading.top) {
+            "Splash branding overlaps the native loading indicator"
+        }
+        check(loading.bottom <= screen.bottom + slack) {
+            "Splash loading indicator is clipped at the bottom"
+        }
+        rule.onNodeWithTag("splash-loading").assertIsDisplayed()
+    }
+
+    @Test
+    fun android12SystemSplashUsesSudokuBrandedIcon() {
+        if (android.os.Build.VERSION.SDK_INT < 31) return
+        val icon = android.util.TypedValue()
+        check(rule.activity.theme.resolveAttribute(
+            android.R.attr.windowSplashScreenAnimatedIcon, icon, true
+        )) { "Android 12+ system splash icon is not configured" }
+        check(icon.resourceId == R.drawable.ic_sudoku) {
+            "System launch splash does not use the branded 7-3-9 icon"
+        }
+        val background = android.util.TypedValue()
+        check(rule.activity.theme.resolveAttribute(
+            android.R.attr.windowSplashScreenBackground, background, true
+        )) { "Android 12+ system splash background is missing" }
+        check(background.data == rule.activity.getColor(R.color.launcher_background)) {
+            "System launch splash and adaptive icon backgrounds do not match"
+        }
     }
 
     @Test
@@ -180,6 +286,49 @@ class SudokuVisualSmokeTest {
         rule.waitForIdle()
     }
 
+    /**
+     * Check native New Game card geometry independently at 941x1672 and
+     * 720x1280. It must use real selectable Compose elements, never a
+     * reference bitmap or invisible click target laid over a screenshot.
+     */
+    @Test
+    fun newGameCardGeometryRespectsBothEmulatorViewports() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        waitFor("screen-nova-igra")
+        rule.onNodeWithTag("new-game-title").assertExists()
+        rule.onNodeWithTag("new-game-subtitle").assertExists()
+        rule.onNodeWithTag("new-game-difficulty-list").assertExists()
+        val density = rule.activity.resources.displayMetrics.density
+        val viewportWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val cardWidth = mutableListOf<Float>()
+        for (index in 0..5) {
+            val node = rule.onNodeWithTag("difficulty-$index")
+            node.performScrollTo().assertIsDisplayed()
+            val bounds = node.fetchSemanticsNode().boundsInRoot
+            check(bounds.left >= -density * 2f &&
+                bounds.right <= viewportWidth + density * 2f &&
+                bounds.height >= density * 72f) {
+                "New Game difficulty card $index clipped or too short: $bounds"
+            }
+            cardWidth.add(bounds.width)
+        }
+        check(cardWidth.maxOrNull()!! - cardWidth.minOrNull()!! <= density * 3f) {
+            "New Game card widths must remain consistent on the same viewport"
+        }
+        val action = rule.onNodeWithTag("primary-action")
+        action.performScrollTo().assertIsDisplayed()
+        val actionBounds = action.fetchSemanticsNode().boundsInRoot
+        check(actionBounds.left >= -density &&
+            actionBounds.right <= viewportWidth + density &&
+            actionBounds.height >= density * 48f) {
+            "New Game CTA is clipped or below the minimum 48dp target: $actionBounds"
+        }
+        rule.onNodeWithTag("new-game-size-header").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("size-9").assertIsSelected()
+        rule.onNodeWithTag("difficulty-2").assertIsSelected()
+    }
+
     @Test
     fun fourAndSixCellGridModesArePlayable() {
         waitFor("home-nova-igra")
@@ -260,6 +409,92 @@ class SudokuVisualSmokeTest {
         waitFor("sudoku-board", timeoutMs = 60_000)
         rule.onNodeWithTag("sudoku-cell-35").assertExists()
         rule.onNodeWithTag("number-6").assertExists()
+    }
+
+    /**
+     * The live 9×9 game must preserve the owner's square board, four aligned
+     * tools and a centered 5+4 keypad on both emulated device sizes. This
+     * verifies actual Compose hit regions, not decorative screenshot pixels.
+     */
+    @Test
+    fun gameplayReferenceGeometryKeepsBoardToolsAndNineKeysAligned() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("size-9").assertIsSelected()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        val dp = rule.activity.resources.displayMetrics.density
+        val viewportWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val board = rule.onNodeWithTag("sudoku-board")
+        board.performScrollTo().assertIsDisplayed()
+        val boardRect = board.fetchSemanticsNode().boundsInRoot
+        check(kotlin.math.abs(boardRect.width - boardRect.height) <= 3f * dp &&
+            boardRect.left >= -dp && boardRect.right <= viewportWidth + dp) {
+            "Real Sudoku board must be square and fully fit the viewport: $boardRect"
+        }
+        (0..80).forEach { index ->
+            rule.onNodeWithTag("sudoku-cell-$index").assertExists()
+        }
+        val firstCell = rule.onNodeWithTag("sudoku-cell-0").fetchSemanticsNode().boundsInRoot
+        val secondCell = rule.onNodeWithTag("sudoku-cell-1").fetchSemanticsNode().boundsInRoot
+        val nextRow = rule.onNodeWithTag("sudoku-cell-9").fetchSemanticsNode().boundsInRoot
+        check(firstCell.width > 0f && firstCell.height > 0f &&
+            kotlin.math.abs(firstCell.width - firstCell.height) < 2f * dp &&
+            kotlin.math.abs(firstCell.top - secondCell.top) <= dp &&
+            firstCell.right <= secondCell.left + dp &&
+            nextRow.top >= firstCell.bottom - dp) {
+            "Grid cell geometry is inconsistent: $firstCell / $secondCell / $nextRow"
+        }
+
+        val tools = rule.onNodeWithTag("game-tool-row")
+        tools.performScrollTo().assertIsDisplayed()
+        val toolsRect = tools.fetchSemanticsNode().boundsInRoot
+        val buttons = listOf("game-notes", "game-hint", "game-undo", "game-erase")
+            .map { rule.onNodeWithTag(it).fetchSemanticsNode().boundsInRoot }
+        buttons.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + dp &&
+                kotlin.math.abs(left.top - right.top) <= dp) {
+                "Gameplay toolbar overlaps or misaligns its buttons"
+            }
+        }
+        check(buttons.first().left >= toolsRect.left - dp &&
+            buttons.last().right <= toolsRect.right + dp &&
+            buttons.all { it.height >= 48f * dp }) {
+            "The real gameplay tools do not fit their full 48dp hit targets"
+        }
+
+        val panel = rule.onNodeWithTag("game-number-panel")
+        panel.performScrollTo().assertIsDisplayed()
+        val panelRect = panel.fetchSemanticsNode().boundsInRoot
+        val keys = (1..9).map { value ->
+            rule.onNodeWithTag("number-$value").fetchSemanticsNode().boundsInRoot
+        }
+        val firstRow = keys.take(5)
+        val secondRow = keys.drop(5)
+        val keyWidth = keys.first().width
+        check(keys.all {
+            it.width > 0f && it.height >= 48f * dp &&
+                kotlin.math.abs(it.width - keyWidth) < dp &&
+                it.left >= panelRect.left - dp &&
+                it.right <= panelRect.right + dp
+        }) { "Gameplay keypad has clipped or differently sized native buttons" }
+        firstRow.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + dp &&
+                kotlin.math.abs(left.top - right.top) <= dp) {
+                "Top keypad row must remain five non-overlapping horizontal keys"
+            }
+        }
+        secondRow.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + dp &&
+                kotlin.math.abs(left.top - right.top) <= dp) {
+                "Bottom keypad row must remain four non-overlapping horizontal keys"
+            }
+        }
+        check(secondRow.first().top >= firstRow.first().bottom - dp &&
+            secondRow.first().left > firstRow.first().left &&
+            secondRow.last().right < firstRow.last().right) {
+            "Native 5+4 Sudoku keypad must remain vertically ordered and centered"
+        }
     }
 
     @Test
@@ -439,6 +674,27 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("home-streak").performScrollTo().assertExists()
         val streakBounds = rule.onNodeWithTag("home-streak")
             .fetchSemanticsNode().boundsInRoot
+        val weekRow = rule.onNodeWithTag("home-week-days")
+            .fetchSemanticsNode().boundsInRoot
+        val weekMarkers = (0..6).map { index ->
+            rule.onNodeWithTag("home-weekday-$index")
+                .fetchSemanticsNode().boundsInRoot
+        }
+        check(weekMarkers.size == 7 &&
+            weekMarkers.all { marker ->
+                marker.width > 0f && marker.height > 0f &&
+                    marker.left >= streakBounds.left - 1f &&
+                    marker.right <= streakBounds.right + 1f &&
+                    marker.top >= weekRow.top - density &&
+                    marker.bottom <= weekRow.bottom + density
+            }) {
+            "Each weekday must remain a visible and bounded real UI element"
+        }
+        weekMarkers.zipWithNext().forEach { (first, second) ->
+            check(first.right <= second.left + density) {
+                "Home weekly progress markers overlap or change order: $first / $second"
+            }
+        }
         val mondayMarker = rule.onAllNodes(
             hasContentDescription("Ponedjeljak:", substring = true)
         ).onFirst().fetchSemanticsNode().boundsInRoot
@@ -569,6 +825,167 @@ class SudokuVisualSmokeTest {
         waitFor("screen-postignuća")
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
+    }
+
+    /**
+     * All four real award previews must have consistent native geometry and
+     * dynamic progress even when every achievement remains locked. The
+     * reference width uses four columns; compact widths use two 2-card rows.
+     */
+    /**
+     * Regression for the old MainActivity restore switch: it restored only
+     * New Game / Game / Settings and silently discarded three other pages.
+     * Keep navigation restoration independent of individual widget states.
+     */
+    @Test
+    fun dailyStatisticsAndAchievementsSurviveActivityRecreation() {
+        waitFor("home-nova-igra")
+
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-dnevni-izazov")
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("statistika")
+        waitFor("screen-statistika")
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-statistika")
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag("achievement-summary").assertExists()
+    }
+
+    /**
+     * All 24 native achievement cards remain accessible after expanding
+     * and rotating. Only the stable achievement title is saved for the
+     * dialog; points and progress stay backed by the actual controller.
+     */
+    @Test
+    fun achievementsExpandedListAndDetailsSurviveActivityRecreation() {
+        waitFor("home-postignuća")
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag(
+            "achievement-progress-prva-pobjeda", useUnmergedTree = true
+        ).assertExists()
+        rule.onNodeWithTag(
+            "achievement-progress-sudoku-legenda", useUnmergedTree = true
+        ).assertExists()
+        val showAll = rule.onNodeWithTag("achievements-show-all")
+        showAll.performScrollTo().performClick()
+        rule.onNodeWithText("Prikaži istaknuta postignuća").assertExists()
+        rule.onNodeWithTag("achievement-zlatni-niz").assertExists()
+        rule.onNodeWithTag("achievement-mala-mreža").assertExists()
+        rule.onNodeWithTag("achievement-zlatni-niz").performScrollTo().performClick()
+        rule.onNodeWithTag("achievement-detail").assertExists()
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag("achievement-detail").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("achievement-zlatni-niz").assertExists()
+        rule.onNodeWithTag(
+            "achievement-progress-zlatni-niz", useUnmergedTree = true
+        ).assertExists()
+        rule.onNodeWithTag("achievements-show-all").performScrollTo()
+        rule.onNodeWithText("Prikaži istaknuta postignuća").assertExists()
+    }
+
+    @Test
+    fun statisticsAwardPreviewGeometryWorksAcrossBothViewports() {
+        waitFor("home-nova-igra")
+        homeTile("statistika")
+        waitFor("screen-statistika")
+        rule.onNodeWithTag("stats-achievements").performScrollTo()
+            .assertIsDisplayed()
+        rule.onNodeWithTag("stats-completion-percent", useUnmergedTree = true)
+            .assertExists()
+        val cards = (0..3).map { index ->
+            val node = rule.onNodeWithTag(
+                "stats-award-preview-$index", useUnmergedTree = true
+            )
+            node.assertExists()
+            node.fetchSemanticsNode().boundsInRoot
+        }
+        val density = rule.activity.resources.displayMetrics.density
+        val widthDp = rule.activity.resources.displayMetrics.widthPixels / density
+        check(cards.all { it.width > 0f && it.height >= 70f * density }) {
+            "Each real Statistics achievement preview must be readable: $cards"
+        }
+        if (widthDp < 410f) {
+            check(
+                cards[0].right <= cards[1].left + density &&
+                cards[2].right <= cards[3].left + density &&
+                cards[0].bottom <= cards[2].top + density &&
+                cards[1].bottom <= cards[3].top + density
+            ) { "Compact Statistics previews must be a non-overlapping 2x2 grid: $cards" }
+        } else {
+            cards.zipWithNext().forEach { (left, right) ->
+                check(
+                    left.right <= right.left + density &&
+                    kotlin.math.abs(left.top - right.top) <= density * 2f &&
+                    kotlin.math.abs(left.bottom - right.bottom) <= density * 2f
+                ) { "Reference Statistics previews must align on one row: $cards" }
+            }
+        }
+        rule.onNodeWithTag("stats-history-panel").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("open-game-history").performClick()
+        rule.onNodeWithText("Povijest igara").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+    }
+
+    /**
+     * Day counts/dates are always real device/user data. Verify the layout
+     * instead of changing completed days just to reproduce an illustration.
+     */
+    @Test
+    fun dailyWeekdayGeometryAndLeaderboardRemainAccessible() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        val density = rule.activity.resources.displayMetrics.density
+        val width = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val week = rule.onNodeWithTag("daily-weekly-streak")
+        week.performScrollTo().assertIsDisplayed()
+        val row = week.fetchSemanticsNode().boundsInRoot
+        val days = (0..6).map { i ->
+            rule.onNodeWithTag("daily-weekday-$i")
+                .fetchSemanticsNode().boundsInRoot
+        }
+        check(days.size == 7 && days.all {
+            it.width > 0f && it.height > 0f &&
+                it.left >= row.left - density &&
+                it.right <= row.right + density &&
+                it.left >= -density &&
+                it.right <= width + density
+        }) { "Seven real calendar days must fit inside the Daily timeline" }
+        days.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + density &&
+                kotlin.math.abs(left.top - right.top) <= density * 2f) {
+                "Daily week markers are out of order or overlap: $left / $right"
+            }
+        }
+        rule.onNodeWithTag("daily-reward-emblem", useUnmergedTree = true)
+            .assertExists()
+        val action = rule.onNodeWithTag("daily-leaderboard")
+        action.performScrollTo().assertIsDisplayed()
+        val bounds = action.fetchSemanticsNode().boundsInRoot
+        check(bounds.height >= 48f * density - 1f &&
+            bounds.left >= -density && bounds.right <= width + density) {
+            "Offline leaderboard action is clipped or smaller than 48dp: $bounds"
+        }
+        action.performClick()
+        rule.onNodeWithText("Osobna rang-lista").assertExists()
+        rule.onNodeWithText(
+            "Offline rezultati na ovom uređaju. Nema globalne rang-liste."
+        ).assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
     }
 
     @Test
@@ -769,12 +1186,94 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("number-9").assertExists()
     }
 
+    /**
+     * The five Settings panels remain real accessible controls. Check the
+     * tappable row, native dropdown value and release version at both emulator
+     * viewports instead of using the owner's flat reference as a fake UI.
+     */
+    @Test
+    fun settingsReferenceRowsKeepTouchTargetsAndCorrectContent() {
+        waitFor("home-nova-igra")
+        homeTile("postavke")
+        waitFor("screen-postavke")
+        val density = rule.activity.resources.displayMetrics.density
+        val screenWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+
+        val switches = listOf(
+            "setting-tamna-tema",
+            "setting-animacije",
+            "setting-automatske-bilješke",
+            "setting-provjera-greške",
+            "setting-isticanje-brojeva",
+        )
+        switches.forEach { tag ->
+            val node = rule.onNodeWithTag(tag)
+            node.performScrollTo().assertIsDisplayed()
+            val bounds = node.fetchSemanticsNode().boundsInRoot
+            check(bounds.height >= 48f * density - 1f &&
+                bounds.left >= -density &&
+                bounds.right <= screenWidth + density) {
+                "Settings switch $tag is too short or clipped: $bounds"
+            }
+            check(node.fetchSemanticsNode().config.contains(
+                SemanticsProperties.ToggleableState
+            )) { "Settings switch $tag must remain natively toggleable" }
+        }
+
+        val language = rule.onNodeWithTag("language-settings")
+        language.performScrollTo().assertIsDisplayed()
+        val languagePanel = language.fetchSemanticsNode().boundsInRoot
+        val value = rule.onNodeWithTag(
+            "settings-language-value", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        check(value.width > 0f && value.height > 0f &&
+            value.left >= languagePanel.left - density &&
+            value.right <= languagePanel.right + density &&
+            value.top >= languagePanel.top - density &&
+            value.bottom <= languagePanel.bottom + density) {
+            "Croatian language selector must fit in the blue language panel"
+        }
+        rule.onNodeWithText("Hrvatski", useUnmergedTree = true).assertExists()
+
+        rule.onNodeWithTag("settings-version").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText(
+            "Verzija " + BuildConfig.VERSION_NAME, useUnmergedTree = true
+        ).assertExists()
+        rule.onNodeWithTag("privacy-policy").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("about-app").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("settings-backup").assertExists()
+    }
+
     @Test
     fun settingsButtonsAreVisibleAndFunctional() {
         waitFor("home-nova-igra")
         homeTile("postavke")
         waitFor("screen-postavke")
         rule.onNodeWithText("PRILAGODI IGRU SVOJIM ŽELJAMA").assertExists()
+        // The reference viewport shows the first two groups in sequence.
+        // Offscreen scrollable children may legitimately have 0x0 geometry on
+        // compact devices, so do not compare bounds across scroll offsets.
+        val appearance = rule.onNodeWithTag("settings-appearance")
+            .fetchSemanticsNode().boundsInRoot
+        val gamePanel = rule.onNodeWithTag("settings-game")
+            .fetchSemanticsNode().boundsInRoot
+        val tolerance = rule.activity.resources.displayMetrics.density * 2f
+        check(appearance.bottom <= gamePanel.top + tolerance &&
+            kotlin.math.abs(appearance.left - gamePanel.left) <= tolerance &&
+            kotlin.math.abs(appearance.right - gamePanel.right) <= tolerance) {
+            "Settings first two groups must be ordered and aligned"
+        }
+        listOf("sound-vibration", "language-settings", "settings-about")
+            .forEach { tag ->
+                rule.onNodeWithTag(tag).performScrollTo().assertIsDisplayed()
+                val visibleBounds = rule.onNodeWithTag(tag)
+                    .fetchSemanticsNode().boundsInRoot
+                check(visibleBounds.width > 0f &&
+                    kotlin.math.abs(visibleBounds.width - appearance.width) <= tolerance) {
+                    "Settings panel $tag must align with other full-width panels"
+                }
+            }
+        rule.onNodeWithTag("settings-backup").assertExists()
         rule.onNodeWithTag("sound-vibration").performScrollTo().assertIsDisplayed()
         // A complete setting row, not just the small thumb, must toggle.
         val darkSetting = rule.onNodeWithTag("setting-tamna-tema")
@@ -793,7 +1292,14 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("language-settings").performScrollTo().assertIsDisplayed()
         val privacyRow = rule.onNodeWithTag("privacy-policy")
         privacyRow.performScrollTo().assertIsDisplayed()
-        val privacyBottom = privacyRow.fetchSemanticsNode().boundsInRoot.bottom
+        val privacyBounds = privacyRow.fetchSemanticsNode().boundsInRoot
+        val privacyBottom = privacyBounds.bottom
+        // WCAG/Android usability: keep a real 48dp touch target even if
+        // reference artwork renders a visually smaller row.
+        val minimumTouchPx = 48f * rule.activity.resources.displayMetrics.density
+        check(privacyBounds.bottom - privacyBounds.top + 0.5f >= minimumTouchPx) {
+            "Settings privacy action touch height is smaller than 48dp"
+        }
         val footerAt = rule.onNodeWithTag("brand-footer")
             .fetchSemanticsNode().boundsInRoot.top
         check(privacyBottom <= footerAt + 1f) {
@@ -847,68 +1353,155 @@ class SudokuVisualSmokeTest {
     }
 
     /**
-     * QA-only render of the REAL in-app Compose header. The test places the
-     * branded Compose component on a black canvas, crops its actual pixels,
-     * and centers the crop inside a 1254px square to compare with the owner's
-     * standalone wordmark artwork. No application preferences are modified.
+     * Export the actual Compose wordmark as an RGBA 1254x1254 QA image.
+     *
+     * A system screenshot is opaque even when a view draws translucent
+     * strokes. Taking REAL Compose screenshots on BOTH black and white
+     * canvases lets us recover glyph and halo alpha instead of incorrectly
+     * marking every near-black pixel fully transparent. Nothing from the
+     * owner's artwork is pasted into the app or the test export.
      */
     @Test
     fun captureActualComposeWordmarkForTenReferenceQa() {
         waitFor("home-nova-igra")
-        rule.runOnUiThread {
-            rule.activity.setContent {
-                SudokuTheme {
-                    Box(Modifier.fillMaxSize().background(ComposeColor.Black),
-                        contentAlignment = Alignment.Center) {
-                        BrandHeader(Modifier.fillMaxWidth())
+
+        fun captureStudio(backdrop: ComposeColor): Bitmap {
+            rule.runOnUiThread {
+                rule.activity.setContent {
+                    SudokuTheme {
+                        Box(
+                            Modifier.fillMaxSize().background(backdrop),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            BrandHeader(Modifier.fillMaxWidth())
+                        }
                     }
                 }
             }
+            rule.waitForIdle()
+            Thread.sleep(250)
+            return InstrumentationRegistry.getInstrumentation()
+                .uiAutomation.takeScreenshot()
+                ?: error("No real Compose wordmark screenshot")
         }
-        rule.waitForIdle()
-        Thread.sleep(350)
-        val shot = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
-            ?: error("No real Compose logo screenshot")
+
+        val black = captureStudio(ComposeColor.Black)
+        val white = captureStudio(ComposeColor.White)
         try {
-            var minX = shot.width
-            var minY = shot.height
-            var maxX = -1
-            var maxY = -1
-            for (y in shot.height / 4 until shot.height * 3 / 4 step 2) {
-                for (x in 0 until shot.width step 2) {
-                    val c = shot.getPixel(x, y)
-                    if (Color.red(c) > 48 || Color.green(c) > 48 ||
-                        Color.blue(c) > 84) {
-                        minX = minOf(minX, x)
-                        minY = minOf(minY, y)
-                        maxX = maxOf(maxX, x)
-                        maxY = maxOf(maxY, y)
+            // Assert the actual Compose semantics layout, independently
+            // of the later alpha/matting image comparison.
+            val logoBounds = rule.onNodeWithTag(
+                "wordmark-symbol", useUnmergedTree = true
+            ).fetchSemanticsNode().boundsInRoot
+            val titleBounds = rule.onNodeWithTag(
+                "wordmark-title", useUnmergedTree = true
+            ).fetchSemanticsNode().boundsInRoot
+            val bylineBounds = rule.onNodeWithTag(
+                "wordmark-byline", useUnmergedTree = true
+            ).fetchSemanticsNode().boundsInRoot
+            val tolerance = rule.activity.resources.displayMetrics.density * 3f
+            check(
+                logoBounds.width > 0f &&
+                    logoBounds.right <= titleBounds.left + tolerance &&
+                    titleBounds.bottom <= bylineBounds.top + tolerance &&
+                    kotlin.math.abs(bylineBounds.right - titleBounds.right) <= tolerance
+            ) {
+                "Wordmark source requires a left 7-3-9 logo, right-aligned byline " +
+                    "and no overlap: $logoBounds / $titleBounds / $bylineBounds"
+            }
+            check(black.width == white.width && black.height == white.height) {
+                "Wordmark dual-background shots differ in resolution"
+            }
+            val count = black.width * black.height
+            val darkPixels = IntArray(count)
+            val lightPixels = IntArray(count)
+            val recovered = IntArray(count)
+            black.getPixels(darkPixels, 0, black.width, 0, 0, black.width, black.height)
+            white.getPixels(lightPixels, 0, white.width, 0, 0, white.width, white.height)
+
+            var left = black.width
+            var top = black.height
+            var right = -1
+            var bottom = -1
+            for (y in black.height / 4 until black.height * 3 / 4) {
+                for (x in 0 until black.width) {
+                    val offset = y * black.width + x
+                    val dark = darkPixels[offset]
+                    val light = lightPixels[offset]
+                    // W = alpha*foreground + (1-alpha)*white;
+                    // B = alpha*foreground. Recover alpha using W - B.
+                    val delta = (
+                        (Color.red(light) - Color.red(dark)) +
+                            (Color.green(light) - Color.green(dark)) +
+                            (Color.blue(light) - Color.blue(dark))
+                        ) / 3
+                    val alpha = (255 - delta).coerceIn(0, 255)
+                    if (alpha < 5) continue
+                    recovered[offset] = Color.argb(
+                        alpha,
+                        (Color.red(dark) * 255 / alpha).coerceIn(0, 255),
+                        (Color.green(dark) * 255 / alpha).coerceIn(0, 255),
+                        (Color.blue(dark) * 255 / alpha).coerceIn(0, 255),
+                    )
+                    if (alpha >= 12) {
+                        left = minOf(left, x)
+                        top = minOf(top, y)
+                        right = maxOf(right, x)
+                        bottom = maxOf(bottom, y)
                     }
                 }
             }
-            check(maxX - minX > 100 && maxY - minY > 30) {
-                "Could not find original Compose brand header on screenshot"
+            check(right - left > 100 && bottom - top > 30) {
+                "Native wordmark must contain an opaque visible logo and text"
             }
-            val crop = Bitmap.createBitmap(
-                shot, minX, minY, maxX - minX + 1, maxY - minY + 1
+            val capture = Bitmap.createBitmap(
+                black.width, black.height, Bitmap.Config.ARGB_8888
             )
             try {
-                val width = 1160
-                val height = (crop.height.toFloat() / crop.width * width).toInt()
-                check(height in 50..1100) { "Invalid Compose wordmark aspect ratio" }
-                val scaled = Bitmap.createScaledBitmap(crop, width, height, true)
+                capture.setPixels(recovered, 0, black.width,
+                    0, 0, black.width, black.height)
+                val crop = Bitmap.createBitmap(
+                    capture, left, top, right - left + 1, bottom - top + 1
+                )
                 try {
-                    val full = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
+                    // Fixed marketing placement at the user's 1254px reference
+                    // size. Do NOT distort the wordmark aspect ratio or
+                    // overwrite alpha to cosmetically improve its pixel MAE.
+                    val targetWidth = 1141
+                    val targetHeight = (
+                        crop.height.toDouble() * targetWidth / crop.width
+                    ).toInt()
+                    check(targetHeight in 150..650) {
+                        "Unexpected native wordmark proportions: " +
+                            "${crop.width}x${crop.height}"
+                    }
+                    val scaled = Bitmap.createScaledBitmap(
+                        crop, targetWidth, targetHeight, true
+                    )
                     try {
-                        val canvas = Canvas(full)
-                        canvas.drawColor(Color.BLACK)
-                        canvas.drawBitmap(scaled, (1254 - width) / 2f,
-                            (1254 - height) / 2f, Paint(Paint.FILTER_BITMAP_FLAG))
-                        saveBrandingQaPng("09-wordmark.png", full)
-                    } finally { full.recycle() }
-                } finally { scaled.recycle() }
-            } finally { crop.recycle() }
-        } finally { shot.recycle() }
+                        val full = Bitmap.createBitmap(
+                            1254, 1254, Bitmap.Config.ARGB_8888
+                        )
+                        try {
+                            val leftMargin = 63f
+                            val topMargin = 611f - targetHeight / 2f
+                            Canvas(full).drawBitmap(
+                                scaled, leftMargin, topMargin,
+                                Paint(Paint.FILTER_BITMAP_FLAG)
+                            )
+                            check(Color.alpha(full.getPixel(0, 0)) == 0) {
+                                "QA wordmark export must keep transparent margins"
+                            }
+                            check(Color.alpha(full.getPixel(1253, 1253)) == 0)
+                            saveBrandingQaPng("09-wordmark.png", full)
+                        } finally { full.recycle() }
+                    } finally { scaled.recycle() }
+                } finally { crop.recycle() }
+            } finally { capture.recycle() }
+        } finally {
+            black.recycle()
+            white.recycle()
+        }
     }
 
     private fun saveBrandingQaPng(name: String, bitmap: Bitmap) {
@@ -947,15 +1540,78 @@ class SudokuVisualSmokeTest {
         check(launcher is android.graphics.drawable.AdaptiveIconDrawable) {
             "Android launcher icon is not the expected adaptive resource"
         }
+        // The original 1254px art has TRANSPARENT margins. Android's
+        // getApplicationIcon() composites an opaque launcher BACKGROUND
+        // into the mask; exporting that composite as a stand-alone PNG
+        // incorrectly reports alpha=255 even in the original's empty area.
+        // Export the installed adaptive FOREGROUND drawable at the reference
+        // artwork scale. Its colors/geometry are genuinely from the APK.
+        // The platform launcher shape is checked separately below, never
+        // presented as identical to a transparent marketing square.
+        val artworkBounds = intArrayOf(-230, -230, 1484, 1484)
         val bitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
         try {
-            val canvas = Canvas(bitmap)
-            canvas.drawColor(Color.BLACK)
-            launcher.setBounds(0, 0, 1254, 1254)
-            launcher.draw(canvas)
+            val canvas = Canvas(bitmap) // newly allocated ARGB_8888 is transparent
+            val foreground = launcher.foreground
+                ?: error("Adaptive launcher has no native foreground")
+            foreground.setBounds(
+                artworkBounds[0], artworkBounds[1],
+                artworkBounds[2], artworkBounds[3],
+            )
+            foreground.draw(canvas)
+            check(Color.alpha(bitmap.getPixel(0, 0)) == 0) {
+                "Adaptive launcher background incorrectly extends past its mask"
+            }
+            check(Color.alpha(bitmap.getPixel(627, 627)) > 0) {
+                "Adaptive launcher has no visible center"
+            }
+            check(
+                Color.alpha(bitmap.getPixel(110, 610)) == 0 &&
+                    Color.alpha(bitmap.getPixel(1145, 610)) == 0 &&
+                    Color.alpha(bitmap.getPixel(627, 80)) == 0 &&
+                    Color.alpha(bitmap.getPixel(627, 1145)) == 0
+            ) { "Canonical standalone branding export must leave transparent side margins" }
             saveBrandingQaPng("10-launcher-icon.png", bitmap)
         } finally {
             bitmap.recycle()
+        }
+
+        // Validate the true Android adaptive drawable as well: this is
+        // distinct from the transparency-preserving ART reference export.
+        val nativeMask = Bitmap.createBitmap(108, 108, Bitmap.Config.ARGB_8888)
+        try {
+            launcher.setBounds(0, 0, 108, 108)
+            launcher.draw(Canvas(nativeMask))
+            check(Color.alpha(nativeMask.getPixel(54, 54)) > 0) {
+                "Installed adaptive launcher mask lost the central number"
+            }
+        } finally { nativeMask.recycle() }
+
+        // Monochrome is a separate Android 13+ themed-icon asset: compare its
+        // alpha mask independently instead of tinting the RGB reference art.
+        val monochrome = context.getDrawable(R.drawable.ic_sudoku_monochrome)
+            ?: error("Missing monochrome Sudoku launcher resource")
+        val monoBitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
+        try {
+            val canvas = Canvas(monoBitmap)
+            monochrome.setBounds(
+                artworkBounds[0], artworkBounds[1],
+                artworkBounds[2], artworkBounds[3],
+            )
+            monochrome.draw(canvas)
+            check(Color.alpha(monoBitmap.getPixel(0, 0)) == 0) {
+                "Themed icon must preserve transparent corners"
+            }
+            check(Color.alpha(monoBitmap.getPixel(627, 627)) > 0) {
+                "Themed icon lost the center digit"
+            }
+            check(
+                Color.alpha(monoBitmap.getPixel(110, 610)) == 0 &&
+                    Color.alpha(monoBitmap.getPixel(1145, 610)) == 0
+            ) { "Android themed icon must preserve its own transparent margin" }
+            saveBrandingQaPng("11-launcher-monochrome.png", monoBitmap)
+        } finally {
+            monoBitmap.recycle()
         }
     }
 

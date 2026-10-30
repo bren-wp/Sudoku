@@ -1,3 +1,60 @@
+## 1.0.48 — Postavke, zaslon 8/8
+
+- Završna referenca **10/10 — Android launcher ikona 7–3–9**: nativni 108dp VectorDrawable dobio je istančan neon okvir, zaobljene rubove svih devet ćelija, svjetlije tirkizno središte i uokviren broj 9; Android 13+ monokromatski vektor usklađen je s pozicijom broja 9 bez neprozirne pozadine.
+- QA izvoz `10-launcher-icon.png` više ne pretvara Androidovu cijelu adaptivnu masku s neprozirnim `@color/launcher_background` u lažnu transparentnu referencu. Izvozi **stvarni foreground resurs ugrađen u APK** na 1254² transparentnoj podlozi, a stvarni maskirani launcher provjerava zasebno. `11-launcher-monochrome.png` također koristi pravi tematizirani vektor.
+- Dodani `scripts/launcher_icon_pixel_qa.py`, RGB/RGBA/alpha izvještaj za sedam fiksnih regija, neovisna provjera themed alfa maske i tri regresijska Python testa. Iz povijesnog stvarnog v1.0.47 artefakta izmjeren je **97.079/255 alpha MAE** zbog potpuno neprozirnog platna i **38.967/255 RGB MAE** preko navy pozadine; detalji u `docs/launcher-qa-followup-v1.0.48.md`. **To nije rezultat ovog commita** ni tvrdnja o dokazanom 1:1.
+
+- Završni prolaz **9/10 — Wordmark**: stvarni Compose 7–3–9 znak ima suptilan cijan sjaj; potpis `by Brendigo` poravnat je s desnim rubom natpisa `Sudoku` bez nepostojeće vodoravne crte, a natpis koristi prijelaz bijela→cijan→tirkizna. Dodani su `wordmark-*` testTagovi i Android geometrijski test.
+- Nativni `09-wordmark.png` instrumentacijski izvoz sada rekonstruira alfa-kanal iz **dvije stvarne Compose snimke, na bijeloj i crnoj podlozi**, umjesto brisanja gotovo crnih piksela; omjer dimenzija ostaje očuvan. Dodani `scripts/wordmark_pixel_qa.py` i Python regresije alfa-pogrešaka s odvojenim izvještajem za znak, natpis i potpis.
+- Provjereni originalni 1254² RGBA PNG ima alpha≥128 granice **(63,443,1204,779)**. SHA-256, postupak, ograničenja i prihvatni kriteriji u `docs/wordmark-qa-followup-v1.0.48.md`. Konačan stvarni 1:1 rezultat **nije potvrđen**; novi QA export još mora proći Android CI.
+
+- Završni vizualni prolaz **8/10 — Splash**: na stvarnom Compose logotipu 7–3–9 dodan je cijan/plavi halo s fokusom na donjem lijevom rubu i zaobljeniji kutovi samo za svjetleći Splash znak; svi drugi mali logotipi ostaju nepromijenjeni.
+- Instrumentacija sada mjeri centriranje, vertikalni redoslijed i nepreklapanje logotipa, natpisa, slogana i indikatora učitavanja na dvije rezolucije; dodani `scripts/splash_pixel_qa.py` i Python regresije šest fiksnih područja. Iz stvarne prethodne v1.0.47 emulatorske snimke izmjeren je RGB MAE **12.498/255** (detalji i SHA-256 u `docs/splash-qa-followup-v1.0.48.md`); ovo **nije** rezultat novog commita i ne potvrđuje 1:1.
+
+- Završni vizualni prolaz **7/10 — Postignuća**: suptilno obojene aure oko pravih vektorskih nagrada (zaključane ostaju zaključane), zasebni pristupačni testTagovi za stvarni napredak svih 24 postignuća i stabilan prikaz popisa/detalja pri rekreaciji Android Activityja.
+- Novi instrumentacijski test potvrđuje proširenih 24 postignuća i očuvani detalj nakon rekreacije. Dodani `scripts/achievements_pixel_qa.py` i dva Python regresijska testa na osam nepromjenjivih područja. Povijesni stvarni v1.0.47 RGB MAE **28.930/255** dokumentiran u `docs/achievements-qa-followup-v1.0.48.md`; **nije** rezultat novih izmjena niti dokaz konačne jednakosti 1:1.
+
+- Završni vizualni prolaz **6/10 — Statistika**: četiri neovisno obojene kartice postignuća (tirkizna, plava, ljubičasta, cijan) i u zaključanom stanju, čitljiv prikaz 4 kartice na 941×1672 i prilagodljiva 2×2 mreža na 720×1280 / povećanom fontu; stvarni napredak ostaje iz baze podataka.
+- Statistički dijalozi pamte otvoreno stanje pri Android rekreaciji aktivnosti; dodani testni tagovi postotka dovršenosti i prazne povijesti te novi instrumentacijski test četiri nagradne kartice i povijesti.
+- Dodani `scripts/statistics_pixel_qa.py` i Python testovi sedam fiksnih ROI područja. Povijesni v1.0.47 globalni RGB MAE bio je **26.637/255**, detalji i izvorni SHA-256 u `docs/statistics-qa-followup-v1.0.48.md`. **To nije rezultat novog HEAD-a i ne dokazuje pixel 1:1.**
+
+- Završni prolaz zaslona **5/10 — Dnevni izazov**: lokalna rang-lista dobila je referentni zaobljeni ljubičasti obrub (25dp), tihi ljubičasti sjaj ikone i najmanje 48dp interaktivne visine. Dnevna nagrada sada koristi nativni zlatni medaljon s posudicom i zvijezdom, umjesto generičkog poklona.
+- Dodane stabilne Compose oznake sedam stvarnih datuma i nagrade, Android UI test lokalne rang-liste i kalendarskih granica, te `scripts/daily_pixel_qa.py` s devet referentnih ROI područja i Python regresijskim testovima. Stvarni prethodni v1.0.47 RGB MAE bio je **23.594/255**, detalji u `docs/daily-qa-followup-v1.0.48.md`. Novi pikseli 1:1 još nisu potvrđeni.
+
+- Završni vizualni prolaz **4/10 — Postavke**: u `SettingsPage` usklađen plavi vanjski obrub panela Jezik uz tirkizni globus, dodane stabilne QA oznake jezičnog selektora i stvarne verzije.
+- Novi Android test `settingsReferenceRowsKeepTouchTargetsAndCorrectContent` provjerava pet pristupačnih 48dp prekidača, granice odabira jezika, stvarnu verziju i dostupnost offline sigurnosnih kopija.
+- Dodani `scripts/settings_pixel_qa.py` i Python regresijski testovi osam fiksnih vizualnih područja. Stvarni povijesni v1.0.47 screenshot pokazuje **24.519/255 RGB MAE** globalno; detalji i SHA-256 izvornih PNG-ova u `docs/settings-qa-followup-v1.0.48.md`. To **nije** rezultat novog commita i ne dokazuje 1:1.
+
+- Završni vizualni prolaz **3/10 — Aktivna igra**: prigušena ispuna odabrane ćelije uz stvarni cijan obrub, označene HUD i alatna traka; instrumentacijski QA ploče 9×9 (81 polje), poravnanja četiriju funkcijskih gumba i 5+4 brojčane tipkovnice na dva emulatora.
+- Dodan `scripts/gameplay_pixel_qa.py` s mjerenjem pune slike i devet fiksnih regija, uz Python regresijske testove. Povijesni stvarni v1.0.47 full-frame RGB MAE **19.381/255**; detalji u `docs/gameplay-qa-followup-v1.0.48.md`. Nova 1:1 metrička provjera još nije potvrđena.
+
+- Završni vizualni prolaz zaslona 2/10 — **Nova igra**: šest tamnijih nativnih gradijenata kartica (Vrlo lako do Majstor), manje pozadinskog blještavila, bez izmjene odabira veličine/težine ili enginea.
+- Dodani stabilni Compose tagovi naslova i šest kartica, uklonjena neiskorištena lokalna varijabla; novi instrumentacijski test čuva širine, visine i interakciju na 941×1672 i 720×1280.
+- Zajednička mjerna rutina za fiksne ROI regije i novi `scripts/new_game_pixel_qa.py` uz Python regresijske testove; povijesni, stvarni v1.0.47 RGB MAE **25.017/255** dokumentiran u `docs/new-game-qa-followup-v1.0.48.md`. **Nije rezultat nove implementacije.**
+- Novi pixel-perfect 1:1 rezultat i prodajno izdanje ne proglašavaju se prije zelenog aktualnog Android CI i stvarnih emulatorskih PNG mjerenja.
+
+- Završna izrada brendinga (reference 9/10): nativni adaptive vector dobio je 9 zaobljenih ćelija i dodatne osvijetljene slojeve; horizontalni SVG logo dobio je iste ćelije, a SVG ikona zadržava prozirne vanjske rubove.
+- QA sada izvozi stvarne transparentne `09-wordmark.png` i `10-launcher-icon.png` te zasebnu `11-launcher-monochrome.png`, a Bash exporter provjerava 11 PNG datoteka.
+- Nadograđen `scripts/pixel_compare.py`: alfa, RGBA i kompozitna usporedba, uz regresijske testove slučaja transparentne naspram neprozirne crne pozadine; izvorni SHA-256 i mjerna ograničenja u `docs/branding-qa-v1.0.48.md`.
+- Puni 1:1 rezultat i CI za aktualni commit nisu još potvrđeni: ne izdavati `v1.0.48` prije dokazivih uspješnih provjera i stvarnog potpisa.
+
+- Dodatni PR #55 prolaz za Splash/branding: očuvan raspored reference 941×1672 pri standardnom fontu; za uske zaslone i font scale >135% uvedena zaštita od prelijevanja naslova i gesla.
+- Android 12+ sustavni splash koristi lokalni 7–3–9 vektorski simbol i brendiranu pozadinu; dodani instrumentacijski testovi sustavne teme i geometrije Splash elemenata pri font scale 180%.
+- Vizualne metrike nove iteracije još su otvorene; detalji i preostali uvjeti navedeni su u `docs/splash-branding-followup-v1.0.48.md`. Bez tvrdnje o 1:1, potpisu ili objavi prije provjere.
+
+- Nastavak PR-a #55: akcija „Pravila privatnosti” ima najmanje 48dp aktivne dodirne površine; instrumentacijski test sprječava regresiju pristupačnosti.
+- Workflow za stvarne marketinške snimke više nije vezan uz zastarjelu granu v1.0.38: sada snima osam stvarnih Android zaslona na aktivnoj `feature/sudoku-*` grani te objavljuje PNG i WebP QA artefakte.
+- Release workflow dodatno pokreće `lintRelease`, objavljuje `SHA256SUMS` i prisilno označuje nepotpisana testna izdanja kao prerelease. Nije izvršena objava iz PR-a.
+- Dodana trajna specifikacija rada: `docs/MASTER_PROMPT_HR.md`. Zelen CI i provjera 1:1 ovog HEAD-a još nisu potvrđeni.
+
+- Usklađene stvarne Compose sekcije Izgled, Igra, Zvuk i vibracija, Jezik i O aplikaciji prema vlasnikovoj referenci.
+- Uvedeni lokalni tamni paneli s tankim rubovima i ravnim razdjelnicima te novi tirkizni, ljubičasti i plavi držači ikonica, bez grid-dekoracije preko teksta.
+- Usklađeni 48dp prekidači, donji opisi, razmaci i obrubljeni odabir jezika sa strelicom prema dolje.
+- Privatnost i verzija premještene u kompaktne, odvojene redove. Sve šifrirane sigurnosne kopije i stvarna lokalna pohrana ostaju funkcionalne.
+- Zasebna prigušena pozadina za Postavke i donji krajolik prema uzorku. Zadržan responsivni raspored, pristupačnost i postojeći dijalozi.
+- Android UI test provjerava međusobni redoslijed, širine i margine pet panela na 941×1672 i 720×1280.
+- v1.0.48, versionCode 49, nepromijenjen identitet paketa i API 36. Početni RGB MAE i ograničenja: `docs/settings-qa-v1.0.48.md`.
+
 ## 1.0.47 — Postignuća, zaslon 7/8
 
 - Pixel-QA dorada stvarnog Compose zaslona Postignuća prema vlasnikovoj slici 941×1672: zbroj bodova, 8 istaknutih kartica, bodovne značke, boje, tipografija i progress barovi.

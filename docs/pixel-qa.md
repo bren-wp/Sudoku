@@ -38,6 +38,14 @@ under these normalized filenames:
 - `references/09-wordmark.png` — 1254×1254
 - `references/10-launcher-icon.png` — 1254×1254
 
+The two original transparent branding references have verified SHA-256
+fingerprints and nonempty alpha channels; see `docs/branding-qa-v1.0.48.md`.
+They are **not** Android emulator screenshots. The instrumented emulator
+additionally exports `actual/11-launcher-monochrome.png` as a separate
+1254×1254 **actual Android themed icon** (no corresponding owner's reference).
+For `09`/`10` always compare alpha as well as RGB: identical black RGB
+pixels can be fully transparent in one image and opaque in the other.
+
 The binary PNG assets **are not committed in the repository**; keep the
 original reference ZIP and its SHA-256 manifest as the source of truth for the
 next audit. When comparing with emulator screenshots use only the first seven

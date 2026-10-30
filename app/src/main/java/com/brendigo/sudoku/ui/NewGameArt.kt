@@ -43,13 +43,17 @@ fun NewGameDifficultySurface(
 ) {
     val tint = newGameAccents[index]
     val rounded = RoundedCornerShape(11.dp)
+    // The 941x1672 owner's reference uses very dark navy interiors with
+    // localized neon edges; the previous gradient made the full right half
+    // of each card too luminous (especially Teško and Majstor). These stops
+    // darken the surfaces without changing contrast of native labels/icons.
     val base = when (index) {
-        0 -> listOf(Color(0xFF01464B), Color(0xFF01343F), Color(0xFF01414C), Color(0xFF01565A), Color(0xFF015157))
-        1 -> listOf(Color(0xFF00404C), Color(0xFF002D3C), Color(0xFF003748), Color(0xFF015B69), Color(0xFF015866))
-        2 -> listOf(Color(0xFF032F64), Color(0xFF03214B), Color(0xFF032752), Color(0xFF033665), Color(0xFF033765))
-        3 -> listOf(Color(0xFF37382F), Color(0xFF202830), Color(0xFF3A3429), Color(0xFF6F5631), Color(0xFF685637))
-        4 -> listOf(Color(0xFF292466), Color(0xFF1D1B58), Color(0xFF29225F), Color(0xFF322367), Color(0xFF2D205F))
-        else -> listOf(Color(0xFF612035), Color(0xFF39142E), Color(0xFF51172B), Color(0xFF771E31), Color(0xFF761F30))
+        0 -> listOf(Color(0xFF003039), Color(0xFF002635), Color(0xFF002C39), Color(0xFF003743), Color(0xFF00343E))
+        1 -> listOf(Color(0xFF002C39), Color(0xFF002333), Color(0xFF002937), Color(0xFF003D4A), Color(0xFF003844))
+        2 -> listOf(Color(0xFF021C45), Color(0xFF021638), Color(0xFF021A45), Color(0xFF022B55), Color(0xFF02284D))
+        3 -> listOf(Color(0xFF252A2B), Color(0xFF16212B), Color(0xFF2A2829), Color(0xFF463C2B), Color(0xFF42392D))
+        4 -> listOf(Color(0xFF1B1B4B), Color(0xFF12153B), Color(0xFF1F1A50), Color(0xFF271B57), Color(0xFF241B4E))
+        else -> listOf(Color(0xFF401B2E), Color(0xFF2C1529), Color(0xFF3B172D), Color(0xFF4C1B30), Color(0xFF491C2F))
     }
     Box(modifier.clip(rounded).background(Brush.horizontalGradient(base))
         .border(1.1.dp, tint, rounded)) {
@@ -59,7 +63,7 @@ fun NewGameDifficultySurface(
             val glowCenter = Offset(w * .77f, h * .13f)
             drawCircle(
                 Brush.radialGradient(
-                    listOf(tint.copy(alpha = .12f), Color.Transparent),
+                    listOf(tint.copy(alpha = .08f), Color.Transparent),
                     center = glowCenter, radius = w * .42f,
                 ),
                 radius = w * .42f, center = glowCenter,
@@ -79,7 +83,7 @@ fun NewGameDifficultySurface(
             val active = Offset(w * .76f, h * .58f)
             drawCircle(
                 Brush.radialGradient(
-                    listOf(tint.copy(alpha = .13f), Color.Transparent),
+                    listOf(tint.copy(alpha = .09f), Color.Transparent),
                     center = active, radius = h * .55f,
                 ), radius = h * .55f, center = active,
             )

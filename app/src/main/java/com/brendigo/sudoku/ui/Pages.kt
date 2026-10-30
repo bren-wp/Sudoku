@@ -482,7 +482,10 @@ fun HomePage(controller: SudokuController) {
                         ) {
                             weekdays.forEachIndexed { index, day ->
                                 val checked = monday.plusDays(index.toLong()).toString() in completed
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Column(
+                                    Modifier.testTag("home-weekday-$index"),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
                                     StreakMarker(checked, diameter = 18.dp,
                                         dayLabel = fullDays[index])
                                     Spacer(Modifier.height(5.dp))
@@ -508,7 +511,19 @@ fun HomePage(controller: SudokuController) {
                 }
                 Spacer(Modifier.width(9.dp))
                 Row(
-                    Modifier.weight(1f),
+                    Modifier.weight(1f)
+                        .testTag("home-week-days")
+                        .drawBehind {
+                            // The source reference includes a fine baseline
+                            // beneath seven separate, real daily markers.
+                            val y = 18.dp.toPx() + 5.dp.toPx()
+                            drawLine(
+                                Ink.line.copy(alpha = .60f),
+                                Offset(size.width * .045f, y),
+                                Offset(size.width * .955f, y),
+                                strokeWidth = 1.dp.toPx(),
+                            )
+                        },
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -519,7 +534,10 @@ fun HomePage(controller: SudokuController) {
                         "Četvrtak", "Petak", "Subota", "Nedjelja")
                     weekdays.forEachIndexed { index, day ->
                         val checked = monday.plusDays(index.toLong()).toString() in completed
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            Modifier.testTag("home-weekday-$index"),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
                             StreakMarker(checked, diameter = 18.dp, dayLabel = fullDays[index])
                             Spacer(Modifier.height(6.dp))
                             Text(day, fontSize = 9.sp, color = Ink.muted)
@@ -711,7 +729,6 @@ fun NewGamePage(controller: SudokuController) {
             // 192dp is the reference width. The selector shrinks with the
             // viewport instead of pushing the 48dp Back target off-screen.
             val selectorWidth = minOf(192.dp, (maxWidth - 56.dp).coerceAtLeast(0.dp))
-            val compactSelector = selectorWidth < 175.dp
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -738,14 +755,16 @@ fun NewGamePage(controller: SudokuController) {
         Spacer(Modifier.height(2.dp))
         Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
             .padding(start = 5.dp)) {
-            AccentText("Nova igra", 55)
-            Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp)
+            AccentText("Nova igra", 55, Modifier.testTag("new-game-title"))
+            Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp,
+                modifier = Modifier.testTag("new-game-subtitle"))
         }
         Spacer(Modifier.height(1.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val accessibilityCards = maxWidth < 300.dp ||
                 LocalDensity.current.fontScale >= 1.3f
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.testTag("new-game-difficulty-list"),
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 difficultyLabels.forEachIndexed { i, label ->
                     NewGameDifficultySurface(
                         i,
@@ -908,7 +927,9 @@ fun DailyPage(controller: SudokuController) {
                                 }
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                BrandIcon("gift", Modifier.size(27.dp), Ink.gold)
+                                DailyRewardEmblem(
+                                    Modifier.size(30.dp).testTag("daily-reward-emblem")
+                                )
                                 Spacer(Modifier.width(6.dp))
                                 Column(horizontalAlignment = Alignment.End) {
                                     Text("DANAŠNJA NAGRADA", color = Ink.gold,
@@ -949,7 +970,9 @@ fun DailyPage(controller: SudokuController) {
                             }
                         }
                         Row(Modifier.weight(1.15f), verticalAlignment = Alignment.CenterVertically) {
-                            DailyRewardEmblem(Modifier.size(52.dp))
+                            DailyRewardEmblem(
+                                Modifier.size(52.dp).testTag("daily-reward-emblem")
+                            )
                             Spacer(Modifier.width(5.dp))
                             Column {
                                 Text("DANAŠNJA\nNAGRADA", color = Ink.gold,
@@ -1062,7 +1085,10 @@ fun DailyPage(controller: SudokuController) {
                     listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED")
                         .forEachIndexed { index, label ->
                             val date = monday.plusDays(index.toLong())
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                Modifier.testTag("daily-weekday-$index"),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
                                 Text(label, color = Ink.muted, fontSize = 10.sp)
                                 Spacer(Modifier.height(3.dp))
                                 DailyWeekMarker(date.toString() in completedDays,
@@ -1097,19 +1123,34 @@ fun DailyPage(controller: SudokuController) {
         }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             DailyFrame(
-                Modifier.fillMaxWidth(.63f).heightIn(min = 46.dp)
+                Modifier.fillMaxWidth(.63f).heightIn(min = 48.dp)
                     .testTag("daily-leaderboard")
                     .semantics {
                         contentDescription = "Otvori osobnu rang-listu"
                         role = Role.Button
                     }
                     .clickable { showRanking = true },
+                // Rounded violet accent matches the source leaderboard pill
+                // while retaining the actual offline ranking dialog.
+                highlight = Ink.purple,
+                radius = 25.dp,
             ) {
                 Row(
                     Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
-                    BrandIcon("trophy", Modifier.size(29.dp), Ink.purple)
+                    Box(
+                        Modifier.size(33.dp)
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Ink.purple.copy(alpha = .30f), Color.Transparent)
+                                ),
+                                RoundedCornerShape(50),
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        BrandIcon("trophy", Modifier.size(29.dp), Ink.purple)
+                    }
                     Spacer(Modifier.width(9.dp))
                     Text("Pogledaj rang-listu", color = Ink.white,
                         fontWeight = FontWeight.Bold, fontSize = 16.sp,
@@ -1153,8 +1194,14 @@ private data class PreviewAward(
 @Composable
 fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
-    var metricInfo by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
-    var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
+    // Keep open Statistics dialogs stable across device rotation and
+    // activity recreation; actual data always comes from SudokuController.
+    var metricInfo by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf<String?>(null)
+    }
+    var showHistory by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
     PageContent(topPadding = 23.dp, horizontalPadding = 18.dp) {
         SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true,
             onBack = { controller.go(Screen.HOME) }, titleOffset = 5.dp)
@@ -1209,7 +1256,11 @@ fun StatsPage(controller: SudokuController) {
                     Spacer(Modifier.width(4.dp))
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
-                if (stats.history.isEmpty()) Subtitle("Još nema dovršenih igara.")
+                if (stats.history.isEmpty()) {
+                    Box(Modifier.testTag("stats-history-empty")) {
+                        Subtitle("Još nema dovršenih igara.")
+                    }
+                }
                 stats.history.take(4).forEach { record ->
                     Row(
                         Modifier.fillMaxWidth().heightIn(min = 26.dp)
@@ -1254,47 +1305,38 @@ fun StatsPage(controller: SudokuController) {
                     Text("Pogledaj sve", color = Ink.cyan, fontSize = 11.sp)
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    listOf(
-                        PreviewAward("Prva pobjeda", "star", stats.finished, 1, Ink.teal),
-                        PreviewAward("Brzinac", "timer", stats.fastWins, 1, Ink.blue),
-                        PreviewAward("Pobjednički niz", "flame-solid", stats.bestStreak, 7, Ink.purple),
-                        PreviewAward("Majstor logike", "brain", stats.winsByLevel[3], 50, Ink.cyan),
-                    ).forEach { award ->
-                        val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
-                        StatisticsSurface(
-                            Modifier.weight(1f).heightIn(min = 72.dp),
-                            accent = if (fraction >= 1f) award.tint else Ink.blue,
-                            background = listOf(
-                                award.tint.copy(alpha = .24f),
-                                Color(0xFF081C40),
-                            ),
-                            corner = 9.dp,
-                        ) {
-                            Column(
-                                Modifier.fillMaxWidth().padding(6.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(3.dp),
-                            ) {
-                                BrandIcon(
-                                    if (fraction >= 1f) award.icon else "lock",
-                                    Modifier.size(20.dp),
-                                    if (fraction >= 1f) award.tint else Ink.muted,
-                                )
-                                Text(award.title, color = Ink.white, fontSize = 9.sp,
-                                    maxLines = 1, textAlign = TextAlign.Center)
-                                Box(
-                                    Modifier.fillMaxWidth().height(4.dp)
-                                        .background(Ink.blue.copy(alpha = .30f),
-                                            RoundedCornerShape(8.dp)),
-                                ) {
-                                    Box(
-                                        Modifier.fillMaxWidth(fraction).fillMaxHeight()
-                                            .background(award.tint, RoundedCornerShape(8.dp)),
-                                    )
+                val previews = listOf(
+                    PreviewAward("Prva pobjeda", "star", stats.finished, 1, Ink.teal),
+                    PreviewAward("Brzinac", "timer", stats.fastWins, 1, Ink.blue),
+                    PreviewAward("Pobjednički niz", "flame-solid", stats.bestStreak, 7, Ink.purple),
+                    PreviewAward("Majstor logike", "brain", stats.winsByLevel[3], 50, Ink.cyan),
+                )
+                // Four across on the owner's 941px reference; a legible 2x2
+                // grid on narrower devices or when the system font is enlarged.
+                BoxWithConstraints(Modifier.fillMaxWidth().testTag("stats-award-grid")) {
+                    val compactAwards = maxWidth < 350.dp ||
+                        LocalDensity.current.fontScale >= 1.3f
+                    if (compactAwards) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            previews.chunked(2).forEachIndexed { row, pair ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    pair.forEachIndexed { column, award ->
+                                        StatsAwardPreview(
+                                            award,
+                                            Modifier.weight(1f)
+                                                .testTag("stats-award-preview-${row * 2 + column}"),
+                                        )
+                                    }
                                 }
-                                Text("${award.current.coerceAtMost(award.goal)}/${award.goal}",
-                                    color = Ink.muted, fontSize = 9.sp)
+                            }
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                            previews.forEachIndexed { index, award ->
+                                StatsAwardPreview(
+                                    award,
+                                    Modifier.weight(1f).testTag("stats-award-preview-$index"),
+                                )
                             }
                         }
                     }
@@ -1340,6 +1382,57 @@ fun StatsPage(controller: SudokuController) {
                 TextButton(onClick = { showHistory = false }) { Text("Zatvori", color = Ink.cyan) }
             },
         )
+    }
+}
+
+
+/** A real, locked-or-earned achievement tile; never fabricate progress. */
+@Composable
+private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
+    val fraction = (award.current.toFloat() / award.goal).coerceIn(0f, 1f)
+    val earned = fraction >= 1f
+    StatisticsSurface(
+        modifier.heightIn(
+            min = if (LocalDensity.current.fontScale >= 1.3f) 100.dp else 84.dp
+        ),
+        // Original's four previews retain their independent teal, blue,
+        // purple and cyan accents even when the underlying award is locked.
+        accent = award.tint.copy(alpha = if (earned) 1f else .72f),
+        background = listOf(
+            award.tint.copy(alpha = if (earned) .27f else .17f),
+            Color(0xFF081C40),
+        ),
+        corner = 9.dp,
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            BrandIcon(
+                if (earned) award.icon else "lock",
+                Modifier.size(20.dp),
+                if (earned) award.tint else Ink.muted,
+            )
+            Text(
+                award.title, color = Ink.white, fontSize = 9.sp,
+                maxLines = 2, lineHeight = 11.sp, textAlign = TextAlign.Center,
+            )
+            Box(
+                Modifier.fillMaxWidth().height(4.dp)
+                    .background(Ink.blue.copy(alpha = .30f),
+                        RoundedCornerShape(8.dp)),
+            ) {
+                Box(
+                    Modifier.fillMaxWidth(fraction).fillMaxHeight()
+                        .background(award.tint, RoundedCornerShape(8.dp)),
+                )
+            }
+            Text(
+                "${award.current.coerceAtMost(award.goal)}/${award.goal}",
+                color = Ink.muted, fontSize = 9.sp,
+            )
+        }
     }
 }
 
@@ -1435,7 +1528,8 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("$percentage%", color = Ink.white, fontSize = 26.sp,
-                        fontWeight = FontWeight.ExtraBold)
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.testTag("stats-completion-percent"))
                     Text("Dovršene igre", color = Ink.muted, fontSize = 9.sp, maxLines = 1)
                 }
             }
@@ -1535,8 +1629,15 @@ private data class Achievement(
 @Composable
 fun AchievementsPage(controller: SudokuController) {
     val s = controller.stats
-    var showAll by remember { androidx.compose.runtime.mutableStateOf(false) }
-    var selectedAchievement by remember { androidx.compose.runtime.mutableStateOf<Achievement?>(null) }
+    // Preserve the actual user's 24-award view and open details through
+    // rotation or process recreation. Save only the stable title, not a
+    // stale Achievement snapshot containing old progress data.
+    var showAll by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    var selectedAchievementTitle by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf<String?>(null)
+    }
     // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
     val basic = listOf(
         Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
@@ -1571,6 +1672,7 @@ fun AchievementsPage(controller: SudokuController) {
     // first four rows; the remaining 16 remain accessible on demand.
     val featured = basic.take(7) + data.last()
     val visible = if (showAll) featured + basic.drop(7) else featured
+    val selectedAchievement = data.firstOrNull { it.title == selectedAchievementTitle }
     PageContent(topPadding = 18.dp, horizontalPadding = 19.dp) {
         SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
         AchievementSummarySurface(Modifier.fillMaxWidth().heightIn(min = 75.dp)
@@ -1639,7 +1741,7 @@ fun AchievementsPage(controller: SudokuController) {
                                 (if (unlocked) ", otključano" else ", zaključano")
                             role = Role.Button
                         }
-                        .clickable { selectedAchievement = achievement },
+                        .clickable { selectedAchievementTitle = achievement.title },
                     ) {
                         Column(
                             Modifier.fillMaxWidth()
@@ -1652,7 +1754,24 @@ fun AchievementsPage(controller: SudokuController) {
                         ) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Box(
-                                    Modifier.size(if (compactFeatured) 38.dp else 48.dp),
+                                    Modifier.size(if (compactFeatured) 38.dp else 48.dp)
+                                        .drawBehind {
+                                            val mid = Offset(size.width / 2f, size.height / 2f)
+                                            drawCircle(
+                                                Brush.radialGradient(
+                                                    listOf(
+                                                        achievement.tint.copy(
+                                                            alpha = if (unlocked) .32f else .14f
+                                                        ),
+                                                        Color.Transparent,
+                                                    ),
+                                                    center = mid,
+                                                    radius = size.width * .68f,
+                                                ),
+                                                radius = size.width * .68f,
+                                                center = mid,
+                                            )
+                                        },
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     // Keep each award recognizable when locked.
@@ -1722,8 +1841,18 @@ fun AchievementsPage(controller: SudokuController) {
                             )
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
-                            Box(Modifier.fillMaxWidth().height(8.dp)
-                                .background(Color(0xDD041B3B), RoundedCornerShape(12.dp))
+                            Box(
+                                Modifier.fillMaxWidth().height(8.dp)
+                                    .testTag(
+                                        "achievement-progress-" +
+                                            achievement.title.lowercase().replace(" ", "-")
+                                    )
+                                    .semantics {
+                                        contentDescription =
+                                            "${achievement.current.coerceAtMost(achievement.goal)}" +
+                                            " od ${achievement.goal}"
+                                    }
+                                    .background(Color(0xDD041B3B), RoundedCornerShape(12.dp))
                                 .border(.6.dp, achievement.tint.copy(alpha = .45f),
                                     RoundedCornerShape(12.dp))) {
                                 if (progress > 0f) Box(
@@ -1766,7 +1895,7 @@ fun AchievementsPage(controller: SudokuController) {
     }
     selectedAchievement?.let { award ->
         AlertDialog(
-            onDismissRequest = { selectedAchievement = null },
+            onDismissRequest = { selectedAchievementTitle = null },
             modifier = Modifier.testTag("achievement-detail"),
             containerColor = Color(0xFF081A41),
             title = { Text(award.title, color = Ink.white) },
@@ -1786,7 +1915,7 @@ fun AchievementsPage(controller: SudokuController) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { selectedAchievement = null }) {
+                TextButton(onClick = { selectedAchievementTitle = null }) {
                     Text("Zatvori", color = Ink.cyan)
                 }
             },
@@ -1815,77 +1944,121 @@ fun SettingsPage(
     var showAbout by androidx.compose.runtime.saveable.rememberSaveable {
         androidx.compose.runtime.mutableStateOf(false)
     }
-    PageContent(topPadding = 20.dp) {
-        SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(Modifier.padding(9.dp)) {
+    PageContent(topPadding = 27.dp, horizontalPadding = 19.dp) {
+        SectionTitle(
+            "Postavke", "Prilagodi igru svojim željama",
+            centered = true, titleOffset = 5.dp,
+            onBack = { controller.back() },
+        )
+        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-appearance")) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp)) {
                 SettingHeader("palette", "Izgled", "Prilagodi vizualni doživljaj igre")
-                SettingToggle("moon", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
-                    controller.updateOptions(opts.copy(dark = it))
-                }
-                SettingToggle("sparkles", "Animacije", "Prikaži animacije i vizualne efekte", opts.animations) {
-                    controller.updateOptions(opts.copy(animations = it))
+                Column(
+                    Modifier.fillMaxWidth()
+                        .background(Color(0x8B051637), RoundedCornerShape(11.dp))
+                        .border(.5.dp, Ink.blue.copy(alpha = .47f), RoundedCornerShape(11.dp))
+                ) {
+                    SettingToggle("moon", "Tamna tema",
+                        "Koristi tamni izgled aplikacije", opts.dark) {
+                        controller.updateOptions(opts.copy(dark = it))
+                    }
+                    SettingsRule(Modifier.padding(horizontal = 6.dp))
+                    SettingToggle("sparkles", "Animacije",
+                        "Prikaži animacije i vizualne efekte", opts.animations) {
+                        controller.updateOptions(opts.copy(animations = it))
+                    }
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(Modifier.padding(9.dp)) {
+        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-game")) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp)) {
                 SettingHeader("gamepad", "Igra", "Postavke igrivosti i pomoći")
-                SettingToggle("note", "Automatske bilješke", "Automatski dodaj moguće brojeve u prazna polja", opts.autoNotes) {
-                    controller.updateOptions(opts.copy(autoNotes = it))
-                }
-                SettingToggle("warning", "Provjera greške", "Odmah označi netočne unose", opts.checkMistakes) {
-                    controller.updateOptions(opts.copy(checkMistakes = it))
-                }
-                SettingToggle("grid", "Isticanje brojeva", "Naglasi sve iste brojeve na ploči", opts.highlightEquals) {
-                    controller.updateOptions(opts.copy(highlightEquals = it))
+                Column(
+                    Modifier.fillMaxWidth()
+                        .background(Color(0x8B051637), RoundedCornerShape(11.dp))
+                        .border(.5.dp, Ink.blue.copy(alpha = .47f), RoundedCornerShape(11.dp))
+                ) {
+                    SettingToggle("note", "Automatske bilješke",
+                        "Automatski dodaj moguće brojeve u prazna polja", opts.autoNotes) {
+                        controller.updateOptions(opts.copy(autoNotes = it))
+                    }
+                    SettingsRule(Modifier.padding(horizontal = 6.dp))
+                    SettingToggle("warning", "Provjera greške",
+                        "Odmah označi netočne unose", opts.checkMistakes) {
+                        controller.updateOptions(opts.copy(checkMistakes = it))
+                    }
+                    SettingsRule(Modifier.padding(horizontal = 6.dp))
+                    SettingToggle("grid", "Isticanje brojeva",
+                        "Naglasi sve iste brojeve na ploči", opts.highlightEquals) {
+                        controller.updateOptions(opts.copy(highlightEquals = it))
+                    }
                 }
             }
         }
-        NeonPanel(
-            Modifier.fillMaxWidth().heightIn(min = 58.dp)
+        SettingsSurface(
+            Modifier.fillMaxWidth().heightIn(min = 55.dp)
                 .testTag("sound-vibration")
                 .semantics { contentDescription = "Zvuk i vibracija"; role = Role.Button }
                 .clickable { showSound = true },
-            Ink.purple,
+            accent = Ink.blue,
         ) {
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 13.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandIcon("speaker", Modifier.size(25.dp), Ink.purple)
-                Spacer(Modifier.width(12.dp))
+                SettingsGlyph("speaker", Ink.purple, size = 36.dp)
+                Spacer(Modifier.width(13.dp))
                 Column(Modifier.weight(1f)) {
                     Text("Zvuk i vibracija", fontSize = 17.sp,
                         fontWeight = FontWeight.Bold, color = Ink.white)
-                    Subtitle("Uključi ili isključi zvučne efekte i vibracije", centered = false)
+                    Text("Uključi ili isključi zvučne efekte i vibracije",
+                        color = Ink.muted, fontSize = 11.sp,
+                        lineHeight = 14.sp, maxLines = 2)
                 }
-                BrandIcon("next", Modifier.size(20.dp), Ink.muted)
+                BrandIcon("next", Modifier.size(22.dp), Ink.muted)
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 54.dp)
-            .testTag("language-settings")
-            .semantics { contentDescription = "Jezik aplikacije, hrvatski"; role = Role.Button }
-            .clickable { showLanguage = true }, Ink.teal) {
-            Row(Modifier.fillMaxWidth().padding(11.dp), verticalAlignment = Alignment.CenterVertically) {
-                BrandIcon("globe", Modifier.size(25.dp), Ink.teal)
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text("Jezik", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-                    Subtitle("Odaberi jezik aplikacije")
+        SettingsSurface(
+            Modifier.fillMaxWidth().heightIn(min = 55.dp)
+                .testTag("language-settings")
+                .semantics {
+                    contentDescription = "Jezik aplikacije, hrvatski"
+                    role = Role.Button
                 }
-                Text("Hrvatski", color = Ink.muted, fontSize = 13.sp)
-                Spacer(Modifier.width(6.dp))
-                BrandIcon("next", Modifier.size(16.dp), Ink.teal)
-            }
-        }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(
-                Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                .clickable { showLanguage = true },
+            // The owner's reference uses a BLUE outer panel border with a
+            // turquoise globe glyph, not a fully turquoise panel.
+            accent = Ink.blue,
+        ) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                SettingsGlyph("globe", Ink.teal, size = 36.dp)
+                Spacer(Modifier.width(13.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("Jezik", fontSize = 17.sp, color = Ink.white,
+                        fontWeight = FontWeight.Bold)
+                    Text("Odaberi jezik aplikacije",
+                        color = Ink.muted, fontSize = 11.sp, maxLines = 2)
+                }
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 58.dp)
+                    Modifier.testTag("settings-language-value")
+                        .background(Color(0xB0082452), RoundedCornerShape(10.dp))
+                        .border(.8.dp, Ink.blue.copy(alpha = .72f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 11.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("Hrvatski", fontSize = 12.sp, color = Ink.muted)
+                    Spacer(Modifier.width(12.dp))
+                    BrandIcon("down", Modifier.size(17.dp), Ink.muted)
+                }
+            }
+        }
+        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-about")) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 5.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 49.dp)
                         .testTag("about-app")
                         .semantics {
                             contentDescription = "O aplikaciji Sudoku by Brendigo"
@@ -1895,45 +2068,51 @@ fun SettingsPage(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     SettingHeader("info", "O aplikaciji", "Sudoku by Brendigo",
-                        Modifier.weight(1f))
+                        Modifier.weight(1f), tint = Ink.blue)
                     BrandIcon("next", Modifier.size(20.dp), Ink.muted)
                 }
-                NeonPanel(
+                SettingsRule()
+                Row(
                     Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("privacy-policy")
-                        .semantics { contentDescription = "Otvori pravila privatnosti"; role = Role.Button }
-                        .clickable { showPrivacy = true },
-                    Ink.blue,
-                ) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        BrandIcon("shield", Modifier.size(20.dp), Ink.cyan)
-                        Spacer(Modifier.width(12.dp))
-                        Text("Pravila privatnosti", color = Ink.white,
-                            fontSize = 15.sp, modifier = Modifier.weight(1f))
-                        BrandIcon("next", Modifier.size(18.dp), Ink.cyan)
-                    }
-                }
-                Row(
-                    Modifier.fillMaxWidth().heightIn(min = 28.dp),
+                        .semantics {
+                            contentDescription = "Otvori pravila privatnosti"
+                            role = Role.Button
+                        }
+                        .clickable { showPrivacy = true }
+                        .padding(horizontal = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    BrandIcon("grid", Modifier.size(20.dp), Ink.muted)
-                    Spacer(Modifier.width(12.dp))
+                    BrandIcon("shield", Modifier.size(20.dp), Ink.muted)
+                    Spacer(Modifier.width(15.dp))
+                    Text("Pravila privatnosti", color = Ink.muted,
+                        fontSize = 13.sp, modifier = Modifier.weight(1f))
+                    BrandIcon("next", Modifier.size(17.dp), Ink.muted)
+                }
+                SettingsRule()
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 28.dp)
+                        .testTag("settings-version")
+                        .padding(horizontal = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BrandIcon("grid", Modifier.size(19.dp), Ink.muted)
+                    Spacer(Modifier.width(15.dp))
                     Text("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME,
-                        color = Ink.muted, fontSize = 13.sp)
+                        color = Ink.muted, fontSize = 12.sp)
                 }
             }
         }
-        // Keep the screenshot-matched Settings sections intact and append
-        // user-initiated offline backup actions after the existing content.
-        NeonPanel(Modifier.fillMaxWidth(), Ink.teal) {
-            Column(Modifier.fillMaxWidth().padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Offline encrypted backups remain accessible by scrolling below the
+        // reference viewport. Keep their real callbacks and persistence.
+        SettingsSurface(Modifier.fillMaxWidth().padding(top = 25.dp)
+            .testTag("settings-backup"), Ink.teal) {
+            Column(
+                Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 SettingHeader("shield", "Sigurnosna kopija",
-                    "Šifrirano spremanje i vraćanje napretka na uređaju")
+                    "Šifrirano spremanje i vraćanje napretka na uređaju", tint = Ink.teal)
                 Row(Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(Modifier.weight(1f)) {
@@ -2051,66 +2230,79 @@ fun SettingsPage(
 }
 
 @Composable
-private fun SettingHeader(icon: String, title: String, subtitle: String,
-                          modifier: Modifier = Modifier) {
+private fun SettingHeader(
+    icon: String,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    tint: Color = Ink.cyan,
+) {
     Row(
-        modifier.fillMaxWidth().padding(vertical = 5.dp),
+        modifier.fillMaxWidth().padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            Modifier.size(39.dp)
-                .background(Ink.cyan.copy(alpha = .13f), RoundedCornerShape(12.dp))
-                .border(1.dp, Ink.cyan.copy(alpha = .85f), RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            BrandIcon(icon, Modifier.size(25.dp), Ink.cyan)
-        }
-        Spacer(Modifier.width(14.dp))
+        SettingsGlyph(icon = icon, tint = tint, size = 36.dp)
+        Spacer(Modifier.width(13.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 18.sp, color = Ink.white,
                 fontWeight = FontWeight.Bold, maxLines = 2)
-            Subtitle(subtitle)
+            Text(subtitle, fontSize = 12.sp, lineHeight = 15.sp,
+                color = Ink.muted, maxLines = 2)
         }
     }
 }
 
 @Composable
-private fun SettingToggle(icon: String, title: String, caption: String, checked: Boolean, change: (Boolean) -> Unit) {
+private fun SettingToggle(
+    icon: String,
+    title: String,
+    caption: String,
+    checked: Boolean,
+    change: (Boolean) -> Unit,
+) {
     val tag = "setting-" + title.lowercase().replace(" ", "-")
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag(tag)
+        Modifier.fillMaxWidth().heightIn(min = 52.dp)
+            .testTag(tag)
             .toggleable(value = checked, role = Role.Switch, onValueChange = change)
-            .semantics { contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}" },
+            .semantics {
+                contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}"
+            }
+            .padding(start = 14.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BrandIcon(icon, Modifier.size(21.dp), Ink.cyan)
-        Spacer(Modifier.width(13.dp))
+        BrandIcon(icon, Modifier.size(21.dp), Ink.muted)
+        Spacer(Modifier.width(17.dp))
         Column(Modifier.weight(1f).padding(end = 7.dp)) {
-            Text(title, fontSize = 14.sp, color = Ink.white,
-                fontWeight = FontWeight.SemiBold, maxLines = 2, lineHeight = 18.sp)
-            Text(caption, color = Ink.muted, fontSize = 11.sp,
-                lineHeight = 14.sp, maxLines = 3)
+            Text(
+                title,
+                fontSize = 14.sp, color = Ink.white,
+                fontWeight = FontWeight.SemiBold, maxLines = 2,
+                lineHeight = 18.sp,
+            )
+            Text(
+                caption, color = Ink.muted,
+                fontSize = 11.sp, lineHeight = 14.sp, maxLines = 3,
+            )
         }
-        // The Material3 default thumb inherited the app's purple theme.
-        // Render the brand switch ourselves; the parent remains the one
-        // accessible/clickable control and persists its state via change().
+        // The entire parent is the single accessible switch and persists
+        // state through the existing SudokuController options callbacks.
         Box(
-            Modifier.width(55.dp).height(31.dp)
+            Modifier.width(48.dp).height(28.dp)
                 .background(
                     if (checked) Brush.horizontalGradient(
-                        listOf(Color(0xFF00D8F7), Color(0xFF0868F5)),
+                        listOf(Color(0xFF00D4F5), Color(0xFF0876F7)),
                     ) else Brush.horizontalGradient(
-                        listOf(Color(0xFF243657), Color(0xFF152444)),
+                        listOf(Color(0xFF223553), Color(0xFF132543)),
                     ),
                     RoundedCornerShape(25.dp),
                 )
-                .border(1.dp,
-                    if (checked) Ink.cyan else Ink.muted.copy(alpha = .65f),
+                .border(1.dp, if (checked) Ink.cyan else Ink.muted.copy(alpha = .66f),
                     RoundedCornerShape(25.dp)),
             contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
             Box(
-                Modifier.padding(horizontal = 4.dp).size(23.dp)
+                Modifier.padding(horizontal = 4.dp).size(20.dp)
                     .background(Color.White, RoundedCornerShape(50)),
             )
         }
@@ -2119,38 +2311,82 @@ private fun SettingToggle(icon: String, title: String, caption: String, checked:
 
 @Composable
 fun SplashPage() {
-    // The reference places the 7-3-9 mark at roughly 26% of the viewport
-    // height and the spinner close to the bottom. Anchoring both independently
-    // avoids moving the logo when the display becomes taller.
+    // Preserve the 941x1672 reference composition at the default font scale.
+    // Smaller or accessibility-scaled displays use the same *real* Compose
+    // content, with guarded typography instead of a cropped screenshot.
     BoxWithConstraints(Modifier.fillMaxSize().testTag("splash-screen")) {
-        val shortScreen = maxHeight < 700.dp
+        val compact = maxHeight < 700.dp || maxWidth < 385.dp
+        val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+        // Keep the rendered wordmark within a safe horizontal footprint when
+        // the system's accessible font scale is unusually large.
+        val typeFactor = minOf(1f, 1.35f / fontScale)
+        val headingSp = ((if (compact) 53 else 79) * typeFactor)
+            .toInt().coerceAtLeast(30)
+        val tagline = if (compact || fontScale > 1.35f)
+            "TRENIRAJ MOZAK SVAKI DAN"
+        else "T R E N I R A J   M O Z A K   S V A K I   D A N"
+
         Column(
             Modifier.align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(top = maxHeight * if (shortScreen) .19f else .255f),
+                .padding(top = maxHeight * if (compact) .19f else .255f)
+                .testTag("splash-brand"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Reference: mark near 26% viewport height, enlarged wordmark
-            // and a shorter icon/title gap. Preserve fluid scaling on small screens.
-            SudokuLogo(if (shortScreen) 92.dp else 122.dp, glowing = true)
-            Spacer(Modifier.height(if (shortScreen) 13.dp else 15.dp))
-            AccentText("Sudoku", if (shortScreen) 53 else 79)
-            Text("by Brendigo", color = Ink.muted, letterSpacing = 5.sp,
-                fontSize = if (shortScreen) 13.sp else 16.sp)
-            Spacer(Modifier.height(if (shortScreen) 12.dp else 11.dp))
-            Text("T R E N I R A J   M O Z A K   S V A K I   D A N",
-                color = Ink.cyan, fontSize = if (shortScreen) 9.sp else 15.sp,
-                textAlign = TextAlign.Center, maxLines = 2)
+            // The owner's 941px artwork has a concentrated cyan halo
+            // extending behind the lower-left edge of its rounded 7-3-9
+            // emblem. Paint only decorative light: the logo is still an
+            // actual scaled Compose 3x3 grid, never a pasted screenshot.
+            Box(
+                Modifier.testTag("splash-logo")
+                    .drawBehind {
+                        val center = Offset(size.width * .38f, size.height * .69f)
+                        val glowRadius = size.width * .82f
+                        drawCircle(
+                            Brush.radialGradient(
+                                listOf(
+                                    Ink.cyan.copy(alpha = .40f),
+                                    Ink.blue.copy(alpha = .15f),
+                                    Color.Transparent,
+                                ),
+                                center = center, radius = glowRadius,
+                            ),
+                            radius = glowRadius,
+                            center = center,
+                        )
+                    },
+            ) {
+                SudokuLogo(if (compact) 92.dp else 122.dp, glowing = true)
+            }
+            Spacer(Modifier.height(if (compact) 13.dp else 15.dp))
+            AccentText("Sudoku", headingSp, Modifier.testTag("splash-title"))
+            Text(
+                "by Brendigo",
+                color = Ink.muted,
+                letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
+                fontSize = if (compact) 13.sp else 16.sp,
+                modifier = Modifier.testTag("splash-byline"),
+                maxLines = 1,
+            )
+            Spacer(Modifier.height(if (compact) 12.dp else 11.dp))
+            Text(
+                tagline,
+                color = Ink.cyan,
+                fontSize = if (compact) 9.sp else 15.sp,
+                letterSpacing = if (compact || fontScale > 1.35f) 1.sp
+                else androidx.compose.ui.unit.TextUnit.Unspecified,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                modifier = Modifier.fillMaxWidth().testTag("splash-tagline"),
+            )
         }
-        // Android's "remove animations" accessibility preference can reduce
-        // the Material indeterminate spinner to a single pixel. Draw a native,
-        // deterministic arc so the loading state remains legible in screenshot
-        // tests and for users who disable animations.
+        // A deterministic loading arc stays visible when Android animations
+        // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (shortScreen) 24.dp else 70.dp)
-                .size(if (shortScreen) 30.dp else 36.dp)
+                .padding(bottom = if (compact) 24.dp else 70.dp)
+                .size(if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
         ) {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ system launch splash matches the real 7-3-9 in-app brand.
+         Keep the normal window attributes identical to values/styles.xml. -->
+    <style name="Theme.Sudoku" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#030C27</item>
+        <item name="android:navigationBarColor">#030C27</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">#030C27</item>
+        <item name="android:windowSplashScreenBackground">@color/launcher_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_sudoku</item>
+    </style>
+</resources>

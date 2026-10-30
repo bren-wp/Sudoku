@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import android.graphics.BitmapFactory
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,7 +76,8 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
 fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                    splash: Boolean = false, home: Boolean = false,
                    newGame: Boolean = false, gameplay: Boolean = false,
-                   daily: Boolean = false, stats: Boolean = false) {
+                   daily: Boolean = false, stats: Boolean = false,
+                   settings: Boolean = false) {
     val context = LocalContext.current
     val originalNightscape = remember(context) {
         runCatching {
@@ -134,7 +136,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 listOf(Ink.cyan.copy(alpha = .36f), Color.Transparent),
                 center = selected, radius = w * .12f),
                 radius = w * .12f, center = selected)
-        } else if (home || daily || stats) {
+        } else if (home || daily || stats || settings) {
             // The original Home reference has two isolated, slanted boards.
             // The old shared grid crossed the title and bled behind the cards.
             for (i in -2..5) {
@@ -235,7 +237,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         }
         // On the source splash, the moon and horizon sit appreciably higher
         // than behind the dense menu cards. Keep gameplay scenery unchanged.
-        val moonY = if (splash) .705f else .77f
+        val moonY = if (splash) .705f else if (settings) .875f else .77f
         if (!gameplay) {
             drawCircle(
                 Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
@@ -402,6 +404,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 splash -> .613f
                 newGame -> .800f
                 gameplay -> .795f
+                settings -> .830f
                 else -> .730f
             }
             val height = 1f - y
@@ -420,7 +423,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
 fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
     // Reference-sized 7-3-9 brand mark, with a compact fallback for narrow phones.
     // Keep a real text logo for scaling, localization and accessibility.
-    BoxWithConstraints(modifier) {
+    BoxWithConstraints(modifier.testTag("wordmark-container")) {
         val narrow = maxWidth < 350.dp
         val logoSize = if (compact) 46.dp else if (narrow) 69.dp else 82.dp
         val headingSize = if (compact) 36.sp else if (narrow) 41.sp else 55.sp
@@ -429,28 +432,37 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            SudokuLogo(logoSize)
-            Spacer(Modifier.width(if (narrow) 10.dp else 9.dp))
-            Column(Modifier.offset(y = if (compact) 0.dp else 8.dp)) {
+            Box(Modifier.testTag("wordmark-symbol")) {
+                // The owner's icon has a soft cyan elevation halo, rather
+                // than the square shadowless header used previously.
+                SudokuLogo(logoSize, glowing = true)
+            }
+            Spacer(Modifier.width(if (narrow) 7.dp else 5.dp))
+            Column(
+                Modifier.offset(y = if (compact) 0.dp else 8.dp),
+                horizontalAlignment = Alignment.End,
+            ) {
                 Text(
                     text = "Sudoku",
+                    modifier = Modifier.testTag("wordmark-title"),
                     fontSize = headingSize,
                     fontWeight = FontWeight.ExtraBold,
                     style = TextStyle(brush = Brush.horizontalGradient(
-                        listOf(Ink.white, Ink.white, Ink.cyan, Ink.blue),
+                        listOf(Ink.white, Ink.white, Color(0xFF00C2FF), Ink.teal),
                     )),
                     letterSpacing = (-1.2).sp,
                     maxLines = 1,
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier.width(if (narrow) 18.dp else 30.dp).height(1.dp)
-                            .background(Ink.cyan.copy(alpha = .65f)),
-                    )
-                    Spacer(Modifier.width(7.dp))
-                    Text("by Brendigo", fontSize = if (narrow) 10.sp else 11.sp,
-                        color = Ink.muted, letterSpacing = 2.5.sp, maxLines = 1)
-                }
+                // The original transparent PNG puts the byline under the
+                // RIGHT edge of "Sudoku"; no horizontal rule precedes it.
+                Text(
+                    "by Brendigo",
+                    modifier = Modifier.testTag("wordmark-byline"),
+                    fontSize = if (compact || narrow) 10.sp else 11.sp,
+                    color = Ink.muted,
+                    letterSpacing = if (compact || narrow) 2.sp else 2.5.sp,
+                    maxLines = 1,
+                )
             }
         }
     }
@@ -459,21 +471,25 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
 @Composable
 fun SudokuLogo(size: Dp, glowing: Boolean = false) {
     val values = listOf("7", "", "", "", "3", "", "", "", "9")
+    // The splash-only icon is more rounded than the small in-app brand
+    // marks. Do not alter Home/other pages using the default icon.
+    val outerCorner = if (glowing) 19.dp else 13.dp
+    val innerCorner = if (glowing) 17.dp else 11.dp
     Column(
         Modifier.size(size)
             .then(if (glowing) Modifier.shadow(
                 elevation = 12.dp,
-                shape = RoundedCornerShape(13.dp),
+                shape = RoundedCornerShape(outerCorner),
                 ambientColor = Ink.cyan,
                 spotColor = Ink.blue,
             ) else Modifier)
             .clearAndSetSemantics {
                 contentDescription = "Sudoku by Brendigo, logotip 7, 3, 9"
             }
-            .clip(RoundedCornerShape(13.dp))
+            .clip(RoundedCornerShape(outerCorner))
             .background(Brush.linearGradient(listOf(Color(0xFF0058DF), Ink.cyan)))
             .padding(2.dp)
-            .clip(RoundedCornerShape(11.dp))
+            .clip(RoundedCornerShape(innerCorner))
             .background(Color(0xFF061A49))
             .padding(4.dp),
         verticalArrangement = Arrangement.spacedBy(1.dp),

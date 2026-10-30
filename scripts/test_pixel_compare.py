@@ -8,9 +8,362 @@ from pathlib import Path
 from PIL import Image
 
 from pixel_compare import REFERENCE_SIZE, compare
+from home_pixel_qa import measure_home, measure_regions
+from new_game_pixel_qa import REGIONS as NEW_GAME_REGIONS
+from gameplay_pixel_qa import REGIONS as GAMEPLAY_REGIONS
+from settings_pixel_qa import REGIONS as SETTINGS_REGIONS
+from daily_pixel_qa import REGIONS as DAILY_REGIONS
+from statistics_pixel_qa import REGIONS as STATISTICS_REGIONS
+from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
+from splash_pixel_qa import REGIONS as SPLASH_REGIONS
+from wordmark_pixel_qa import WORDMARK_REGIONS, opaque_bounds, wordmark_report
+from launcher_icon_pixel_qa import ICON_REGIONS, alpha_bounds, launcher_report, verify_monochrome
+from final_ten_reference_qa import TEN, THEMED, audit, validate_image
 
 
 class PixelCompareTest(unittest.TestCase):
+    def test_home_reference_areas_isolate_card_regressions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((90, 0, 0), (100, 800, 200, 900))
+            reference.save(folder / "ref.png")
+            actual.save(folder / "actual.png")
+            regions = measure_home(folder / "ref.png", folder / "actual.png",
+                                   folder / "evidence")
+            named = {row["region"]: row for row in regions}
+            self.assertEqual(0, named["header"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, named["streak"]["rgb_mae_0_to_255"])
+            self.assertGreater(named["primary_cards"]["rgb_mae_0_to_255"], 0)
+            self.assertGreater(named["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertTrue((folder / "evidence" / "overlay.png").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_final_ten_gate_requires_every_real_screenshot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            with self.assertRaisesRegex(FileNotFoundError, "01-home"):
+                audit(folder / "references", folder / "screenshots", folder / "evidence")
+            self.assertEqual(10, len(TEN))
+            self.assertEqual("11-launcher-monochrome", THEMED)
+
+    def test_final_ten_gate_checks_native_brand_alpha_and_resolution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            path = folder / "brand.png"
+            Image.new("RGB", (1254, 1254), (0, 0, 0)).save(path)
+            with self.assertRaisesRegex(ValueError, "RGBA"):
+                validate_image(path, (1254, 1254), require_alpha=True)
+            Image.new("RGBA", (720, 1280), (0, 0, 0, 0)).save(path)
+            with self.assertRaisesRegex(ValueError, "1254"):
+                validate_image(path, (1254, 1254), require_alpha=True)
+            Image.new("RGBA", (1254, 1254), (0, 0, 0, 0)).save(path)
+            validate_image(path, (1254, 1254), require_alpha=True)
+
+    def test_launcher_icon_has_real_transparent_margins_and_separate_digits(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            source = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
+            source.paste((2, 20, 65, 255), (123, 100, 1131, 1119))
+            actual = source.copy()
+            # Reject an old foreground export with opaque background:
+            # the source's margin must remain untouched.
+            actual.paste((2, 20, 65, 255), (0, 0, 1254, 48))
+            source.save(folder / "source.png")
+            actual.save(folder / "actual.png")
+            result = launcher_report(
+                folder / "source.png", folder / "actual.png",
+                folder / "evidence",
+            )
+            areas = {row["region"]: row for row in result["regions"]}
+            self.assertEqual(set(ICON_REGIONS), set(areas))
+            self.assertEqual((123, 100, 1131, 1119), result["original_bbox"])
+            self.assertNotEqual(result["actual_bbox"], result["original_bbox"])
+            self.assertGreater(result["summary"]["alpha_mae_0_to_255"], 0)
+            self.assertEqual(0, areas["digit_7"]["alpha_mae"])
+            self.assertEqual(0, areas["digit_3"]["alpha_mae"])
+            self.assertEqual(0, areas["digit_9"]["alpha_mae"])
+            self.assertTrue((folder / "evidence" / "launcher-regions.csv").exists())
+            self.assertTrue((folder / "evidence" / "alpha-difference.png").exists())
+
+    def test_launcher_alpha_bounds_require_actual_1254_canvas(self):
+        with self.assertRaisesRegex(ValueError, "1254"):
+            alpha_bounds(Image.new("RGBA", (720, 1280)))
+
+    def test_launcher_monochrome_must_be_sparse_white_alpha_mask(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "11-launcher-monochrome.png"
+            valid = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
+            valid.paste((255, 255, 255, 255), (597, 560, 657, 694))
+            valid.save(path)
+            report = verify_monochrome(path)
+            self.assertGreater(report["visible_alpha_128_pct"], .1)
+            invalid = Image.new("RGBA", (1254, 1254), (5, 20, 30, 255))
+            invalid.save(path)
+            with self.assertRaisesRegex(ValueError, "transparent canvas corners"):
+                verify_monochrome(path)
+
+    def test_wordmark_alpha_and_byline_regions_are_separate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
+            reference.paste((0, 190, 255, 255), (80, 480, 300, 710))
+            reference.paste((255, 255, 255, 255), (450, 520, 1050, 675))
+            reference.paste((145, 160, 200, 255), (690, 720, 1050, 750))
+            actual = reference.copy()
+            # Same exact RGB, but byline alpha is too low: old RGB-only
+            # comparison was blind to this regression.
+            actual.paste((145, 160, 200, 45), (690, 720, 1050, 750))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            report = wordmark_report(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence",
+            )
+            regions = {row["region"]: row for row in report["regions"]}
+            self.assertEqual(set(WORDMARK_REGIONS), set(regions))
+            self.assertEqual(0, regions["symbol_739"]["alpha_mae"])
+            self.assertEqual(0, regions["title_sudoku"]["alpha_mae"])
+            self.assertGreater(regions["byline_brendigo"]["alpha_mae"], 0)
+            self.assertGreater(report["summary"]["alpha_mae_0_to_255"], 0)
+            self.assertNotEqual(
+                report["source_visible_bbox"], report["actual_visible_bbox"]
+            )
+            for filename in ("alpha-difference.png", "wordmark-regions.csv",
+                             "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / filename).is_file())
+
+    def test_wordmark_alpha_bounds_need_correct_resolution(self):
+        img = Image.new("RGBA", (720, 1280), (0, 0, 0, 0))
+        with self.assertRaisesRegex(ValueError, "1254"):
+            opaque_bounds(img)
+
+    def test_splash_qa_detects_logo_only_drift(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((24, 88, 200), (390, 510, 550, 660))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            rows = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", SPLASH_REGIONS,
+            )
+            by_name = {row["region"]: row for row in rows}
+            self.assertEqual(set(SPLASH_REGIONS), set(by_name))
+            self.assertGreater(by_name["logo_and_halo"]["rgb_mae_0_to_255"], 0)
+            self.assertGreater(by_name["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_name["lower_scenery"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_name["loading_indicator"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_name["title_byline_tagline"]["rgb_mae_0_to_255"])
+            for artifact in ("regions.csv", "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / artifact).is_file())
+
+    def test_splash_qa_does_not_scale_compact_720px_capture(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", SPLASH_REGIONS)
+
+    def test_achievements_roi_separates_first_row_from_footer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((175, 25, 45), (200, 390, 320, 520))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            rows = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", ACHIEVEMENTS_REGIONS,
+            )
+            areas = {item["region"]: item for item in rows}
+            self.assertEqual(set(ACHIEVEMENTS_REGIONS), set(areas))
+            self.assertGreater(areas["first_award_row"]["rgb_mae_0_to_255"], 0)
+            self.assertGreater(areas["whole"]["rgb_mae_0_to_255"], 0)
+            for name in ("header", "summary", "second_award_row",
+                         "third_award_row", "fourth_award_row", "bottom_scenery"):
+                self.assertEqual(0, areas[name]["rgb_mae_0_to_255"])
+            for name in ("regions.csv", "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / name).is_file())
+
+    def test_achievements_roi_rejects_mismatched_720p_screen(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", ACHIEVEMENTS_REGIONS)
+
+    def test_statistics_reference_roi_reports_achievement_card_change(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            observed = reference.copy()
+            observed.paste((40, 90, 110), (230, 1350, 400, 1500))
+            reference.save(folder / "ref.png")
+            observed.save(folder / "actual.png")
+            results = measure_regions(
+                folder / "ref.png", folder / "actual.png",
+                folder / "evidence", STATISTICS_REGIONS,
+            )
+            areas = {item["region"]: item for item in results}
+            self.assertEqual(set(STATISTICS_REGIONS), set(areas))
+            self.assertGreater(areas["achievement_previews"]["rgb_mae_0_to_255"], 0)
+            self.assertGreater(areas["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, areas["metric_cards"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, areas["chart_row"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, areas["history"]["rgb_mae_0_to_255"])
+            for name in ("regions.csv", "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / name).is_file())
+
+    def test_statistics_qa_rejects_incorrect_emulator_resolution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "ref.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "ref.png", folder / "actual.png",
+                                folder / "evidence", STATISTICS_REGIONS)
+
+    def test_daily_qa_isolates_local_leaderboard_area(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((80, 0, 100), (300, 1340, 520, 1410))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            reports = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", DAILY_REGIONS,
+            )
+            by_region = {row["region"]: row for row in reports}
+            self.assertEqual(set(DAILY_REGIONS), set(by_region))
+            self.assertGreater(by_region["leaderboard"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_region["week_timeline"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_region["start_action"]["rgb_mae_0_to_255"])
+            self.assertGreater(by_region["whole"]["rgb_mae_0_to_255"], 0)
+            for name in ("regions.csv", "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / name).is_file())
+
+    def test_daily_qa_rejects_compact_screen_as_941px_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", DAILY_REGIONS)
+
+    def test_settings_qa_detects_sound_panel_difference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            # Only sound card changes, not the underlying owner reference.
+            actual.paste((0, 0, 110), (120, 1000, 270, 1090))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            rows = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", SETTINGS_REGIONS,
+            )
+            by_region = {row["region"]: row for row in rows}
+            self.assertEqual(set(SETTINGS_REGIONS), set(by_region))
+            self.assertGreater(by_region["sound"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_region["appearance"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_region["language"]["rgb_mae_0_to_255"])
+            self.assertGreater(by_region["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+            self.assertTrue((folder / "evidence" / "overlay.png").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+
+    def test_settings_qa_rejects_incorrect_reference_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", SETTINGS_REGIONS)
+
+    def test_gameplay_qa_reports_board_only_difference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((0, 0, 120), (250, 400, 350, 500))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            measurements = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", GAMEPLAY_REGIONS,
+            )
+            by_name = {row["region"]: row for row in measurements}
+            self.assertEqual(set(GAMEPLAY_REGIONS), set(by_name))
+            self.assertGreater(by_name["board"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_name["hud"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_name["keypad"]["rgb_mae_0_to_255"])
+            self.assertGreater(by_name["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+            self.assertTrue((folder / "evidence" / "overlay.png").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+
+    def test_gameplay_qa_rejects_compact_screenshot_as_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", GAMEPLAY_REGIONS)
+
+    def test_new_game_qa_measures_all_reference_regions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            observed = reference.copy()
+            observed.paste((90, 0, 0), (320, 425, 410, 535))
+            reference.save(folder / "reference.png")
+            observed.save(folder / "actual.png")
+            results = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", NEW_GAME_REGIONS,
+            )
+            rows = {result["region"]: result for result in results}
+            self.assertEqual(set(NEW_GAME_REGIONS), set(rows))
+            self.assertGreater(rows["six_cards"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, rows["cta"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, rows["bottom_scenery"]["rgb_mae_0_to_255"])
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+
+    def test_new_game_qa_refuses_compact_vs_reference_rescale(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", NEW_GAME_REGIONS)
+
+    def test_home_pixel_qa_rejects_mismatched_viewports(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_home(folder / "reference.png", folder / "actual.png",
+                             folder / "evidence")
+
     def test_identical_screens_have_zero_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
@@ -61,6 +414,41 @@ class PixelCompareTest(unittest.TestCase):
                     folder / "wordmark.png", folder / "wordmark.png",
                     folder / "wrong-size-result",
                 )
+
+    def test_transparent_logo_rejects_opaque_black_even_when_rgb_is_identical(self):
+        from pixel_compare import BRANDING_SIZE
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGBA", BRANDING_SIZE, (0, 0, 0, 0))
+            observed = Image.new("RGBA", BRANDING_SIZE, (0, 0, 0, 255))
+            reference.save(folder / "ref.png")
+            observed.save(folder / "observed.png")
+            measured = compare(
+                folder / "ref.png", folder / "observed.png",
+                folder / "result", expected_size=BRANDING_SIZE,
+            )
+            # The old RGB-only comparator falsely reported a perfect match.
+            self.assertEqual(0, measured["mean_error_0_to_255"])
+            self.assertEqual(255, measured["alpha_mae_0_to_255"])
+            self.assertEqual(63.75, measured["rgba_mae_0_to_255"])
+            self.assertEqual(0, measured["rgba_within_12_pct"])
+            self.assertGreater(measured["navy_composited_rgb_mae"], 0)
+
+    def test_identical_transparent_branding_has_zero_alpha_error(self):
+        from pixel_compare import BRANDING_SIZE
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGBA", BRANDING_SIZE, (0, 0, 0, 0))
+            reference.putpixel((500, 500), (1, 210, 240, 255))
+            reference.save(folder / "logo.png")
+            measured = compare(
+                folder / "logo.png", folder / "logo.png",
+                folder / "result", expected_size=BRANDING_SIZE,
+            )
+            self.assertEqual(0, measured["alpha_mae_0_to_255"])
+            self.assertEqual(0, measured["rgba_mae_0_to_255"])
+            self.assertEqual(100, measured["rgba_within_12_pct"])
+            self.assertEqual(0, measured["navy_composited_rgb_mae"])
 
     def test_volatile_mask_measures_stable_content_without_hiding_global_error(self):
         with tempfile.TemporaryDirectory() as tmp:
