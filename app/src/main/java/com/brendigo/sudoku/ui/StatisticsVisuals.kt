@@ -57,10 +57,10 @@ fun StatisticsSurface(
 
 /** Dedicated backgrounds for the four statistic metrics. */
 fun metricCardColors(key: String): List<Color> = when (key) {
-    "played" -> listOf(Color(0xF100454B), Color(0xF0024C52), Color(0xFB022B40))
-    "best" -> listOf(Color(0xF321205F), Color(0xF5242170), Color(0xFA161548))
-    "total" -> listOf(Color(0xF3023267), Color(0xF2044D8C), Color(0xFA06275C))
-    "streak" -> listOf(Color(0xF343332B), Color(0xF667462B), Color(0xFA483826))
+    "played" -> listOf(Color(0xF104303A), Color(0xF2034550), Color(0xFB02263A))
+    "best" -> listOf(Color(0xF21C174A), Color(0xF4201B57), Color(0xFB13133B))
+    "total" -> listOf(Color(0xF1042653), Color(0xF3053674), Color(0xFA051F4A))
+    "streak" -> listOf(Color(0xF331302C), Color(0xF53D332B), Color(0xFB302A28))
     else -> listOf(Color(0xF4051B41), Color(0xF4052146))
 }
 
