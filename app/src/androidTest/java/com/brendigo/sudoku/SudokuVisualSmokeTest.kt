@@ -64,6 +64,38 @@ class SudokuVisualSmokeTest {
         // The loader remains a visible, accessible Compose element even when
         // system animation duration scales are set to zero by the emulator.
         rule.onNodeWithTag("splash-loading").assertIsDisplayed()
+        val screen = rule.onNodeWithTag("splash-screen")
+            .fetchSemanticsNode().boundsInRoot
+        val logo = rule.onNodeWithTag("splash-logo")
+            .fetchSemanticsNode().boundsInRoot
+        val title = rule.onNodeWithTag("splash-title")
+            .fetchSemanticsNode().boundsInRoot
+        val byline = rule.onNodeWithTag("splash-byline")
+            .fetchSemanticsNode().boundsInRoot
+        val tagline = rule.onNodeWithTag("splash-tagline")
+            .fetchSemanticsNode().boundsInRoot
+        val indicator = rule.onNodeWithTag("splash-loading")
+            .fetchSemanticsNode().boundsInRoot
+        val dp = rule.activity.resources.displayMetrics.density
+        val middle = (screen.left + screen.right) / 2f
+        check(logo.width >= 90f * dp &&
+            logo.height >= 90f * dp &&
+            kotlin.math.abs(logo.center.x - middle) <= 3f * dp &&
+            logo.top >= screen.top + screen.height * .17f &&
+            logo.top <= screen.top + screen.height * .35f) {
+            "Actual Splash 7-3-9 logo is mis-sized or off-axis: $logo / $screen"
+        }
+        check(logo.bottom <= title.top + 2f * dp &&
+            title.bottom <= byline.top + 2f * dp &&
+            byline.bottom <= tagline.top + 2f * dp &&
+            tagline.bottom + 8f * dp < indicator.top) {
+            "Real Splash logo, heading, subtitle, slogan and loader overlap"
+        }
+        check(
+            kotlin.math.abs(indicator.center.x - middle) <= 3f * dp &&
+                indicator.bottom <= screen.bottom + dp &&
+                indicator.top >= screen.top + screen.height * .70f
+        ) { "Actual Splash loading ring must remain centered at the bottom" }
         shot("08-splash")
     }
 
