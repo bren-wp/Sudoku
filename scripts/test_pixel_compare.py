@@ -15,6 +15,7 @@ from settings_pixel_qa import REGIONS as SETTINGS_REGIONS
 from daily_pixel_qa import REGIONS as DAILY_REGIONS
 from statistics_pixel_qa import REGIONS as STATISTICS_REGIONS
 from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
+from splash_pixel_qa import REGIONS as SPLASH_REGIONS
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -36,6 +37,37 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_splash_qa_detects_logo_only_drift(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((24, 88, 200), (390, 510, 550, 660))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            rows = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", SPLASH_REGIONS,
+            )
+            by_name = {row["region"]: row for row in rows}
+            self.assertEqual(set(SPLASH_REGIONS), set(by_name))
+            self.assertGreater(by_name["logo_and_halo"]["rgb_mae_0_to_255"], 0)
+            self.assertGreater(by_name["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_name["lower_scenery"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_name["loading_indicator"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_name["title_byline_tagline"]["rgb_mae_0_to_255"])
+            for artifact in ("regions.csv", "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / artifact).is_file())
+
+    def test_splash_qa_does_not_scale_compact_720px_capture(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", SPLASH_REGIONS)
 
     def test_achievements_roi_separates_first_row_from_footer(self):
         with tempfile.TemporaryDirectory() as tmp:
