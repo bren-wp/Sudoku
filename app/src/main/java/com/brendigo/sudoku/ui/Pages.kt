@@ -71,6 +71,8 @@ private fun rememberToday(): LocalDate {
 fun PageContent(
     topPadding: androidx.compose.ui.unit.Dp = 28.dp,
     footerText: String = "V I Š E   O D   I G R E  ·  V J E Ž B A   Z A   U M",
+    showFooter: Boolean = true,
+    horizontalPadding: androidx.compose.ui.unit.Dp = 20.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     // Footer occupies its own layout slot below the scroll viewport.
@@ -80,13 +82,13 @@ fun PageContent(
         Column(
             Modifier.weight(1f).fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = horizontalPadding)
                 .padding(top = topPadding, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(7.dp),
         ) {
             content()
         }
-        Text(
+        if (showFooter) Text(
             footerText,
             color = Ink.muted, fontSize = 9.sp, letterSpacing = 1.sp,
             textAlign = TextAlign.Center,
@@ -698,7 +700,7 @@ fun NewGamePage(controller: SudokuController) {
     var level by androidx.compose.runtime.saveable.rememberSaveable {
         androidx.compose.runtime.mutableIntStateOf(2)
     }
-    PageContent {
+    PageContent(topPadding = 22.dp, showFooter = false, horizontalPadding = 21.dp) {
         // Reference hierarchy: back + board size on the same first row,
         // followed by the large title and the six full-width difficulty cards.
         BoxWithConstraints(Modifier.fillMaxWidth().testTag("new-game-size-header")) {
@@ -712,77 +714,57 @@ fun NewGamePage(controller: SudokuController) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    Modifier.size(48.dp).testTag("navigate-back")
+                    Modifier.size(46.dp).testTag("navigate-back")
                         .semantics { contentDescription = "Natrag"; role = Role.Button }
-                        .background(Color(0x99082150), RoundedCornerShape(14.dp))
+                        .background(Color(0xB0082150), RoundedCornerShape(12.dp))
+                        .border(1.dp, Ink.line.copy(alpha = .80f), RoundedCornerShape(12.dp))
                         .clickable { controller.go(Screen.HOME) },
                     contentAlignment = Alignment.Center,
                 ) {
                     BrandIcon("back", Modifier.size(24.dp), Ink.muted)
                 }
-                Row(
-                    Modifier.width(selectorWidth).testTag("new-game-size-selector"),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        if (compactSelector) 3.dp else 5.dp),
-                ) {
-                    listOf(9, 6, 4).forEach { option ->
-                        NeonPanel(
-                            Modifier.weight(1f).testTag("size-$option")
-                                .heightIn(min = 48.dp)
-                                .semantics {
-                                    contentDescription = "Veličina $option puta $option"
-                                    role = Role.RadioButton
-                                    selected = size == option
-                                }
-                                .clickable(enabled = !controller.isGenerating) { size = option },
-                            highlight = if (size == option) Ink.cyan else Ink.line,
-                        ) {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("$option×$option",
-                                    color = if (size == option) Ink.white else Ink.muted,
-                                    fontSize = if (compactSelector) 13.sp else 16.sp,
-                                    maxLines = 1,
-                                    fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                }
+                NewGameSizeSelector(
+                    selectedSize = size,
+                    enabled = !controller.isGenerating,
+                    onSelect = { size = it },
+                    modifier = Modifier.width(selectorWidth),
+                )
             }
         }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(2.dp))
         Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")) {
-            AccentText("Nova igra", 43)
-            Text("Odaberi težinu", color = Ink.muted, fontSize = 18.sp)
+            AccentText("Nova igra", 50)
+            Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp)
         }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(1.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val accessibilityCards = maxWidth < 300.dp ||
                 LocalDensity.current.fontScale >= 1.3f
-            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 difficultyLabels.forEachIndexed { i, label ->
-                    NeonPanel(
+                    NewGameDifficultySurface(
+                        i,
                         Modifier.fillMaxWidth().testTag("difficulty-$i")
-                            .heightIn(min = if (accessibilityCards) 96.dp else 75.dp)
+                            .heightIn(min = if (accessibilityCards) 96.dp else 74.dp)
                             .semantics {
                                 contentDescription = "Težina $label"
                                 role = Role.RadioButton
                                 selected = level == i
                             }
                             .clickable(enabled = !controller.isGenerating) { level = i },
-                        highlight = difficultyColors[i],
                     ) {
                         Row(
                             Modifier.fillMaxWidth().padding(
-                                horizontal = if (accessibilityCards) 9.dp else 13.dp,
+                                horizontal = if (accessibilityCards) 12.dp else 18.dp,
                                 vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            val iconSize = if (accessibilityCards) 41.dp else 48.dp
+                            val iconSize = if (accessibilityCards) 41.dp else 47.dp
                             Box(
                                 Modifier.size(iconSize)
-                                    .background(difficultyColors[i].copy(alpha = .11f),
+                                    .background(newGameAccents[i].copy(alpha = .11f),
                                         RoundedCornerShape(50))
-                                    .border(1.5.dp, difficultyColors[i],
+                                    .border(1.5.dp, newGameAccents[i],
                                         RoundedCornerShape(50)),
                                 contentAlignment = Alignment.Center,
                             ) {
@@ -795,14 +777,14 @@ fun NewGamePage(controller: SudokuController) {
                                         else -> "crown"
                                     },
                                     Modifier.size(if (accessibilityCards) 25.dp else 28.dp),
-                                    difficultyColors[i],
+                                    newGameAccents[i],
                                 )
                             }
-                            Spacer(Modifier.width(if (accessibilityCards) 9.dp else 17.dp))
+                            Spacer(Modifier.width(if (accessibilityCards) 9.dp else 22.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(
                                     label,
-                                    fontSize = if (accessibilityCards) 17.sp else 19.sp,
+                                    fontSize = if (accessibilityCards) 17.sp else 21.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Ink.white,
                                     maxLines = 2,
@@ -817,7 +799,7 @@ fun NewGamePage(controller: SudokuController) {
                                         "Samo za najbolje",
                                     )[i],
                                     color = Ink.muted,
-                                    fontSize = if (accessibilityCards) 12.sp else 13.sp,
+                                    fontSize = if (accessibilityCards) 12.sp else 14.sp,
                                     lineHeight = if (accessibilityCards) 15.sp else 17.sp,
                                     maxLines = if (accessibilityCards) 3 else 2,
                                 )
@@ -825,23 +807,22 @@ fun NewGamePage(controller: SudokuController) {
                             BrandIcon(
                                 "next",
                                 Modifier.size(if (accessibilityCards) 19.dp else 23.dp),
-                                if (level == i) Ink.cyan else difficultyColors[i],
+                                if (level == i) Ink.cyan else newGameAccents[i],
                             )
                         }
                     }
                 }
             }
         }
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(7.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val fullWidthAction = maxWidth < 290.dp
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                SolidAction(
-                    if (controller.isGenerating) "Pripremam zagonetku…" else "▶   Započni igru",
-                    { scope.launch { controller.startNew(size, level) } },
-                    Modifier.fillMaxWidth(if (fullWidthAction) 1f else .75f),
-                    !controller.isGenerating,
-                    minHeight = 54.dp,
+                NewGameStartAction(
+                    title = if (controller.isGenerating) "Pripremam zagonetku…" else "Započni igru",
+                    onClick = { scope.launch { controller.startNew(size, level) } },
+                    modifier = Modifier.fillMaxWidth(if (fullWidthAction) 1f else .74f),
+                    enabled = !controller.isGenerating,
                 )
             }
         }
