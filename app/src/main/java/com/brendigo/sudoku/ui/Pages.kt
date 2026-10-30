@@ -955,7 +955,7 @@ fun DailyPage(controller: SudokuController) {
                                 Text("DANAŠNJA\nNAGRADA", color = Ink.gold,
                                     fontSize = 9.sp, lineHeight = 11.sp, maxLines = 2)
                                 Spacer(Modifier.height(2.dp))
-                                Text("Zlatna\nznačka", color = Ink.white,
+                                Text("Zlatna značka", color = Ink.white,
                                     fontSize = 11.sp, lineHeight = 13.sp, maxLines = 2)
                             }
                         }
