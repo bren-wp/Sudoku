@@ -1155,8 +1155,9 @@ fun StatsPage(controller: SudokuController) {
     val stats = controller.stats
     var metricInfo by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var showHistory by remember { androidx.compose.runtime.mutableStateOf(false) }
-    PageContent(topPadding = 14.dp, horizontalPadding = 18.dp) {
-        SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true, onBack = { controller.go(Screen.HOME) })
+    PageContent(topPadding = 23.dp, horizontalPadding = 18.dp) {
+        SectionTitle("Statistika", "Tvoj Sudoku put u brojkama", centered = true,
+            onBack = { controller.go(Screen.HOME) }, titleOffset = 5.dp)
         Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             StatTile("Odigrane igre", stats.played.toString(), Ink.teal, Modifier.weight(1f)) {
                 metricInfo = "Ukupan broj pokrenutih Sudoku partija. Dovršene igre prikazane su zasebno."
@@ -1189,7 +1190,7 @@ fun StatsPage(controller: SudokuController) {
         }
         StatisticsSurface(
             Modifier.fillMaxWidth().heightIn(
-                min = if (stats.history.isEmpty()) 78.dp else 136.dp
+                min = if (stats.history.isEmpty()) 140.dp else 136.dp
             ).testTag("stats-history-panel")
         ) {
             Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1354,7 +1355,7 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
     val names = listOf("Lako", "Srednje", "Teško", "Stručno")
     val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
     StatisticsSurface(
-        modifier.height(186.dp).testTag("stats-difficulty-chart")
+        modifier.height(192.dp).testTag("stats-difficulty-chart")
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1405,7 +1406,7 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
         (stats.finished.toFloat() / stats.played).coerceIn(0f, 1f)
     val percentage = (fraction * 100).toInt()
     StatisticsSurface(
-        modifier.height(186.dp).testTag("stats-completion-ring")
+        modifier.height(192.dp).testTag("stats-completion-ring")
     ) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),
@@ -1472,7 +1473,7 @@ private fun StatTile(
         else -> "other"
     }
     StatisticsSurface(
-        modifier.heightIn(min = 87.dp)
+        modifier.heightIn(min = 84.dp)
             .testTag("stat-tile-$id")
             .semantics { contentDescription = "$label: $value"; role = Role.Button }
             .clickable(onClick = onClick),
