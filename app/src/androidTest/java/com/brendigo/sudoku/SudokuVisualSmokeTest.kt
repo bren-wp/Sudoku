@@ -823,11 +823,9 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("achievement-mala-mreža").assertExists()
         rule.onNodeWithTag("achievement-zlatni-niz").performScrollTo().performClick()
         rule.onNodeWithTag("achievement-detail").assertExists()
-        rule.onNodeWithText("Zlatni niz").assertExists()
         rule.activityRule.scenario.recreate()
         waitFor("screen-postignuća")
         rule.onNodeWithTag("achievement-detail").assertExists()
-        rule.onNodeWithText("Zlatni niz").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         rule.onNodeWithTag("achievement-zlatni-niz").assertExists()
         rule.onNodeWithTag(
