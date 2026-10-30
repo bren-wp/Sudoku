@@ -379,6 +379,92 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("number-6").assertExists()
     }
 
+    /**
+     * The live 9×9 game must preserve the owner's square board, four aligned
+     * tools and a centered 5+4 keypad on both emulated device sizes. This
+     * verifies actual Compose hit regions, not decorative screenshot pixels.
+     */
+    @Test
+    fun gameplayReferenceGeometryKeepsBoardToolsAndNineKeysAligned() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        rule.onNodeWithTag("size-9").assertIsSelected()
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        val dp = rule.activity.resources.displayMetrics.density
+        val viewportWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val board = rule.onNodeWithTag("sudoku-board")
+        board.performScrollTo().assertIsDisplayed()
+        val boardRect = board.fetchSemanticsNode().boundsInRoot
+        check(kotlin.math.abs(boardRect.width - boardRect.height) <= 3f * dp &&
+            boardRect.left >= -dp && boardRect.right <= viewportWidth + dp) {
+            "Real Sudoku board must be square and fully fit the viewport: $boardRect"
+        }
+        (0..80).forEach { index ->
+            rule.onNodeWithTag("sudoku-cell-$index").assertExists()
+        }
+        val firstCell = rule.onNodeWithTag("sudoku-cell-0").fetchSemanticsNode().boundsInRoot
+        val secondCell = rule.onNodeWithTag("sudoku-cell-1").fetchSemanticsNode().boundsInRoot
+        val nextRow = rule.onNodeWithTag("sudoku-cell-9").fetchSemanticsNode().boundsInRoot
+        check(firstCell.width > 0f && firstCell.height > 0f &&
+            kotlin.math.abs(firstCell.width - firstCell.height) < 2f * dp &&
+            kotlin.math.abs(firstCell.top - secondCell.top) <= dp &&
+            firstCell.right <= secondCell.left + dp &&
+            nextRow.top >= firstCell.bottom - dp) {
+            "Grid cell geometry is inconsistent: $firstCell / $secondCell / $nextRow"
+        }
+
+        val tools = rule.onNodeWithTag("game-tool-row")
+        tools.performScrollTo().assertIsDisplayed()
+        val toolsRect = tools.fetchSemanticsNode().boundsInRoot
+        val buttons = listOf("game-notes", "game-hint", "game-undo", "game-erase")
+            .map { rule.onNodeWithTag(it).fetchSemanticsNode().boundsInRoot }
+        buttons.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + dp &&
+                kotlin.math.abs(left.top - right.top) <= dp) {
+                "Gameplay toolbar overlaps or misaligns its buttons"
+            }
+        }
+        check(buttons.first().left >= toolsRect.left - dp &&
+            buttons.last().right <= toolsRect.right + dp &&
+            buttons.all { it.height >= 48f * dp }) {
+            "The real gameplay tools do not fit their full 48dp hit targets"
+        }
+
+        val panel = rule.onNodeWithTag("game-number-panel")
+        panel.performScrollTo().assertIsDisplayed()
+        val panelRect = panel.fetchSemanticsNode().boundsInRoot
+        val keys = (1..9).map { value ->
+            rule.onNodeWithTag("number-$value").fetchSemanticsNode().boundsInRoot
+        }
+        val firstRow = keys.take(5)
+        val secondRow = keys.drop(5)
+        val keyWidth = keys.first().width
+        check(keys.all {
+            it.width > 0f && it.height >= 48f * dp &&
+                kotlin.math.abs(it.width - keyWidth) < dp &&
+                it.left >= panelRect.left - dp &&
+                it.right <= panelRect.right + dp
+        }) { "Gameplay keypad has clipped or differently sized native buttons" }
+        firstRow.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + dp &&
+                kotlin.math.abs(left.top - right.top) <= dp) {
+                "Top keypad row must remain five non-overlapping horizontal keys"
+            }
+        }
+        secondRow.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + dp &&
+                kotlin.math.abs(left.top - right.top) <= dp) {
+                "Bottom keypad row must remain four non-overlapping horizontal keys"
+            }
+        }
+        check(secondRow.first().top >= firstRow.first().bottom - dp &&
+            secondRow.first().left > firstRow.first().left &&
+            secondRow.last().right < firstRow.last().right) {
+            "Native 5+4 Sudoku keypad must remain vertically ordered and centered"
+        }
+    }
+
     @Test
     fun gamePauseConcealsGridAndResumeRestoresControls() {
         waitFor("home-nova-igra")
