@@ -8,9 +8,38 @@ from pathlib import Path
 from PIL import Image
 
 from pixel_compare import REFERENCE_SIZE, compare
+from home_pixel_qa import measure_home
 
 
 class PixelCompareTest(unittest.TestCase):
+    def test_home_reference_areas_isolate_card_regressions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((90, 0, 0), (100, 800, 200, 900))
+            reference.save(folder / "ref.png")
+            actual.save(folder / "actual.png")
+            regions = measure_home(folder / "ref.png", folder / "actual.png",
+                                   folder / "evidence")
+            named = {row["region"]: row for row in regions}
+            self.assertEqual(0, named["header"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, named["streak"]["rgb_mae_0_to_255"])
+            self.assertGreater(named["primary_cards"]["rgb_mae_0_to_255"], 0)
+            self.assertGreater(named["whole"]["rgb_mae_0_to_255"], 0)
+            self.assertTrue((folder / "evidence" / "overlay.png").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_home_pixel_qa_rejects_mismatched_viewports(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_home(folder / "reference.png", folder / "actual.png",
+                             folder / "evidence")
+
     def test_identical_screens_have_zero_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
