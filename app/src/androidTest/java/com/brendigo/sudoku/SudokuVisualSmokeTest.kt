@@ -800,6 +800,43 @@ class SudokuVisualSmokeTest {
      * dynamic progress even when every achievement remains locked. The
      * reference width uses four columns; compact widths use two 2-card rows.
      */
+    /**
+     * All 24 native achievement cards remain accessible after expanding
+     * and rotating. Only the stable achievement title is saved for the
+     * dialog; points and progress stay backed by the actual controller.
+     */
+    @Test
+    fun achievementsExpandedListAndDetailsSurviveActivityRecreation() {
+        waitFor("home-postignuća")
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag(
+            "achievement-progress-prva-pobjeda", useUnmergedTree = true
+        ).assertExists()
+        rule.onNodeWithTag(
+            "achievement-progress-sudoku-legenda", useUnmergedTree = true
+        ).assertExists()
+        val showAll = rule.onNodeWithTag("achievements-show-all")
+        showAll.performScrollTo().performClick()
+        rule.onNodeWithText("Prikaži istaknuta postignuća").assertExists()
+        rule.onNodeWithTag("achievement-zlatni-niz").assertExists()
+        rule.onNodeWithTag("achievement-mala-mreža").assertExists()
+        rule.onNodeWithTag("achievement-zlatni-niz").performScrollTo().performClick()
+        rule.onNodeWithTag("achievement-detail").assertExists()
+        rule.onNodeWithText("Zlatni niz").assertExists()
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag("achievement-detail").assertExists()
+        rule.onNodeWithText("Zlatni niz").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+        rule.onNodeWithTag("achievement-zlatni-niz").assertExists()
+        rule.onNodeWithTag(
+            "achievement-progress-zlatni-niz", useUnmergedTree = true
+        ).assertExists()
+        rule.onNodeWithTag("achievements-show-all").performScrollTo()
+        rule.onNodeWithText("Prikaži istaknuta postignuća").assertExists()
+    }
+
     @Test
     fun statisticsAwardPreviewGeometryWorksAcrossBothViewports() {
         waitFor("home-nova-igra")
