@@ -1815,77 +1815,119 @@ fun SettingsPage(
     var showAbout by androidx.compose.runtime.saveable.rememberSaveable {
         androidx.compose.runtime.mutableStateOf(false)
     }
-    PageContent(topPadding = 20.dp) {
-        SectionTitle("Postavke", "Prilagodi igru svojim željama", centered = true, onBack = { controller.back() })
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(Modifier.padding(9.dp)) {
+    PageContent(topPadding = 27.dp, horizontalPadding = 19.dp) {
+        SectionTitle(
+            "Postavke", "Prilagodi igru svojim željama",
+            centered = true, titleOffset = 5.dp,
+            onBack = { controller.back() },
+        )
+        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-appearance")) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp)) {
                 SettingHeader("palette", "Izgled", "Prilagodi vizualni doživljaj igre")
-                SettingToggle("moon", "Tamna tema", "Koristi tamni izgled aplikacije", opts.dark) {
-                    controller.updateOptions(opts.copy(dark = it))
-                }
-                SettingToggle("sparkles", "Animacije", "Prikaži animacije i vizualne efekte", opts.animations) {
-                    controller.updateOptions(opts.copy(animations = it))
+                Column(
+                    Modifier.fillMaxWidth()
+                        .background(Color(0x8B051637), RoundedCornerShape(11.dp))
+                        .border(.5.dp, Ink.blue.copy(alpha = .47f), RoundedCornerShape(11.dp))
+                ) {
+                    SettingToggle("moon", "Tamna tema",
+                        "Koristi tamni izgled aplikacije", opts.dark) {
+                        controller.updateOptions(opts.copy(dark = it))
+                    }
+                    SettingsRule(Modifier.padding(horizontal = 6.dp))
+                    SettingToggle("sparkles", "Animacije",
+                        "Prikaži animacije i vizualne efekte", opts.animations) {
+                        controller.updateOptions(opts.copy(animations = it))
+                    }
                 }
             }
         }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(Modifier.padding(9.dp)) {
+        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-game")) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp)) {
                 SettingHeader("gamepad", "Igra", "Postavke igrivosti i pomoći")
-                SettingToggle("note", "Automatske bilješke", "Automatski dodaj moguće brojeve u prazna polja", opts.autoNotes) {
-                    controller.updateOptions(opts.copy(autoNotes = it))
-                }
-                SettingToggle("warning", "Provjera greške", "Odmah označi netočne unose", opts.checkMistakes) {
-                    controller.updateOptions(opts.copy(checkMistakes = it))
-                }
-                SettingToggle("grid", "Isticanje brojeva", "Naglasi sve iste brojeve na ploči", opts.highlightEquals) {
-                    controller.updateOptions(opts.copy(highlightEquals = it))
+                Column(
+                    Modifier.fillMaxWidth()
+                        .background(Color(0x8B051637), RoundedCornerShape(11.dp))
+                        .border(.5.dp, Ink.blue.copy(alpha = .47f), RoundedCornerShape(11.dp))
+                ) {
+                    SettingToggle("note", "Automatske bilješke",
+                        "Automatski dodaj moguće brojeve u prazna polja", opts.autoNotes) {
+                        controller.updateOptions(opts.copy(autoNotes = it))
+                    }
+                    SettingsRule(Modifier.padding(horizontal = 6.dp))
+                    SettingToggle("warning", "Provjera greške",
+                        "Odmah označi netočne unose", opts.checkMistakes) {
+                        controller.updateOptions(opts.copy(checkMistakes = it))
+                    }
+                    SettingsRule(Modifier.padding(horizontal = 6.dp))
+                    SettingToggle("grid", "Isticanje brojeva",
+                        "Naglasi sve iste brojeve na ploči", opts.highlightEquals) {
+                        controller.updateOptions(opts.copy(highlightEquals = it))
+                    }
                 }
             }
         }
-        NeonPanel(
-            Modifier.fillMaxWidth().heightIn(min = 58.dp)
+        SettingsSurface(
+            Modifier.fillMaxWidth().heightIn(min = 55.dp)
                 .testTag("sound-vibration")
                 .semantics { contentDescription = "Zvuk i vibracija"; role = Role.Button }
                 .clickable { showSound = true },
-            Ink.purple,
+            accent = Ink.blue,
         ) {
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandIcon("speaker", Modifier.size(25.dp), Ink.purple)
-                Spacer(Modifier.width(12.dp))
+                SettingsGlyph("speaker", Ink.purple, size = 36.dp)
+                Spacer(Modifier.width(13.dp))
                 Column(Modifier.weight(1f)) {
                     Text("Zvuk i vibracija", fontSize = 17.sp,
                         fontWeight = FontWeight.Bold, color = Ink.white)
-                    Subtitle("Uključi ili isključi zvučne efekte i vibracije", centered = false)
+                    Text("Uključi ili isključi zvučne efekte i vibracije",
+                        color = Ink.muted, fontSize = 11.sp,
+                        lineHeight = 14.sp, maxLines = 2)
                 }
-                BrandIcon("next", Modifier.size(20.dp), Ink.muted)
+                BrandIcon("next", Modifier.size(22.dp), Ink.muted)
             }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 54.dp)
-            .testTag("language-settings")
-            .semantics { contentDescription = "Jezik aplikacije, hrvatski"; role = Role.Button }
-            .clickable { showLanguage = true }, Ink.teal) {
-            Row(Modifier.fillMaxWidth().padding(11.dp), verticalAlignment = Alignment.CenterVertically) {
-                BrandIcon("globe", Modifier.size(25.dp), Ink.teal)
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text("Jezik", color = Ink.white, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-                    Subtitle("Odaberi jezik aplikacije")
+        SettingsSurface(
+            Modifier.fillMaxWidth().heightIn(min = 55.dp)
+                .testTag("language-settings")
+                .semantics {
+                    contentDescription = "Jezik aplikacije, hrvatski"
+                    role = Role.Button
                 }
-                Text("Hrvatski", color = Ink.muted, fontSize = 13.sp)
-                Spacer(Modifier.width(6.dp))
-                BrandIcon("next", Modifier.size(16.dp), Ink.teal)
-            }
-        }
-        NeonPanel(Modifier.fillMaxWidth(), Ink.blue) {
-            Column(
-                Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                .clickable { showLanguage = true },
+            accent = Ink.teal,
+        ) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                SettingsGlyph("globe", Ink.teal, size = 36.dp)
+                Spacer(Modifier.width(13.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("Jezik", fontSize = 17.sp, color = Ink.white,
+                        fontWeight = FontWeight.Bold)
+                    Text("Odaberi jezik aplikacije",
+                        color = Ink.muted, fontSize = 11.sp, maxLines = 2)
+                }
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 58.dp)
+                    Modifier
+                        .background(Color(0xB0082452), RoundedCornerShape(10.dp))
+                        .border(.8.dp, Ink.blue.copy(alpha = .72f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 11.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("Hrvatski", fontSize = 12.sp, color = Ink.muted)
+                    Spacer(Modifier.width(12.dp))
+                    BrandIcon("down", Modifier.size(17.dp), Ink.muted)
+                }
+            }
+        }
+        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-about")) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 5.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 49.dp)
                         .testTag("about-app")
                         .semantics {
                             contentDescription = "O aplikaciji Sudoku by Brendigo"
@@ -1895,45 +1937,49 @@ fun SettingsPage(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     SettingHeader("info", "O aplikaciji", "Sudoku by Brendigo",
-                        Modifier.weight(1f))
+                        Modifier.weight(1f), tint = Ink.blue)
                     BrandIcon("next", Modifier.size(20.dp), Ink.muted)
                 }
-                NeonPanel(
-                    Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                        .testTag("privacy-policy")
-                        .semantics { contentDescription = "Otvori pravila privatnosti"; role = Role.Button }
-                        .clickable { showPrivacy = true },
-                    Ink.blue,
-                ) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        BrandIcon("shield", Modifier.size(20.dp), Ink.cyan)
-                        Spacer(Modifier.width(12.dp))
-                        Text("Pravila privatnosti", color = Ink.white,
-                            fontSize = 15.sp, modifier = Modifier.weight(1f))
-                        BrandIcon("next", Modifier.size(18.dp), Ink.cyan)
-                    }
-                }
+                SettingsRule()
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 28.dp),
+                    Modifier.fillMaxWidth().heightIn(min = 29.dp)
+                        .testTag("privacy-policy")
+                        .semantics {
+                            contentDescription = "Otvori pravila privatnosti"
+                            role = Role.Button
+                        }
+                        .clickable { showPrivacy = true }
+                        .padding(horizontal = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    BrandIcon("grid", Modifier.size(20.dp), Ink.muted)
-                    Spacer(Modifier.width(12.dp))
+                    BrandIcon("shield", Modifier.size(20.dp), Ink.muted)
+                    Spacer(Modifier.width(15.dp))
+                    Text("Pravila privatnosti", color = Ink.muted,
+                        fontSize = 13.sp, modifier = Modifier.weight(1f))
+                    BrandIcon("next", Modifier.size(17.dp), Ink.muted)
+                }
+                SettingsRule()
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 28.dp)
+                        .padding(horizontal = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BrandIcon("grid", Modifier.size(19.dp), Ink.muted)
+                    Spacer(Modifier.width(15.dp))
                     Text("Verzija " + com.brendigo.sudoku.BuildConfig.VERSION_NAME,
-                        color = Ink.muted, fontSize = 13.sp)
+                        color = Ink.muted, fontSize = 12.sp)
                 }
             }
         }
-        // Keep the screenshot-matched Settings sections intact and append
-        // user-initiated offline backup actions after the existing content.
-        NeonPanel(Modifier.fillMaxWidth(), Ink.teal) {
-            Column(Modifier.fillMaxWidth().padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Offline encrypted backups remain accessible by scrolling below the
+        // reference viewport. Keep their real callbacks and persistence.
+        SettingsSurface(Modifier.fillMaxWidth().testTag("settings-backup"), Ink.teal) {
+            Column(
+                Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 SettingHeader("shield", "Sigurnosna kopija",
-                    "Šifrirano spremanje i vraćanje napretka na uređaju")
+                    "Šifrirano spremanje i vraćanje napretka na uređaju", tint = Ink.teal)
                 Row(Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(Modifier.weight(1f)) {
