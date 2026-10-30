@@ -1,5 +1,8 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni vizualni prolaz **8/10 — Splash**: na stvarnom Compose logotipu 7–3–9 dodan je cijan/plavi halo s fokusom na donjem lijevom rubu i zaobljeniji kutovi samo za svjetleći Splash znak; svi drugi mali logotipi ostaju nepromijenjeni.
+- Instrumentacija sada mjeri centriranje, vertikalni redoslijed i nepreklapanje logotipa, natpisa, slogana i indikatora učitavanja na dvije rezolucije; dodani `scripts/splash_pixel_qa.py` i Python regresije šest fiksnih područja. Iz stvarne prethodne v1.0.47 emulatorske snimke izmjeren je RGB MAE **12.498/255** (detalji i SHA-256 u `docs/splash-qa-followup-v1.0.48.md`); ovo **nije** rezultat novog commita i ne potvrđuje 1:1.
+
 - Završni vizualni prolaz **7/10 — Postignuća**: suptilno obojene aure oko pravih vektorskih nagrada (zaključane ostaju zaključane), zasebni pristupačni testTagovi za stvarni napredak svih 24 postignuća i stabilan prikaz popisa/detalja pri rekreaciji Android Activityja.
 - Novi instrumentacijski test potvrđuje proširenih 24 postignuća i očuvani detalj nakon rekreacije. Dodani `scripts/achievements_pixel_qa.py` i dva Python regresijska testa na osam nepromjenjivih područja. Povijesni stvarni v1.0.47 RGB MAE **28.930/255** dokumentiran u `docs/achievements-qa-followup-v1.0.48.md`; **nije** rezultat novih izmjena niti dokaz konačne jednakosti 1:1.
 
