@@ -513,6 +513,27 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("home-streak").performScrollTo().assertExists()
         val streakBounds = rule.onNodeWithTag("home-streak")
             .fetchSemanticsNode().boundsInRoot
+        val weekRow = rule.onNodeWithTag("home-week-days")
+            .fetchSemanticsNode().boundsInRoot
+        val weekMarkers = (0..6).map { index ->
+            rule.onNodeWithTag("home-weekday-$index")
+                .fetchSemanticsNode().boundsInRoot
+        }
+        check(weekMarkers.size == 7 &&
+            weekMarkers.all { marker ->
+                marker.width > 0f && marker.height > 0f &&
+                    marker.left >= streakBounds.left - 1f &&
+                    marker.right <= streakBounds.right + 1f &&
+                    marker.top >= weekRow.top - density &&
+                    marker.bottom <= weekRow.bottom + density
+            }) {
+            "Each weekday must remain a visible and bounded real UI element"
+        }
+        weekMarkers.zipWithNext().forEach { (first, second) ->
+            check(first.right <= second.left + density) {
+                "Home weekly progress markers overlap or change order: $first / $second"
+            }
+        }
         val mondayMarker = rule.onAllNodes(
             hasContentDescription("Ponedjeljak:", substring = true)
         ).onFirst().fetchSemanticsNode().boundsInRoot
