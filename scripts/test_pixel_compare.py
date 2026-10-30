@@ -18,6 +18,7 @@ from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
 from splash_pixel_qa import REGIONS as SPLASH_REGIONS
 from wordmark_pixel_qa import WORDMARK_REGIONS, opaque_bounds, wordmark_report
 from launcher_icon_pixel_qa import ICON_REGIONS, alpha_bounds, launcher_report, verify_monochrome
+from final_ten_reference_qa import TEN, THEMED, audit, validate_image
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -39,6 +40,27 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_final_ten_gate_requires_every_real_screenshot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            with self.assertRaisesRegex(FileNotFoundError, "01-home"):
+                audit(folder / "references", folder / "screenshots", folder / "evidence")
+            self.assertEqual(10, len(TEN))
+            self.assertEqual("11-launcher-monochrome", THEMED)
+
+    def test_final_ten_gate_checks_native_brand_alpha_and_resolution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            path = folder / "brand.png"
+            Image.new("RGB", (1254, 1254), (0, 0, 0)).save(path)
+            with self.assertRaisesRegex(ValueError, "RGBA"):
+                validate_image(path, (1254, 1254), require_alpha=True)
+            Image.new("RGBA", (720, 1280), (0, 0, 0, 0)).save(path)
+            with self.assertRaisesRegex(ValueError, "1254"):
+                validate_image(path, (1254, 1254), require_alpha=True)
+            Image.new("RGBA", (1254, 1254), (0, 0, 0, 0)).save(path)
+            validate_image(path, (1254, 1254), require_alpha=True)
 
     def test_launcher_icon_has_real_transparent_margins_and_separate_digits(self):
         with tempfile.TemporaryDirectory() as tmp:
