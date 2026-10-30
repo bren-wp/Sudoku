@@ -960,7 +960,6 @@ fun DailyPage(controller: SudokuController) {
                             }
                         }
                     }
-            }
                 }
             }
         }
