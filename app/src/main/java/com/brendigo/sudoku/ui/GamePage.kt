@@ -152,7 +152,10 @@ fun GamePage(controller: SudokuController) {
                 Text(formatTime(game.elapsed), fontSize = if (compact) 14.sp else 16.sp,
                     color = Ink.muted, modifier = Modifier.testTag("game-time"))
             }
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                Modifier.weight(1f).testTag("game-progress-group"),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 val correct = game.correctCount()
                 val percentage = correct.toFloat() / game.board.size
                 Text("Još ${game.emptyCells} praznih polja", color = Ink.muted, fontSize = 11.sp)
@@ -202,7 +205,10 @@ fun GamePage(controller: SudokuController) {
             }
         }
         Spacer(Modifier.height(if (compact) 2.dp else 6.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)) {
+        Row(
+            Modifier.fillMaxWidth().testTag("game-tool-row"),
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp),
+        ) {
             GameTool("Bilješke", if (game.notesMode) Ink.teal else Ink.line,
                 Modifier.weight(1f), height = toolHeight, active = game.notesMode,
                 enabled = !game.paused && !game.completed && !game.failed,
@@ -335,7 +341,10 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                         val equal = highlight && selectionNumber > 0 && digit == selectionNumber
                         val wrong = showErrors && digit > 0 && digit != game.solution[index]
                         val bg = when {
-                            isSelected -> Color(0xFF007A9A).copy(alpha = .68f)
+                            // The reference shows a deep navy selected tile
+                            // outlined by neon cyan, not an opaque turquoise
+                            // block that obscures neighbouring number contrast.
+                            isSelected -> Color(0xFF006B87).copy(alpha = .34f)
                             wrong -> Ink.red.copy(alpha = .17f)
                             equal -> Ink.blue.copy(alpha = .27f)
                             isPeer -> Ink.blue.copy(alpha = .12f)
