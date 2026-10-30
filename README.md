@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.41** · Android 8.0+ · Bez oglasa · Bez interneta
+**Izdanje 1.0.42** · Android 8.0+ · Bez oglasa · Bez interneta
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
@@ -132,7 +132,7 @@ s internetom: deinstalacija ili kvar uređaja mogu ga trajno ukloniti.
 
 ### Privatna sigurnosna kopija
 
-Uz Sudoku 1.0.41 možete ručno izvesti napredak u šifriranu `.sudoku` datoteku. Prilikom izvoza lozinku potvrđujete dvaput, a prije povrata pregledavate broj partija u kopiji i na uređaju. Zamjena je moguća tek uz vašu izričitu potvrdu. Kopija se sprema tamo gdje sami odaberete u Androidovu pregledniku datoteka — aplikacija ne zahtijeva internetsku vezu niti račun. Zaštitite lozinku: nije moguće obnoviti zaboravljenu lozinku. Sve slike zaslona iznad stvarne su snimke emulatora, ne dizajnerski prikazi.
+Uz Sudoku 1.0.42 možete ručno izvesti napredak u šifriranu `.sudoku` datoteku. Prilikom izvoza lozinku potvrđujete dvaput, a prije povrata pregledavate broj partija u kopiji i na uređaju. Zamjena je moguća tek uz vašu izričitu potvrdu. Kopija se sprema tamo gdje sami odaberete u Androidovu pregledniku datoteka — aplikacija ne zahtijeva internetsku vezu niti račun. Zaštitite lozinku: nije moguće obnoviti zaboravljenu lozinku. Sve slike zaslona iznad stvarne su snimke emulatora, ne dizajnerski prikazi.
 
 
 ### Pixel QA (Splash 1/8)
@@ -143,3 +143,13 @@ Priložene slike zaslona su stvarni prikazi aplikacije; ažuriraju se tek
 nakon uspješnog izvođenja Android emulator testa i provjere rezultata.
 Postojeća referentna usporedba nije potvrda potpune pixel-perfect jednakosti.
 Metodologija: [Splash pixel QA](docs/splash-qa-v1.0.41.md).
+
+
+### Pixel QA — Početni zaslon (2/8)
+
+Izdanje 1.0.42 usredotočeno je na stvarni Compose početni zaslon: naslov,
+raspored, zadržavanje navigacije i ilustrirane kartice za nastavak, novu igru,
+dnevni izazov, statistiku, postignuća i postavke. Korisnička statistika i
+niz ne zamjenjuju se primjerima iz referentne slike. Vizualna usporedba
+izvodi se na stvarnoj Android snimci, a točna 1:1 jednakost se ne tvrdi dok
+razlike nisu izmjerene i uklonjene. Detalji: [Home pixel QA](docs/home-qa-v1.0.42.md).
