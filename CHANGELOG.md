@@ -1,5 +1,10 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni vizualni prolaz zaslona 2/10 — **Nova igra**: šest tamnijih nativnih gradijenata kartica (Vrlo lako do Majstor), manje pozadinskog blještavila, bez izmjene odabira veličine/težine ili enginea.
+- Dodani stabilni Compose tagovi naslova i šest kartica, uklonjena neiskorištena lokalna varijabla; novi instrumentacijski test čuva širine, visine i interakciju na 941×1672 i 720×1280.
+- Zajednička mjerna rutina za fiksne ROI regije i novi `scripts/new_game_pixel_qa.py` uz Python regresijske testove; povijesni, stvarni v1.0.47 RGB MAE **25.017/255** dokumentiran u `docs/new-game-qa-followup-v1.0.48.md`. **Nije rezultat nove implementacije.**
+- Novi pixel-perfect 1:1 rezultat i prodajno izdanje ne proglašavaju se prije zelenog aktualnog Android CI i stvarnih emulatorskih PNG mjerenja.
+
 - Završna izrada brendinga (reference 9/10): nativni adaptive vector dobio je 9 zaobljenih ćelija i dodatne osvijetljene slojeve; horizontalni SVG logo dobio je iste ćelije, a SVG ikona zadržava prozirne vanjske rubove.
 - QA sada izvozi stvarne transparentne `09-wordmark.png` i `10-launcher-icon.png` te zasebnu `11-launcher-monochrome.png`, a Bash exporter provjerava 11 PNG datoteka.
 - Nadograđen `scripts/pixel_compare.py`: alfa, RGBA i kompozitna usporedba, uz regresijske testove slučaja transparentne naspram neprozirne crne pozadine; izvorni SHA-256 i mjerna ograničenja u `docs/branding-qa-v1.0.48.md`.
