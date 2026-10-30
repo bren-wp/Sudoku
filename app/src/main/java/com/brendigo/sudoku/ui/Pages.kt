@@ -1571,10 +1571,10 @@ fun AchievementsPage(controller: SudokuController) {
     // first four rows; the remaining 16 remain accessible on demand.
     val featured = basic.take(7) + data.last()
     val visible = if (showAll) featured + basic.drop(7) else featured
-    PageContent(topPadding = 18.dp) {
+    PageContent(topPadding = 18.dp, horizontalPadding = 19.dp) {
         SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 75.dp)
-            .testTag("achievement-summary"), Ink.blue) {
+        AchievementSummarySurface(Modifier.fillMaxWidth().heightIn(min = 75.dp)
+            .testTag("achievement-summary")) {
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val compactSummary = maxWidth < 375.dp || LocalDensity.current.fontScale >= 1.4f
                 Row(
@@ -1584,22 +1584,22 @@ fun AchievementsPage(controller: SudokuController) {
                     horizontalArrangement = Arrangement.spacedBy(
                         if (compactSummary) 6.dp else 13.dp),
                 ) {
-                BrandIcon("trophy", Modifier.size(if (compactSummary) 30.dp else 40.dp), Ink.gold)
+                BrandIcon("trophy-solid", Modifier.size(if (compactSummary) 34.dp else 43.dp), Ink.gold)
                 Column(Modifier.weight(1f)) {
                     Subtitle("Ukupno bodova")
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("$points", fontSize = if (compactSummary) 22.sp else 27.sp,
+                        Text("$points", fontSize = if (compactSummary) 22.sp else 29.sp,
                             color = Ink.gold, fontWeight = FontWeight.ExtraBold)
                         Text(" / 1000", fontSize = if (compactSummary) 10.sp else 13.sp, color = Ink.muted)
                     }
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
                     .background(Ink.blue.copy(alpha = .80f)))
-                BrandIcon("star", Modifier.size(if (compactSummary) 27.dp else 38.dp), Ink.cyan)
+                BrandIcon("star-solid", Modifier.size(if (compactSummary) 29.dp else 39.dp), Ink.cyan)
                 Column(Modifier.weight(.75f)) {
                     Subtitle("Otključano")
                     Text("${data.count { it.current >= it.goal }} / ${data.size}",
-                        fontSize = if (compactSummary) 20.sp else 26.sp,
+                        fontSize = if (compactSummary) 20.sp else 29.sp,
                         color = Ink.cyan, fontWeight = FontWeight.ExtraBold)
                 }
                 }
@@ -1625,7 +1625,11 @@ fun AchievementsPage(controller: SudokuController) {
                 pair.forEach { achievement ->
                     val unlocked = achievement.current >= achievement.goal
                     val compactFeatured = rowIndex in 2..3
-                    NeonPanel(Modifier.weight(1f).then(
+                    AchievementSurface(
+                        title = achievement.title,
+                        tint = achievement.tint,
+                        completed = unlocked,
+                        modifier = Modifier.weight(1f).then(
                             if (compactCards) Modifier.heightIn(min = rowHeight)
                             else Modifier.height(rowHeight)
                         )
@@ -1636,33 +1640,26 @@ fun AchievementsPage(controller: SudokuController) {
                             role = Role.Button
                         }
                         .clickable { selectedAchievement = achievement },
-                        // Preserve the warm sunset treatment on gold awards.
-                        if (achievement.tint == Ink.gold) Ink.gold
-                        else if (unlocked) achievement.tint
-                        else achievement.tint.copy(alpha = .70f),
-                        warmPagoda = false) {
-                        if (!unlocked) {
-                            Box(Modifier.matchParentSize().background(Color(0x66051530)))
-                        }
+                    ) {
                         Column(
                             Modifier.fillMaxWidth()
                                 .then(if (compactCards) Modifier.heightIn(min = rowHeight)
                                       else Modifier.fillMaxHeight())
-                                .padding(horizontal = 9.dp,
-                                    vertical = if (rowIndex < 2) 9.dp else 7.dp),
+                                .padding(horizontal = if (compactCards) 8.dp else 13.dp,
+                                    vertical = if (compactCards) 9.dp else 12.dp),
                             verticalArrangement = Arrangement.spacedBy(
-                                if (compactCards) 4.dp else 2.dp),
+                                if (compactCards) 4.dp else 3.dp),
                         ) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Box(
-                                    Modifier.size(if (compactFeatured) 36.dp else 43.dp),
+                                    Modifier.size(if (compactFeatured) 38.dp else 48.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     // Keep each award recognizable when locked.
                                     BrandIcon(achievementIconFor(achievement.title),
-                                        Modifier.size(if (compactFeatured) 35.dp else 42.dp),
+                                        Modifier.size(if (compactFeatured) 37.dp else 47.dp),
                                         if (unlocked) achievement.tint
-                                        else achievement.tint.copy(alpha = .60f))
+                                        else achievement.tint.copy(alpha = .68f))
                                     if (!unlocked) {
                                         Box(
                                             Modifier.size(if (compactFeatured) 18.dp else 20.dp)
@@ -1677,7 +1674,7 @@ fun AchievementsPage(controller: SudokuController) {
                                     }
                                 }
                                 Row(
-                                    Modifier.background(Ink.blue.copy(alpha = .23f),
+                                    Modifier.background(Color(0xBB041B3E),
                                             RoundedCornerShape(30.dp))
                                         .border(1.dp, if (unlocked) achievement.tint
                                             else Ink.muted.copy(alpha = .55f),
@@ -1685,13 +1682,13 @@ fun AchievementsPage(controller: SudokuController) {
                                         .padding(horizontal = 9.dp, vertical = 5.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    BrandIcon("star", Modifier.size(13.dp),
+                                    BrandIcon("star-solid", Modifier.size(14.dp),
                                         if (unlocked) achievement.tint else Ink.muted)
                                     Spacer(Modifier.width(3.dp))
                                     Text("${achievement.reward}",
                                         color = if (unlocked) achievement.tint
                                             else achievement.tint.copy(alpha = .75f),
-                                        fontSize = 12.sp)
+                                        fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                 }
                             }
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -1725,15 +1722,24 @@ fun AchievementsPage(controller: SudokuController) {
                             )
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
-                            Box(Modifier.fillMaxWidth().height(8.dp).background(Ink.blue.copy(alpha = .25f),
-                                RoundedCornerShape(12.dp))) {
-                                Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
-                                    .background(if (unlocked) achievement.tint else
-                                        achievement.tint.copy(alpha = .58f),
-                                    RoundedCornerShape(12.dp)))
+                            Box(Modifier.fillMaxWidth().height(8.dp)
+                                .background(Color(0xDD041B3B), RoundedCornerShape(12.dp))
+                                .border(.6.dp, achievement.tint.copy(alpha = .45f),
+                                    RoundedCornerShape(12.dp))) {
+                                if (progress > 0f) Box(
+                                    Modifier.fillMaxWidth(progress).fillMaxHeight()
+                                        .background(
+                                            Brush.horizontalGradient(listOf(
+                                                achievement.tint.copy(alpha = .64f),
+                                                achievement.tint,
+                                                achievement.tint.copy(alpha = .92f)
+                                            )),
+                                            RoundedCornerShape(12.dp),
+                                        )
+                                )
                             }
                             Text("${achievement.current.coerceAtMost(achievement.goal)} / ${achievement.goal}",
-                                color = Ink.muted, fontSize = 11.sp)
+                                color = if (unlocked) achievement.tint else Ink.muted, fontSize = 11.sp)
                         }
                     }
                 }
