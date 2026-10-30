@@ -1629,8 +1629,15 @@ private data class Achievement(
 @Composable
 fun AchievementsPage(controller: SudokuController) {
     val s = controller.stats
-    var showAll by remember { androidx.compose.runtime.mutableStateOf(false) }
-    var selectedAchievement by remember { androidx.compose.runtime.mutableStateOf<Achievement?>(null) }
+    // Preserve the actual user's 24-award view and open details through
+    // rotation or process recreation. Save only the stable title, not a
+    // stale Achievement snapshot containing old progress data.
+    var showAll by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    var selectedAchievementTitle by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf<String?>(null)
+    }
     // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
     val basic = listOf(
         Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
@@ -1665,6 +1672,7 @@ fun AchievementsPage(controller: SudokuController) {
     // first four rows; the remaining 16 remain accessible on demand.
     val featured = basic.take(7) + data.last()
     val visible = if (showAll) featured + basic.drop(7) else featured
+    val selectedAchievement = data.firstOrNull { it.title == selectedAchievementTitle }
     PageContent(topPadding = 18.dp, horizontalPadding = 19.dp) {
         SectionTitle("Postignuća", centered = true, onBack = { controller.go(Screen.HOME) })
         AchievementSummarySurface(Modifier.fillMaxWidth().heightIn(min = 75.dp)
@@ -1733,7 +1741,7 @@ fun AchievementsPage(controller: SudokuController) {
                                 (if (unlocked) ", otključano" else ", zaključano")
                             role = Role.Button
                         }
-                        .clickable { selectedAchievement = achievement },
+                        .clickable { selectedAchievementTitle = achievement.title },
                     ) {
                         Column(
                             Modifier.fillMaxWidth()
@@ -1746,7 +1754,24 @@ fun AchievementsPage(controller: SudokuController) {
                         ) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Box(
-                                    Modifier.size(if (compactFeatured) 38.dp else 48.dp),
+                                    Modifier.size(if (compactFeatured) 38.dp else 48.dp)
+                                        .drawBehind {
+                                            val mid = Offset(size.width / 2f, size.height / 2f)
+                                            drawCircle(
+                                                Brush.radialGradient(
+                                                    listOf(
+                                                        achievement.tint.copy(
+                                                            alpha = if (unlocked) .32f else .14f
+                                                        ),
+                                                        Color.Transparent,
+                                                    ),
+                                                    center = mid,
+                                                    radius = size.width * .68f,
+                                                ),
+                                                radius = size.width * .68f,
+                                                center = mid,
+                                            )
+                                        },
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     // Keep each award recognizable when locked.
@@ -1816,8 +1841,18 @@ fun AchievementsPage(controller: SudokuController) {
                             )
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
-                            Box(Modifier.fillMaxWidth().height(8.dp)
-                                .background(Color(0xDD041B3B), RoundedCornerShape(12.dp))
+                            Box(
+                                Modifier.fillMaxWidth().height(8.dp)
+                                    .testTag(
+                                        "achievement-progress-" +
+                                            achievement.title.lowercase().replace(" ", "-")
+                                    )
+                                    .semantics {
+                                        contentDescription =
+                                            "${achievement.current.coerceAtMost(achievement.goal)}" +
+                                            " od ${achievement.goal}"
+                                    }
+                                    .background(Color(0xDD041B3B), RoundedCornerShape(12.dp))
                                 .border(.6.dp, achievement.tint.copy(alpha = .45f),
                                     RoundedCornerShape(12.dp))) {
                                 if (progress > 0f) Box(
@@ -1860,7 +1895,7 @@ fun AchievementsPage(controller: SudokuController) {
     }
     selectedAchievement?.let { award ->
         AlertDialog(
-            onDismissRequest = { selectedAchievement = null },
+            onDismissRequest = { selectedAchievementTitle = null },
             modifier = Modifier.testTag("achievement-detail"),
             containerColor = Color(0xFF081A41),
             title = { Text(award.title, color = Ink.white) },
@@ -1880,7 +1915,7 @@ fun AchievementsPage(controller: SudokuController) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { selectedAchievement = null }) {
+                TextButton(onClick = { selectedAchievementTitle = null }) {
                     Text("Zatvori", color = Ink.cyan)
                 }
             },
