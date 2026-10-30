@@ -1265,8 +1265,7 @@ fun StatsPage(controller: SudokuController) {
                             Modifier.weight(1f).heightIn(min = 72.dp),
                             accent = if (fraction >= 1f) award.tint else Ink.blue,
                             background = listOf(
-                                award.tint.copy(alpha = .24f)
-                                    .compositeOver(Color(0xFF031936)),
+                                award.tint.copy(alpha = .24f),
                                 Color(0xFF081C40),
                             ),
                             corner = 9.dp,
