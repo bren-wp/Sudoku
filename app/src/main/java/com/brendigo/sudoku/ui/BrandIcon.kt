@@ -167,6 +167,37 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     canvas.drawRoundRect(RectF(10f,4f,14f,21f),1f,1f,filled)
                     canvas.drawRoundRect(RectF(17f,8f,21f,21f),1f,1f,filled)
                 }
+                "trophy-solid" -> {
+                    val gold = Paint(filled).apply {
+                        shader = android.graphics.LinearGradient(
+                            0f, 0f, 24f, 24f,
+                            android.graphics.Color.rgb(255, 235, 126),
+                            android.graphics.Color.rgb(255, 165, 45),
+                            android.graphics.Shader.TileMode.CLAMP,
+                        )
+                        setShadowLayer(1.9f, 0f, 1.0f,
+                            android.graphics.Color.rgb(241, 159, 28))
+                    }
+                    canvas.drawRoundRect(RectF(6.5f, 3f, 17.5f, 15f), 2f, 2f, gold)
+                    val leftCup = Path().apply {
+                        moveTo(7f, 6f); lineTo(2.4f, 6f)
+                        lineTo(2.4f, 9.6f)
+                        cubicTo(2.4f, 14.3f, 6.8f, 15.6f, 11f, 15.8f)
+                    }
+                    val rightCup = Path().apply {
+                        moveTo(17f, 6f); lineTo(21.6f, 6f)
+                        lineTo(21.6f, 9.6f)
+                        cubicTo(21.6f, 14.3f, 17.2f, 15.6f, 13f, 15.8f)
+                    }
+                    val cupRim = Paint(gold).apply {
+                        style = Paint.Style.STROKE
+                        strokeWidth = 2.2f
+                    }
+                    canvas.drawPath(leftCup, cupRim)
+                    canvas.drawPath(rightCup, cupRim)
+                    canvas.drawRoundRect(RectF(10.7f, 14f, 13.3f, 20f),1f,1f,gold)
+                    canvas.drawRoundRect(RectF(6.5f, 20f, 17.5f, 22f),1f,1f,gold)
+                }
                 "trophy" -> {
                     rectangle(7f,3f,17f,14f,2f)
                     poly(7f,6f,3f,6f,3f,10f,5f,13f,9f,15f)
@@ -386,9 +417,10 @@ fun homeIconFor(title: String): String = when (title) {
 }
 
 fun achievementIconFor(title: String): String = when (title) {
-    "Prva pobjeda","Iskusni igrač","Stotka" -> "trophy"
+    "Prva pobjeda","Iskusni igrač","Stotka" -> "trophy-solid"
     "Sedam dana zaredom" -> "calendar-seven"
-    "Prvi izazov","Dnevna rutina","Rješavač izazova" -> "calendar"
+    "Prvi izazov","Dnevna rutina" -> "calendar"
+    "Rješavač izazova" -> "grid"
     "Majstor logike","Samostalni mislilac" -> "brain"
     "Bez greške","Besprijekoran niz" -> "bolt"
     "Vrući niz","Zlatni niz" -> "flame"
