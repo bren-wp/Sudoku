@@ -1,3 +1,14 @@
+## 1.0.42 — Početni zaslon (Home 2/8), pixel QA
+
+- Dorada **isključivo Home UI-ja** prema korisnikovoj originalnoj referenci 941×1672. Postojeći Compose gumbi, stvarni podaci napretka, navigacija i spremanje partija ostaju funkcionalni.
+- Razdvojena ukrasna Sudoku mreža u gornje kutove Home zaslona; ne prelazi više preko središnjeg naslova i kartica. Pozadine ostalih zaslona zadržavaju prethodni prikaz.
+- Preciznije poravnati logotip i naslov, slogan, tekst i gumb kartice za nastavak, dekorativna ploča te tipografija velikih i malih navigacijskih kartica.
+- Dodatna skalabilna, isključivo neinteraktivna Compose Canvas ilustracija u karticama Nova igra i Dnevni izazov, s mjesečinom, planinama i pagodom, bez lijepljenja statičnih screenshotova preko UI elemenata.
+- Ikone izravno uspoređene s referencom: pravi zupčanik za Postavke umjesto sunčevih zraka; običan plus, kalendar sa zvjezdicom i ispunjeni plamen na početnom zaslonu.
+- Dodatna instrumentirana provjera jednakih visina i nepreklapanja dviju primarnih Home kartica. Postojeći instrumentirani testovi provjeravaju raspored 2+3 i responsivnu alternativu.
+- Ostaju AGP **9.5.0**, Gradle **9.6.0** u četiri CI workflowa, target/compile SDK **36** te `com.brendigo.sudoku`; `versionCode=43`, `versionName=1.0.42`.
+- Dok usporedba novih stvarnih screenshotova nije potvrđena, **ne tvrdi se** da je cijeli zaslon 1:1 niti da je izdanje spremno za Google Play. Vidi `docs/home-qa-v1.0.42.md`.
+
 ## 1.0.41 — prvi fokusirani pixel QA prolaz: Splash + AGP 9.5
 
 - **Zaslon 1/8 (Splash):** povećan tekst logotipa `Sudoku`, smanjeni razmaci ispod 7–3–9 znaka i natpisa, te bolje usklađen slogan na referentnih 941×1672 piksela. Izvorni prikaz ostaje pravi Jetpack Compose UI.
