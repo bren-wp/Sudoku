@@ -1,5 +1,10 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završna izrada brendinga (reference 9/10): nativni adaptive vector dobio je 9 zaobljenih ćelija i dodatne osvijetljene slojeve; horizontalni SVG logo dobio je iste ćelije, a SVG ikona zadržava prozirne vanjske rubove.
+- QA sada izvozi stvarne transparentne `09-wordmark.png` i `10-launcher-icon.png` te zasebnu `11-launcher-monochrome.png`, a Bash exporter provjerava 11 PNG datoteka.
+- Nadograđen `scripts/pixel_compare.py`: alfa, RGBA i kompozitna usporedba, uz regresijske testove slučaja transparentne naspram neprozirne crne pozadine; izvorni SHA-256 i mjerna ograničenja u `docs/branding-qa-v1.0.48.md`.
+- Puni 1:1 rezultat i CI za aktualni commit nisu još potvrđeni: ne izdavati `v1.0.48` prije dokazivih uspješnih provjera i stvarnog potpisa.
+
 - Dodatni PR #55 prolaz za Splash/branding: očuvan raspored reference 941×1672 pri standardnom fontu; za uske zaslone i font scale >135% uvedena zaštita od prelijevanja naslova i gesla.
 - Android 12+ sustavni splash koristi lokalni 7–3–9 vektorski simbol i brendiranu pozadinu; dodani instrumentacijski testovi sustavne teme i geometrije Splash elemenata pri font scale 180%.
 - Vizualne metrike nove iteracije još su otvorene; detalji i preostali uvjeti navedeni su u `docs/splash-branding-followup-v1.0.48.md`. Bez tvrdnje o 1:1, potpisu ili objavi prije provjere.
