@@ -1,5 +1,10 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Nastavak PR-a #55: akcija „Pravila privatnosti” ima najmanje 48dp aktivne dodirne površine; instrumentacijski test sprječava regresiju pristupačnosti.
+- Workflow za stvarne marketinške snimke više nije vezan uz zastarjelu granu v1.0.38: sada snima osam stvarnih Android zaslona na aktivnoj `feature/sudoku-*` grani te objavljuje PNG i WebP QA artefakte.
+- Release workflow dodatno pokreće `lintRelease`, objavljuje `SHA256SUMS` i prisilno označuje nepotpisana testna izdanja kao prerelease. Nije izvršena objava iz PR-a.
+- Dodana trajna specifikacija rada: `docs/MASTER_PROMPT_HR.md`. Zelen CI i provjera 1:1 ovog HEAD-a još nisu potvrđeni.
+
 - Usklađene stvarne Compose sekcije Izgled, Igra, Zvuk i vibracija, Jezik i O aplikaciji prema vlasnikovoj referenci.
 - Uvedeni lokalni tamni paneli s tankim rubovima i ravnim razdjelnicima te novi tirkizni, ljubičasti i plavi držači ikonica, bez grid-dekoracije preko teksta.
 - Usklađeni 48dp prekidači, donji opisi, razmaci i obrubljeni odabir jezika sa strelicom prema dolje.
