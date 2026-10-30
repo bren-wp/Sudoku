@@ -575,6 +575,24 @@ class SudokuVisualSmokeTest {
         check(dailyTop.bottom <= heroTop.top + 1f) {
             "Daily Challenge header must not overlap the hero"
         }
+        val actualDensity = rule.activity.resources.displayMetrics.density
+        val panel = rule.onNodeWithTag("daily-streak-panel")
+            .fetchSemanticsNode().boundsInRoot
+        val action = rule.onNodeWithTag("primary-action")
+            .fetchSemanticsNode().boundsInRoot
+        val leaderboard = rule.onNodeWithTag("daily-leaderboard")
+            .fetchSemanticsNode().boundsInRoot
+        check(heroTop.bottom <= panel.top + actualDensity &&
+            panel.bottom <= action.top + actualDensity &&
+            action.bottom <= leaderboard.top + actualDensity) {
+            "Daily panels must retain vertical order without overlap: " +
+                "hero=$heroTop, week=$panel, action=$action, ranking=$leaderboard"
+        }
+        check(difficultyBounds.top >= heroTop.top &&
+            timeBounds.bottom <= heroTop.bottom + actualDensity &&
+            rewardBounds.bottom <= heroTop.bottom + actualDensity) {
+            "Daily metric rows must be contained within the scenic hero"
+        }
         rule.onNodeWithText("Zlatna značka").assertExists()
         rule.onNodeWithTag("daily-leaderboard").performScrollTo().performClick()
         rule.onNodeWithText("Osobna rang-lista").assertExists()
