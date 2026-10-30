@@ -309,7 +309,7 @@ fun HomePage(controller: SudokuController) {
     ) {
         Spacer(Modifier.height(14.dp))
         BrandHeader(Modifier.fillMaxWidth())
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(0.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             Text(
                 "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
@@ -321,13 +321,13 @@ fun HomePage(controller: SudokuController) {
                 maxLines = 2,
             )
         }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(0.dp))
         val game = controller.game
         if (game != null && !game.completed && !game.failed) {
             NeonPanel(Modifier.fillMaxWidth().testTag("resume-game")
                 .semantics { contentDescription = "Nastavi spremljenu Sudoku igru"; role = Role.Button }
                 .clickable { controller.go(Screen.GAME) }
-                .heightIn(min = 190.dp), highlight = Ink.blue) {
+                .heightIn(min = 196.dp), highlight = Ink.blue) {
                 // Decorative, non-interactive canvas behind the real resume action.
                 // It recreates the illuminated Sudoku-board motif, not a bitmap UI.
                 ResumeBoardArtwork(Modifier.matchParentSize())
@@ -351,7 +351,6 @@ fun HomePage(controller: SudokuController) {
                         Modifier.fillMaxWidth(.45f), minHeight = 42.dp)
                 }
             }
-            Spacer(Modifier.height(6.dp))
         }
         if (game?.daily == true && controller.hasSavedRegularGame()) {
             NeonPanel(
@@ -599,22 +598,22 @@ private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
             }
             drawRect(
                 brush = Brush.verticalGradient(
-                    listOf(Color.Transparent, Color(0xD307132B)),
-                    startY = h * .47f, endY = h,
+                    listOf(Color.Transparent, Color(0xDF26252A)),
+                    startY = h * .27f, endY = h * .83f,
                 ),
             )
         } else if (accent == Ink.teal) {
             drawRect(
                 Brush.horizontalGradient(
-                    listOf(Color(0xFF003B42), Color(0xFF004652), Color(0xFF036078)),
+                    listOf(Color(0xFF002E38), Color(0xFF003D47), Color(0xFF004651)),
                 ),
             )
             val focus = Offset(w * .83f, h * .10f)
             drawCircle(
                 brush = Brush.radialGradient(
-                    listOf(Ink.teal.copy(alpha = .45f), Color.Transparent),
-                    center = focus, radius = w * .64f,
-                ), radius = w * .64f, center = focus,
+                    listOf(Ink.teal.copy(alpha = .56f), Color.Transparent),
+                    center = focus, radius = h * .43f,
+                ), radius = h * .43f, center = focus,
             )
             for (i in -1..5) {
                 val x = w * (.56f + i * .12f)
