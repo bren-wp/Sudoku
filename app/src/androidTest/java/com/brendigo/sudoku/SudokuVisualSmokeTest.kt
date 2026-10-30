@@ -775,27 +775,29 @@ class SudokuVisualSmokeTest {
         homeTile("postavke")
         waitFor("screen-postavke")
         rule.onNodeWithText("PRILAGODI IGRU SVOJIM ŽELJAMA").assertExists()
-        val settingsRows = listOf(
-            "settings-appearance",
-            "settings-game",
-            "sound-vibration",
-            "language-settings",
-            "settings-about",
-        )
-        val settingsBounds = settingsRows.map { tag ->
-            rule.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot
-        }
+        // The reference viewport shows the first two groups in sequence.
+        // Offscreen scrollable children may legitimately have 0x0 geometry on
+        // compact devices, so do not compare bounds across scroll offsets.
+        val appearance = rule.onNodeWithTag("settings-appearance")
+            .fetchSemanticsNode().boundsInRoot
+        val gamePanel = rule.onNodeWithTag("settings-game")
+            .fetchSemanticsNode().boundsInRoot
         val tolerance = rule.activity.resources.displayMetrics.density * 2f
-        settingsBounds.zipWithNext().forEachIndexed { index, (upper, lower) ->
-            check(upper.bottom <= lower.top + tolerance) {
-                "Settings sections ${settingsRows[index]} and " +
-                    "${settingsRows[index + 1]} overlap: $upper vs $lower"
-            }
-            check(kotlin.math.abs(upper.left - lower.left) <= tolerance &&
-                kotlin.math.abs(upper.right - lower.right) <= tolerance) {
-                "Settings sections must share the same side margins"
-            }
+        check(appearance.bottom <= gamePanel.top + tolerance &&
+            kotlin.math.abs(appearance.left - gamePanel.left) <= tolerance &&
+            kotlin.math.abs(appearance.right - gamePanel.right) <= tolerance) {
+            "Settings first two groups must be ordered and aligned"
         }
+        listOf("sound-vibration", "language-settings", "settings-about")
+            .forEach { tag ->
+                rule.onNodeWithTag(tag).performScrollTo().assertIsDisplayed()
+                val visibleBounds = rule.onNodeWithTag(tag)
+                    .fetchSemanticsNode().boundsInRoot
+                check(visibleBounds.width > 0f &&
+                    kotlin.math.abs(visibleBounds.width - appearance.width) <= tolerance) {
+                    "Settings panel $tag must align with other full-width panels"
+                }
+            }
         rule.onNodeWithTag("settings-backup").assertExists()
         rule.onNodeWithTag("sound-vibration").performScrollTo().assertIsDisplayed()
         // A complete setting row, not just the small thumb, must toggle.
