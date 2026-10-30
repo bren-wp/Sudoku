@@ -61,6 +61,15 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                 "plus" -> {circle(12f,12f,9f);line(12f,7f,12f,17f);line(7f,12f,17f,12f)}
                 "plus-plain" -> {line(12f,4f,12f,20f);line(4f,12f,20f,12f)}
                 "play" -> {poly(8f,5f,19f,12f,8f,19f,8f,5f)}
+                "play-filled" -> {
+                    val p = Path().apply {
+                        moveTo(6f, 3f)
+                        lineTo(20f, 12f)
+                        lineTo(6f, 21f)
+                        close()
+                    }
+                    canvas.drawPath(p, filled)
+                }
                 "pause" -> {rectangle(6f,4f,9f,20f,1f);rectangle(15f,4f,18f,20f,1f)}
                 "settings" -> {
                     // A real eight-tooth gear, not a sun/rays icon.
