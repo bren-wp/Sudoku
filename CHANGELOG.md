@@ -1,3 +1,12 @@
+## 1.0.47 — Postignuća, zaslon 7/8
+
+- Pixel-QA dorada stvarnog Compose zaslona Postignuća prema vlasnikovoj slici 941×1672: zbroj bodova, 8 istaknutih kartica, bodovne značke, boje, tipografija i progress barovi.
+- Nativne, potpuno lokalne dekorativne pozadine kartica (zlatna večer, modra noć, tirkizna logika, tamna zaključana), bez screenshot-imitacije interaktivnog UI-ja.
+- Dodatna zlatna puna vektorska ikona pehara, ispravljen prikaz ikonice Rješavač izazova i pune zvjezdice.
+- Bez lažiranja bodova iz reference: stvarni napredak, 24 postignuća i modalni detalji ostaju nepromijenjeni.
+- Novi instrumentirani test dvostupčanog poravnanja kartica i prikaza sažetka na emulatorima.
+- AGP 9.5.0, Gradle 9.6.0 i API 36 nepromijenjeni; v1.0.47/versionCode 48. Izmjerena početna vizualna razlika i uvjeti prihvaćanja navedeni su u `docs/achievements-qa-v1.0.47.md`.
+
 ## 1.0.46 — Statistika, zaslon 6/8
 
 - Usklađeni layout i boje četiri statističke kartice, ikone i tipografija na stvarnom Compose zaslonu.
