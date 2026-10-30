@@ -1942,7 +1942,7 @@ fun SettingsPage(
                 }
                 SettingsRule()
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 29.dp)
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("privacy-policy")
                         .semantics {
                             contentDescription = "Otvori pravila privatnosti"
