@@ -927,7 +927,9 @@ fun DailyPage(controller: SudokuController) {
                                 }
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                BrandIcon("gift", Modifier.size(27.dp), Ink.gold)
+                                DailyRewardEmblem(
+                                    Modifier.size(30.dp).testTag("daily-reward-emblem")
+                                )
                                 Spacer(Modifier.width(6.dp))
                                 Column(horizontalAlignment = Alignment.End) {
                                     Text("DANAŠNJA NAGRADA", color = Ink.gold,
