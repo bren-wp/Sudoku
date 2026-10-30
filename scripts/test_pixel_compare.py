@@ -8,7 +8,8 @@ from pathlib import Path
 from PIL import Image
 
 from pixel_compare import REFERENCE_SIZE, compare
-from home_pixel_qa import measure_home
+from home_pixel_qa import measure_home, measure_regions
+from new_game_pixel_qa import REGIONS as NEW_GAME_REGIONS
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -30,6 +31,35 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_new_game_qa_measures_all_reference_regions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            observed = reference.copy()
+            observed.paste((90, 0, 0), (320, 425, 410, 535))
+            reference.save(folder / "reference.png")
+            observed.save(folder / "actual.png")
+            results = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", NEW_GAME_REGIONS,
+            )
+            rows = {result["region"]: result for result in results}
+            self.assertEqual(set(NEW_GAME_REGIONS), set(rows))
+            self.assertGreater(rows["six_cards"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, rows["cta"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, rows["bottom_scenery"]["rgb_mae_0_to_255"])
+            self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+            self.assertTrue((folder / "evidence" / "difference.png").is_file())
+
+    def test_new_game_qa_refuses_compact_vs_reference_rescale(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", NEW_GAME_REGIONS)
 
     def test_home_pixel_qa_rejects_mismatched_viewports(self):
         with tempfile.TemporaryDirectory() as tmp:
