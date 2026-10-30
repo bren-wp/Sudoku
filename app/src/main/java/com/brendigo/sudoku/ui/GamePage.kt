@@ -458,7 +458,9 @@ private fun GameTool(
             Column(
                 Modifier.fillMaxSize().padding(
                     start = 5.dp, end = 5.dp, top = 4.dp,
-                    bottom = if (isNotes) 17.dp else 5.dp,
+                    bottom = if (isNotes) {
+                        if (condensedTool) 17.dp else 23.dp
+                    } else 5.dp,
                 ),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
