@@ -254,6 +254,49 @@ class SudokuVisualSmokeTest {
         rule.waitForIdle()
     }
 
+    /**
+     * Check native New Game card geometry independently at 941x1672 and
+     * 720x1280. It must use real selectable Compose elements, never a
+     * reference bitmap or invisible click target laid over a screenshot.
+     */
+    @Test
+    fun newGameCardGeometryRespectsBothEmulatorViewports() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        waitFor("screen-nova-igra")
+        rule.onNodeWithTag("new-game-title").assertExists()
+        rule.onNodeWithTag("new-game-subtitle").assertExists()
+        rule.onNodeWithTag("new-game-difficulty-list").assertExists()
+        val density = rule.activity.resources.displayMetrics.density
+        val viewportWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val cardWidth = mutableListOf<Float>()
+        for (index in 0..5) {
+            val node = rule.onNodeWithTag("difficulty-$index")
+            node.performScrollTo().assertIsDisplayed()
+            val bounds = node.fetchSemanticsNode().boundsInRoot
+            check(bounds.left >= -density * 2f &&
+                bounds.right <= viewportWidth + density * 2f &&
+                bounds.height >= density * 72f) {
+                "New Game difficulty card $index clipped or too short: $bounds"
+            }
+            cardWidth.add(bounds.width)
+        }
+        check(cardWidth.maxOrNull()!! - cardWidth.minOrNull()!! <= density * 3f) {
+            "New Game card widths must remain consistent on the same viewport"
+        }
+        val action = rule.onNodeWithTag("primary-action")
+        action.performScrollTo().assertIsDisplayed()
+        val actionBounds = action.fetchSemanticsNode().boundsInRoot
+        check(actionBounds.left >= -density &&
+            actionBounds.right <= viewportWidth + density &&
+            actionBounds.height >= density * 48f) {
+            "New Game CTA is clipped or below the minimum 48dp target: $actionBounds"
+        }
+        rule.onNodeWithTag("new-game-size-header").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("size-9").assertIsSelected()
+        rule.onNodeWithTag("difficulty-2").assertIsSelected()
+    }
+
     @Test
     fun fourAndSixCellGridModesArePlayable() {
         waitFor("home-nova-igra")
