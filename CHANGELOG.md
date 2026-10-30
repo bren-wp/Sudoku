@@ -1,5 +1,8 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni vizualni prolaz **3/10 — Aktivna igra**: prigušena ispuna odabrane ćelije uz stvarni cijan obrub, označene HUD i alatna traka; instrumentacijski QA ploče 9×9 (81 polje), poravnanja četiriju funkcijskih gumba i 5+4 brojčane tipkovnice na dva emulatora.
+- Dodan `scripts/gameplay_pixel_qa.py` s mjerenjem pune slike i devet fiksnih regija, uz Python regresijske testove. Povijesni stvarni v1.0.47 full-frame RGB MAE **19.381/255**; detalji u `docs/gameplay-qa-followup-v1.0.48.md`. Nova 1:1 metrička provjera još nije potvrđena.
+
 - Završni vizualni prolaz zaslona 2/10 — **Nova igra**: šest tamnijih nativnih gradijenata kartica (Vrlo lako do Majstor), manje pozadinskog blještavila, bez izmjene odabira veličine/težine ili enginea.
 - Dodani stabilni Compose tagovi naslova i šest kartica, uklonjena neiskorištena lokalna varijabla; novi instrumentacijski test čuva širine, visine i interakciju na 941×1672 i 720×1280.
 - Zajednička mjerna rutina za fiksne ROI regije i novi `scripts/new_game_pixel_qa.py` uz Python regresijske testove; povijesni, stvarni v1.0.47 RGB MAE **25.017/255** dokumentiran u `docs/new-game-qa-followup-v1.0.48.md`. **Nije rezultat nove implementacije.**
