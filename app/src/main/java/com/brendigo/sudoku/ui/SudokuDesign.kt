@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import android.graphics.BitmapFactory
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -422,7 +423,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
 fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
     // Reference-sized 7-3-9 brand mark, with a compact fallback for narrow phones.
     // Keep a real text logo for scaling, localization and accessibility.
-    BoxWithConstraints(modifier) {
+    BoxWithConstraints(modifier.testTag("wordmark-container")) {
         val narrow = maxWidth < 350.dp
         val logoSize = if (compact) 46.dp else if (narrow) 69.dp else 82.dp
         val headingSize = if (compact) 36.sp else if (narrow) 41.sp else 55.sp
@@ -431,28 +432,37 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            SudokuLogo(logoSize)
-            Spacer(Modifier.width(if (narrow) 10.dp else 9.dp))
-            Column(Modifier.offset(y = if (compact) 0.dp else 8.dp)) {
+            Box(Modifier.testTag("wordmark-symbol")) {
+                // The owner's icon has a soft cyan elevation halo, rather
+                // than the square shadowless header used previously.
+                SudokuLogo(logoSize, glowing = true)
+            }
+            Spacer(Modifier.width(if (narrow) 7.dp else 5.dp))
+            Column(
+                Modifier.offset(y = if (compact) 0.dp else 8.dp),
+                horizontalAlignment = Alignment.End,
+            ) {
                 Text(
                     text = "Sudoku",
+                    modifier = Modifier.testTag("wordmark-title"),
                     fontSize = headingSize,
                     fontWeight = FontWeight.ExtraBold,
                     style = TextStyle(brush = Brush.horizontalGradient(
-                        listOf(Ink.white, Ink.white, Ink.cyan, Ink.blue),
+                        listOf(Ink.white, Ink.white, Color(0xFF00C2FF), Ink.teal),
                     )),
                     letterSpacing = (-1.2).sp,
                     maxLines = 1,
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier.width(if (narrow) 18.dp else 30.dp).height(1.dp)
-                            .background(Ink.cyan.copy(alpha = .65f)),
-                    )
-                    Spacer(Modifier.width(7.dp))
-                    Text("by Brendigo", fontSize = if (narrow) 10.sp else 11.sp,
-                        color = Ink.muted, letterSpacing = 2.5.sp, maxLines = 1)
-                }
+                // The original transparent PNG puts the byline under the
+                // RIGHT edge of "Sudoku"; no horizontal rule precedes it.
+                Text(
+                    "by Brendigo",
+                    modifier = Modifier.testTag("wordmark-byline"),
+                    fontSize = if (compact || narrow) 10.sp else 11.sp,
+                    color = Ink.muted,
+                    letterSpacing = if (compact || narrow) 2.sp else 2.5.sp,
+                    maxLines = 1,
+                )
             }
         }
     }
