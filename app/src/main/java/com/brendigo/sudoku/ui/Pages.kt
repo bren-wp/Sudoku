@@ -2220,7 +2220,8 @@ fun SplashPage() {
                 tagline,
                 color = Ink.cyan,
                 fontSize = if (compact) 9.sp else 15.sp,
-                letterSpacing = if (compact || fontScale > 1.35f) 1.sp else 0.sp,
+                letterSpacing = if (compact || fontScale > 1.35f) 1.sp
+                else androidx.compose.ui.unit.TextUnit.Unspecified,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 modifier = Modifier.fillMaxWidth().testTag("splash-tagline"),
