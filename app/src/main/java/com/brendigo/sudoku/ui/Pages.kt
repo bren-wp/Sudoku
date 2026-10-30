@@ -2097,66 +2097,79 @@ fun SettingsPage(
 }
 
 @Composable
-private fun SettingHeader(icon: String, title: String, subtitle: String,
-                          modifier: Modifier = Modifier) {
+private fun SettingHeader(
+    icon: String,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    tint: Color = Ink.cyan,
+) {
     Row(
-        modifier.fillMaxWidth().padding(vertical = 5.dp),
+        modifier.fillMaxWidth().padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            Modifier.size(39.dp)
-                .background(Ink.cyan.copy(alpha = .13f), RoundedCornerShape(12.dp))
-                .border(1.dp, Ink.cyan.copy(alpha = .85f), RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            BrandIcon(icon, Modifier.size(25.dp), Ink.cyan)
-        }
-        Spacer(Modifier.width(14.dp))
+        SettingsGlyph(icon = icon, tint = tint, size = 36.dp)
+        Spacer(Modifier.width(13.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 18.sp, color = Ink.white,
                 fontWeight = FontWeight.Bold, maxLines = 2)
-            Subtitle(subtitle)
+            Text(subtitle, fontSize = 12.sp, lineHeight = 15.sp,
+                color = Ink.muted, maxLines = 2)
         }
     }
 }
 
 @Composable
-private fun SettingToggle(icon: String, title: String, caption: String, checked: Boolean, change: (Boolean) -> Unit) {
+private fun SettingToggle(
+    icon: String,
+    title: String,
+    caption: String,
+    checked: Boolean,
+    change: (Boolean) -> Unit,
+) {
     val tag = "setting-" + title.lowercase().replace(" ", "-")
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag(tag)
+        Modifier.fillMaxWidth().heightIn(min = 48.dp)
+            .testTag(tag)
             .toggleable(value = checked, role = Role.Switch, onValueChange = change)
-            .semantics { contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}" },
+            .semantics {
+                contentDescription = "$title: ${if (checked) "uključeno" else "isključeno"}"
+            }
+            .padding(start = 14.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BrandIcon(icon, Modifier.size(21.dp), Ink.cyan)
-        Spacer(Modifier.width(13.dp))
+        BrandIcon(icon, Modifier.size(21.dp), Ink.muted)
+        Spacer(Modifier.width(17.dp))
         Column(Modifier.weight(1f).padding(end = 7.dp)) {
-            Text(title, fontSize = 14.sp, color = Ink.white,
-                fontWeight = FontWeight.SemiBold, maxLines = 2, lineHeight = 18.sp)
-            Text(caption, color = Ink.muted, fontSize = 11.sp,
-                lineHeight = 14.sp, maxLines = 3)
+            Text(
+                title,
+                fontSize = 14.sp, color = Ink.white,
+                fontWeight = FontWeight.SemiBold, maxLines = 2,
+                lineHeight = 18.sp,
+            )
+            Text(
+                caption, color = Ink.muted,
+                fontSize = 11.sp, lineHeight = 14.sp, maxLines = 3,
+            )
         }
-        // The Material3 default thumb inherited the app's purple theme.
-        // Render the brand switch ourselves; the parent remains the one
-        // accessible/clickable control and persists its state via change().
+        // The entire parent is the single accessible switch and persists
+        // state through the existing SudokuController options callbacks.
         Box(
-            Modifier.width(55.dp).height(31.dp)
+            Modifier.width(48.dp).height(28.dp)
                 .background(
                     if (checked) Brush.horizontalGradient(
-                        listOf(Color(0xFF00D8F7), Color(0xFF0868F5)),
+                        listOf(Color(0xFF00D4F5), Color(0xFF0876F7)),
                     ) else Brush.horizontalGradient(
-                        listOf(Color(0xFF243657), Color(0xFF152444)),
+                        listOf(Color(0xFF223553), Color(0xFF132543)),
                     ),
                     RoundedCornerShape(25.dp),
                 )
-                .border(1.dp,
-                    if (checked) Ink.cyan else Ink.muted.copy(alpha = .65f),
+                .border(1.dp, if (checked) Ink.cyan else Ink.muted.copy(alpha = .66f),
                     RoundedCornerShape(25.dp)),
             contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
             Box(
-                Modifier.padding(horizontal = 4.dp).size(23.dp)
+                Modifier.padding(horizontal = 4.dp).size(20.dp)
                     .background(Color.White, RoundedCornerShape(50)),
             )
         }
