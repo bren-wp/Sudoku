@@ -72,7 +72,7 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
  * noninteractive scenery. No full-screen screenshot replaces any UI.
  */
 @Composable
-fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splash: Boolean = false) {
+fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splash: Boolean = false, home: Boolean = false) {
     val context = LocalContext.current
     val originalNightscape = remember(context) {
         runCatching {
@@ -98,26 +98,59 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false, splas
         // a dark central title area, not one grid crossing the full screen.
         // Geometry is anchored to viewport width, not device pixel density.
         // Keep it purely decorative so Compose buttons retain touch semantics.
-        for (i in -1..5) {
-            val x = i * w * .105f
-            val leftColor = Color(0xFF1267BD).copy(alpha = if (i % 3 == 0) .46f else .27f)
-            drawLine(leftColor, Offset(x, 0f),
-                Offset(x + w * .20f, h * .275f), strokeWidth = w * .0029f)
-            val y = i * w * .095f
-            if (y < h * .30f) {
-                drawLine(Color(0xFF146FC0).copy(alpha = .30f),
-                    Offset(0f, y), Offset(w * .52f, y - w * .145f),
-                    strokeWidth = w * .0028f)
+        if (home) {
+            // The original Home reference has two isolated, slanted boards.
+            // The old shared grid crossed the title and bled behind the cards.
+            for (i in -2..5) {
+                val leftX = w * (i * .105f)
+                val leftAlpha = if (i % 3 == 0) .42f else .22f
+                drawLine(
+                    Color(0xFF1768C0).copy(alpha = leftAlpha),
+                    Offset(leftX, 0f), Offset(leftX + w * .12f, h * .217f),
+                    strokeWidth = w * .0029f,
+                )
+                val leftY = i * w * .096f
+                drawLine(
+                    Color(0xFF1464AD).copy(alpha = .29f),
+                    Offset(0f, leftY), Offset(w * .47f, leftY - w * .12f),
+                    strokeWidth = w * .0027f,
+                )
+                val rightX = w * (.66f + i * .103f)
+                drawLine(
+                    Color(0xFF1268C5).copy(alpha = leftAlpha),
+                    Offset(rightX, 0f), Offset(rightX - w * .13f, h * .213f),
+                    strokeWidth = w * .0028f,
+                )
+                val rightY = i * w * .091f
+                drawLine(
+                    Color(0xFF0D5AAE).copy(alpha = .24f),
+                    Offset(w * .61f, rightY - w * .015f),
+                    Offset(w, rightY + w * .09f),
+                    strokeWidth = w * .0027f,
+                )
             }
-            val rightX = w * (.66f + i * .093f)
-            drawLine(Color(0xFF1268C5).copy(alpha = if (i % 3 == 0) .46f else .26f),
-                Offset(rightX, 0f), Offset(rightX - w * .16f, h * .29f),
-                strokeWidth = w * .0026f)
-            val rightY = i * w * .090f
-            if (rightY < h * .30f) {
-                drawLine(Color(0xFF0D5AAE).copy(alpha = .24f),
-                    Offset(w * .59f, rightY - w * .045f),
-                    Offset(w, rightY + w * .110f), strokeWidth = w * .0028f)
+        } else {
+            for (i in -1..5) {
+                val x = i * w * .105f
+                val leftColor = Color(0xFF1267BD).copy(alpha = if (i % 3 == 0) .46f else .27f)
+                drawLine(leftColor, Offset(x, 0f),
+                    Offset(x + w * .20f, h * .275f), strokeWidth = w * .0029f)
+                val y = i * w * .095f
+                if (y < h * .30f) {
+                    drawLine(Color(0xFF146FC0).copy(alpha = .30f),
+                        Offset(0f, y), Offset(w * .52f, y - w * .145f),
+                        strokeWidth = w * .0028f)
+                }
+                val rightX = w * (.66f + i * .093f)
+                drawLine(Color(0xFF1268C5).copy(alpha = if (i % 3 == 0) .46f else .26f),
+                    Offset(rightX, 0f), Offset(rightX - w * .16f, h * .29f),
+                    strokeWidth = w * .0026f)
+                val rightY = i * w * .090f
+                if (rightY < h * .30f) {
+                    drawLine(Color(0xFF0D5AAE).copy(alpha = .24f),
+                        Offset(w * .59f, rightY - w * .045f),
+                        Offset(w, rightY + w * .110f), strokeWidth = w * .0028f)
+                }
             }
         }
         // Large translucent Sudoku digits are part of the original visual motif.
@@ -311,15 +344,15 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
     BoxWithConstraints(modifier) {
         val narrow = maxWidth < 350.dp
         val logoSize = if (compact) 46.dp else if (narrow) 69.dp else 82.dp
-        val headingSize = if (compact) 36.sp else if (narrow) 41.sp else 51.sp
+        val headingSize = if (compact) 36.sp else if (narrow) 41.sp else 55.sp
         Row(
             Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
             SudokuLogo(logoSize)
-            Spacer(Modifier.width(if (narrow) 10.dp else 13.dp))
-            Column {
+            Spacer(Modifier.width(if (narrow) 10.dp else 9.dp))
+            Column(Modifier.offset(y = if (compact) 0.dp else 8.dp)) {
                 Text(
                     text = "Sudoku",
                     fontSize = headingSize,
