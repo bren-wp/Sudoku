@@ -775,6 +775,28 @@ class SudokuVisualSmokeTest {
         homeTile("postavke")
         waitFor("screen-postavke")
         rule.onNodeWithText("PRILAGODI IGRU SVOJIM ŽELJAMA").assertExists()
+        val settingsRows = listOf(
+            "settings-appearance",
+            "settings-game",
+            "sound-vibration",
+            "language-settings",
+            "settings-about",
+        )
+        val settingsBounds = settingsRows.map { tag ->
+            rule.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot
+        }
+        val tolerance = rule.activity.resources.displayMetrics.density * 2f
+        settingsBounds.zipWithNext().forEachIndexed { index, (upper, lower) ->
+            check(upper.bottom <= lower.top + tolerance) {
+                "Settings sections ${settingsRows[index]} and " +
+                    "${settingsRows[index + 1]} overlap: $upper vs $lower"
+            }
+            check(kotlin.math.abs(upper.left - lower.left) <= tolerance &&
+                kotlin.math.abs(upper.right - lower.right) <= tolerance) {
+                "Settings sections must share the same side margins"
+            }
+        }
+        rule.onNodeWithTag("settings-backup").assertExists()
         rule.onNodeWithTag("sound-vibration").performScrollTo().assertIsDisplayed()
         // A complete setting row, not just the small thumb, must toggle.
         val darkSetting = rule.onNodeWithTag("setting-tamna-tema")
