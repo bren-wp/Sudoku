@@ -833,6 +833,36 @@ class SudokuVisualSmokeTest {
      * reference width uses four columns; compact widths use two 2-card rows.
      */
     /**
+     * Regression for the old MainActivity restore switch: it restored only
+     * New Game / Game / Settings and silently discarded three other pages.
+     * Keep navigation restoration independent of individual widget states.
+     */
+    @Test
+    fun dailyStatisticsAndAchievementsSurviveActivityRecreation() {
+        waitFor("home-nova-igra")
+
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-dnevni-izazov")
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("statistika")
+        waitFor("screen-statistika")
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-statistika")
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        rule.activityRule.scenario.recreate()
+        waitFor("screen-postignuća")
+        rule.onNodeWithTag("achievement-summary").assertExists()
+    }
+
+    /**
      * All 24 native achievement cards remain accessible after expanding
      * and rotating. Only the stable achievement title is saved for the
      * dialog; points and progress stay backed by the actual controller.
