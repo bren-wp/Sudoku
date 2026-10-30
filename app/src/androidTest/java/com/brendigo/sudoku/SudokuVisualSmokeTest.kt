@@ -796,6 +796,54 @@ class SudokuVisualSmokeTest {
     }
 
     /**
+     * All four real award previews must have consistent native geometry and
+     * dynamic progress even when every achievement remains locked. The
+     * reference width uses four columns; compact widths use two 2-card rows.
+     */
+    @Test
+    fun statisticsAwardPreviewGeometryWorksAcrossBothViewports() {
+        waitFor("home-nova-igra")
+        homeTile("statistika")
+        waitFor("screen-statistika")
+        rule.onNodeWithTag("stats-achievements").performScrollTo()
+            .assertIsDisplayed()
+        rule.onNodeWithTag("stats-completion-percent", useUnmergedTree = true)
+            .assertExists()
+        val cards = (0..3).map { index ->
+            val node = rule.onNodeWithTag(
+                "stats-award-preview-$index", useUnmergedTree = true
+            )
+            node.assertExists()
+            node.fetchSemanticsNode().boundsInRoot
+        }
+        val density = rule.activity.resources.displayMetrics.density
+        val widthDp = rule.activity.resources.displayMetrics.widthPixels / density
+        check(cards.all { it.width > 0f && it.height >= 70f * density }) {
+            "Each real Statistics achievement preview must be readable: $cards"
+        }
+        if (widthDp < 410f) {
+            check(
+                cards[0].right <= cards[1].left + density &&
+                cards[2].right <= cards[3].left + density &&
+                cards[0].bottom <= cards[2].top + density &&
+                cards[1].bottom <= cards[3].top + density
+            ) { "Compact Statistics previews must be a non-overlapping 2x2 grid: $cards" }
+        } else {
+            cards.zipWithNext().forEach { (left, right) ->
+                check(
+                    left.right <= right.left + density &&
+                    kotlin.math.abs(left.top - right.top) <= density * 2f &&
+                    kotlin.math.abs(left.bottom - right.bottom) <= density * 2f
+                ) { "Reference Statistics previews must align on one row: $cards" }
+            }
+        }
+        rule.onNodeWithTag("stats-history-panel").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("open-game-history").performClick()
+        rule.onNodeWithText("Povijest igara").assertExists()
+        rule.onNodeWithText("Zatvori").performClick()
+    }
+
+    /**
      * Day counts/dates are always real device/user data. Verify the layout
      * instead of changing completed days just to reproduce an illustration.
      */
