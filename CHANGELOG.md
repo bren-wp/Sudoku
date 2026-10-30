@@ -1,3 +1,12 @@
+## 1.0.44 — gameplay zaslon 4/8, ciljani pixel QA
+
+- Redizajnirani stvarni Compose elementi zaslona Sudoku igre: mirnija tamnoplava pozadina bez ukrasnih brojeva preko HUD-a, plavi obrubi navigacije, tipografija ćelija i 3×3 razdjelnici.
+- Akcijski gumbi Bilješke, Savjet, Poništi i Izbriši dobili su čiste lokalne gradijente, veće vektorske ikone i čitljivije natpise.
+- Tipkovnica 1–9 sada je u zajedničkom zaobljenom okviru s pet tipki u prvom i četiri u centriranom drugom retku; zadržane su sve klikabilne funkcije i test tagovi.
+- Instrumentirani test dodatno kontrolira poziciju mreže i svih tipki u odnosu na okvir. Testovi korištenja igre, pauze, bilješki i nastavka ostaju aktivni.
+- Verzija 1.0.44, versionCode 45. Gradle 9.6.0, AGP 9.5.0, API 36, paket i korisnički podaci ostaju nepromijenjeni.
+- Stvarna referenca i mjerenja opisana su u `docs/gameplay-qa-v1.0.44.md`. Ne tvrdi se potpuna 1:1 jednakost bez dokazivog pixel/geometry QA.
+
 ## 1.0.43 — ekran 3/8: Nova igra (pixel QA)
 
 - Ciljana redizajn dorada zaslona **Nova igra**, bez mijenjanja spremljenih Sudoku partija, enginea ili drugih dovršenih zaslona.

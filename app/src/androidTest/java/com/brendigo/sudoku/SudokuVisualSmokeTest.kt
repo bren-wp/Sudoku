@@ -925,6 +925,18 @@ class SudokuVisualSmokeTest {
 
         rule.onNodeWithTag("primary-action").performScrollTo().performClick()
         waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("game-number-panel").assertExists()
+        val gameBoard = rule.onNodeWithTag("sudoku-board").fetchSemanticsNode().boundsInRoot
+        val numPanel = rule.onNodeWithTag("game-number-panel").fetchSemanticsNode().boundsInRoot
+        val firstNumber = rule.onNodeWithTag("number-1").fetchSemanticsNode().boundsInRoot
+        val ninthNumber = rule.onNodeWithTag("number-9").fetchSemanticsNode().boundsInRoot
+        val epsilon = rule.activity.resources.displayMetrics.density * 2f
+        check(numPanel.top >= gameBoard.bottom - epsilon &&
+            firstNumber.left >= numPanel.left - epsilon &&
+            ninthNumber.right <= numPanel.right + epsilon) {
+            "Gameplay board/keypad must stay ordered and within keypad frame: " +
+                "$gameBoard, $numPanel, $firstNumber, $ninthNumber"
+        }
         shot("03-game")
 
         rule.onNodeWithTag("game-settings").performClick()

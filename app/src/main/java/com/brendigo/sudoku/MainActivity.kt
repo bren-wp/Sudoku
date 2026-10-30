@@ -136,7 +136,8 @@ private fun Application(controller: SudokuController) {
         ScenicBackdrop(Modifier.fillMaxSize(), bright = !controller.options.dark,
             splash = controller.page == Screen.SPLASH,
             home = controller.page == Screen.HOME,
-            newGame = controller.page == Screen.NEW_GAME)
+            newGame = controller.page == Screen.NEW_GAME,
+            gameplay = controller.page == Screen.GAME)
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             SudokuBackupFlow(controller) { onExportBackup, onImportBackup ->
                 when (controller.page) {

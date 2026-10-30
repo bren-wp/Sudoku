@@ -74,7 +74,7 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
 @Composable
 fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                    splash: Boolean = false, home: Boolean = false,
-                   newGame: Boolean = false) {
+                   newGame: Boolean = false, gameplay: Boolean = false) {
     val context = LocalContext.current
     val originalNightscape = remember(context) {
         runCatching {
@@ -100,7 +100,18 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         // a dark central title area, not one grid crossing the full screen.
         // Geometry is anchored to viewport width, not device pixel density.
         // Keep it purely decorative so Compose buttons retain touch semantics.
-        if (newGame) {
+        if (gameplay) {
+            // The gameplay reference deliberately has a quiet upper field.
+            // Never let decorative sudoku numbers/grid interfere with HUD
+            // typography, error hearts, or the actual playable board.
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(Color(0x24175CA6), Color.Transparent),
+                    center = Offset(w * .78f, h * .05f), radius = w * .44f,
+                ),
+                radius = w * .44f, center = Offset(w * .78f, h * .05f),
+            )
+        } else if (newGame) {
             // Only the upper-right tilted board belongs to the New Game
             // reference. Never draw the giant full-screen decorative grid.
             val boardTint = Color(0xFF167AF2)
@@ -179,7 +190,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         }
         // Large translucent Sudoku digits are part of the original visual motif.
         // Native canvas text here is decoration, never interactive content.
-        drawIntoCanvas { canvas ->
+        if (!gameplay) drawIntoCanvas { canvas ->
             val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
                 color = android.graphics.Color.rgb(24, 101, 209)
                 alpha = 105
@@ -224,12 +235,14 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         // On the source splash, the moon and horizon sit appreciably higher
         // than behind the dense menu cards. Keep gameplay scenery unchanged.
         val moonY = if (splash) .705f else .77f
-        drawCircle(
-            Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
-            radius = w * .16f, center = Offset(w * .81f, h * moonY),
-        )
-        drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
-            radius = w * .030f, center = Offset(w * .81f, h * moonY))
+        if (!gameplay) {
+            drawCircle(
+                Brush.radialGradient(listOf(Color(0x5584C5FA), Color.Transparent)),
+                radius = w * .16f, center = Offset(w * .81f, h * moonY),
+            )
+            drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
+                radius = w * .030f, center = Offset(w * .81f, h * moonY))
+        }
         // Distant layered mountain silhouettes.
         fun mountains(y: Float, amplitude: Float, color: Color, phase: Float) {
             val path = Path().apply {
@@ -366,8 +379,13 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         // The source image contains only scenery beneath all buttons and
         // card interactions. Its first pixels fade in to avoid a visible seam.
         originalNightscape?.let { art ->
-            val y = if (splash) .613f else if (newGame) .800f else .730f
-            val height = if (splash) .387f else if (newGame) .200f else .390f
+            val y = when {
+                splash -> .613f
+                newGame -> .800f
+                gameplay -> .795f
+                else -> .730f
+            }
+            val height = 1f - y
             drawImage(
                 image = art,
                 srcSize = IntSize(art.width, art.height),
