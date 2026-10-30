@@ -815,7 +815,14 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("language-settings").performScrollTo().assertIsDisplayed()
         val privacyRow = rule.onNodeWithTag("privacy-policy")
         privacyRow.performScrollTo().assertIsDisplayed()
-        val privacyBottom = privacyRow.fetchSemanticsNode().boundsInRoot.bottom
+        val privacyBounds = privacyRow.fetchSemanticsNode().boundsInRoot
+        val privacyBottom = privacyBounds.bottom
+        // WCAG/Android usability: keep a real 48dp touch target even if
+        // reference artwork renders a visually smaller row.
+        val minimumTouchPx = 48f * rule.activity.resources.displayMetrics.density
+        check(privacyBounds.bottom - privacyBounds.top + 0.5f >= minimumTouchPx) {
+            "Settings privacy action touch height is smaller than 48dp"
+        }
         val footerAt = rule.onNodeWithTag("brand-footer")
             .fetchSemanticsNode().boundsInRoot.top
         check(privacyBottom <= footerAt + 1f) {
