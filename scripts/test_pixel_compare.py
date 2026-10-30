@@ -12,6 +12,7 @@ from home_pixel_qa import measure_home, measure_regions
 from new_game_pixel_qa import REGIONS as NEW_GAME_REGIONS
 from gameplay_pixel_qa import REGIONS as GAMEPLAY_REGIONS
 from settings_pixel_qa import REGIONS as SETTINGS_REGIONS
+from daily_pixel_qa import REGIONS as DAILY_REGIONS
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -33,6 +34,36 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_daily_qa_isolates_local_leaderboard_area(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            reference = Image.new("RGB", REFERENCE_SIZE, (0, 0, 0))
+            actual = reference.copy()
+            actual.paste((80, 0, 100), (300, 1340, 520, 1410))
+            reference.save(folder / "reference.png")
+            actual.save(folder / "actual.png")
+            reports = measure_regions(
+                folder / "reference.png", folder / "actual.png",
+                folder / "evidence", DAILY_REGIONS,
+            )
+            by_region = {row["region"]: row for row in reports}
+            self.assertEqual(set(DAILY_REGIONS), set(by_region))
+            self.assertGreater(by_region["leaderboard"]["rgb_mae_0_to_255"], 0)
+            self.assertEqual(0, by_region["week_timeline"]["rgb_mae_0_to_255"])
+            self.assertEqual(0, by_region["start_action"]["rgb_mae_0_to_255"])
+            self.assertGreater(by_region["whole"]["rgb_mae_0_to_255"], 0)
+            for name in ("regions.csv", "overlay.png", "difference.png"):
+                self.assertTrue((folder / "evidence" / name).is_file())
+
+    def test_daily_qa_rejects_compact_screen_as_941px_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            Image.new("RGB", REFERENCE_SIZE).save(folder / "reference.png")
+            Image.new("RGB", (720, 1280)).save(folder / "actual.png")
+            with self.assertRaisesRegex(ValueError, "941"):
+                measure_regions(folder / "reference.png", folder / "actual.png",
+                                folder / "evidence", DAILY_REGIONS)
 
     def test_settings_qa_detects_sound_panel_difference(self):
         with tempfile.TemporaryDirectory() as tmp:
