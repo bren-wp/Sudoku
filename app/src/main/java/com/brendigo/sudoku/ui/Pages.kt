@@ -1354,7 +1354,7 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
     val names = listOf("Lako", "Srednje", "Teško", "Stručno")
     val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
     StatisticsSurface(
-        modifier.heightIn(min = 182.dp).testTag("stats-difficulty-chart")
+        modifier.height(186.dp).testTag("stats-difficulty-chart")
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1405,7 +1405,7 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
         (stats.finished.toFloat() / stats.played).coerceIn(0f, 1f)
     val percentage = (fraction * 100).toInt()
     StatisticsSurface(
-        modifier.heightIn(min = 182.dp).testTag("stats-completion-ring")
+        modifier.height(186.dp).testTag("stats-completion-ring")
     ) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),
@@ -1419,9 +1419,9 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                     maxLines = 1, lineHeight = 12.sp)
             }
             Spacer(Modifier.height(6.dp))
-            Box(Modifier.fillMaxWidth().height(106.dp),
+            Box(Modifier.fillMaxWidth().height(98.dp),
                 contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(101.dp)) {
+                Canvas(Modifier.size(94.dp)) {
                     drawArc(Ink.blue.copy(alpha = .28f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     if (fraction > 0f) {
@@ -1472,7 +1472,7 @@ private fun StatTile(
         else -> "other"
     }
     StatisticsSurface(
-        modifier.heightIn(min = 78.dp)
+        modifier.heightIn(min = 87.dp)
             .testTag("stat-tile-$id")
             .semantics { contentDescription = "$label: $value"; role = Role.Button }
             .clickable(onClick = onClick),
