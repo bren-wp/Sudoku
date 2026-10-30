@@ -1,5 +1,9 @@
 ## 1.0.48 — Postavke, zaslon 8/8
 
+- Završni vizualni prolaz **4/10 — Postavke**: u `SettingsPage` usklađen plavi vanjski obrub panela Jezik uz tirkizni globus, dodane stabilne QA oznake jezičnog selektora i stvarne verzije.
+- Novi Android test `settingsReferenceRowsKeepTouchTargetsAndCorrectContent` provjerava pet pristupačnih 48dp prekidača, granice odabira jezika, stvarnu verziju i dostupnost offline sigurnosnih kopija.
+- Dodani `scripts/settings_pixel_qa.py` i Python regresijski testovi osam fiksnih vizualnih područja. Stvarni povijesni v1.0.47 screenshot pokazuje **24.519/255 RGB MAE** globalno; detalji i SHA-256 izvornih PNG-ova u `docs/settings-qa-followup-v1.0.48.md`. To **nije** rezultat novog commita i ne dokazuje 1:1.
+
 - Završni vizualni prolaz **3/10 — Aktivna igra**: prigušena ispuna odabrane ćelije uz stvarni cijan obrub, označene HUD i alatna traka; instrumentacijski QA ploče 9×9 (81 polje), poravnanja četiriju funkcijskih gumba i 5+4 brojčane tipkovnice na dva emulatora.
 - Dodan `scripts/gameplay_pixel_qa.py` s mjerenjem pune slike i devet fiksnih regija, uz Python regresijske testove. Povijesni stvarni v1.0.47 full-frame RGB MAE **19.381/255**; detalji u `docs/gameplay-qa-followup-v1.0.48.md`. Nova 1:1 metrička provjera još nije potvrđena.
 
