@@ -2179,38 +2179,59 @@ private fun SettingToggle(
 
 @Composable
 fun SplashPage() {
-    // The reference places the 7-3-9 mark at roughly 26% of the viewport
-    // height and the spinner close to the bottom. Anchoring both independently
-    // avoids moving the logo when the display becomes taller.
+    // Preserve the 941x1672 reference composition at the default font scale.
+    // Smaller or accessibility-scaled displays use the same *real* Compose
+    // content, with guarded typography instead of a cropped screenshot.
     BoxWithConstraints(Modifier.fillMaxSize().testTag("splash-screen")) {
-        val shortScreen = maxHeight < 700.dp
+        val compact = maxHeight < 700.dp || maxWidth < 385.dp
+        val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+        // Keep the rendered wordmark within a safe horizontal footprint when
+        // the system's accessible font scale is unusually large.
+        val typeFactor = minOf(1f, 1.35f / fontScale)
+        val headingSp = ((if (compact) 53 else 79) * typeFactor)
+            .toInt().coerceAtLeast(30)
+        val tagline = if (compact || fontScale > 1.35f)
+            "TRENIRAJ MOZAK SVAKI DAN"
+        else "T R E N I R A J   M O Z A K   S V A K I   D A N"
+
         Column(
             Modifier.align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(top = maxHeight * if (shortScreen) .19f else .255f),
+                .padding(top = maxHeight * if (compact) .19f else .255f)
+                .testTag("splash-brand"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Reference: mark near 26% viewport height, enlarged wordmark
-            // and a shorter icon/title gap. Preserve fluid scaling on small screens.
-            SudokuLogo(if (shortScreen) 92.dp else 122.dp, glowing = true)
-            Spacer(Modifier.height(if (shortScreen) 13.dp else 15.dp))
-            AccentText("Sudoku", if (shortScreen) 53 else 79)
-            Text("by Brendigo", color = Ink.muted, letterSpacing = 5.sp,
-                fontSize = if (shortScreen) 13.sp else 16.sp)
-            Spacer(Modifier.height(if (shortScreen) 12.dp else 11.dp))
-            Text("T R E N I R A J   M O Z A K   S V A K I   D A N",
-                color = Ink.cyan, fontSize = if (shortScreen) 9.sp else 15.sp,
-                textAlign = TextAlign.Center, maxLines = 2)
+            Box(Modifier.testTag("splash-logo")) {
+                SudokuLogo(if (compact) 92.dp else 122.dp, glowing = true)
+            }
+            Spacer(Modifier.height(if (compact) 13.dp else 15.dp))
+            AccentText("Sudoku", headingSp, Modifier.testTag("splash-title"))
+            Text(
+                "by Brendigo",
+                color = Ink.muted,
+                letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
+                fontSize = if (compact) 13.sp else 16.sp,
+                modifier = Modifier.testTag("splash-byline"),
+                maxLines = 1,
+            )
+            Spacer(Modifier.height(if (compact) 12.dp else 11.dp))
+            Text(
+                tagline,
+                color = Ink.cyan,
+                fontSize = if (compact) 9.sp else 15.sp,
+                letterSpacing = if (compact || fontScale > 1.35f) 1.sp else 0.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                modifier = Modifier.fillMaxWidth().testTag("splash-tagline"),
+            )
         }
-        // Android's "remove animations" accessibility preference can reduce
-        // the Material indeterminate spinner to a single pixel. Draw a native,
-        // deterministic arc so the loading state remains legible in screenshot
-        // tests and for users who disable animations.
+        // A deterministic loading arc stays visible when Android animations
+        // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (shortScreen) 24.dp else 70.dp)
-                .size(if (shortScreen) 30.dp else 36.dp)
+                .padding(bottom = if (compact) 24.dp else 70.dp)
+                .size(if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
         ) {
