@@ -1,12 +1,15 @@
 name: Refresh Sudoku marketing screenshots
 
-# This development branch workflow captures ACTUAL Compose screens, not concept art.
-# It writes only small WebP screenshots on the dedicated development branch.
+# Capture real Compose screens for every Sudoku feature branch. A manual run on
+# main is read-only: only dedicated feature branches may publish captured assets.
 on:
   push:
-    branches: ["feature/sudoku-v138-visual-parity-pass"]
+    branches:
+      - "feature/sudoku-*"
     paths:
       - ".github/workflows/marketing-screenshots.yml"
+      - ".github/scripts/run-visual-smoke.sh"
+      - ".github/scripts/export-emulator-screenshots.sh"
       - "app/src/main/**"
       - "app/src/androidTest/**"
       - "app/build.gradle.kts"
@@ -75,16 +78,30 @@ jobs:
                   if image.size != (941, 1672):
                       raise SystemExit(f"Unexpected emulator size for {filename}: {image.size}")
                   output = destination / (basename + ".webp")
-                  # Full native capture resolution, compressed for GitHub README.
                   image.convert("RGB").save(
                       output, format="WEBP", quality=85, method=6,
                   )
                   print(output, output.stat().st_size)
           PY
-      - name: Publish verified captures to development branch
-        # Never write to main on workflow_dispatch; releases require reviewed PRs.
-        if: github.ref == 'refs/heads/feature/sudoku-v138-visual-parity-pass'
+      - name: Upload actual screen captures for pixel QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: sudoku-real-android-captures
+          path: screenshots/*.png
+          if-no-files-found: error
+      - name: Upload preview gallery
+        uses: actions/upload-artifact@v4
+        with:
+          name: sudoku-real-webp-gallery
+          path: docs/screenshots/*.webp
+          if-no-files-found: error
+      - name: Publish verified captures only on Sudoku feature branches
+        if: startsWith(github.ref, 'refs/heads/feature/sudoku-')
+        shell: bash
         run: |
+          set -euo pipefail
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          [[ "$BRANCH" =~ ^feature/sudoku-[A-Za-z0-9._/-]+$ ]]
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/screenshots/*.webp
@@ -92,6 +109,6 @@ jobs:
             echo "Marketing screenshots unchanged"
             exit 0
           fi
-          git commit -m "docs(marketing): add real Android UI screenshot gallery [skip ci]"
-          git pull --rebase origin feature/sudoku-v138-visual-parity-pass
-          git push origin HEAD:feature/sudoku-v138-visual-parity-pass
+          git commit -m "docs(marketing): refresh actual Android screenshots [skip ci]"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
