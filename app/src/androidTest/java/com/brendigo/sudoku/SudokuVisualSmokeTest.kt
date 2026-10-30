@@ -1052,15 +1052,43 @@ class SudokuVisualSmokeTest {
         check(launcher is android.graphics.drawable.AdaptiveIconDrawable) {
             "Android launcher icon is not the expected adaptive resource"
         }
+        // Reference 10 is transparent around the original icon. Rendering on
+        // an opaque black canvas creates a *false* mismatch over the entire
+        // transparent region and hides Android's actual adaptive mask.
         val bitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
         try {
-            val canvas = Canvas(bitmap)
-            canvas.drawColor(Color.BLACK)
+            val canvas = Canvas(bitmap) // newly allocated ARGB_8888 is transparent
             launcher.setBounds(0, 0, 1254, 1254)
             launcher.draw(canvas)
+            check(Color.alpha(bitmap.getPixel(0, 0)) == 0) {
+                "Adaptive launcher background incorrectly extends past its mask"
+            }
+            check(Color.alpha(bitmap.getPixel(627, 627)) > 0) {
+                "Adaptive launcher has no visible center"
+            }
             saveBrandingQaPng("10-launcher-icon.png", bitmap)
         } finally {
             bitmap.recycle()
+        }
+
+        // Monochrome is a separate Android 13+ themed-icon asset: compare its
+        // alpha mask independently instead of tinting the RGB reference art.
+        val monochrome = context.getDrawable(R.drawable.ic_sudoku_monochrome)
+            ?: error("Missing monochrome Sudoku launcher resource")
+        val monoBitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
+        try {
+            val canvas = Canvas(monoBitmap)
+            monochrome.setBounds(0, 0, 1254, 1254)
+            monochrome.draw(canvas)
+            check(Color.alpha(monoBitmap.getPixel(0, 0)) == 0) {
+                "Themed icon must preserve transparent corners"
+            }
+            check(Color.alpha(monoBitmap.getPixel(627, 627)) > 0) {
+                "Themed icon lost the center digit"
+            }
+            saveBrandingQaPng("11-launcher-monochrome.png", monoBitmap)
+        } finally {
+            monoBitmap.recycle()
         }
     }
 
