@@ -461,21 +461,25 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
 @Composable
 fun SudokuLogo(size: Dp, glowing: Boolean = false) {
     val values = listOf("7", "", "", "", "3", "", "", "", "9")
+    // The splash-only icon is more rounded than the small in-app brand
+    // marks. Do not alter Home/other pages using the default icon.
+    val outerCorner = if (glowing) 19.dp else 13.dp
+    val innerCorner = if (glowing) 17.dp else 11.dp
     Column(
         Modifier.size(size)
             .then(if (glowing) Modifier.shadow(
                 elevation = 12.dp,
-                shape = RoundedCornerShape(13.dp),
+                shape = RoundedCornerShape(outerCorner),
                 ambientColor = Ink.cyan,
                 spotColor = Ink.blue,
             ) else Modifier)
             .clearAndSetSemantics {
                 contentDescription = "Sudoku by Brendigo, logotip 7, 3, 9"
             }
-            .clip(RoundedCornerShape(13.dp))
+            .clip(RoundedCornerShape(outerCorner))
             .background(Brush.linearGradient(listOf(Color(0xFF0058DF), Ink.cyan)))
             .padding(2.dp)
-            .clip(RoundedCornerShape(11.dp))
+            .clip(RoundedCornerShape(innerCorner))
             .background(Color(0xFF061A49))
             .padding(4.dp),
         verticalArrangement = Arrangement.spacedBy(1.dp),
