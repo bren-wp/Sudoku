@@ -44,12 +44,12 @@ fun NewGameDifficultySurface(
     val tint = newGameAccents[index]
     val rounded = RoundedCornerShape(11.dp)
     val base = when (index) {
-        0 -> listOf(Color(0xFF003A42), Color(0xFF00414C), Color(0xFF003D43))
-        1 -> listOf(Color(0xFF003743), Color(0xFF034151), Color(0xFF00374B))
-        2 -> listOf(Color(0xFF04265E), Color(0xFF07386F), Color(0xFF062457))
-        3 -> listOf(Color(0xFF252D35), Color(0xFF413B31), Color(0xFF343429))
-        4 -> listOf(Color(0xFF21164A), Color(0xFF261D64), Color(0xFF23134D))
-        else -> listOf(Color(0xFF391829), Color(0xFF36152F), Color(0xFF2C1434))
+        0 -> listOf(Color(0xFF01464B), Color(0xFF01343F), Color(0xFF01414C), Color(0xFF01565A), Color(0xFF015157))
+        1 -> listOf(Color(0xFF00404C), Color(0xFF002D3C), Color(0xFF003748), Color(0xFF015B69), Color(0xFF015866))
+        2 -> listOf(Color(0xFF032F64), Color(0xFF03214B), Color(0xFF032752), Color(0xFF033665), Color(0xFF033765))
+        3 -> listOf(Color(0xFF37382F), Color(0xFF202830), Color(0xFF3A3429), Color(0xFF6F5631), Color(0xFF685637))
+        4 -> listOf(Color(0xFF292466), Color(0xFF1D1B58), Color(0xFF29225F), Color(0xFF322367), Color(0xFF2D205F))
+        else -> listOf(Color(0xFF612035), Color(0xFF39142E), Color(0xFF51172B), Color(0xFF771E31), Color(0xFF761F30))
     }
     Box(modifier.clip(rounded).background(Brush.horizontalGradient(base))
         .border(1.1.dp, tint, rounded)) {
@@ -59,27 +59,27 @@ fun NewGameDifficultySurface(
             val glowCenter = Offset(w * .77f, h * .13f)
             drawCircle(
                 Brush.radialGradient(
-                    listOf(tint.copy(alpha = .25f), Color.Transparent),
+                    listOf(tint.copy(alpha = .12f), Color.Transparent),
                     center = glowCenter, radius = w * .42f,
                 ),
                 radius = w * .42f, center = glowCenter,
             )
             for (column in 0..4) {
-                val x = w * (.61f + column * .108f)
-                drawLine(tint.copy(alpha = if (column == 2) .40f else .20f),
+                val x = w * (.65f + column * .108f)
+                drawLine(tint.copy(alpha = if (column == 2) .27f else .12f),
                     Offset(x + h * .20f, 0f), Offset(x - h * .29f, h),
                     strokeWidth = if (column == 2) 2.0f else 1.45f)
             }
             for (row in 0..3) {
                 val y = h * (-.23f + row * .55f)
-                drawLine(tint.copy(alpha = if (row == 2) .42f else .19f),
-                    Offset(w * .50f, y - h * .22f), Offset(w * 1.06f, y + h * .19f),
+                drawLine(tint.copy(alpha = if (row == 2) .27f else .12f),
+                    Offset(w * .57f, y - h * .22f), Offset(w * 1.06f, y + h * .19f),
                     strokeWidth = if (row == 2) 2.1f else 1.5f)
             }
             val active = Offset(w * .76f, h * .58f)
             drawCircle(
                 Brush.radialGradient(
-                    listOf(tint.copy(alpha = .24f), Color.Transparent),
+                    listOf(tint.copy(alpha = .13f), Color.Transparent),
                     center = active, radius = h * .55f,
                 ), radius = h * .55f, center = active,
             )
@@ -103,7 +103,7 @@ fun NewGameDifficultySurface(
                 canvas.nativeCanvas.drawText("6", w * .90f, h * .84f, paint)
             }
             drawRect(
-                Brush.horizontalGradient(listOf(Color(0x55001630), Color.Transparent),
+                Brush.horizontalGradient(listOf(Color(0x20001630), Color.Transparent),
                     startX = 0f, endX = w * .65f),
                 size = androidx.compose.ui.geometry.Size(w * .65f, h),
             )
