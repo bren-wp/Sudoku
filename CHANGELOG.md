@@ -1,3 +1,13 @@
+## 1.0.41 — prvi fokusirani pixel QA prolaz: Splash + AGP 9.5
+
+- **Zaslon 1/8 (Splash):** povećan tekst logotipa `Sudoku`, smanjeni razmaci ispod 7–3–9 znaka i natpisa, te bolje usklađen slogan na referentnih 941×1672 piksela. Izvorni prikaz ostaje pravi Jetpack Compose UI.
+- Umjesto animiranog Material indikatora, koji se na emulatoru s isključenim animacijama može prikazati samo kao točka, uveden je deterministički iscrtani svijetleći luk dostupan čitačima zaslona.
+- Dodan je opcionalni cyan glow oko 7–3–9 logotipa samo na splash zaslonu, bez neželjenog utjecaja na početni zaslon.
+- Android Gradle Plugin 8.10.1 → **9.5.0**, Kotlin migriran na ugrađenu AGP podršku, Compose compiler plugin → **2.4.21** i `compilerOptions.jvmTarget=17`.
+- Gradle **9.6.0** u četiri postojeća GitHub Actions workflowa (Android CI, visual smoke, publish-release i marketing screenshots). Nije uvedena nova Android dozvola, oglas ili mrežna ovisnost.
+- `versionCode=42`, `versionName=1.0.41`; `applicationId` i `targetSdk=36` ostaju nepromijenjeni. Produkcijski potpis i dalje zahtijeva postojeći izdavački ključ.
+- **Status:** ovo je prvi zaslon po zaslon; ne tvrdi se da je 1:1 jednakost potvrđena prije novih stvarnih emulator snimki i normalizirane usporedbe. Vidi `docs/splash-qa-v1.0.41.md`.
+
 ## 1.0.40 — zaštita spremljenih partija pri promjeni načina igre
 
 - Prije zamjene postojeće Sudoku partije novom, kao i prije prijelaza između redovne i dnevne igre, obavezan je uspješan sinkroni zapis. Ako zapis ne uspije, trenutačna mreža, potezi i statistika ostaju u memoriji, a korisnik dobiva jasnu poruku.

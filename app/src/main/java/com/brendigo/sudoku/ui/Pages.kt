@@ -1967,23 +1967,43 @@ fun SplashPage() {
                 .padding(top = maxHeight * if (shortScreen) .19f else .255f),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            SudokuLogo(if (shortScreen) 92.dp else 122.dp)
-            Spacer(Modifier.height(if (shortScreen) 18.dp else 30.dp))
-            AccentText("Sudoku", if (shortScreen) 48 else 64)
+            // Reference: mark near 26% viewport height, enlarged wordmark
+            // and a shorter icon/title gap. Preserve fluid scaling on small screens.
+            SudokuLogo(if (shortScreen) 92.dp else 122.dp, glowing = true)
+            Spacer(Modifier.height(if (shortScreen) 13.dp else 15.dp))
+            AccentText("Sudoku", if (shortScreen) 53 else 79)
             Text("by Brendigo", color = Ink.muted, letterSpacing = 5.sp,
                 fontSize = if (shortScreen) 13.sp else 16.sp)
-            Spacer(Modifier.height(if (shortScreen) 20.dp else 32.dp))
+            Spacer(Modifier.height(if (shortScreen) 12.dp else 11.dp))
             Text("T R E N I R A J   M O Z A K   S V A K I   D A N",
-                color = Ink.cyan, fontSize = if (shortScreen) 9.sp else 11.sp,
-                textAlign = TextAlign.Center)
+                color = Ink.cyan, fontSize = if (shortScreen) 9.sp else 15.sp,
+                textAlign = TextAlign.Center, maxLines = 2)
         }
-        CircularProgressIndicator(
-            color = Ink.cyan,
-            strokeWidth = 3.dp,
-            modifier = Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (shortScreen) 24.dp else 58.dp)
+        // Android's "remove animations" accessibility preference can reduce
+        // the Material indeterminate spinner to a single pixel. Draw a native,
+        // deterministic arc so the loading state remains legible in screenshot
+        // tests and for users who disable animations.
+        Canvas(
+            Modifier.align(Alignment.BottomCenter)
+                .padding(bottom = if (shortScreen) 24.dp else 70.dp)
                 .size(if (shortScreen) 30.dp else 36.dp)
-                .testTag("splash-loading"),
-        )
+                .testTag("splash-loading")
+                .semantics { contentDescription = "Učitavanje igre" }
+        ) {
+            drawArc(
+                color = Ink.blue.copy(alpha = .40f),
+                startAngle = 0f,
+                sweepAngle = 360f,
+                useCenter = false,
+                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
+            )
+            drawArc(
+                color = Ink.cyan,
+                startAngle = -93f,
+                sweepAngle = 145f,
+                useCenter = false,
+                style = Stroke(width = 3.5.dp.toPx(), cap = StrokeCap.Round),
+            )
+        }
     }
 }

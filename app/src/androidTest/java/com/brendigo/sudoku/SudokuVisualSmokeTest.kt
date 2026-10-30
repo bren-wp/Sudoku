@@ -61,6 +61,9 @@ class SudokuVisualSmokeTest {
             controller.go(com.brendigo.sudoku.data.Screen.SPLASH)
         }
         waitFor("splash-screen")
+        // The loader remains a visible, accessible Compose element even when
+        // system animation duration scales are set to zero by the emulator.
+        rule.onNodeWithTag("splash-loading").assertIsDisplayed()
         shot("08-splash")
     }
 

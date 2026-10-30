@@ -12,6 +12,8 @@ on:
       - "gradle.properties"
       - "build.gradle.kts"
       - "settings.gradle.kts"
+      - ".github/workflows/android.yml"
+      - ".github/workflows/visual-smoke.yml"
   pull_request:
     types: [closed]
   workflow_dispatch:
@@ -55,10 +57,10 @@ jobs:
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)"
           test -x "$SDKMANAGER"
           "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
-      - name: Gradle 8.13
+      - name: Gradle 9.6.0
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.13"
+          gradle-version: "9.6.0"
       - name: Version and release check
         id: version
         shell: bash
