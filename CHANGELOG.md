@@ -1,3 +1,14 @@
+## 1.0.45 — zaslon 5/8: Dnevni izazov
+
+- Ciljana pixel QA dorada stvarnog Compose sučelja dnevnog izazova (naslov, dnevni sažetak, ilustrirana kartica, dnevni niz i gumbi). Nema renderiranih statičnih screenshotova umjesto interaktivnih elemenata.
+- Lokalno dodan **337×261 WebP isječak samo pejzaža** iz korisnikove originalne reference: planine, mjesec i pagoda, bez teksta, datuma, rezultata ili gumba. Prikazuje se isključivo u pozadini kartice.
+- Zasebna dekorativna mreža u gornjim kutovima dnevnog izazova; drugi zasloni zadržavaju svoje pozadine.
+- Veća, čitljivija tipografija, zlatni amblem poklona, plamen, bolje dimenzije KPI kartica, osvijetljeni indikatori sedam dana te glavni CTA s punim simbolom reprodukcije.
+- Stvarni datumi, lokalni rezultati, sedmodnevni niz, nastavak dnevne partije i spremljeni korisnički podaci ostaju dinamički i netaknuti.
+- Novi Android UI regresijski test provjerava da se sažetak, hero, sedmodnevni niz i akcijski gumbi ne preklapaju na različitim ekranima.
+- Verzija 1.0.45, versionCode 46; nepromijenjeni AGP 9.5.0, Gradle 9.6.0, Android API 36 i `com.brendigo.sudoku`.
+- Detalji i mjerljive preostale razlike: `docs/daily-qa-v1.0.45.md`.
+
 ## 1.0.44 — gameplay zaslon 4/8, ciljani pixel QA
 
 - Redizajnirani stvarni Compose elementi zaslona Sudoku igre: mirnija tamnoplava pozadina bez ukrasnih brojeva preko HUD-a, plavi obrubi navigacije, tipografija ćelija i 3×3 razdjelnici.

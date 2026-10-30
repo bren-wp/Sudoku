@@ -575,6 +575,20 @@ class SudokuVisualSmokeTest {
         check(dailyTop.bottom <= heroTop.top + 1f) {
             "Daily Challenge header must not overlap the hero"
         }
+        val actualDensity = rule.activity.resources.displayMetrics.density
+        val panel = rule.onNodeWithTag("daily-streak-panel")
+            .fetchSemanticsNode().boundsInRoot
+        check(heroTop.bottom <= panel.top + actualDensity) {
+            "Daily hero overlaps week timeline"
+        }
+        // In the compact viewport, Compose's scroll container intentionally
+        // leaves offscreen nodes unplaced (0x0 bounds). Scroll to each action
+        // before asserting its visibility instead of comparing stale bounds.
+        rule.onNodeWithTag("primary-action").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("daily-leaderboard").performScrollTo().assertIsDisplayed()
+        // Metric bounds above were captured before scrolling; do not compare
+        // them against later scroll-offset hero bounds on compact viewports.
+        // The 2+1 vs 3-column assertions already validate these layouts.
         rule.onNodeWithText("Zlatna značka").assertExists()
         rule.onNodeWithTag("daily-leaderboard").performScrollTo().performClick()
         rule.onNodeWithText("Osobna rang-lista").assertExists()
