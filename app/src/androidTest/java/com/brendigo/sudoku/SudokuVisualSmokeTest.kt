@@ -1510,23 +1510,25 @@ class SudokuVisualSmokeTest {
         check(launcher is android.graphics.drawable.AdaptiveIconDrawable) {
             "Android launcher icon is not the expected adaptive resource"
         }
-        // The owner supplied standalone icon ART (1254px, with clear
-        // margins), while Android provides a masked launcher drawable that
-        // normally occupies its entire requested bounds. Render it inside a
-        // canonical inset frame to measure visual content and alpha fairly.
-        // This export is NOT a claim of reproducing the launcher mask itself:
-        // Android may use a circle or squircle according to the device.
-        val frameLeft = 120
-        val frameTop = 103
-        val frameSize = 1014
+        // The original 1254px art has TRANSPARENT margins. Android's
+        // getApplicationIcon() composites an opaque launcher BACKGROUND
+        // into the mask; exporting that composite as a stand-alone PNG
+        // incorrectly reports alpha=255 even in the original's empty area.
+        // Export the installed adaptive FOREGROUND drawable at the reference
+        // artwork scale. Its colors/geometry are genuinely from the APK.
+        // The platform launcher shape is checked separately below, never
+        // presented as identical to a transparent marketing square.
+        val artworkBounds = intArrayOf(-230, -230, 1484, 1484)
         val bitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
         try {
             val canvas = Canvas(bitmap) // newly allocated ARGB_8888 is transparent
-            launcher.setBounds(
-                frameLeft, frameTop,
-                frameLeft + frameSize, frameTop + frameSize,
+            val foreground = launcher.foreground
+                ?: error("Adaptive launcher has no native foreground")
+            foreground.setBounds(
+                artworkBounds[0], artworkBounds[1],
+                artworkBounds[2], artworkBounds[3],
             )
-            launcher.draw(canvas)
+            foreground.draw(canvas)
             check(Color.alpha(bitmap.getPixel(0, 0)) == 0) {
                 "Adaptive launcher background incorrectly extends past its mask"
             }
@@ -1544,6 +1546,17 @@ class SudokuVisualSmokeTest {
             bitmap.recycle()
         }
 
+        // Validate the true Android adaptive drawable as well: this is
+        // distinct from the transparency-preserving ART reference export.
+        val nativeMask = Bitmap.createBitmap(108, 108, Bitmap.Config.ARGB_8888)
+        try {
+            launcher.setBounds(0, 0, 108, 108)
+            launcher.draw(Canvas(nativeMask))
+            check(Color.alpha(nativeMask.getPixel(54, 54)) > 0) {
+                "Installed adaptive launcher mask lost the central number"
+            }
+        } finally { nativeMask.recycle() }
+
         // Monochrome is a separate Android 13+ themed-icon asset: compare its
         // alpha mask independently instead of tinting the RGB reference art.
         val monochrome = context.getDrawable(R.drawable.ic_sudoku_monochrome)
@@ -1552,8 +1565,8 @@ class SudokuVisualSmokeTest {
         try {
             val canvas = Canvas(monoBitmap)
             monochrome.setBounds(
-                frameLeft, frameTop,
-                frameLeft + frameSize, frameTop + frameSize,
+                artworkBounds[0], artworkBounds[1],
+                artworkBounds[2], artworkBounds[3],
             )
             monochrome.draw(canvas)
             check(Color.alpha(monoBitmap.getPixel(0, 0)) == 0) {
