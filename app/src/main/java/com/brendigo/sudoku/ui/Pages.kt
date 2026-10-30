@@ -2334,7 +2334,29 @@ fun SplashPage() {
                 .testTag("splash-brand"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(Modifier.testTag("splash-logo")) {
+            // The owner's 941px artwork has a concentrated cyan halo
+            // extending behind the lower-left edge of its rounded 7-3-9
+            // emblem. Paint only decorative light: the logo is still an
+            // actual scaled Compose 3x3 grid, never a pasted screenshot.
+            Box(
+                Modifier.testTag("splash-logo")
+                    .drawBehind {
+                        val center = Offset(size.width * .38f, size.height * .69f)
+                        val glowRadius = size.width * .82f
+                        drawCircle(
+                            Brush.radialGradient(
+                                listOf(
+                                    Ink.cyan.copy(alpha = .40f),
+                                    Ink.blue.copy(alpha = .15f),
+                                    Color.Transparent,
+                                ),
+                                center = center, radius = glowRadius,
+                            ),
+                            radius = glowRadius,
+                            center = center,
+                        )
+                    },
+            ) {
                 SudokuLogo(if (compact) 92.dp else 122.dp, glowing = true)
             }
             Spacer(Modifier.height(if (compact) 13.dp else 15.dp))
