@@ -1473,18 +1473,18 @@ private fun StatTile(
         else -> "other"
     }
     StatisticsSurface(
-        modifier.heightIn(min = 84.dp)
+        modifier.height(if (LocalDensity.current.fontScale >= 1.3f) 110.dp else 84.dp)
             .testTag("stat-tile-$id")
             .semantics { contentDescription = "$label: $value"; role = Role.Button }
             .clickable(onClick = onClick),
         accent = color, background = metricCardColors(id), corner = 12.dp,
     ) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
+        BoxWithConstraints(Modifier.fillMaxSize()) {
             val compact = maxWidth < 176.dp
             Row(
-                Modifier.fillMaxWidth().padding(
+                Modifier.fillMaxSize().padding(
                     horizontal = if (compact) 9.dp else 13.dp,
-                    vertical = 9.dp,
+                    vertical = 5.dp,
                 ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -1508,6 +1508,17 @@ private fun StatTile(
                         fontSize = if (compact && value.length > 7) 15.sp
                             else if (compact) 19.sp else 23.sp,
                         fontWeight = FontWeight.ExtraBold, maxLines = 1,
+                    )
+                    Text(
+                        when (id) {
+                            "played" -> "Pokrenute igre"
+                            "best" -> "Najbrži rezultat"
+                            "total" -> "Provedeno u igri"
+                            "streak" -> "Trenutni niz"
+                            else -> ""
+                        },
+                        color = Ink.muted, fontSize = if (compact) 8.sp else 9.sp,
+                        maxLines = 1,
                     )
                 }
                 BrandIcon("next", Modifier.size(if (compact) 12.dp else 15.dp), color)
