@@ -165,7 +165,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                         BrandIcon("statistics", Modifier.size(29.dp), Ink.cyan)
                         Spacer(Modifier.width(8.dp))
                     }
-                    AccentText(title, if (title.length > 16) 35 else 39)
+                    AccentText(title, if (title == "Dnevni izazov") 46 else if (title.length > 16) 35 else 39)
                 }
                 if (description.isNotBlank()) {
                     if (title == "Statistika" || title == "Postavke") {
@@ -178,6 +178,10 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
                         )
+                    } else if (title == "Dnevni izazov") {
+                        Text(description, color = Ink.muted, fontSize = 17.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth())
                     } else {
                         Subtitle(description, Modifier.fillMaxWidth(), centered = true)
                     }
@@ -838,17 +842,17 @@ private fun DailyMetric(
     icon: String, label: String, value: String,
     color: Color, modifier: Modifier = Modifier,
 ) {
-    NeonPanel(modifier.heightIn(min = 64.dp), Ink.blue, corner = 13.dp) {
+    DailyFrame(modifier.heightIn(min = 57.dp), Ink.blue, radius = 12.dp) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BrandIcon(icon, Modifier.size(25.dp), color)
+            BrandIcon(icon, Modifier.size(29.dp), color)
             Spacer(Modifier.width(7.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text(label, color = Ink.muted, fontSize = 8.sp,
-                    lineHeight = 10.sp, maxLines = 2)
-                Text(value, color = Ink.white, fontSize = 12.sp,
+                Text(label, color = Ink.muted, fontSize = 9.sp,
+                    lineHeight = 11.sp, maxLines = 2)
+                Text(value, color = Ink.white, fontSize = 13.sp,
                     fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
@@ -865,15 +869,15 @@ fun DailyPage(controller: SudokuController) {
     val formattedDate = remember(today) {
         today.format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR")))
     }
-    PageContent {
+    PageContent(topPadding = 21.dp, showFooter = false, horizontalPadding = 18.dp) {
         SectionTitle("Dnevni izazov", "Današnji izazov", centered = true,
-            onBack = { controller.go(Screen.HOME) }, titleOffset = 18.dp)
-        Spacer(Modifier.height(32.dp))
+            onBack = { controller.go(Screen.HOME) }, titleOffset = 16.dp)
+        Spacer(Modifier.height(31.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val compactSummary = maxWidth < 355.dp ||
                 LocalDensity.current.fontScale >= 1.3f
-            NeonPanel(Modifier.fillMaxWidth().heightIn(min = if (compactSummary) 146.dp else 98.dp)
-                .testTag("daily-summary"), Ink.blue) {
+            DailyFrame(Modifier.fillMaxWidth().heightIn(min = if (compactSummary) 146.dp else 98.dp)
+                .testTag("daily-summary")) {
                 if (compactSummary) {
                     Column(
                         Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 11.dp),
@@ -895,7 +899,7 @@ fun DailyPage(controller: SudokuController) {
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                BrandIcon("flame", Modifier.size(27.dp), Ink.gold)
+                                BrandIcon("flame-solid", Modifier.size(30.dp), Ink.gold)
                                 Spacer(Modifier.width(5.dp))
                                 Column {
                                     Text("${controller.currentStreak(today)}", color = Ink.gold,
@@ -916,44 +920,46 @@ fun DailyPage(controller: SudokuController) {
                         }
                     }
                 } else {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(11.dp),
-            ) {
-                Row(Modifier.weight(1.4f), verticalAlignment = Alignment.CenterVertically) {
-                    BrandIcon("calendar", Modifier.size(27.dp), Ink.blue)
-                    Spacer(Modifier.width(8.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("D A N A S", color = Ink.muted, fontSize = 10.sp)
-                        Text(formattedDate, color = Ink.white,
-                            fontWeight = FontWeight.Bold, fontSize = 12.sp,
-                            lineHeight = 14.sp, maxLines = 2)
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    ) {
+                        Row(Modifier.weight(1.43f), verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("calendar", Modifier.size(27.dp), Ink.blue)
+                            Spacer(Modifier.width(8.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("D A N A S", color = Ink.muted, fontSize = 10.sp)
+                                Text(formattedDate, color = Ink.white,
+                                    fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                                    lineHeight = 15.sp, maxLines = 2)
+                            }
+                        }
+                        Box(Modifier.width(1.dp).height(60.dp)
+                            .background(Ink.blue.copy(alpha = .66f)))
+                        Row(Modifier.weight(.97f), verticalAlignment = Alignment.CenterVertically) {
+                            BrandIcon("flame-solid", Modifier.size(43.dp), Ink.gold)
+                            Spacer(Modifier.width(2.dp))
+                            Column(horizontalAlignment = Alignment.Start) {
+                                Text("${controller.currentStreak(today)}", color = Ink.gold,
+                                    fontSize = 37.sp, fontWeight = FontWeight.ExtraBold,
+                                    lineHeight = 39.sp)
+                                Text("DANA\nU NIZU", color = Ink.muted,
+                                    fontSize = 9.sp, lineHeight = 11.sp, maxLines = 2)
+                            }
+                        }
+                        Row(Modifier.weight(1.15f), verticalAlignment = Alignment.CenterVertically) {
+                            DailyRewardEmblem(Modifier.size(52.dp))
+                            Spacer(Modifier.width(5.dp))
+                            Column {
+                                Text("DANAŠNJA\nNAGRADA", color = Ink.gold,
+                                    fontSize = 9.sp, lineHeight = 11.sp, maxLines = 2)
+                                Spacer(Modifier.height(2.dp))
+                                Text("Zlatna\nznačka", color = Ink.white,
+                                    fontSize = 11.sp, lineHeight = 13.sp, maxLines = 2)
+                            }
+                        }
                     }
-                }
-                Box(Modifier.width(1.dp).height(57.dp)
-                    .background(Ink.blue.copy(alpha = .65f)))
-                Column(Modifier.weight(1.0f),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        BrandIcon("flame", Modifier.size(33.dp), Ink.gold)
-                        Spacer(Modifier.width(4.dp))
-                        Text("${controller.currentStreak(today)}", color = Ink.gold,
-                            fontSize = 34.sp, fontWeight = FontWeight.ExtraBold,
-                            lineHeight = 38.sp)
-                    }
-                    Text("DANA U NIZU", color = Ink.muted,
-                        fontSize = 9.sp, maxLines = 1)
-                }
-                Column(Modifier.weight(1.18f),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    BrandIcon("gift", Modifier.size(34.dp), Ink.gold)
-                    Text("DANAŠNJA NAGRADA", color = Ink.gold,
-                        fontSize = 8.sp, textAlign = TextAlign.Center,
-                        lineHeight = 10.sp, maxLines = 2)
-                    Text("Zlatna značka", color = Ink.white,
-                        fontSize = 11.sp, maxLines = 1)
-                }
             }
                 }
             }
@@ -961,10 +967,12 @@ fun DailyPage(controller: SudokuController) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val compactHero = maxWidth < 355.dp ||
                 LocalDensity.current.fontScale >= 1.3f
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 202.dp)
-            .testTag("daily-hero"), Ink.gold, warmGlowAlpha = .25f) {
+        DailyFrame(Modifier.fillMaxWidth().heightIn(min = 196.dp)
+            .testTag("daily-hero"), Ink.blue) {
+            DailyHeroBackdrop()
             Column(
-                Modifier.fillMaxWidth().heightIn(min = 202.dp).padding(16.dp),
+                Modifier.fillMaxWidth().heightIn(min = 196.dp)
+                    .padding(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text("D A N A Š N J I   I Z A Z O V",
@@ -979,7 +987,7 @@ fun DailyPage(controller: SudokuController) {
                 Text("Riješi današnju sudoku zagonetku i osvoji posebnu nagradu!",
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
-                Spacer(Modifier.height(13.dp))
+                Spacer(Modifier.height(20.dp))
                 Column(
                     Modifier.fillMaxWidth().testTag("daily-metrics"),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -994,20 +1002,21 @@ fun DailyPage(controller: SudokuController) {
                         DailyMetric("star", "NAGRADA", "50 bodova",
                             Ink.gold, Modifier.fillMaxWidth().testTag("daily-reward-metric"))
                     } else {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
                             DailyMetric("statistics", "TEŽINA", "Srednja",
-                                Ink.gold, Modifier.weight(1f).testTag("daily-difficulty-metric"))
+                                Ink.gold, Modifier.weight(.98f).testTag("daily-difficulty-metric"))
                             DailyMetric("timer", "PROCIJENJENO VRIJEME", "12 min",
-                                Ink.cyan, Modifier.weight(1f).testTag("daily-time-metric"))
-                            DailyMetric("star", "NAGRADA", "50 bodova",
-                                Ink.gold, Modifier.weight(1f).testTag("daily-reward-metric"))
+                                Ink.cyan, Modifier.weight(1.10f).testTag("daily-time-metric"))
+                            DailyMetric("star-solid", "NAGRADA", "50 bodova",
+                                Ink.gold, Modifier.weight(1.10f).testTag("daily-reward-metric"))
                         }
                     }
                 }
             }
         }
         }
-        NeonPanel(Modifier.fillMaxWidth().heightIn(min = 122.dp), Ink.blue) {
+        DailyFrame(Modifier.fillMaxWidth().heightIn(min = 122.dp)
+            .testTag("daily-streak-panel")) {
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -1056,8 +1065,8 @@ fun DailyPage(controller: SudokuController) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(label, color = Ink.muted, fontSize = 10.sp)
                                 Spacer(Modifier.height(3.dp))
-                                StreakMarker(date.toString() in completedDays,
-                                    diameter = 31.dp, dayLabel = label)
+                                DailyWeekMarker(date.toString() in completedDays,
+                                    dayLabel = label, diameter = 31.dp)
                                 Spacer(Modifier.height(3.dp))
                                 Text("${date.dayOfMonth}.${date.monthValue}.",
                                     color = if (date == today) Ink.white else Ink.muted,
@@ -1074,38 +1083,36 @@ fun DailyPage(controller: SudokuController) {
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            SolidAction(
-                when {
-                    controller.dailyAlreadyCompleted() -> "✓   Današnji izazov riješen"
+            DailyStartAction(
+                title = when {
+                    controller.dailyAlreadyCompleted() -> "✓ Današnji izazov riješen"
                     controller.isGenerating -> "Učitavanje…"
-                    controller.hasSavedDailyFor(today) -> "▶   Nastavi današnji izazov"
-                    else -> "▶   Pokreni izazov"
+                    controller.hasSavedDailyFor(today) -> "Nastavi današnji izazov"
+                    else -> "Pokreni izazov"
                 },
-                { scope.launch { controller.startNew(9, 2, daily = true) } },
-                Modifier.fillMaxWidth(.80f),
-                !controller.isGenerating && !controller.dailyAlreadyCompleted(),
-                minHeight = 56.dp,
+                onClick = { scope.launch { controller.startNew(9, 2, daily = true) } },
+                modifier = Modifier.fillMaxWidth(.80f),
+                enabled = !controller.isGenerating && !controller.dailyAlreadyCompleted(),
             )
         }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            NeonPanel(
-                Modifier.fillMaxWidth(.64f).heightIn(min = 53.dp)
+            DailyFrame(
+                Modifier.fillMaxWidth(.63f).heightIn(min = 46.dp)
                     .testTag("daily-leaderboard")
                     .semantics {
                         contentDescription = "Otvori osobnu rang-listu"
                         role = Role.Button
                     }
                     .clickable { showRanking = true },
-                Ink.blue,
             ) {
                 Row(
                     Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
-                    BrandIcon("trophy", Modifier.size(25.dp), Ink.purple)
+                    BrandIcon("trophy", Modifier.size(29.dp), Ink.purple)
                     Spacer(Modifier.width(9.dp))
                     Text("Pogledaj rang-listu", color = Ink.white,
-                        fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold, fontSize = 16.sp,
                         maxLines = 1)
                 }
             }
