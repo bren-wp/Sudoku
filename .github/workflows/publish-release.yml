@@ -101,7 +101,7 @@ jobs:
       - name: Test, lint and build Android release from merge commit
         if: steps.version.outputs.exists != 'true'
         run: |
-          gradle --no-daemon :app:testDebugUnitTest :app:lintDebug \
+          gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:lintRelease \
             :app:assembleDebug :app:assembleRelease :app:bundleRelease
       - name: Publish APK and AAB (signed only when publisher key is configured)
         if: steps.version.outputs.exists != 'true'
@@ -118,8 +118,10 @@ jobs:
             test -s "$APK" && test -s "$AAB"
             cp "$APK" "release-assets/Sudoku-$RELEASE_TAG.apk"
             cp "$AAB" "release-assets/Sudoku-$RELEASE_TAG.aab"
+            (cd release-assets && sha256sum Sudoku-*.apk Sudoku-*.aab > SHA256SUMS)
             printf '%s\n' "Sudoku $RELEASE_TAG • by Brendigo" "" \
               "Potpisani Android APK i AAB izrađeni su iz testiranog merge commita." \
+              "SHA256SUMS sadrži kontrolne SHA-256 sažetke oba artefakta." \
               "Prije objave na Google Playu provjerite certifikat i provedite završnu provjeru aplikacije." \
               > release-notes.md
             gh release create "$RELEASE_TAG" release-assets/* -R "$REPO" \
@@ -131,8 +133,10 @@ jobs:
             test -s "$APK" && test -s "$AAB"
             cp "$APK" "release-assets/Sudoku-$RELEASE_TAG-test.apk"
             cp "$AAB" "release-assets/Sudoku-$RELEASE_TAG-unsigned.aab"
+            (cd release-assets && sha256sum Sudoku-*.apk Sudoku-*.aab > SHA256SUMS)
             printf '%s\n' "Sudoku $RELEASE_TAG • by Brendigo" "" \
               "**TESTNO IZDANJE**: APK je debug potpisan; AAB je nepotpisan." \
+              "SHA256SUMS sadrži kontrolne SHA-256 sažetke oba artefakta." \
               "**Nije spremno za Google Play.** Za izdavački potpis potrebne su " \
               "SUDOKU_KEYSTORE_BASE64, SUDOKU_SIGNING_KEY_ALIAS, " \
               "SUDOKU_SIGNING_STORE_PASSWORD i SUDOKU_SIGNING_KEY_PASSWORD." \
@@ -140,4 +144,7 @@ jobs:
             gh release create "$RELEASE_TAG" release-assets/* -R "$REPO" \
               --target "$SOURCE_SHA" --title "Sudoku $RELEASE_TAG" \
               --notes-file release-notes.md --prerelease
+            # Defensive reconciliation: test artifacts must never be labelled
+            # a stable Google Play-ready GitHub release.
+            gh release edit "$RELEASE_TAG" -R "$REPO" --prerelease
           fi
