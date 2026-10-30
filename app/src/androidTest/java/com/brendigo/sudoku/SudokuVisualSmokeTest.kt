@@ -67,6 +67,61 @@ class SudokuVisualSmokeTest {
         shot("08-splash")
     }
 
+    /**
+     * Splash branding must remain real, readable Compose UI at increased font
+     * scale on both 941x1672 and 720x1280 emulator viewports. This protects
+     * geometric accessibility; an image-level 1:1 comparison remains separate.
+     */
+    @Test
+    fun splashBrandDoesNotOverlapLoadingIndicatorAtLargeFontScale() {
+        waitFor("home-nova-igra")
+        val displayDensity = rule.activity.resources.displayMetrics.density
+        rule.runOnUiThread {
+            rule.activity.setContent {
+                androidx.compose.runtime.CompositionLocalProvider(
+                    androidx.compose.ui.platform.LocalDensity provides
+                        androidx.compose.ui.unit.Density(displayDensity, 1.8f)
+                ) {
+                    SudokuTheme {
+                        Box(Modifier.fillMaxSize()) {
+                            com.brendigo.sudoku.ui.SplashPage()
+                        }
+                    }
+                }
+            }
+        }
+        rule.waitForIdle()
+        val screen = rule.onNodeWithTag("splash-screen").fetchSemanticsNode().boundsInRoot
+        val brand = rule.onNodeWithTag("splash-brand").fetchSemanticsNode().boundsInRoot
+        val logo = rule.onNodeWithTag("splash-logo").fetchSemanticsNode().boundsInRoot
+        val title = rule.onNodeWithTag("splash-title").fetchSemanticsNode().boundsInRoot
+        val byline = rule.onNodeWithTag("splash-byline").fetchSemanticsNode().boundsInRoot
+        val tagline = rule.onNodeWithTag("splash-tagline").fetchSemanticsNode().boundsInRoot
+        val loading = rule.onNodeWithTag("splash-loading").fetchSemanticsNode().boundsInRoot
+        val slack = displayDensity * 2f
+        check(brand.left >= screen.left - slack &&
+            brand.right <= screen.right + slack) {
+            "Splash branding overflowed the available width"
+        }
+        check(title.left >= screen.left - slack &&
+            title.right <= screen.right + slack) {
+            "Splash title overflowed at 1.8x system font scale"
+        }
+        check(logo.bottom <= title.top + slack &&
+            title.bottom <= byline.top + slack &&
+            byline.bottom <= tagline.top + slack) {
+            "Splash logo, title, byline and tagline overlap"
+        }
+        check(tagline.bottom <= brand.bottom + slack &&
+            brand.bottom + 8f * displayDensity < loading.top) {
+            "Splash branding overlaps the native loading indicator"
+        }
+        check(loading.bottom <= screen.bottom + slack) {
+            "Splash loading indicator is clipped at the bottom"
+        }
+        rule.onNodeWithTag("splash-loading").assertIsDisplayed()
+    }
+
     @Test
     fun productionAppRemainsOfflineAndDisablesAndroidBackup() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
