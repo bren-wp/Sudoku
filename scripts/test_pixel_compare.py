@@ -17,6 +17,7 @@ from statistics_pixel_qa import REGIONS as STATISTICS_REGIONS
 from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
 from splash_pixel_qa import REGIONS as SPLASH_REGIONS
 from wordmark_pixel_qa import WORDMARK_REGIONS, opaque_bounds, wordmark_report
+from launcher_icon_pixel_qa import ICON_REGIONS, alpha_bounds, launcher_report, verify_monochrome
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -38,6 +39,49 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_launcher_icon_has_real_transparent_margins_and_separate_digits(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            source = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
+            source.paste((2, 20, 65, 255), (123, 100, 1131, 1119))
+            actual = source.copy()
+            # Reject an old foreground export with opaque background:
+            # the source's margin must remain untouched.
+            actual.paste((2, 20, 65, 255), (0, 0, 1254, 48))
+            source.save(folder / "source.png")
+            actual.save(folder / "actual.png")
+            result = launcher_report(
+                folder / "source.png", folder / "actual.png",
+                folder / "evidence",
+            )
+            areas = {row["region"]: row for row in result["regions"]}
+            self.assertEqual(set(ICON_REGIONS), set(areas))
+            self.assertEqual((123, 100, 1131, 1119), result["original_bbox"])
+            self.assertNotEqual(result["actual_bbox"], result["original_bbox"])
+            self.assertGreater(result["summary"]["alpha_mae_0_to_255"], 0)
+            self.assertEqual(0, areas["digit_7"]["alpha_mae"])
+            self.assertEqual(0, areas["digit_3"]["alpha_mae"])
+            self.assertEqual(0, areas["digit_9"]["alpha_mae"])
+            self.assertTrue((folder / "evidence" / "launcher-regions.csv").exists())
+            self.assertTrue((folder / "evidence" / "alpha-difference.png").exists())
+
+    def test_launcher_alpha_bounds_require_actual_1254_canvas(self):
+        with self.assertRaisesRegex(ValueError, "1254"):
+            alpha_bounds(Image.new("RGBA", (720, 1280)))
+
+    def test_launcher_monochrome_must_be_sparse_white_alpha_mask(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "11-launcher-monochrome.png"
+            valid = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
+            valid.paste((255, 255, 255, 255), (597, 560, 657, 694))
+            valid.save(path)
+            report = verify_monochrome(path)
+            self.assertGreater(report["visible_alpha_128_pct"], .1)
+            invalid = Image.new("RGBA", (1254, 1254), (5, 20, 30, 255))
+            invalid.save(path)
+            with self.assertRaisesRegex(ValueError, "transparent canvas corners"):
+                verify_monochrome(path)
 
     def test_wordmark_alpha_and_byline_regions_are_separate(self):
         with tempfile.TemporaryDirectory() as tmp:
