@@ -75,7 +75,7 @@ fun SudokuTheme(dark: Boolean = true, content: @Composable () -> Unit) {
 fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                    splash: Boolean = false, home: Boolean = false,
                    newGame: Boolean = false, gameplay: Boolean = false,
-                   daily: Boolean = false) {
+                   daily: Boolean = false, stats: Boolean = false) {
     val context = LocalContext.current
     val originalNightscape = remember(context) {
         runCatching {
@@ -134,7 +134,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 listOf(Ink.cyan.copy(alpha = .36f), Color.Transparent),
                 center = selected, radius = w * .12f),
                 radius = w * .12f, center = selected)
-        } else if (home || daily) {
+        } else if (home || daily || stats) {
             // The original Home reference has two isolated, slanted boards.
             // The old shared grid crossed the title and bled behind the cards.
             for (i in -2..5) {
@@ -191,7 +191,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
         }
         // Large translucent Sudoku digits are part of the original visual motif.
         // Native canvas text here is decoration, never interactive content.
-        if (!gameplay && !daily) drawIntoCanvas { canvas ->
+        if (!gameplay && !daily && !stats) drawIntoCanvas { canvas ->
             val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
                 color = android.graphics.Color.rgb(24, 101, 209)
                 alpha = 105
@@ -244,7 +244,7 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
             drawCircle(Color(0xFFA2D8FF).copy(alpha = .84f),
                 radius = w * .030f, center = Offset(w * .81f, h * moonY))
         }
-        if (daily) drawIntoCanvas { canvas ->
+        if (daily || stats) drawIntoCanvas { canvas ->
             // Sparse digits in the far corners only, never through the daily
             // summary and challenge cards.
             val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
