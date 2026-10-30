@@ -55,12 +55,33 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                 p.close()
                 canvas.drawPath(p,stroke)
             }
+            fun filledStar(cx:Float=12f, cy:Float=12f, radius:Float=9f) {
+                val p = Path()
+                for(i in 0 until 10) {
+                    val theta = Math.PI * (i * .2 - .5)
+                    val r = if(i % 2 == 0) radius else radius * .46f
+                    val x = cx + cos(theta).toFloat() * r
+                    val y = cy + sin(theta).toFloat() * r
+                    if(i == 0) p.moveTo(x,y) else p.lineTo(x,y)
+                }
+                p.close()
+                canvas.drawPath(p, filled)
+            }
             when(kind) {
                 "back" -> poly(15f,4f,7f,12f,15f,20f)
                 "next" -> poly(9f,4f,17f,12f,9f,20f)
                 "plus" -> {circle(12f,12f,9f);line(12f,7f,12f,17f);line(7f,12f,17f,12f)}
                 "plus-plain" -> {line(12f,4f,12f,20f);line(4f,12f,20f,12f)}
                 "play" -> {poly(8f,5f,19f,12f,8f,19f,8f,5f)}
+                "play-filled" -> {
+                    val p = Path().apply {
+                        moveTo(6f, 3f)
+                        lineTo(20f, 12f)
+                        lineTo(6f, 21f)
+                        close()
+                    }
+                    canvas.drawPath(p, filled)
+                }
                 "pause" -> {rectangle(6f,4f,9f,20f,1f);rectangle(15f,4f,18f,20f,1f)}
                 "settings" -> {
                     // A real eight-tooth gear, not a sun/rays icon.
@@ -189,6 +210,57 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     star(cx = 4.5f, cy = 12f, radius = 4.5f)
                     star(cx = 12f, cy = 12f, radius = 4.5f)
                     star(cx = 19.5f, cy = 12f, radius = 4.5f)
+                }
+                "leaf-solid" -> {
+                    val p = Path().apply {
+                        moveTo(3f, 20f)
+                        cubicTo(2f, 9f, 12f, 3f, 22f, 2.5f)
+                        cubicTo(22f, 13f, 16f, 21f, 3f, 20f)
+                        close()
+                    }
+                    canvas.drawPath(p, filled)
+                    val vein = Paint(stroke).apply {
+                        color = android.graphics.Color.rgb(0, 44, 53)
+                        strokeWidth = 1.5f
+                    }
+                    canvas.drawLine(5f, 19f, 17f, 8f, vein)
+                }
+                "star-solid" -> filledStar()
+                "double-star-solid" -> {
+                    filledStar(7f, 12f, 6.1f)
+                    filledStar(17f, 12f, 6.1f)
+                }
+                "triple-star-solid" -> {
+                    filledStar(4.7f, 12f, 4.5f)
+                    filledStar(12f, 12f, 4.5f)
+                    filledStar(19.3f, 12f, 4.5f)
+                }
+                "crown-solid", "crown-royal" -> {
+                    val crown = Path().apply {
+                        moveTo(2.2f, 7f)
+                        lineTo(7.6f, 12f)
+                        lineTo(12f, 3.1f)
+                        lineTo(16.5f, 12f)
+                        lineTo(21.8f, 7f)
+                        lineTo(19.2f, 20.5f)
+                        lineTo(4.8f, 20.5f)
+                        close()
+                    }
+                    canvas.drawPath(crown, filled)
+                    canvas.drawRoundRect(RectF(5f, 21f, 19f, 23f), 1f, 1f, filled)
+                    if(kind == "crown-royal") {
+                        val gem = Path().apply {
+                            moveTo(12f, 6f)
+                            lineTo(14f, 9.6f)
+                            lineTo(12f, 13f)
+                            lineTo(10f, 9.6f)
+                            close()
+                        }
+                        val cutout = Paint(filled).apply {
+                            color = android.graphics.Color.rgb(43, 17, 51)
+                        }
+                        canvas.drawPath(gem, cutout)
+                    }
                 }
                 "leaf" -> {
                     val p = Path().apply {

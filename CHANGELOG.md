@@ -1,3 +1,13 @@
+## 1.0.43 — ekran 3/8: Nova igra (pixel QA)
+
+- Ciljana redizajn dorada zaslona **Nova igra**, bez mijenjanja spremljenih Sudoku partija, enginea ili drugih dovršenih zaslona.
+- Gornji desni dio pozadine sada koristi izoliranu, koso položenu Sudoku mrežu kao na referenci. Uklonjen je neprimjeren veliki križajući uzorak iza cijelog ekrana. Donja noćna scena ostaje dekorativna i lokalna.
+- Odabir ploče 9×9 / 6×6 / 4×4 prikazan je kao jedna segmentirana kontrola s jasnim aktivnim stanjem, uz zadržane UI test tagove i pristupačnost.
+- Svih šest kartica težine ima pojedinačni tamni gradijent, boje obruba, dekorativnu mrežu i odgovarajući broj (1, 2, 3, 4, 7, 9). Kartice su prave klikabilne Compose kontrole, a ilustracije su neinteraktivne.
+- Dodatno usklađeni tipografija, vertikalni razmaci, položaj ikona i naslov. Gumb `Započni igru` dobio je lokalni vertikalni neon-gradijent i punu ikonu reprodukcije.
+- Očuvani: `com.brendigo.sudoku`, API 36, AGP 9.5.0, Gradle 9.6.0, Kotlin/Compose i Google Play signing postupak. `versionName=1.0.43`, `versionCode=44`.
+- Uspješan build i emulator screenshot nisu isto što i 1:1. Precizne razlike i preostali rizici nalaze se u `docs/new-game-qa-v1.0.43.md`; produkcijsko potpisivanje ostaje zasebno.
+
 ## 1.0.42 — Početni zaslon (Home 2/8), pixel QA
 
 - Dorada **isključivo Home UI-ja** prema korisnikovoj originalnoj referenci 941×1672. Postojeći Compose gumbi, stvarni podaci napretka, navigacija i spremanje partija ostaju funkcionalni.

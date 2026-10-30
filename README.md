@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.42** · Android 8.0+ · Bez oglasa · Bez interneta
+**Izdanje 1.0.43** · Android 8.0+ · Bez oglasa · Bez interneta
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
@@ -132,7 +132,7 @@ s internetom: deinstalacija ili kvar uređaja mogu ga trajno ukloniti.
 
 ### Privatna sigurnosna kopija
 
-Uz Sudoku 1.0.42 možete ručno izvesti napredak u šifriranu `.sudoku` datoteku. Prilikom izvoza lozinku potvrđujete dvaput, a prije povrata pregledavate broj partija u kopiji i na uređaju. Zamjena je moguća tek uz vašu izričitu potvrdu. Kopija se sprema tamo gdje sami odaberete u Androidovu pregledniku datoteka — aplikacija ne zahtijeva internetsku vezu niti račun. Zaštitite lozinku: nije moguće obnoviti zaboravljenu lozinku. Sve slike zaslona iznad stvarne su snimke emulatora, ne dizajnerski prikazi.
+Uz Sudoku 1.0.43 možete ručno izvesti napredak u šifriranu `.sudoku` datoteku. Prilikom izvoza lozinku potvrđujete dvaput, a prije povrata pregledavate broj partija u kopiji i na uređaju. Zamjena je moguća tek uz vašu izričitu potvrdu. Kopija se sprema tamo gdje sami odaberete u Androidovu pregledniku datoteka — aplikacija ne zahtijeva internetsku vezu niti račun. Zaštitite lozinku: nije moguće obnoviti zaboravljenu lozinku. Sve slike zaslona iznad stvarne su snimke emulatora, ne dizajnerski prikazi.
 
 
 ### Pixel QA (Splash 1/8)
