@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.50** · Android 8.0+ · Bez oglasa · Bez interneta
+**Izdanje 1.0.51** · Android 8.0+ · Bez oglasa · Bez interneta
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
@@ -123,7 +123,8 @@ potvrditi zamjenu lokalnog napretka. Lozinku nije moguće obnoviti.
 PNG-ovima. Svi zasloni ostaju funkcionalni Compose UI, ali još **nisu pixel-perfect 1:1**.
 Rezultati su u [završnom QA izvještaju](docs/final-ten-screen-qa-v1.0.48.md) i
 [Splash iteraciji v1.0.49](docs/splash-qa-v1.0.49.md) te
-[Home iteraciji v1.0.50](docs/home-qa-v1.0.50.md).
+[Home iteraciji v1.0.50](docs/home-qa-v1.0.50.md) te
+[Novoj igri v1.0.51](docs/new-game-qa-v1.0.51.md).
 
 ---
 

@@ -1,3 +1,13 @@
+## 1.0.51 — Nova igra, pixel-QA iteracija 3/8
+
+- Šest izvornih Kotlin/Jetpack Compose kartica težina ostaje potpuno interaktivno; nije upotrijebljena statična slika ekrana. Dodano je perspektivno osvijetljeno vektorsko Sudoku polje isključivo na **Vrlo lako, Lako, Srednje**, nakon stvarne provjere da dodatni sjaj na donje tri kartice povećava odstupanje.
+- Izvorni PNG i stvarne snimke Android emulatora na **941×1672**, bez promjene rezolucije: RGB MAE cijeli ekran **22.3559 → 22.3279**, svih šest kartica **25.2476 → 25.1949**, gornje tri **23.2532 → 23.1490** i donje tri nepromijenjeno **27.2923**.
+- Prva iteracija `5f0151c` pogoršala je cijeli ekran na **22.3788**, dok je gornji dio bio bolji; ograničenjem novih svjetlosnih efekata na prve tri kartice (`d446870`) regresija je uklonjena. **Nije dokazana potpuna pixel-perfect 1:1 jednakost.**
+- Android CI [41358012995](https://github.com/bren-wp/Sudoku/actions/runs/41358012995) i oba emulatora [41358012930](https://github.com/bren-wp/Sudoku/actions/runs/41358012930) prošli su za kodni commit `d446870140c04fab9ba065d366cdb683ce8be87c`; izdavački commit dodatno traži vlastitu provjeru.
+- Sačuvani `rememberSaveable` odabiri 9×9/6×6/4×4, šest težina, pokretanje igre, lokalno stanje, identitet paketa i sigurnosne postavke. Bez novih ovisnosti i dozvola.
+- `versionName=1.0.51`, `versionCode=52`, `applicationId=com.brendigo.sudoku`. Nepotpisani AAB i testno potpisani APK nisu spremni za Google Play. Metapodatak izdanja treba biti `prerelease`.
+- Detaljan [pixel QA i reproducibilne regije](docs/new-game-qa-v1.0.51.md). Sljedeći zaslon: **Aktivna Sudoku igra (Gameplay)**.
+
 ## 1.0.50 — Početni Home zaslon, pixel-QA iteracija 2/8
 
 - Doradene su izvorne, skalabilne Compose ilustracije kartica Nova igra i Dnevni izazov: topli sumrak, slojevi planina, obris drveća i pagoda te diskretni detalji u tirkiznoj mreži; dekoracije ne zamjenjuju aktivne UI kontrole i ne koriste sliku zaslona.
