@@ -1,3 +1,13 @@
+## 1.0.53 — Dnevni izazov, pixel-QA iteracija 5/8
+
+- Vjerno uspoređen izvorni `05-daily.png` s pravom Android emulatorskom snimkom **941×1672**, bez skale ili zamjene stvarnog Compose UI-a bitmapom. Vlasnikova referenca čuva ilustrativni datum i rezultat; korisniku se nastavljaju prikazivati stvarni lokalni datumi, dovršeni dani i stanje izazova.
+- Prva ilustracijska dorada `1eb130f` proširila je noćni krajolik, ali pogoršala sirovi ukupni RGB MAE s **23.640 na 23.759** i regiju prizora s **23.287 na 25.214**. Zato je širina/položaj ilustracije **vraćen** u commitu `e716bd0`.
+- Lokalna navigacijska kartica **Pogledaj rang-listu** ima plavi referentni obrub umjesto ljubičastog; trofej ostaje ljubičast, a stvarni offline dijalog potpuno funkcionalan.
+- Nakon konačne korekcije [Android visual smoke 41362054376](https://github.com/bren-wp/Sudoku/actions/runs/41362054376) na `e716bd0`: cijeli zaslon RGB MAE **23.6400 → 23.5594**, područje rang-liste **40.6703 → 39.5593**. Ne tvrdi se 1:1 jednakost.
+- [Android CI 41362054311](https://github.com/bren-wp/Sudoku/actions/runs/41362054311) i oba emulatora [41362054376](https://github.com/bren-wp/Sudoku/actions/runs/41362054376) **SUCCESS**. Odabir i nastavak dnevne partije, stvarni kalendar, neprekinuti niz, offline rang-lista, pristupačnost i spremanje napretka ostaju.
+- `versionName=1.0.53`, `versionCode=54`, `applicationId=com.brendigo.sudoku` nepromijenjen; bez migracija, dozvola, ovisnosti ili mrežnih poziva. Izdanje je testno s nepotpisanim AAB-om ako nije konfiguriran izdavački ključ. Izdavački commit ima odvojenu CI provjeru.
+- Metodologija i stvarni regionalni izvještaj: [Dnevni izazov QA](docs/daily-qa-v1.0.53.md). Sljedeća pojedinačna iteracija: **Statistika**.
+
 ## 1.0.52 — Aktivna igra (Gameplay), pojedinačna pixel-QA iteracija 4/8
 
 - Ispravljeno stvarno preklapanje naslova `Bilješke` s tekstom `Uključeno/Isključeno` na 941×1672 i 720×1280: ikona, naslov i status sada koriste zasebne stvarne Compose retke, bez preklapanja slojeva. Zadržani su semantika, aktivni prekidač i najmanje 48dp dodirne površine.
