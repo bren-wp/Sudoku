@@ -472,71 +472,78 @@ private fun GameTool(
             val narrowTool = maxWidth < 83.dp
             val condensedTool = narrowTool || maxHeight < 58.dp
             val isNotes = name == "Bilješke"
-            // Reserve a real, measured bottom slot for the Notes label and pill.
-            // Placing it inside the centered icon column left it unplaced
-            // (0×0 bounds) at 720×1280 / 51dp tool height.
-            Column(
-                Modifier.fillMaxSize()
-                    .padding(start = 5.dp, end = 5.dp, top = 4.dp,
-                        bottom = 5.dp)
-                    // Keep the title ABOVE the independent status row.
-                    // Reserving 23dp at the bottom previously reduced the
-                    // content column to 0dp and clipped "Bilješke".
-                    .offset(y = if (isNotes) (-7).dp else 0.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                BrandIcon(
-                    when (name) {
-                        "Bilješke" -> "note"
-                        "Savjet" -> "hint"
-                        "Poništi" -> "undo"
-                        "Izbriši" -> "erase"
-                        else -> "grid"
-                    },
-                    Modifier.size(when {
-                        isNotes && condensedTool -> 19.dp
-                        isNotes || condensedTool -> 23.dp
-                        else -> 29.dp
-                    }),
-                    if (active) Ink.cyan else Ink.muted,
-                )
-                Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
-                Text(name, color = Ink.white,
-                    modifier = if (isNotes) Modifier.testTag("game-notes-label")
-                        else Modifier,
-                    fontSize = if (condensedTool) 9.sp else 13.sp, maxLines = 1)
-            }
             if (isNotes) {
-                Row(
-                    Modifier.align(Alignment.BottomCenter)
-                        .padding(bottom = 3.dp)
-                        .testTag("game-notes-status"),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                // Separate, flow-laid-out icon/title/status rows. The old
+                // overlapping Box alignment gave Text and status 24dp
+                // semantic bounds each, causing real clipping on BOTH
+                // 941x1672 and 720x1280 emulator captures.
+                Column(
+                    Modifier.fillMaxSize()
+                        .padding(horizontal = 3.dp, vertical = 2.dp),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    BrandIcon("note",
+                        Modifier.size(if (condensedTool) 14.dp else 20.dp),
+                        if (active) Ink.cyan else Ink.muted)
                     Text(
-                        if (active) "Uključeno" else "Isključeno",
-                        color = if (active) Ink.cyan else Ink.muted,
-                        fontSize = if (condensedTool) 7.sp else 10.sp,
+                        "Bilješke", color = Ink.white,
+                        modifier = Modifier.testTag("game-notes-label"),
+                        fontSize = if (condensedTool) 8.sp else 11.sp,
+                        lineHeight = if (condensedTool) 10.sp else 13.sp,
                         maxLines = 1,
                     )
-                    Box(
-                        Modifier.width(if (condensedTool) 17.dp else 22.dp)
-                            .height(if (condensedTool) 10.dp else 12.dp)
-                            .background(
-                                if (active) Ink.cyan else Color(0xFF294266),
-                                RoundedCornerShape(50),
-                            ),
-                        contentAlignment = if (active) Alignment.CenterEnd
-                            else Alignment.CenterStart,
+                    Row(
+                        Modifier.testTag("game-notes-status"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Box(
-                            Modifier.padding(horizontal = 1.5.dp)
-                                .size(if (condensedTool) 7.dp else 9.dp)
-                                .background(Ink.white, RoundedCornerShape(50)),
+                        Text(
+                            if (active) "Uključeno" else "Isključeno",
+                            color = if (active) Ink.cyan else Ink.muted,
+                            fontSize = if (condensedTool) 7.sp else 9.sp,
+                            lineHeight = if (condensedTool) 9.sp else 11.sp,
+                            maxLines = 1,
                         )
+                        Box(
+                            Modifier.width(if (condensedTool) 17.dp else 22.dp)
+                                .height(if (condensedTool) 10.dp else 12.dp)
+                                .background(
+                                    if (active) Ink.cyan else Color(0xFF294266),
+                                    RoundedCornerShape(50),
+                                ),
+                            contentAlignment = if (active) Alignment.CenterEnd
+                                else Alignment.CenterStart,
+                        ) {
+                            Box(
+                                Modifier.padding(horizontal = 1.5.dp)
+                                    .size(if (condensedTool) 7.dp else 9.dp)
+                                    .background(Ink.white, RoundedCornerShape(50)),
+                            )
+                        }
                     }
+                }
+            } else {
+                Column(
+                    Modifier.fillMaxSize().padding(
+                        start = 5.dp, end = 5.dp, top = 4.dp, bottom = 5.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    BrandIcon(
+                        when (name) {
+                            "Savjet" -> "hint"
+                            "Poništi" -> "undo"
+                            "Izbriši" -> "erase"
+                            else -> "grid"
+                        },
+                        Modifier.size(if (condensedTool) 23.dp else 29.dp),
+                        Ink.muted,
+                    )
+                    Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
+                    Text(name, color = Ink.white,
+                        fontSize = if (condensedTool) 9.sp else 13.sp,
+                        maxLines = 1)
                 }
             }
         }
