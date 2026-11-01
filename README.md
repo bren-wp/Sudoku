@@ -121,7 +121,8 @@ potvrditi zamjenu lokalnog napretka. Lozinku nije moguće obnoviti.
 
 **Pixel QA:** Deset originalnih referenci uspoređeno je sa stvarnim emulatorskim
 PNG-ovima. Svi zasloni ostaju funkcionalni Compose UI, ali još **nisu pixel-perfect 1:1**.
-Rezultati su u [završnom QA izvještaju](docs/final-ten-screen-qa-v1.0.48.md) i\n[Splash iteraciji v1.0.49](docs/splash-qa-v1.0.49.md).
+Rezultati su u [završnom QA izvještaju](docs/final-ten-screen-qa-v1.0.48.md) i
+[Splash iteraciji v1.0.49](docs/splash-qa-v1.0.49.md).
 
 ---
 

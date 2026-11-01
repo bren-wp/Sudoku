@@ -34,3 +34,14 @@ Android CI i oba emulatorska testa uspješno su završili na commitu `38686da`, 
 - Usporediti kvalitetu izvorne ilustracije s lokalnim pejzažnim resursom bez ugrađivanja statičnih UI screenshotova.
 - Ponovno snimiti oba emulatora za završni izdavački commit i usporediti nativnu referentnu rezoluciju.
 - Tek nakon toga nastaviti redom s Home / početnim zaslonom.
+
+## Potvrđena završna verifikacija v1.0.49
+
+Objavljeni kod: `f94633c827df65703840f1258754a97bd924538b`.
+
+- [Android CI 41353666041](https://github.com/bren-wp/Sudoku/actions/runs/41353666041): **SUCCESS** (unit tests, Python pixel QA regressions, lint, debug/release APK i AAB build).
+- [Android visual smoke 41353665989](https://github.com/bren-wp/Sudoku/actions/runs/41353665989): **SUCCESS na oba stvarna emulatora** (941×1672 i 720×1280); izvezeni PNG artefakti su dostupni.
+- [Publish Sudoku release 41353666218](https://github.com/bren-wp/Sudoku/actions/runs/41353666218): **SUCCESS**, [v1.0.49](https://github.com/bren-wp/Sudoku/releases/tag/v1.0.49) objavljeno kao *prerelease* s debug-potpisanim testnim APK-om, nepotpisanim AAB-om i SHA256SUMS. Nije potpisano za Google Play.
+- Ponovljeni MAE na samom izdanju `f94633c` ostaje **12.033/255** (RGB, 941×1672); isječci uže rezolucije nisu preskalirani ili prikazivani kao 1:1 dokaz.
+
+Zaostala odstupanja (slova slogana i fotografski pejzaž) i dalje blokiraju tvrdnju o doslovnoj pixel-perfect jednakosti.
