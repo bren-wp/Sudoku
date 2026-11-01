@@ -1379,10 +1379,34 @@ class SudokuVisualSmokeTest {
                 }
             }
             rule.waitForIdle()
-            Thread.sleep(250)
-            return InstrumentationRegistry.getInstrumentation()
-                .uiAutomation.takeScreenshot()
-                ?: error("No real Compose wordmark screenshot")
+            // Emulator graphics buffers can present the previous black/white
+            // frame even after Compose semantics become idle. Validate pixels
+            // OUTSIDE the logo on each real screenshot before recovering alpha;
+            // never accept a partially presented surface as source artwork.
+            val white = backdrop == ComposeColor.White
+            val expected = if (white) 255 else 0
+            repeat(12) { attempt ->
+                val shot = InstrumentationRegistry.getInstrumentation()
+                    .uiAutomation.takeScreenshot()
+                    ?: error("No real Compose wordmark screenshot")
+                val sampleX = intArrayOf(
+                    (shot.width * .18f).toInt(), (shot.width * .82f).toInt()
+                )
+                val sampleY = intArrayOf(
+                    (shot.height * .18f).toInt(), (shot.height * .82f).toInt()
+                )
+                val stable = sampleX.all { x -> sampleY.all { y ->
+                    val color = shot.getPixel(x, y)
+                    kotlin.math.abs(Color.red(color) - expected) < 32 &&
+                        kotlin.math.abs(Color.green(color) - expected) < 32 &&
+                        kotlin.math.abs(Color.blue(color) - expected) < 32
+                } }
+                if (stable) return shot
+                shot.recycle()
+                Thread.sleep(200)
+            }
+            error("Native wordmark studio background did not settle to " +
+                "${if (white) "white" else "black"} in 12 actual captures")
         }
 
         val black = captureStudio(ComposeColor.Black)

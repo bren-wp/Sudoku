@@ -2366,8 +2366,7 @@ fun SplashPage() {
                 color = Ink.muted,
                 letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
                 fontSize = if (compact) 13.sp else 16.sp,
-                modifier = Modifier.offset(y = if (compact) 0.dp else (-7).dp)
-                    .testTag("splash-byline"),
+                modifier = Modifier.testTag("splash-byline"),
                 maxLines = 1,
             )
             Spacer(Modifier.height(if (compact) 12.dp else 11.dp))
@@ -2379,9 +2378,7 @@ fun SplashPage() {
                 else androidx.compose.ui.unit.TextUnit.Unspecified,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                modifier = Modifier.fillMaxWidth()
-                    .offset(y = if (compact) 0.dp else (-4).dp)
-                    .testTag("splash-tagline"),
+                modifier = Modifier.fillMaxWidth().testTag("splash-tagline"),
             )
         }
         // A deterministic loading arc stays visible when Android animations
