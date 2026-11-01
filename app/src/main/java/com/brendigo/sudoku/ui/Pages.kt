@@ -1202,7 +1202,9 @@ fun DailyPage(controller: SudokuController) {
                     .clickable { showRanking = true },
                 // Rounded violet accent matches the source leaderboard pill
                 // while retaining the actual offline ranking dialog.
-                highlight = Ink.purple,
+                // The source pill outlines in a bright cobalt blue,
+                // while the trophy itself remains violet.
+                highlight = Ink.blue,
                 radius = 25.dp,
             ) {
                 Row(
