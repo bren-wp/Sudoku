@@ -81,31 +81,37 @@ fun NewGameDifficultySurface(
                     Offset(w * .57f, y - h * .22f), Offset(w * 1.06f, y + h * .19f),
                     strokeWidth = if (row == 2) 2.1f else 1.5f)
             }
-            // In the reference each angled board includes one illuminated
-            // quadrilateral, offset behind its large digit. Draw it as vector
-            // art, never a bitmap or an interactive screenshot.
-            val litCell = Path().apply {
-                moveTo(w * .735f, h * .035f)
-                lineTo(w * .811f, h * .10f)
-                lineTo(w * .785f, h * .565f)
-                lineTo(w * .710f, h * .500f)
-                close()
+            // Measured on the actual 941x1672 Android capture: the lit
+            // quadrilateral improves the upper three cool-toned cards,
+            // but increases RGB MAE on gold/purple/red. Never apply the
+            // extra light to the lower three cards.
+            if (index < 3) {
+                val litCell = Path().apply {
+                    moveTo(w * .735f, h * .035f)
+                    lineTo(w * .811f, h * .10f)
+                    lineTo(w * .785f, h * .565f)
+                    lineTo(w * .710f, h * .500f)
+                    close()
+                }
+                val cellCenter = Offset(w * .761f, h * .290f)
+                drawPath(
+                    litCell,
+                    Brush.radialGradient(
+                        listOf(tint.copy(alpha = .20f), tint.copy(alpha = .065f)),
+                        center = cellCenter,
+                        radius = h * .52f,
+                    ),
+                )
             }
-            val cellCenter = Offset(w * .761f, h * .290f)
-            drawPath(
-                litCell,
-                Brush.radialGradient(
-                    listOf(tint.copy(alpha = .20f), tint.copy(alpha = .065f)),
-                    center = cellCenter,
-                    radius = h * .52f,
-                ),
-            )
             val active = Offset(w * .76f, h * .58f)
             drawCircle(
                 Brush.radialGradient(
-                    listOf(tint.copy(alpha = .13f), Color.Transparent),
-                    center = active, radius = h * .50f,
-                ), radius = h * .50f, center = active,
+                    listOf(tint.copy(alpha = if (index < 3) .13f else .09f),
+                        Color.Transparent),
+                    center = active,
+                    radius = h * if (index < 3) .50f else .55f,
+                ), radius = h * if (index < 3) .50f else .55f,
+                center = active,
             )
             drawIntoCanvas { canvas ->
                 val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
@@ -129,9 +135,13 @@ fun NewGameDifficultySurface(
             // A navy vignette preserves the original readability of
             // difficulty labels, even with a luminous board behind them.
             drawRect(
-                Brush.horizontalGradient(listOf(Color(0x39001630), Color.Transparent),
-                    startX = 0f, endX = w * .66f),
-                size = androidx.compose.ui.geometry.Size(w * .66f, h),
+                Brush.horizontalGradient(listOf(
+                    if (index < 3) Color(0x39001630) else Color(0x20001630),
+                    Color.Transparent),
+                    startX = 0f,
+                    endX = w * if (index < 3) .66f else .65f),
+                size = androidx.compose.ui.geometry.Size(
+                    w * if (index < 3) .66f else .65f, h),
             )
         }
         content()
