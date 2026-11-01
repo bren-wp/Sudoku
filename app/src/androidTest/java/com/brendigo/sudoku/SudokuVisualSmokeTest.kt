@@ -532,6 +532,22 @@ class SudokuVisualSmokeTest {
             statusBounds.bottom <= notesBounds.bottom + 1f) {
             "Reference Notes label/toggle escapes its card: status=$statusBounds, card=$notesBounds"
         }
+        val notesLabel = rule.onNodeWithTag(
+            "game-notes-label", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        check(notesLabel.width > 0f && notesLabel.height > 0f &&
+            notesLabel.top >= notesBounds.top - 1f &&
+            notesLabel.bottom <= statusBounds.top + metrics.density * 2f) {
+            "Gameplay Notes title clips or overlaps the toggle status: " +
+                "label=$notesLabel, status=$statusBounds, card=$notesBounds"
+        }
+        val heading = rule.onNodeWithTag(
+            "game-heading", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        check(heading.width > 0f && heading.height > 0f &&
+            heading.left >= -1f && heading.right <= metrics.widthPixels + 1f) {
+            "Gameplay heading escaped the viewport: $heading"
+        }
         val hintBounds = rule.onNodeWithTag("game-hint").fetchSemanticsNode().boundsInRoot
         val eraseBounds = rule.onNodeWithTag("game-erase").fetchSemanticsNode().boundsInRoot
         check(notesBounds.right <= hintBounds.left + 1f &&
