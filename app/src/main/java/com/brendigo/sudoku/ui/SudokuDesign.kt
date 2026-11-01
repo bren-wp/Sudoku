@@ -114,6 +114,63 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 ),
                 radius = w * .44f, center = Offset(w * .78f, h * .05f),
             )
+        } else if (splash) {
+            // Splash uses the owner's wider, asymmetrical grid motif.
+            // All elements are drawn natively: no screenshot, UI text or controls
+            // are baked into the backdrop.
+            val navyLine = Color(0xFF1162BB)
+            val cyanLine = Color(0xFF02A9FB)
+            val leftColumns = listOf(
+                Triple(.055f, .205f, .24f),
+                Triple(.225f, .360f, .30f),
+                Triple(.375f, .510f, .17f),
+            )
+            leftColumns.forEachIndexed { index, (topX, bottomX, alpha) ->
+                drawLine(navyLine.copy(alpha = alpha),
+                    Offset(w * topX, 0f), Offset(w * bottomX, h * .42f),
+                    strokeWidth = w * if (index == 1) .0042f else .003f)
+            }
+            listOf(
+                Triple(.755f, .545f, .48f),
+                Triple(.942f, .735f, .33f),
+                Triple(1.12f, .93f, .23f),
+            ).forEachIndexed { index, (topX, bottomX, alpha) ->
+                drawLine(navyLine.copy(alpha = alpha),
+                    Offset(w * topX, 0f), Offset(w * bottomX, h * .40f),
+                    strokeWidth = w * if (index == 0) .004f else .003f)
+            }
+            listOf(
+                Triple(.095f, -.018f, .51f),
+                Triple(.175f, .067f, .44f),
+                Triple(.265f, .148f, .28f),
+                Triple(.358f, .247f, .17f),
+            ).forEachIndexed { index, (leftY, rightY, alpha) ->
+                drawLine(navyLine.copy(alpha = alpha),
+                    Offset(0f, h * leftY), Offset(w * .56f, h * rightY),
+                    strokeWidth = w * if (index == 1) .004f else .0032f)
+            }
+            listOf(
+                Triple(.020f, .112f, .40f),
+                Triple(.112f, .207f, .41f),
+                Triple(.225f, .316f, .27f),
+            ).forEachIndexed { index, (leftY, rightY, alpha) ->
+                drawLine(navyLine.copy(alpha = alpha),
+                    Offset(w * .49f, h * leftY), Offset(w, h * rightY),
+                    strokeWidth = w * if (index == 1) .004f else .003f)
+            }
+            // The highlighted diagonal edge and hot cyan point match the
+            // original corner accent without affecting the live splash UI.
+            drawLine(cyanLine.copy(alpha = .48f),
+                Offset(w * .13f, h * .013f), Offset(w * .214f, h * .256f),
+                strokeWidth = w * .0027f)
+            drawCircle(Brush.radialGradient(
+                listOf(cyanLine.copy(alpha = .49f), Color.Transparent),
+                center = Offset(w * .137f, h * .195f), radius = w * .067f),
+                radius = w * .067f,
+                center = Offset(w * .137f, h * .195f))
+            drawLine(cyanLine.copy(alpha = .42f),
+                Offset(w * .758f, 0f), Offset(w * .663f, h * .268f),
+                strokeWidth = w * .004f)
         } else if (newGame) {
             // Only the upper-right tilted board belongs to the New Game
             // reference. Never draw the giant full-screen decorative grid.
@@ -202,7 +259,11 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                     android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.NORMAL
                 )
             }
-            val digits = if (newGame) listOf(
+            val digits = if (splash) listOf(
+                Triple("9", .16f, .119f), Triple("3", .038f, .236f),
+                Triple("5", .805f, .056f), Triple("1", .615f, .118f),
+                Triple("6", .886f, .248f), Triple("8", .795f, .408f)
+            ) else if (newGame) listOf(
                 Triple("5", .73f, .095f), Triple("9", .96f, .127f),
                 Triple("3", .80f, .176f), Triple("1", .70f, .215f),
                 Triple("6", .85f, .231f)
@@ -214,6 +275,9 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
             if (newGame) {
                 paint.textSize = w * .052f
                 paint.alpha = 180
+            } else if (splash) {
+                paint.textSize = w * .077f
+                paint.alpha = 135
             }
             digits.forEach { (digit, x, y) ->
                 if (newGame && digit == "3") {

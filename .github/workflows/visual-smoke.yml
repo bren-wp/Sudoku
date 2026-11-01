@@ -1,6 +1,11 @@
 name: Android visual smoke
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/visual-smoke.yml"
   pull_request:
     paths:
       - "app/**"
