@@ -168,6 +168,16 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     canvas.drawRoundRect(RectF(10f,4f,14f,21f),1f,1f,filled)
                     canvas.drawRoundRect(RectF(17f,8f,21f,21f),1f,1f,filled)
                 }
+                "pie-chart" -> {
+                    // Three-quarter native vector pie, distinct from the
+                    // histogram icon. Works offline at any UI scale.
+                    canvas.drawArc(RectF(2f, 3f, 21f, 22f),
+                        0f, 270f, true, filled)
+                    canvas.drawArc(RectF(8f, 1f, 23f, 16f),
+                        270f, 90f, true, stroke)
+                    line(12f, 2f, 12f, 11f)
+                    line(12f, 11f, 22f, 11f)
+                }
                 "trophy-solid" -> {
                     val gold = Paint(filled).apply {
                         shader = android.graphics.LinearGradient(

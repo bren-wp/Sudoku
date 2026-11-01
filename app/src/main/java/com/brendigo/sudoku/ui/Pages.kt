@@ -1578,7 +1578,7 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                BrandIcon("statistics", Modifier.size(20.dp), Ink.cyan)
+                BrandIcon("pie-chart", Modifier.size(20.dp), Ink.cyan)
                 Spacer(Modifier.width(6.dp))
                 Text("Postotak dovršenosti", color = Ink.white,
                     fontSize = 10.sp, fontWeight = FontWeight.Bold,
@@ -1662,9 +1662,9 @@ private fun StatTile(
                         "streak" -> "flame-solid"
                         else -> "statistics"
                     },
-                    Modifier.size(if (compact) 30.dp else 40.dp), color,
+                    Modifier.size(if (compact) 34.dp else 44.dp), color,
                 )
-                Spacer(Modifier.width(if (compact) 7.dp else 10.dp))
+                Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(label, color = Ink.muted,
