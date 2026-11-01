@@ -60,6 +60,15 @@ fun GamePage(controller: SudokuController) {
         val narrowWidth = maxWidth < 340.dp
         val tinyTitle = maxWidth < 275.dp
         val largeText = LocalDensity.current.fontScale >= 1.4f
+        // Balance the two controls on the right against a single Back
+        // control on the left. The previous weighted column centered the
+        // wordmark inside an asymmetrical row instead of on the viewport.
+        val headingShift = when {
+            largeText || narrowWidth -> 0.dp
+            maxWidth >= 400.dp -> 39.dp
+            maxWidth >= 350.dp -> 26.dp
+            else -> 0.dp
+        }
         val horizontal = if (compact) 12.dp else 21.dp
         // Width is the hard limit: a 216dp minimum previously overflowed
         // narrow multi-window and foldable screens.
@@ -84,7 +93,9 @@ fun GamePage(controller: SudokuController) {
                 .clickable { controller.go(Screen.HOME) }, contentAlignment = Alignment.Center) {
                 BrandIcon("back", Modifier.size(24.dp), Ink.muted)
             }
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.weight(1f).offset(x = headingShift)
+                .testTag("game-heading"),
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 AccentText("Sudoku", when {
                     tinyTitle -> 22
                     narrowWidth || largeText -> 28
@@ -465,12 +476,13 @@ private fun GameTool(
             // Placing it inside the centered icon column left it unplaced
             // (0×0 bounds) at 720×1280 / 51dp tool height.
             Column(
-                Modifier.fillMaxSize().padding(
-                    start = 5.dp, end = 5.dp, top = 4.dp,
-                    bottom = if (isNotes) {
-                        if (condensedTool) 17.dp else 23.dp
-                    } else 5.dp,
-                ),
+                Modifier.fillMaxSize()
+                    .padding(start = 5.dp, end = 5.dp, top = 4.dp,
+                        bottom = 5.dp)
+                    // Keep the title ABOVE the independent status row.
+                    // Reserving 23dp at the bottom previously reduced the
+                    // content column to 0dp and clipped "Bilješke".
+                    .offset(y = if (isNotes) (-7).dp else 0.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -491,6 +503,8 @@ private fun GameTool(
                 )
                 Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
                 Text(name, color = Ink.white,
+                    modifier = if (isNotes) Modifier.testTag("game-notes-label")
+                        else Modifier,
                     fontSize = if (condensedTool) 9.sp else 13.sp, maxLines = 1)
             }
             if (isNotes) {
