@@ -89,6 +89,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
     Canvas(modifier) {
         val w = size.width
         val h = size.height
+        // Compact 360dp screens must keep decorative grid lines above title.
+        val compactSplashArt = splash && w / density < 385f
         drawRect(
             Brush.verticalGradient(
                 if (bright) listOf(
@@ -127,7 +129,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
             )
             leftColumns.forEachIndexed { index, (topX, bottomX, alpha) ->
                 drawLine(navyLine.copy(alpha = alpha),
-                    Offset(w * topX, 0f), Offset(w * bottomX, h * .42f),
+                    Offset(w * topX, 0f),
+                    Offset(w * bottomX, h * if (compactSplashArt) .30f else .42f),
                     strokeWidth = w * if (index == 1) .0042f else .003f)
             }
             listOf(
@@ -136,7 +139,8 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 Triple(1.12f, .93f, .23f),
             ).forEachIndexed { index, (topX, bottomX, alpha) ->
                 drawLine(navyLine.copy(alpha = alpha),
-                    Offset(w * topX, 0f), Offset(w * bottomX, h * .40f),
+                    Offset(w * topX, 0f),
+                    Offset(w * bottomX, h * if (compactSplashArt) .30f else .40f),
                     strokeWidth = w * if (index == 0) .004f else .003f)
             }
             listOf(
@@ -262,8 +266,10 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
             val digits = if (splash) listOf(
                 Triple("9", .16f, .119f), Triple("3", .038f, .236f),
                 Triple("5", .805f, .056f), Triple("1", .615f, .118f),
-                Triple("6", .886f, .248f), Triple("8", .795f, .408f)
-            ) else if (newGame) listOf(
+                Triple("6", .886f, .248f)
+            ) + (if (compactSplashArt) emptyList() else listOf(
+                Triple("8", .795f, .408f)
+            )) else if (newGame) listOf(
                 Triple("5", .73f, .095f), Triple("9", .96f, .127f),
                 Triple("3", .80f, .176f), Triple("1", .70f, .215f),
                 Triple("6", .85f, .231f)

@@ -1,3 +1,12 @@
+## 1.0.49 — Splash zaslon, iteracija 1/8
+
+- Zadržan stvarni Kotlin/Compose Splash UI i postojeći lokalni napredak; dekorativna gornja Sudoku mreža sada koristi zasebnu geometriju, izvorne rubne brojeve i plavi sjaj, bez pretvaranja cijelog zaslona u bitmapu.
+- Logotip 7–3–9 blago povećan, a negativni pomaci teksta uklonjeni nakon stvarnog emulatorskog testa koji je pokazao preklapanje; korigirano snimanje wordmark studija validacijom obaju stvarno prikazanih kadrova prije alfa-kompozicije.
+- Na uskim ekranima dekorativne linije završavaju iznad naslova, a broj 8 je izostavljen kada bi ometao tipografiju.
+- Provjera **941×1672** na izvornom v1.0.48 prije/nakon kodu: stvarni Splash RGB MAE **12.364 → 12.033** (niže je bolje), gornja pozadina **10.481 → 9.923**, logo/natpis **24.853 → 23.872**. Izvorni PNG-ovi nisu preskalirani. Nijedna od tih metrika nije tvrdnja da je 1:1 dovršen.
+- Android CI i oba Android visual smoke emulatora uspješno su prošli na kodnom commitu `38686da413741a3e91e389aa69e03fad9647b702`; izdavački commit 1.0.49 zahtijeva zasebnu završnu provjeru.
+- Verzija `1.0.49`, `versionCode=50`, `applicationId=com.brendigo.sudoku` nepromijenjen. Bez novih dozvola, ovisnosti ili migracija pohrane. Nepotpisan AAB ne smije se predstavljati kao Play-ready.
+
 ## 1.0.48 — Postavke, zaslon 8/8
 
 - Završna referenca **10/10 — Android launcher ikona 7–3–9**: nativni 108dp VectorDrawable dobio je istančan neon okvir, zaobljene rubove svih devet ćelija, svjetlije tirkizno središte i uokviren broj 9; Android 13+ monokromatski vektor usklađen je s pozicijom broja 9 bez neprozirne pozadine.
