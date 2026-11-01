@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -80,12 +81,31 @@ fun NewGameDifficultySurface(
                     Offset(w * .57f, y - h * .22f), Offset(w * 1.06f, y + h * .19f),
                     strokeWidth = if (row == 2) 2.1f else 1.5f)
             }
+            // In the reference each angled board includes one illuminated
+            // quadrilateral, offset behind its large digit. Draw it as vector
+            // art, never a bitmap or an interactive screenshot.
+            val litCell = Path().apply {
+                moveTo(w * .735f, h * .035f)
+                lineTo(w * .811f, h * .10f)
+                lineTo(w * .785f, h * .565f)
+                lineTo(w * .710f, h * .500f)
+                close()
+            }
+            val cellCenter = Offset(w * .761f, h * .290f)
+            drawPath(
+                litCell,
+                Brush.radialGradient(
+                    listOf(tint.copy(alpha = .20f), tint.copy(alpha = .065f)),
+                    center = cellCenter,
+                    radius = h * .52f,
+                ),
+            )
             val active = Offset(w * .76f, h * .58f)
             drawCircle(
                 Brush.radialGradient(
-                    listOf(tint.copy(alpha = .09f), Color.Transparent),
-                    center = active, radius = h * .55f,
-                ), radius = h * .55f, center = active,
+                    listOf(tint.copy(alpha = .13f), Color.Transparent),
+                    center = active, radius = h * .50f,
+                ), radius = h * .50f, center = active,
             )
             drawIntoCanvas { canvas ->
                 val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
@@ -106,10 +126,12 @@ fun NewGameDifficultySurface(
                 canvas.nativeCanvas.drawText("3", w * .79f, h * .17f, paint)
                 canvas.nativeCanvas.drawText("6", w * .90f, h * .84f, paint)
             }
+            // A navy vignette preserves the original readability of
+            // difficulty labels, even with a luminous board behind them.
             drawRect(
-                Brush.horizontalGradient(listOf(Color(0x20001630), Color.Transparent),
-                    startX = 0f, endX = w * .65f),
-                size = androidx.compose.ui.geometry.Size(w * .65f, h),
+                Brush.horizontalGradient(listOf(Color(0x39001630), Color.Transparent),
+                    startX = 0f, endX = w * .66f),
+                size = androidx.compose.ui.geometry.Size(w * .66f, h),
             )
         }
         content()
