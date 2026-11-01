@@ -77,6 +77,24 @@ jobs:
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
+      # An older job or a later GitHub metadata edit can leave an unsigned
+      # test bundle labelled as a stable release. Reconcile from the actual
+      # uploaded artifact names every time this workflow visits that tag.
+      - name: Reconcile existing unsigned release classification
+        if: steps.version.outputs.exists == 'true'
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          assets="$(gh api "repos/$REPO/releases/tags/$RELEASE_TAG" --jq '.assets[].name')"
+          if grep -Fq -- "-unsigned.aab" <<< "$assets"; then
+            id="$(gh api "repos/$REPO/releases/tags/$RELEASE_TAG" --jq '.id')"
+            gh api --method PATCH "repos/$REPO/releases/$id" -F prerelease=true --silent
+            classification="$(gh api "repos/$REPO/releases/tags/$RELEASE_TAG" --jq '.prerelease')"
+            [[ "$classification" == "true" ]] ||
+              { echo "::error::Unsigned release was not classified as prerelease"; exit 1; }
+          fi
       - name: Configure optional publisher signing
         if: steps.version.outputs.exists != 'true'
         shell: bash
