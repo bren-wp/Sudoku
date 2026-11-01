@@ -1,3 +1,13 @@
+## 1.0.54 — Statistika, pixel-QA iteracija 6/8
+
+- Prilagođeni su razmaci i veličine izvornih vektorskih ikona u četiri stvarne Compose metričke kartice (Odigrane igre, Najbolje vrijeme, Ukupno vrijeme, Dnevni niz). Podaci se i dalje uzimaju iz lokalnih statistika.
+- Dodana je nativna, skalabilna `pie-chart` ikona zaglavlja Postotak dovršenosti umjesto stupčastog grafikona, prema vizualnoj temi reference. Nisu dodane bitmapne kopije sučelja ni vanjske ovisnosti.
+- Fiksna usporedba izvorne reference i pravih Android PNG-ova na **941×1672**: ukupni RGB MAE **26.56719 → 26.45646**; četiri metričke kartice **33.75332 → 33.06711**, najbolji rezultat **36.58020 → 35.07672** i dnevni niz **39.20457 → 37.99924**. Područje grafikona blago je lošije **27.57403 → 27.68292**, što se bilježi bez skrivanja regresije.
+- [Android CI 41363509138](https://github.com/bren-wp/Sudoku/actions/runs/41363509138): **SUCCESS**; [Android visual smoke 41363509152](https://github.com/bren-wp/Sudoku/actions/runs/41363509152): **SUCCESS** na 941×1672 i 720×1280, kodni commit `7095f9b9adb1c233ee492ec4409a172edd0599db`. Izdavački commit provjerava se zasebno.
+- Povijest igara, četiri pregleda postignuća, donji krajolik, grafikon težina i krug dovršenosti ostaju stvarni Compose UI. **Nisu izmišljeni** postoci, završene partije, otključane nagrade ili vremena.
+- `versionName=1.0.54`, `versionCode=55`, `applicationId=com.brendigo.sudoku`; bez brisanja napretka, novih dozvola ili migracija. Testno izdanje s nepotpisanim AAB-om nije Play-ready.
+- Metodologija i točne regionalne metrike: [Statistics QA](docs/statistics-qa-v1.0.54.md). Potpuna 1:1 jednakost **nije potvrđena**. Sljedeći zaslon: **Postignuća**.
+
 ## 1.0.53 — Dnevni izazov, pixel-QA iteracija 5/8
 
 - Vjerno uspoređen izvorni `05-daily.png` s pravom Android emulatorskom snimkom **941×1672**, bez skale ili zamjene stvarnog Compose UI-a bitmapom. Vlasnikova referenca čuva ilustrativni datum i rezultat; korisniku se nastavljaju prikazivati stvarni lokalni datumi, dovršeni dani i stanje izazova.
