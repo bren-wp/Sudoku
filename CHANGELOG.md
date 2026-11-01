@@ -1,3 +1,13 @@
+## 1.0.50 — Početni Home zaslon, pixel-QA iteracija 2/8
+
+- Doradene su izvorne, skalabilne Compose ilustracije kartica Nova igra i Dnevni izazov: topli sumrak, slojevi planina, obris drveća i pagoda te diskretni detalji u tirkiznoj mreži; dekoracije ne zamjenjuju aktivne UI kontrole i ne koriste sliku zaslona.
+- Nakon usporedbe sa stvarnim emulatorskim PNG-ovima **vraćena je promjena** koja je pogoršala kompaktne kartice: regresija je bila jasno izmjerena. Time smo zadržali postojeću funkcionalnu i vizualnu strukturu Statistike, Postignuća i Postavki.
+- **Stvarna usporedba v1.0.49 → kandidat 1.0.50**, izvornik i emulator 941×1672 bez resizea: Home ukupni RGB MAE **24.085 → 23.990**; kartice Nova igra/Dnevni izazov **28.556 → 27.997**; Nastavi **25.339 → 25.323**; mali navigacijski red **29.304 → 29.304**; dnevni niz **30.846 → 30.846**.
+- Android CI [run 41355612707](https://github.com/bren-wp/Sudoku/actions/runs/41355612707) i oba Android emulatora [run 41355612738](https://github.com/bren-wp/Sudoku/actions/runs/41355612738) **uspješno** završili za izvorni UI commit `b1c8bb035022649250acaea9c029ce2a8f80128a`.
+- Verzija `1.0.50`, `versionCode=51`, isti `com.brendigo.sudoku` i minSdk 26. Bez novih Android dozvola, servisâ ili migracija pohrane. Izdavački build provjerava se zasebno; nepotpisani AAB nije Google Play spreman.
+- **Nije potvrđen potpuno pixel-perfect 1:1**. Dinamički rezultati igrača, izvorni ilustrativni podaci i pozadinski detalji još se razlikuju. Detalji: [Home QA v1.0.50](docs/home-qa-v1.0.50.md).
+- Sljedeći zaslon predviđenog redoslijeda: **Nova igra**.
+
 ## 1.0.49 — Splash zaslon, iteracija 1/8
 
 - Zadržan stvarni Kotlin/Compose Splash UI i postojeći lokalni napredak; dekorativna gornja Sudoku mreža sada koristi zasebnu geometriju, izvorne rubne brojeve i plavi sjaj, bez pretvaranja cijelog zaslona u bitmapu.
