@@ -576,33 +576,10 @@ fun HomePage(controller: SudokuController) {
  */
 @Composable
 private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
-    if (compact) {
-        Canvas(Modifier.matchParentSize()) {
-            val w = size.width
-            val h = size.height
-            // The source's three small navigation tiles each have a restrained
-            // localized glow, not a flat full-card accent fill.
-            val glowCenter = Offset(w * .19f, h * .28f)
-            drawCircle(
-                Brush.radialGradient(
-                    listOf(accent.copy(alpha = .14f), Color.Transparent),
-                    center = glowCenter,
-                    radius = w * .72f,
-                ),
-                radius = w * .72f,
-                center = glowCenter,
-            )
-            for (index in 0..3) {
-                val x = w * (.57f + index * .18f)
-                drawLine(
-                    accent.copy(alpha = .065f),
-                    Offset(x, 0f), Offset(x - w * .18f, h),
-                    strokeWidth = 1.2f,
-                )
-            }
-        }
-        return
-    }
+    // Comparison against the actual 941x1672 emulator proved that extra
+    // compact-card halos increased regional RGB MAE. Preserve the original
+    // restrained treatment and never hide a measured regression.
+    if (compact) return
     Canvas(Modifier.matchParentSize()) {
         val w = size.width
         val h = size.height
