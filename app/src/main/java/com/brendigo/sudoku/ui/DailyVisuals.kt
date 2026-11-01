@@ -92,30 +92,35 @@ fun BoxScope.DailyHeroBackdrop() {
             )),
         )
         scenery?.let { art ->
+            // The owner artwork blends the mountain ridge through the
+            // *middle* of the hero, rather than starting with a hard seam
+            // at 60% width. This is non-interactive scenery only.
             drawImage(
                 image = art,
-                dstOffset = IntOffset((w * .60f).roundToInt(), 3),
-                dstSize = IntSize((w * .395f).roundToInt(), (h * .67f).roundToInt()),
+                dstOffset = IntOffset((w * .385f).roundToInt(), 2),
+                dstSize = IntSize((w * .61f).roundToInt(), (h * .78f).roundToInt()),
                 filterQuality = FilterQuality.High,
             )
         }
-        // Seamless navy-to-art feather at the left side of the decorative
-        // bitmap. The source contains no text, so real Compose labels still
-        // own the readable foreground on every viewport.
+        // Continuous left-to-right fog masks the visual edge of the local
+        // scenic asset without hiding or baking in any Compose labels.
         drawRect(
             Brush.horizontalGradient(
-                listOf(Color(0xE0041733), Color(0xE0041733),
-                    Color(0x66041733), Color.Transparent),
-                startX = 0f, endX = w * .98f,
+                listOf(
+                    Color(0xFA041733), Color(0xF0041733),
+                    Color(0xB8041733), Color(0x64041733),
+                    Color.Transparent,
+                ),
+                startX = 0f, endX = w,
             ),
             topLeft = Offset.Zero,
-            size = Size(w, h * .70f),
+            size = Size(w, h * .79f),
         )
         drawRect(
             Brush.horizontalGradient(
-                listOf(Color(0xFE04152F), Color(0xD8041733),
-                    Color(0x13031733), Color.Transparent),
-                startX = 0f, endX = w * .68f,
+                listOf(Color(0xF804152F), Color(0xC8041733),
+                    Color(0x18031733), Color.Transparent),
+                startX = 0f, endX = w * .78f,
             ),
         )
         // Match the reference: the metric row floats above navy shadows,
