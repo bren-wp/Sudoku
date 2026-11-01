@@ -62,3 +62,30 @@ python scripts/final_ten_reference_qa.py \
 Prijašnje kolo dovršilo je **implementacijske prolaske 1/10 do 10/10** i ove se provjere sada mogu pokrenuti u jednom potezu. **Aktualni rezultat stvarnog 1:1, zelenog Android CI-ja i spremnosti za produkciju još nije potvrđen.** Status u ovom dokumentu ne zamjenjuje stvarne rezultate aktualnih GitHub workflowa.
 
 Popis lokalnih dokumenata po ekranu: `docs/home-qa-followup-v1.0.48.md`, `docs/new-game-qa-followup-v1.0.48.md`, `docs/gameplay-qa-followup-v1.0.48.md`, `docs/settings-qa-followup-v1.0.48.md`, `docs/daily-qa-followup-v1.0.48.md`, `docs/statistics-qa-followup-v1.0.48.md`, `docs/achievements-qa-followup-v1.0.48.md`, `docs/splash-qa-followup-v1.0.48.md`, `docs/wordmark-qa-followup-v1.0.48.md` i `docs/launcher-qa-followup-v1.0.48.md`.
+
+## Provjera nakon mergea — 1. studenoga 2026.
+
+PR [#55](https://github.com/bren-wp/Sudoku/pull/55) **spojen je** u `main` 30.10.2026. u 23:34:26 UTC, merge commit `aa4f564c195194ab7b039e63166a8357b2258ab9`. Post-merge [Android CI run 41145280869](https://github.com/bren-wp/Sudoku/actions/runs/41145280869) završen je uspješno: unit testovi, pixel-QA regresija, lint i Android APK/AAB build.
+
+Zadnji uspješni [Android visual smoke run 41144169319](https://github.com/bren-wp/Sudoku/actions/runs/41144169319) testira kod s commita `484c1faaa48953d0f42e019b5977b51357b2b56e` na **941×1672** i **720×1280** emulatorima. Naknadni commit `150e6fce707a49feb8e53d618abe93751578b925` mijenja **samo osam `docs/screenshots/*.webp` datoteka**, ne Android aplikacijski kod. Post-merge ponovljeni Android *visual smoke* za sam merge SHA nije pokrenut; ovdje se ne tvrdi suprotno.
+
+Originali su potvrđeni iz deset vlasnikovih referentnih PNG-ova serije `Slika ChatGPT 24. lis 2026. 20_47`; wordmark i ikona odgovaraju već pohranjenim SHA-256 otiscima `BRAND_REFERENCE_SHA256`. Stvarna emulatorska arhiva: `sudoku-emulator-screen-references`, artifact ID `13020465460`, run `41144169319`. Mjerenje je napravljeno nad nepreskaliranim PNG-ovima, po odgovarajućem nazivu zaslona:
+
+| Prikaz | Novi RGB MAE / 255 | Novi alfa MAE / 255 |
+|---|---:|---:|
+| Home | 24.085 | 0.000 |
+| New Game | 22.356 | 0.000 |
+| Gameplay | 19.405 | 0.000 |
+| Settings | 19.291 | 0.000 |
+| Daily | 23.667 | 0.000 |
+| Statistics | 26.567 | 0.000 |
+| Achievements | 28.850 | 0.000 |
+| Splash | 12.364 | 0.000 |
+| Wordmark (1254×1254) | 18.615 | 21.903 |
+| Adaptive icon (1254×1254) | 37.200 | 6.939 |
+
+**Rezultat: 0/10 potpuno jednakih RGBA slika**. Statistika, izazovi, datumi, postignuća i pojedinačne zagonetke razlikuju se između dizajnerske reference i stvarne aplikacije: ne smiju se krivotvoriti produkcijski podaci radi snižavanja MAE-a. Iza takvih razlika ostaju stvarni vizualni nesrazmjeri koje treba popraviti nakon precizne regionalne analize. Za dva transparentna brendinga RGB MAE nije zamjena za alfa-kanal.
+
+Objavljeno [v1.0.48 izdanje](https://github.com/bren-wp/Sudoku/releases/tag/v1.0.48) trenutačno sadrži samo testni APK i **nepotpisani AAB**, bez izdavačkog potpisa. GitHubov API označava izdanje kao `prerelease=false`, iako artefakti nisu produkcijski potpisani. Taj metapodatak valja ispraviti na GitHubu prije promocije izdanja; ne predstavljati AAB kao Google Play spreman.
+
+Ovaj nalaz je dokumentacijski; ne mijenja Android izvorni kod, podatke igrača, `applicationId`, `versionName` ni `versionCode`. Potpuna pixel-parity i završni security/dead-code audit nisu proglašeni dovršenima.

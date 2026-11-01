@@ -115,6 +115,14 @@ Nema korisničkog računa, oglasa, analitike ni mrežnih dozvola.
 Detalji su u dokumentu [PRIVACY.md](PRIVACY.md). Napredak se ne sinkronizira
 s internetom: deinstalacija ili kvar uređaja mogu ga trajno ukloniti.
 
+**Offline sigurnosna kopija:** U Postavkama je moguće izvesti napredak u
+lozinkom šifriranu `.sudoku` datoteku, a prije uvoza pregledati podatke i
+potvrditi zamjenu lokalnog napretka. Lozinku nije moguće obnoviti.
+
+**Pixel QA:** Deset originalnih referenci uspoređeno je sa stvarnim emulatorskim
+PNG-ovima. Svi zasloni ostaju funkcionalni Compose UI, ali još **nisu pixel-perfect 1:1**.
+Rezultati su u [završnom QA izvještaju](docs/final-ten-screen-qa-v1.0.48.md).
+
 ---
 
 <div align="center">
@@ -128,33 +136,3 @@ s internetom: deinstalacija ili kvar uređaja mogu ga trajno ukloniti.
 [Licencija](LICENSE)
 
 </div>
-
-
-### Privatna sigurnosna kopija
-
-Uz Sudoku 1.0.46 možete ručno izvesti napredak u šifriranu `.sudoku` datoteku. Prilikom izvoza lozinku potvrđujete dvaput, a prije povrata pregledavate broj partija u kopiji i na uređaju. Zamjena je moguća tek uz vašu izričitu potvrdu. Kopija se sprema tamo gdje sami odaberete u Androidovu pregledniku datoteka — aplikacija ne zahtijeva internetsku vezu niti račun. Zaštitite lozinku: nije moguće obnoviti zaboravljenu lozinku. Sve slike zaslona iznad stvarne su snimke emulatora, ne dizajnerski prikazi.
-
-
-### Pixel QA (Splash 1/8)
-
-Prva ciljano vizualna iteracija 1.0.41 usklađuje Splash logotip,
-tipografiju, razmake i prikaz indikatora učitavanja s izvornom referencom.
-Priložene slike zaslona su stvarni prikazi aplikacije; ažuriraju se tek
-nakon uspješnog izvođenja Android emulator testa i provjere rezultata.
-Postojeća referentna usporedba nije potvrda potpune pixel-perfect jednakosti.
-Metodologija: [Splash pixel QA](docs/splash-qa-v1.0.41.md).
-
-
-### Pixel QA — Početni zaslon (2/8)
-
-Izdanje 1.0.42 usredotočeno je na stvarni Compose početni zaslon: naslov,
-raspored, zadržavanje navigacije i ilustrirane kartice za nastavak, novu igru,
-dnevni izazov, statistiku, postignuća i postavke. Korisnička statistika i
-niz ne zamjenjuju se primjerima iz referentne slike. Vizualna usporedba
-izvodi se na stvarnoj Android snimci, a točna 1:1 jednakost se ne tvrdi dok
-razlike nisu izmjerene i uklonjene. Detalji: [Home pixel QA](docs/home-qa-v1.0.42.md).
-
-
-### Zaslon 5/8 — Dnevni izazov
-
-Za v1.0.45 prilagođeni su stvarni lokalni Compose elementi Dnevnog izazova: dnevni sažetak, velika kartica s izvornim pejzažom, tri informativne kartice, sedmodnevni niz i interaktivni gumbi. Dekorativna slika je izrezana **isključivo iz pozadine korisnikove izvorne reference** i ne sadrži nikakav UI tekst, datume ni gumbe; korisnički podaci i navigacija ostaju izvorni. Vizualni QA nalazi se u [dokumentaciji](docs/daily-qa-v1.0.45.md). Točna pixel-perfect 1:1 jednakost nije deklarirana bez nove usporedbe.

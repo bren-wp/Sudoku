@@ -5,7 +5,7 @@ nova arhitektura za pojedinačne vizualne ili stabilnosne popravke.
 
 ## Lokalna izgradnja
 
-- Android SDK 36, JDK 17 i Gradle 8.13.
+- Android SDK 36, JDK 17 i Gradle 9.6.0 (kao u GitHub Actions workflowima).
 - Android minSdk 26, targetSdk 36.
 
 ```bash
@@ -32,9 +32,9 @@ se pomoću `marketing-screenshots.yml`.
 
 ## Otvorena vizualna usklađivanja
 
-Nekadašnji issue #11 je obrisan (GitHub vraća HTTP 410); nadzor se nastavlja
-kroz [PR #38](https://github.com/bren-wp/Sudoku/pull/38). Sedam referentnih
-ekrana i splash nisu još objektivno potvrđeni kao 1:1.
+PR [#55](https://github.com/bren-wp/Sudoku/pull/55) spojen je u `main` 30.10.2026. (UTC). Svih deset referenci sada je ponovno izmjereno na
+odgovarajućem posljednjem uspješnom emulatorskom kodu; nijedna nije RGBA-identična.
+Točne vrijednosti, izvori i preostala ograničenja: [završni QA](final-ten-screen-qa-v1.0.48.md).
 
 ## Potpisivanje i izdanja
 
@@ -42,6 +42,6 @@ Izdavačke ključeve nikada ne dodavati u repozitorij. Koristiti zaštićene
 GitHub Actions tajne koje release workflow prepoznaje. Ako nisu dostupne,
 AAB ostaje nepotpisan, a debug APK služi samo za testnu instalaciju.
 
-Glavna grana automatski objavljuje izdanje tek nakon uspješnog Android CI
-push testa i samo ako odgovarajući tag još ne postoji. Verziju i versionCode
-povećati prije spajanja, a PR spojiti tek nakon oba uspješna emulatorska testa.
+Release workflow samostalno testira, lint-a i gradi aplikaciju prije objave ako oznaka verzije još ne postoji; nije serijski uvjetovan završetkom odvojenog Android CI push workflowa. Za novu Play verziju u pravilu je potreban nov, jedinstven `versionCode` i ispravan izdavački ključ.
+
+Na izdanju [v1.0.48](https://github.com/bren-wp/Sudoku/releases/tag/v1.0.48) dostupni su samo testni APK i nepotpisani AAB. GitHub trenutno prikazuje stabilni release metapodatak za njih, što **ne znači** da su spremni za produkciju. Prije distribucije provjeriti potpis i oznaku izdanja.
