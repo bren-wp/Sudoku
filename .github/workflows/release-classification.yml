@@ -1,0 +1,54 @@
+name: Verify Sudoku release classification
+
+# Release metadata may change after Publish completes. This independent,
+# trusted main-branch reconciliation prevents an unsigned Android App Bundle
+# from being advertised as a production-ready release.
+on:
+  workflow_run:
+    workflows: ["Publish Sudoku release"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  classify:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout trusted main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Enforce test-release classification for unsigned bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n 1)"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          tag="v$version"
+          id="$(gh api "repos/$REPO/releases/tags/$tag" --jq '.id')"
+          assets="$(gh api "repos/$REPO/releases/tags/$tag" --jq '.assets[].name')"
+          if grep -Fq -- '-unsigned.aab' <<< "$assets"; then
+            gh api --method PATCH "repos/$REPO/releases/$id" -F prerelease=true --silent
+            # Read the authoritative metadata only after the publish workflow
+            # has fully completed; never report Play-readiness from a tag.
+            actual="$(gh api "repos/$REPO/releases/tags/$tag" --jq '.prerelease')"
+            test "$actual" = true || {
+              echo "::error::Unsigned $tag is not classified as prerelease"
+              exit 1
+            }
+            echo "Unsigned $tag correctly classified as prerelease."
+          else
+            echo "No unsigned AAB for $tag; no metadata mutation required."
+          fi
