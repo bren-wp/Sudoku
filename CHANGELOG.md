@@ -1,3 +1,13 @@
+## 1.0.52 — Aktivna igra (Gameplay), pojedinačna pixel-QA iteracija 4/8
+
+- Ispravljeno stvarno preklapanje naslova `Bilješke` s tekstom `Uključeno/Isključeno` na 941×1672 i 720×1280: ikona, naslov i status sada koriste zasebne stvarne Compose retke, bez preklapanja slojeva. Zadržani su semantika, aktivni prekidač i najmanje 48dp dodirne površine.
+- Glavni naslov `Sudoku` u aktivnoj partiji dodatno je centriran s obzirom na asimetričan red jedne Back i dvije desne kontrole, bez pomicanja gumba, ploče ili korisničkih podataka.
+- Novi instrumentacijski QA provjerava da naslov `Bilješke` ima stvarne granice i da je iznad svojeg statusnog prekidača; prva verzija **pala je na oba emulatora**, a problem je riješen stvarnom promjenom Compose rasporeda, ne popuštanjem testa.
+- Izravna usporedba stvarnih 941×1672 Android PNG-ova bez reskaliranja: **RGB MAE cijeli ekran 19.42462 → 19.00803**; zaglavlje **23.35356 → 21.23357**; toolbar **22.96020 → 22.62929**; ploča **17.67285 → 17.24404**. Sirova MAE uključuje različite stvarne brojeve, vrijeme i stanje igre; to **nije dokaz 1:1**.
+- [Android CI 41359855285](https://github.com/bren-wp/Sudoku/actions/runs/41359855285): **SUCCESS**. [Android visual smoke 41359855322](https://github.com/bren-wp/Sudoku/actions/runs/41359855322): **SUCCESS** na 941×1672 i 720×1280 za UI commit `6483625b98971dd8f527c1b0b5a035b1a4109347`. Završni izdavački commit traži svoju provjeru.
+- `versionName=1.0.52`, `versionCode=53`, `applicationId=com.brendigo.sudoku` ostaje; bez migracija podataka, dodatnih ovisnosti ili mrežnih dozvola. Ako nema Play izdavačkog potpisa, APK je testni, AAB nepotpisan i GitHub izdanje mora biti `prerelease`.
+- Metodologija, koordinate i stvarna mjerenja: [Gameplay QA v1.0.52](docs/gameplay-qa-v1.0.52.md). Sljedeća odvojena iteracija: **Dnevni izazov**.
+
 ## 1.0.51 — Nova igra, pixel-QA iteracija 3/8
 
 - Šest izvornih Kotlin/Jetpack Compose kartica težina ostaje potpuno interaktivno; nije upotrijebljena statična slika ekrana. Dodano je perspektivno osvijetljeno vektorsko Sudoku polje isključivo na **Vrlo lako, Lako, Srednje**, nakon stvarne provjere da dodatni sjaj na donje tri kartice povećava odstupanje.
