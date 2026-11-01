@@ -288,7 +288,7 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
                 textAlign = android.graphics.Paint.Align.CENTER
             }
             listOf(
-                Triple("5", .73f, .17f), Triple("3", .78f, .40f),
+                Triple("5", .73f, .17f), Triple("3", .79f, .40f),
                 Triple("1", .70f, .59f), Triple("6", .87f, .67f),
                 Triple("8", .73f, .85f),
             ).forEach { (digit, x, y) ->
@@ -576,14 +576,52 @@ fun HomePage(controller: SudokuController) {
  */
 @Composable
 private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
-    if (compact) return
+    if (compact) {
+        Canvas(Modifier.matchParentSize()) {
+            val w = size.width
+            val h = size.height
+            // The source's three small navigation tiles each have a restrained
+            // localized glow, not a flat full-card accent fill.
+            val glowCenter = Offset(w * .19f, h * .28f)
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(accent.copy(alpha = .14f), Color.Transparent),
+                    center = glowCenter,
+                    radius = w * .72f,
+                ),
+                radius = w * .72f,
+                center = glowCenter,
+            )
+            for (index in 0..3) {
+                val x = w * (.57f + index * .18f)
+                drawLine(
+                    accent.copy(alpha = .065f),
+                    Offset(x, 0f), Offset(x - w * .18f, h),
+                    strokeWidth = 1.2f,
+                )
+            }
+        }
+        return
+    }
     Canvas(Modifier.matchParentSize()) {
         val w = size.width
         val h = size.height
         if (accent == Ink.gold) {
             drawRect(Brush.horizontalGradient(listOf(
-                Color(0xFF16283B), Color(0xFF493829), Color(0xFF624524),
+                Color(0xFF27292D), Color(0xFF473E36), Color(0xFF80522A),
             )))
+            // Staggered silhouettes and amber mist create the reference's
+            // layered dusk atmosphere, with no text or UI baked into artwork.
+            for (cloud in 0..14) {
+                val cx = w * (.36f + (cloud * 29 % 65) / 100f)
+                val cy = h * (.085f + (cloud * 17 % 39) / 100f)
+                val radius = w * (.055f + (cloud % 4) * .011f)
+                drawCircle(
+                    Color(0xFFB47D42).copy(alpha = .075f + (cloud % 3) * .024f),
+                    radius = radius,
+                    center = Offset(cx, cy),
+                )
+            }
             val moon = Offset(w * .76f, h * .19f)
             drawCircle(
                 brush = Brush.radialGradient(
@@ -610,6 +648,42 @@ private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
                 drawPath(mountain, if (ridge == 0) Color(0xB21B2535)
                     else Color(0xD10B1A29))
             }
+            // A third foreground ridge anchors the tiny right-side temple.
+            // The outlines are scaled to the card dimensions, including when
+            // a tablet or landscape viewport expands the available width.
+            val foregroundRidge = Path().apply {
+                moveTo(w * .48f, h)
+                lineTo(w * .48f, h * .74f)
+                for (index in 0..32) {
+                    val x = w * (.48f + index / 32f * .52f)
+                    val height = .745f -
+                        kotlin.math.sin(index * .28f + 1.1f) * .034f -
+                        kotlin.math.sin(index * .92f + .6f) * .018f
+                    lineTo(x, h * height)
+                }
+                lineTo(w, h)
+                close()
+            }
+            drawPath(foregroundRidge, Color(0xB9091928))
+            // Natural tree clusters on the reference's far right, behind the
+            // interactive title/chevron. Pure Canvas decoration.
+            for (tree in 0..9) {
+                val x = w * (.73f + tree * .029f)
+                val bottom = h * (.76f + (tree % 3) * .025f)
+                val crown = h * (.40f + (tree * 7 % 16) * .012f)
+                drawLine(
+                    Color(0xF0081723), Offset(x, bottom), Offset(x, crown),
+                    strokeWidth = w * .005f,
+                )
+                for (leaf in 0..4) {
+                    val y = crown + (bottom - crown) * (.10f + leaf * .135f)
+                    drawCircle(
+                        Color(0xC6081622),
+                        radius = w * (.014f + (tree % 3) * .005f),
+                        center = Offset(x + w * ((leaf % 2) * .018f - .009f), y),
+                    )
+                }
+            }
             val px = w * .89f
             val py = h * .80f
             val u = w * .034f
@@ -627,6 +701,12 @@ private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
                 }
                 drawPath(roof, Color(0xFF041027))
             }
+            drawRect(Color(0xFFF4B65C).copy(alpha = .65f),
+                Offset(px - u * .32f, py - u * 2.20f),
+                androidx.compose.ui.geometry.Size(u * .64f, u * .70f))
+            drawRect(Color(0xFFF4B65C).copy(alpha = .38f),
+                Offset(px - u * .28f, py - u * 1.05f),
+                androidx.compose.ui.geometry.Size(u * .56f, u * .43f))
             drawRect(
                 brush = Brush.verticalGradient(
                     listOf(Color.Transparent, Color(0xDF26252A)),
@@ -639,7 +719,20 @@ private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
                     listOf(Color(0xFF002E38), Color(0xFF003D47), Color(0xFF004651)),
                 ),
             )
-            val focus = Offset(w * .83f, h * .10f)
+            // Individual translucent puzzle tiles behind the real "Nova
+            // igra" action, matching the soft diagonal vignette in the art.
+            for (row in 0..4) for (col in 0..4) {
+                val x = w * (.44f + col * .13f - row * .028f)
+                val y = h * (-.14f + row * .20f)
+                if ((row + col) % 3 == 0) {
+                    drawRect(
+                        Ink.teal.copy(alpha = .022f + col * .009f),
+                        Offset(x, y),
+                        androidx.compose.ui.geometry.Size(w * .11f, h * .18f),
+                    )
+                }
+            }
+            val focus = Offset(w * .78f, h * .13f)
             drawCircle(
                 brush = Brush.radialGradient(
                     listOf(Ink.teal.copy(alpha = .56f), Color.Transparent),
