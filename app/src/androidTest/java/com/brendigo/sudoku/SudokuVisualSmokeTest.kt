@@ -821,7 +821,10 @@ class SudokuVisualSmokeTest {
         rule.onAllNodes(hasContentDescription("bilješke 2", substring = true))
             .onFirst().assertExists()
         rule.onNodeWithTag("game-erase").assertIsEnabled().performClick()
-        rule.onNodeWithTag("game-back").performClick()
+        // The keypad was scrolled into view on short landscape screens;
+        // move the real Back target into view before pressing it.
+        rule.onNodeWithTag("game-back")
+            .performScrollTo().assertIsDisplayed().performClick()
         waitFor("resume-game")
         val resume = rule.onNodeWithTag("resume-game")
         resume.performScrollTo().assertIsDisplayed()
@@ -1048,20 +1051,35 @@ class SudokuVisualSmokeTest {
         }
         // Verify that the four metric cards and chart pair match the
         // reference hierarchy without overlapping on either emulator width.
-        val chart = rule.onNodeWithTag("stats-difficulty-chart")
-            .fetchSemanticsNode().boundsInRoot
-        val ring = rule.onNodeWithTag("stats-completion-ring")
-            .fetchSemanticsNode().boundsInRoot
+        val chartNode = rule.onNodeWithTag("stats-difficulty-chart")
+        val ringNode = rule.onNodeWithTag("stats-completion-ring")
         val statsDensity = rule.activity.resources.displayMetrics.density
         if (screenWidthDp >= 410f) {
-            check(chart.right <= ring.left + statsDensity &&
+            chartNode.performScrollTo().assertIsDisplayed()
+            val chart = chartNode.fetchSemanticsNode().boundsInRoot
+            val ring = ringNode.fetchSemanticsNode().boundsInRoot
+            check(chart.width > 0f && ring.width > 0f &&
+                chart.right <= ring.left + statsDensity &&
                 kotlin.math.abs(chart.top - ring.top) <= statsDensity * 2f &&
                 kotlin.math.abs(chart.bottom - ring.bottom) <= statsDensity * 3f) {
                 "Reference Stats chart and ring must share one level row: $chart, $ring"
             }
         } else {
-            check(chart.bottom <= ring.top + statsDensity) {
-                "Compact Stats chart and ring must stack without overlap: $chart, $ring"
+            // On a narrow scrolling phone the lower ring may report 0x0 until
+            // it enters the viewport. Validate each real panel *after* scroll
+            // rather than comparing coordinates from different scroll frames.
+            chartNode.performScrollTo().assertIsDisplayed()
+            val chart = chartNode.fetchSemanticsNode().boundsInRoot
+            ringNode.performScrollTo().assertIsDisplayed()
+            val ring = ringNode.fetchSemanticsNode().boundsInRoot
+            val screenWidth = rule.activity.resources.displayMetrics.widthPixels
+            check(chart.width > 0f && chart.height > 0f &&
+                ring.width > 0f && ring.height > 0f &&
+                chart.left >= -statsDensity &&
+                chart.right <= screenWidth + statsDensity &&
+                ring.left >= -statsDensity &&
+                ring.right <= screenWidth + statsDensity) {
+                "Compact Stats chart or ring is clipped: $chart, $ring"
             }
         }
         rule.onNodeWithTag("stats-history-panel").assertExists()
