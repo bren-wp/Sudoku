@@ -222,7 +222,28 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
                     else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
             )
-            .border(1.4.dp, if (enabled) Ink.cyan else Color.Gray, RoundedCornerShape(30.dp))
+            // Raised glass highlight is painted behind the actual Compose
+            // play icon and label. It is not a static button screenshot.
+            .drawBehind {
+                if (enabled) {
+                    val topHeight = size.height * .48f
+                    drawRoundRect(
+                        brush = Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = .24f), Color.Transparent),
+                            startY = 0f, endY = topHeight,
+                        ),
+                        size = androidx.compose.ui.geometry.Size(size.width, topHeight),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(30.dp.toPx()),
+                    )
+                }
+            }
+            .border(
+                1.4.dp,
+                if (enabled) Brush.verticalGradient(listOf(
+                    Color(0xFFB1FDFF), Ink.cyan, Color(0xFF087DFA),
+                )) else Brush.verticalGradient(listOf(Color.Gray, Color.DarkGray)),
+                RoundedCornerShape(30.dp),
+            )
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
