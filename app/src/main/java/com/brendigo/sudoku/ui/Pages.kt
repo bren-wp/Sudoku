@@ -222,7 +222,28 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
                     else listOf(Color.DarkGray, Color.Gray)),
                 RoundedCornerShape(30.dp)
             )
-            .border(1.4.dp, if (enabled) Ink.cyan else Color.Gray, RoundedCornerShape(30.dp))
+            // Raised glass highlight is painted behind the actual Compose
+            // play icon and label. It is not a static button screenshot.
+            .drawBehind {
+                if (enabled) {
+                    val topHeight = size.height * .48f
+                    drawRoundRect(
+                        brush = Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = .24f), Color.Transparent),
+                            startY = 0f, endY = topHeight,
+                        ),
+                        size = androidx.compose.ui.geometry.Size(size.width, topHeight),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(30.dp.toPx()),
+                    )
+                }
+            }
+            .border(
+                1.4.dp,
+                if (enabled) Brush.verticalGradient(listOf(
+                    Color(0xFFB1FDFF), Ink.cyan, Color(0xFF087DFA),
+                )) else Brush.verticalGradient(listOf(Color.Gray, Color.DarkGray)),
+                RoundedCornerShape(30.dp),
+            )
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,
@@ -798,13 +819,44 @@ private fun HomeTile(
         ) {
             val icon = homeIconFor(title)
             if (compact) {
-                // The reference uses unboxed icons on the smaller three cards.
-                BrandIcon(icon, Modifier.size(29.dp), accent)
+                // Reference: the three small cards use unboxed, luminous
+                // glyphs, not a flat solid-color vector or an extra button.
+                BrandIcon(
+                    icon,
+                    Modifier.size(29.dp).drawBehind {
+                        val center = Offset(size.width * .5f, size.height * .5f)
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                listOf(accent.copy(alpha = .27f), Color.Transparent),
+                                center = center, radius = size.width * .78f,
+                            ),
+                            center = center, radius = size.width * .78f,
+                        )
+                    },
+                    accent,
+                )
             } else {
                 Box(
                     Modifier.size(44.dp)
-                        .background(accent.copy(alpha = .13f), RoundedCornerShape(50))
-                        .border(1.5.dp, accent, RoundedCornerShape(50)),
+                        // A restrained radial glass well adds depth while
+                        // retaining the original accessible full-card click.
+                        .background(
+                            Brush.radialGradient(listOf(
+                                accent.copy(alpha = .29f),
+                                accent.copy(alpha = .12f),
+                                Color(0xCC03152F),
+                            )),
+                            RoundedCornerShape(50),
+                        )
+                        .border(
+                            1.5.dp,
+                            Brush.linearGradient(listOf(
+                                Color.White.copy(alpha = .76f),
+                                accent,
+                                accent.copy(alpha = .55f),
+                            )),
+                            RoundedCornerShape(50),
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     BrandIcon(icon, Modifier.size(30.dp), accent)
@@ -2558,6 +2610,22 @@ fun SplashPage() {
                             radius = glowRadius,
                             center = center,
                         )
+                        // The 941x1672 source has a second, tighter cyan
+                        // bloom behind the selected centre tile. Preserve
+                        // the live Compose logo and illuminate it separately.
+                        val tileGlow = Offset(size.width * .52f, size.height * .54f)
+                        val tileRadius = size.width * .45f
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                listOf(
+                                    Ink.cyan.copy(alpha = .19f),
+                                    Ink.blue.copy(alpha = .09f),
+                                    Color.Transparent,
+                                ),
+                                center = tileGlow, radius = tileRadius,
+                            ),
+                            center = tileGlow, radius = tileRadius,
+                        )
                     },
             ) {
                 SudokuLogo(when {
@@ -2595,7 +2663,7 @@ fun SplashPage() {
         // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 70.dp)
+                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 80.dp)
                 .size(if (landscape) 24.dp else if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
