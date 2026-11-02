@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
@@ -461,9 +462,28 @@ private fun GameTool(
                     else listOf(Color(0xFF0A2350), Color(0xFF061C46), Color(0xFF081C44))
                 )
             )
+            // Reference: a raised glass top, a subtle edge reflection and
+            // brighter teal emission for the selected Notes control.
+            .drawBehind {
+                val top = this.size.height * .43f
+                drawRoundRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            if (active) Color(0x4449FFFF) else Color(0x2668B7FF),
+                            Color.Transparent,
+                        ),
+                        startY = 0f, endY = top,
+                    ),
+                    size = androidx.compose.ui.geometry.Size(this.size.width, top),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(13.dp.toPx()),
+                )
+            }
             .border(
                 if (active) 1.6.dp else 1.dp,
-                if (active) Ink.cyan else Ink.blue.copy(alpha = .75f),
+                Brush.linearGradient(
+                    if (active) listOf(Color(0xFF9EFFFF), Ink.cyan, Color(0xFF009CC6))
+                    else listOf(Color(0xFF4B9DFF), Ink.blue.copy(alpha = .75f)),
+                ),
                 RoundedCornerShape(13.dp),
             )
             .clickable(enabled = enabled, onClick = onClick),
@@ -629,7 +649,24 @@ private fun NumberRow(
                                 listOf(Color(0xFF103773), Color(0xFF0B2B63), Color(0xFF092452))
                             )
                         )
-                        .border(1.dp, Color(0xFF2377ED), RoundedCornerShape(10.dp))
+                        .drawBehind {
+                            val sheenHeight = this.size.height * .52f
+                            drawRoundRect(
+                                brush = Brush.verticalGradient(
+                                    listOf(Color(0x3362B8FF), Color.Transparent),
+                                    startY = 0f, endY = sheenHeight,
+                                ),
+                                size = androidx.compose.ui.geometry.Size(this.size.width, sheenHeight),
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(10.dp.toPx()),
+                            )
+                        }
+                        .border(
+                            1.dp,
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF5CABFF), Color(0xFF1665D7)),
+                            ),
+                            RoundedCornerShape(10.dp),
+                        )
                         .clickable(enabled = enabled) { onClick(value) },
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
