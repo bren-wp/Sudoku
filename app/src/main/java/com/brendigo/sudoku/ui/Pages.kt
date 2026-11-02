@@ -2490,12 +2490,20 @@ fun SplashPage() {
         // Keep the rendered wordmark within a safe horizontal footprint when
         // the system's accessible font scale is unusually large.
         val typeFactor = minOf(1f, 1.35f / fontScale)
-        val headingSp = ((when {
+        val idealHeadingSp = ((when {
             landscape -> 48
             veryNarrow -> 42
             compact -> 53
             else -> 79
         }) * typeFactor).toInt().coerceAtLeast(28)
+        // "Sudoku" must remain on one line even on 240dp devices with
+        // 1.8x accessible text. Otherwise a wrapped heading pushes the
+        // tagline into the native loader. Normal reference typography is
+        // unchanged; only constrained width + high font scale is capped.
+        val titleWidthDp = (maxWidth.value - 40f).coerceAtLeast(0f)
+        val maxSingleLineSp = (titleWidthDp / (4.25f * fontScale))
+            .toInt().coerceAtLeast(20)
+        val headingSp = minOf(idealHeadingSp, maxSingleLineSp)
         val tagline = if (compact || fontScale > 1.35f)
             "TRENIRAJ MOZAK SVAKI DAN"
         else "T R E N I R A J   M O Z A K   S V A K I   D A N"
