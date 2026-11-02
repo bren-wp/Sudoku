@@ -558,6 +558,16 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
             }
             .clip(RoundedCornerShape(outerCorner))
             .background(Brush.linearGradient(listOf(Color(0xFF0058DF), Ink.cyan)))
+            // The owner's 7-3-9 badge has a glass-like, raised cyan rim.
+            // Keep this decorative bevel on glowing logo variants only.
+            .then(if (glowing) Modifier.border(
+                width = 1.5.dp,
+                brush = Brush.linearGradient(listOf(
+                    Color(0xFFE0FFFF), Color(0xFF21DEFF), Color(0xFF0056DB),
+                    Color(0xFF24D5FF),
+                )),
+                shape = RoundedCornerShape(outerCorner),
+            ) else Modifier)
             .padding(2.dp)
             .clip(RoundedCornerShape(innerCorner))
             .background(Color(0xFF061A49))
@@ -571,7 +581,15 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
                     Box(
                         Modifier.weight(1f).fillMaxHeight()
                             .background(if (center)
-                                Brush.radialGradient(listOf(Color(0xFF12DFFF), Color(0xFF0054BA), Color(0xFF062358)))
+                                Brush.radialGradient(
+                                    if (glowing) listOf(
+                                        Color(0xFF65FDFF), Color(0xFF05BDF5),
+                                        Color(0xFF064BA8), Color(0xFF061841),
+                                    ) else listOf(
+                                        Color(0xFF12DFFF), Color(0xFF0054BA),
+                                        Color(0xFF062358),
+                                    )
+                                )
                             else Brush.linearGradient(listOf(Color(0xFF071B47), Color(0xFF062452))))
                             .border(.55.dp, Ink.cyan.copy(alpha = .68f)),
                         contentAlignment = Alignment.Center,
