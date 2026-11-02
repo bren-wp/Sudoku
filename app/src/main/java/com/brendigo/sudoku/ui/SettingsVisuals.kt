@@ -79,14 +79,17 @@ fun SettingsGlyph(
                 )
             )
             .drawBehind {
+                // 'size' is also the outer Dp parameter of SettingsGlyph;
+                // explicitly select DrawScope.size for pixel dimensions.
+                val canvasSize = this.size
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(tint.copy(alpha = .25f), Color.Transparent),
-                        center = Offset(size.width * .32f, size.height * .24f),
-                        radius = size.width * .77f,
+                        center = Offset(canvasSize.width * .32f, canvasSize.height * .24f),
+                        radius = canvasSize.width * .77f,
                     ),
-                    center = Offset(size.width * .32f, size.height * .24f),
-                    radius = size.width * .77f,
+                    center = Offset(canvasSize.width * .32f, canvasSize.height * .24f),
+                    radius = canvasSize.width * .77f,
                 )
             }
             .border(1.dp, tint.copy(alpha = .9f), shape),
