@@ -2584,7 +2584,10 @@ fun SplashPage() {
                     tightAccessibility -> .035f
                     landscape -> .055f
                     compact -> .19f
-                    else -> .255f
+                    // On the 941 x 1672 reference the 7-3-9 emblem starts
+                    // 8px lower. Adjust the parent layout, not the drawn logo:
+                    // offsets would make the semantics bounds diverge.
+                    else -> .260f
                 })
                 .testTag("splash-brand"),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -2636,7 +2639,7 @@ fun SplashPage() {
                     else -> 124.dp
                 }, glowing = true)
             }
-            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 13.dp else 15.dp))
+            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 13.dp else 13.dp))
             AccentText("Sudoku", headingSp, Modifier.testTag("splash-title"))
             Text(
                 "by Brendigo",
