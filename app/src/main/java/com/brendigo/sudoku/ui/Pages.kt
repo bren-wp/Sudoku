@@ -819,13 +819,44 @@ private fun HomeTile(
         ) {
             val icon = homeIconFor(title)
             if (compact) {
-                // The reference uses unboxed icons on the smaller three cards.
-                BrandIcon(icon, Modifier.size(29.dp), accent)
+                // Reference: the three small cards use unboxed, luminous
+                // glyphs, not a flat solid-color vector or an extra button.
+                BrandIcon(
+                    icon,
+                    Modifier.size(29.dp).drawBehind {
+                        val center = Offset(size.width * .5f, size.height * .5f)
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                listOf(accent.copy(alpha = .27f), Color.Transparent),
+                                center = center, radius = size.width * .78f,
+                            ),
+                            center = center, radius = size.width * .78f,
+                        )
+                    },
+                    accent,
+                )
             } else {
                 Box(
                     Modifier.size(44.dp)
-                        .background(accent.copy(alpha = .13f), RoundedCornerShape(50))
-                        .border(1.5.dp, accent, RoundedCornerShape(50)),
+                        // A restrained radial glass well adds depth while
+                        // retaining the original accessible full-card click.
+                        .background(
+                            Brush.radialGradient(listOf(
+                                accent.copy(alpha = .29f),
+                                accent.copy(alpha = .12f),
+                                Color(0xCC03152F),
+                            )),
+                            RoundedCornerShape(50),
+                        )
+                        .border(
+                            1.5.dp,
+                            Brush.linearGradient(listOf(
+                                Color.White.copy(alpha = .76f),
+                                accent,
+                                accent.copy(alpha = .55f),
+                            )),
+                            RoundedCornerShape(50),
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     BrandIcon(icon, Modifier.size(30.dp), accent)
