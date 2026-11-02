@@ -2558,6 +2558,22 @@ fun SplashPage() {
                             radius = glowRadius,
                             center = center,
                         )
+                        // The 941x1672 source has a second, tighter cyan
+                        // bloom behind the selected centre tile. Preserve
+                        // the live Compose logo and illuminate it separately.
+                        val tileGlow = Offset(size.width * .52f, size.height * .54f)
+                        val tileRadius = size.width * .45f
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                listOf(
+                                    Ink.cyan.copy(alpha = .19f),
+                                    Ink.blue.copy(alpha = .09f),
+                                    Color.Transparent,
+                                ),
+                                center = tileGlow, radius = tileRadius,
+                            ),
+                            center = tileGlow, radius = tileRadius,
+                        )
                     },
             ) {
                 SudokuLogo(when {
@@ -2576,7 +2592,9 @@ fun SplashPage() {
                 letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
                 fontSize = if (landscape || veryNarrow) 12.sp
                 else if (compact) 13.sp else 16.sp,
-                modifier = Modifier.testTag("splash-byline"),
+                modifier = Modifier
+                    .offset(y = if (landscape || compact || tightAccessibility) 0.dp else (-10).dp)
+                    .testTag("splash-byline"),
                 maxLines = 1,
             )
             Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 12.dp else 11.dp))
@@ -2588,14 +2606,16 @@ fun SplashPage() {
                 else androidx.compose.ui.unit.TextUnit.Unspecified,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                modifier = Modifier.fillMaxWidth().testTag("splash-tagline"),
+                modifier = Modifier.fillMaxWidth()
+                    .offset(y = if (landscape || compact || tightAccessibility) 0.dp else (-10).dp)
+                    .testTag("splash-tagline"),
             )
         }
         // A deterministic loading arc stays visible when Android animations
         // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 70.dp)
+                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 80.dp)
                 .size(if (landscape) 24.dp else if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
