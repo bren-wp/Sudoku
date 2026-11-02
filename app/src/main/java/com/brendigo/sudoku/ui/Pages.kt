@@ -875,11 +875,12 @@ fun NewGamePage(controller: SudokuController) {
                 (maxWidth.value / (5.3f * LocalDensity.current.fontScale))
                     .toInt().coerceAtLeast(20),
             )
+            val subtitleSize = if (maxWidth < 300.dp) 17.sp else 21.sp
             Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
                 .padding(start = 5.dp)) {
                 AccentText("Nova igra", headingSize, Modifier.testTag("new-game-title"))
                 Text("Odaberi težinu", color = Ink.muted,
-                    fontSize = if (maxWidth < 300.dp) 17.sp else 21.sp,
+                    fontSize = subtitleSize,
                     modifier = Modifier.testTag("new-game-subtitle"))
             }
         }
