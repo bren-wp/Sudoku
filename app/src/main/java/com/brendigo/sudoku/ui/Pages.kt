@@ -1676,6 +1676,12 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
                                         )),
                                         RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
                                     )
+                                    // Narrow glossy lip, not a static chart image.
+                                    .border(
+                                        .6.dp,
+                                        colors[index].copy(alpha = .82f),
+                                        RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+                                    )
                             )
                             Spacer(Modifier.height(6.dp))
                             Text(names[index], color = Ink.muted, fontSize = 9.sp,
@@ -1711,6 +1717,15 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
             Box(Modifier.fillMaxWidth().height(98.dp),
                 contentAlignment = Alignment.Center) {
                 Canvas(Modifier.size(94.dp)) {
+                    val center = Offset(size.width / 2f, size.height / 2f)
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            listOf(Ink.cyan.copy(alpha = .10f), Color.Transparent),
+                            center = center, radius = size.width * .75f,
+                        ),
+                        radius = size.width * .75f,
+                        center = center,
+                    )
                     drawArc(Ink.blue.copy(alpha = .28f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     if (fraction > 0f) {
@@ -1827,16 +1842,32 @@ private fun StatTile(
                 ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandIcon(
-                    when (id) {
-                        "played" -> "gamepad"
-                        "best" -> "timer"
-                        "total" -> "timer"
-                        "streak" -> "flame-solid"
-                        else -> "statistics"
-                    },
-                    Modifier.size(if (compact) 34.dp else 44.dp), color,
-                )
+                Box(
+                    Modifier.size(if (compact) 34.dp else 44.dp)
+                        .drawBehind {
+                            val center = Offset(size.width * .5f, size.height * .5f)
+                            drawCircle(
+                                brush = Brush.radialGradient(
+                                    listOf(color.copy(alpha = .30f), Color.Transparent),
+                                    center = center, radius = size.width * .78f,
+                                ),
+                                radius = size.width * .78f,
+                                center = center,
+                            )
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    BrandIcon(
+                        when (id) {
+                            "played" -> "gamepad"
+                            "best" -> "timer"
+                            "total" -> "timer"
+                            "streak" -> "flame-solid"
+                            else -> "statistics"
+                        },
+                        Modifier.fillMaxSize(), color,
+                    )
+                }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {

@@ -39,3 +39,7 @@ Odgovarajući `references/01-home.png` mora biti originalna korisnikova slika. I
 - Dnevni izazov: suptilni stakleni sjaj kartica, višeslojni zlatni prsten, 3D gornji odsjaj primarnog gumba. Datum, napredak i svi gumbi ostaju stvarni i dinamični.
 - Instrumentacijski test razlikuje 2+1 i tri stupca pomoću istog praga **355dp sadržaja** kao produkcijska komponenta, nakon margina od 18dp po strani.
 - Potrebni su novi stvarni PNG snimci i instrumentacijski rezultati prije zaključka o pixel-perfect podudarnosti.
+
+### Statistika — nativna 3D dorada (3. 11. 2026.)
+- Uveden diskretan odsjaj gornjeg ruba statističkih kartica, svjetlosni halo oko četiri stvarne vektorske ikonice, obrubi stupaca i halo oko prstena dovršenosti.
+- Brojke, grafikon, postotak, povijest i dodiri i dalje dolaze iz stvarnog stanja aplikacije. Sljedeći korak ostaje usporedba `06-statistics.png` s izvornom referencom na emulatorskim profilima.
