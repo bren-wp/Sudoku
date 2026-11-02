@@ -595,8 +595,8 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
                             // A second emitted-light pass sits ON TOP of the
                             // tile fill yet BEHIND the live text numeral.
                             .then(if (center && glowing) Modifier.drawBehind {
-                                val lightCenter = Offset(size.width * .50f, size.height * .48f)
-                                val radius = size.width * .82f
+                                val lightCenter = Offset(this.size.width * .50f, this.size.height * .48f)
+                                val radius = this.size.width * .82f
                                 drawCircle(
                                     brush = Brush.radialGradient(
                                         colors = listOf(
