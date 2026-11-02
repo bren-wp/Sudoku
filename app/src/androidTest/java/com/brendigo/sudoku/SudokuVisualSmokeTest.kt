@@ -133,6 +133,9 @@ class SudokuVisualSmokeTest {
     @Test
     fun homeMenuCardsAndWeekStripFitEveryEmulatorProfile() {
         waitFor("home-nova-igra")
+        // Export the untouched Home viewport before scrolling, so the tiny
+        // and intermediate profiles have actual device-rendered image evidence.
+        shot("01-home")
         val density = rule.activity.resources.displayMetrics.density
         val viewportWidth = rule.activity.resources.displayMetrics.widthPixels
         val tags = listOf(
