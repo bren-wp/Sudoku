@@ -164,7 +164,7 @@ fun NewGameSizeSelector(
         verticalAlignment = Alignment.CenterVertically) {
         listOf(9, 6, 4).forEachIndexed { index, option ->
             val active = selectedSize == option
-            Box(Modifier.weight(1f).fillMaxHeight().testTag("size-$option")
+            BoxWithConstraints(Modifier.weight(1f).fillMaxHeight().testTag("size-$option")
                 .semantics {
                     contentDescription = "Veličina $option puta $option"
                     role = Role.RadioButton
@@ -176,8 +176,15 @@ fun NewGameSizeSelector(
                     .border(1.5.dp, Ink.cyan, corners) else Modifier)
                 .clickable(enabled = enabled) { onSelect(option) },
                 contentAlignment = Alignment.Center) {
-                Text("$option×$option", color = if (active) Ink.white else Ink.muted,
-                    fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                // Each of three equal segments must fit at 240dp width,
+                // including at Android 1.8x system text scale.
+                val scale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+                val labelSp = minOf(16f, maxWidth.value / (2.65f * scale))
+                    .coerceAtLeast(9f).sp
+                Text("$option×$option",
+                    modifier = Modifier.testTag("size-label-$option"),
+                    color = if (active) Ink.white else Ink.muted,
+                    fontSize = labelSp, fontWeight = FontWeight.Bold, maxLines = 1)
                 if (index < 2 && !active) {
                     Box(Modifier.align(Alignment.CenterEnd).width(.7.dp)
                         .fillMaxHeight(.76f)
