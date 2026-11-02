@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.54** · Android 8.0+ · Bez oglasa · Bez interneta
+**Izdanje 1.0.55** · Android 8.0+ · Bez oglasa · Bez interneta
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
@@ -127,7 +127,8 @@ Rezultati su u [završnom QA izvještaju](docs/final-ten-screen-qa-v1.0.48.md) i
 [Novoj igri v1.0.51](docs/new-game-qa-v1.0.51.md) i
 [Gameplay iteraciji v1.0.52](docs/gameplay-qa-v1.0.52.md) te
 [Dnevnom izazovu v1.0.53](docs/daily-qa-v1.0.53.md) te
-[Statistici v1.0.54](docs/statistics-qa-v1.0.54.md).
+[Statistici v1.0.54](docs/statistics-qa-v1.0.54.md) i
+[Postignućima i Statistici v1.0.55](docs/achievements-statistics-qa-v1.0.55.md).
 
 ---
 

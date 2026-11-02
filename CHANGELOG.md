@@ -1,3 +1,13 @@
+## 1.0.55 — Postignuća i prioritetna Statistika, pixel-QA 7/8
+
+- Prije zahvata uspoređeni su svi dostupni Android prikazi s korisnikovim PNG-ovima na 941×1672. Najveći MAE glavnih zaslona: Postignuća **28.85024**, Statistika **26.45647**, Početni zaslon **23.9902**.
+- **Postignuća:** pojačan je neon sjaj stvarnih vektorskih ikona isključivo u prva **dva** reda od osam istaknutih postignuća. Ukupno RGB MAE **28.85024 → 28.78820**; red 1 **38.19531 → 38.02878**, red 2 **39.28587 → 39.08268**; redovi 3–4 nepromijenjeni. Semantika zaključavanja, napredak 0/1, 0/7 itd. i prikaz svih **24** nisu mijenjani.
+- **Statistika:** izvorna kartica Dnevni niz na referenci prikazuje topao mjesec, planinski lanac i pagodu. Dodani su procedurally nacrtani Compose Canvas krajolik i diskretno svjetlo *iza stvarnih podataka*. Ukupno Statistika RGB MAE **26.45647 → 26.03790**, četiri metričke kartice **33.06711 → 31.01450**, a Dnevni niz **37.99924 → 29.12590** (~23.4% manje odstupanje).
+- Prvi commit `fa33848` razotkrio je regresiju na donjim redovima Postignuća i svim metričkim karticama Statistike. Commit `919600e` vratio je te dijelove i ograničio dodatno osvjetljenje na prva dva reda; commit `72e1605` dodao je krajolik iza Statistike. Regresije nisu prikrivene.
+- [Android CI 41366273955](https://github.com/bren-wp/Sudoku/actions/runs/41366273955) i oba emulatora [41366273931](https://github.com/bren-wp/Sudoku/actions/runs/41366273931): **SUCCESS** na 941×1672 i 720×1280 za UI commit `72e1605ca1810d0d229d3d74305f1fcdcbd7cd11`. Zaseban CI mora potvrditi i izdavački commit.
+- Bez novih ovisnosti, dozvola, internetskih servisa ili lažnih statistika; `applicationId=com.brendigo.sudoku`, `versionName=1.0.55`, `versionCode=56`. Testni APK i nepotpisani AAB nisu Play-ready.
+- Detaljan pregled, mjerenja, ograničenja i preostali prioriteti: [Pixel-QA Postignuća + Statistika](docs/achievements-statistics-qa-v1.0.55.md). Nije postignuta puna pixel-perfect 1:1 jednakost; sljedeći prioriteti su Početni zaslon i postojeći neusklađeni detalji kartica.
+
 ## 1.0.54 — Statistika, pixel-QA iteracija 6/8
 
 - Prilagođeni su razmaci i veličine izvornih vektorskih ikona u četiri stvarne Compose metričke kartice (Odigrane igre, Najbolje vrijeme, Ukupno vrijeme, Dnevni niz). Podaci se i dalje uzimaju iz lokalnih statistika.
