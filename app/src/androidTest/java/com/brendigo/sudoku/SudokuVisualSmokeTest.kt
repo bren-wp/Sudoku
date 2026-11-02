@@ -18,6 +18,9 @@ import android.content.ContentValues
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -1673,9 +1676,12 @@ class SudokuVisualSmokeTest {
             val maxAttempts = 30
             var lastSamples = ""
             repeat(maxAttempts) {
-                val shot = InstrumentationRegistry.getInstrumentation()
-                    .uiAutomation.takeScreenshot()
-                    ?: error("No real Compose wordmark screenshot")
+                // Capture Compose's actual rendered root rather than the
+                // emulator's full display compositor. Some x86_64 tablet
+                // emulator builds return a flat 127-grey system screenshot
+                // even when the native Compose surface is black or white.
+                // Root capture keeps the strict pixel verification below.
+                val shot = rule.onRoot().captureToImage().asAndroidBitmap()
                 val sampleX = intArrayOf(
                     (shot.width * .18f).toInt(), (shot.width * .82f).toInt()
                 )
