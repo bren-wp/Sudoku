@@ -53,3 +53,9 @@ Odgovarajući `references/01-home.png` mora biti originalna korisnikova slika. I
 - Pad landscape runnera na SHA `4eb310d00` nastao je pri raspakiravanju `system-images;android-35;default;x86_64` (nevaljan SDK ZIP), **prije pokretanja aplikacijskih testova**. Preinstalacija sada provjerava i `emulator` i `system.img`, pokušava samo SDK preuzimanje najviše tri puta te briše isključivo nedovršenu sistemsku sliku na izoliranom CI runneru.
 - `--reference-capture`: glavna snimka `01-home.png` više ne dijeli istu instrumentacijsku invokaciju sa stvaranjem sačuvane partije za `01-home-resume.png`. Prije zasebne resume invokacije briše se samo podatkovno stanje emulatorove aplikacije, dok stvarne PNG snimke ostaju u MediaStoreu.
 - Nijedan testni assert nije ublažen niti uklonjen; svih 11 emulatorskih profila ostaje uključeno.
+
+## Ispravak reference capture pada — 3. 11. 2026.
+- Na SHA `3ff6a26` Android CI je završio uspješno. Vizualni `reference` profil pao je **nakon uspješnog prvog instrumentacijskog prolaza** jer je `adb shell pm clear com.brendigo.sudoku` vratio `Failed` na Androidu 15.
+- Naredba `pm clear` uklonjena je iz CI-ja. `01-home.png` se snima u prvom pozivu, a zaseban drugi instrumentacijski poziv snima `01-home-resume.png` uz stvarnu nedovršenu igru. Slike ne ovise o redoslijedu JUnit metoda u jednoj invokaciji.
+- Workflow `paths` sada uključuje obje skripte za izvođenje i izvoz vizualnih testova, tako da i izmjene samih skripti pokreću novu provjeru.
+- Testne asercije, svih 11 profila i screenshotovi ostaju obvezni; ništa nije označeno zelenim bez stvarnog rezultata.

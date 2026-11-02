@@ -26,9 +26,9 @@ elif [[ "${1:-}" == "--tablet-shard" ]]; then
 elif [[ "${1:-}" == "--reference-capture" ]]; then
   # The owner's Home reference has an unfinished game. Export that real
   # state separately instead of distorting the screenshot from a fresh app.
-  # First collect the clean-install Home and other reference screens.
-  # A separate invocation AFTER resetting only the emulator app data creates
-  # the real resume state, so it cannot contaminate 01-home.png.
+  # First collect the clean Home and other reference screens.
+  # A later separate instrumentation invocation creates the real resume
+  # state. The completed first capture remains immutable in MediaStore.
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa")
   export_args+=("--reference-capture")
 elif [[ "${1:-}" == "--tablet-capture" ]]; then

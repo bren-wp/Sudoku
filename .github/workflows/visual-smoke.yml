@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "app/**"
+      - ".github/scripts/run-visual-smoke.sh"
+      - ".github/scripts/export-emulator-screenshots.sh"
       - ".github/workflows/visual-smoke.yml"
   pull_request:
     paths:
@@ -14,6 +16,7 @@ on:
       - "gradle.properties"
       - "docs/screenshots/**"
       - ".github/scripts/export-emulator-screenshots.sh"
+      - ".github/scripts/run-visual-smoke.sh"
       - ".github/workflows/visual-smoke.yml"
   workflow_dispatch:
 
