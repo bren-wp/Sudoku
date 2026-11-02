@@ -54,6 +54,9 @@ jobs:
           - layout: tablet
             resolution: 1200x1920
             density: 240
+            # This AVD repeatedly went offline with Vulkan ColorBuffer errors.
+            # Force non-Vulkan software rendering for this profile only.
+            emulator_gpu_flags: "-feature -Vulkan"
             artifact: sudoku-emulator-tablet-screenshots
           # Boundary checks for 240dp and 400dp content layouts. These
           # profiles run only Splash/Home/New Game tests; the five above run the
@@ -88,7 +91,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
+          emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim ${{ matrix.emulator_gpu_flags }}"
           script: |
             # Seven layout profiles, five full suites and two focused boundary tests:
             # 270dp narrow, 640x360dp landscape, 800dp tablet, 240dp tiny and 400dp medium.
