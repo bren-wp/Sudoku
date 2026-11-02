@@ -23,11 +23,14 @@ elif [[ "${1:-}" == "--tablet-shard" ]]; then
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.numShards=$total")
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.shardIndex=$index")
   skip_export=true
-elif [[ "${1:-}" == "--tablet-capture" || "${1:-}" == "--reference-capture" ]]; then
-  # Short isolated capture run produces all eleven screenshot names with
-  # real Android content, without recycling graphics buffers for 41 tests.
-  # Full 41-test coverage remains on the independent tablet shards; this
-  # capture-only lane is dedicated to faithful real PNG evidence.
+elif [[ "${1:-}" == "--reference-capture" ]]; then
+  # The owner's Home reference has an unfinished game. Export that real
+  # state separately instead of distorting the screenshot from a fresh app.
+  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealHomeWithResumeCardForReferenceQA")
+  export_args+=("--reference-capture")
+elif [[ "${1:-}" == "--tablet-capture" ]]; then
+  # Bounded real-Android capture prevents exhausting emulator graphics buffers.
+  # The full suite is still covered by the independent tablet shards.
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa")
 fi
 # Only retry known transient Maven Central rate limits. A failing assertion,
