@@ -413,6 +413,7 @@ fun HomePage(controller: SudokuController) {
             }
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val secondaryTilesFitTwoColumns = maxWidth >= 300.dp
             if (maxWidth >= 370.dp) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     HomeTile("Statistika", "Prati svoj napredak",
@@ -430,7 +431,7 @@ fun HomePage(controller: SudokuController) {
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (maxWidth >= 300.dp) {
+                    if (secondaryTilesFitTwoColumns) {
                         // Two columns remain legible at 300-369dp content
                         // widths. On very narrow phones each tile gets a
                         // full-width touch target and readable Croatian text.
