@@ -207,9 +207,9 @@ class SudokuVisualSmokeTest {
             selector.right <= screenWidth + density) {
             "New Game navigation and size selector collide: $back / $selector"
         }
-        // Capture the actual user-facing screen without scrolling any cards.
-        val widthDp = screenWidth / density
-        if (widthDp < 300f || widthDp in 395f..405f) shot("02-new-game")
+        // Always capture the unscrolled real Compose screen for reference QA.
+        // This covers portrait, landscape and compact profiles, not only 240/400dp.
+        shot("02-new-game")
         rule.onNodeWithTag("size-4").performScrollTo().performClick()
         rule.onNodeWithTag("size-4").assertIsSelected()
         rule.onNodeWithTag("size-9").performClick()
