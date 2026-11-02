@@ -23,6 +23,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.roundToInt
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
@@ -580,6 +587,16 @@ private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
     // compact-card halos increased regional RGB MAE. Preserve the original
     // restrained treatment and never hide a measured regression.
     if (compact) return
+    // Reuse a bundled, text-free crop of the owner's reference mountains.
+    // The Compose card and its navigation remain fully interactive.
+    val context = LocalContext.current
+    val mountainArt = remember(context) {
+        runCatching {
+            context.assets.open("achievement-gold-art.webp").use {
+                BitmapFactory.decodeStream(it)?.asImageBitmap()
+            }
+        }.getOrNull()
+    }
     Canvas(Modifier.matchParentSize()) {
         val w = size.width
         val h = size.height
@@ -587,6 +604,17 @@ private fun BoxScope.HomeTileArtwork(accent: Color, compact: Boolean) {
             drawRect(Brush.horizontalGradient(listOf(
                 Color(0xFF27292D), Color(0xFF473E36), Color(0xFF80522A),
             )))
+            mountainArt?.let { art ->
+                // Subtle photographic texture is behind the original
+                // native moon, mountains and illuminated pavilion.
+                drawImage(
+                    image = art,
+                    dstOffset = IntOffset((w * .36f).roundToInt(), 0),
+                    dstSize = IntSize((w * .64f).roundToInt(), h.roundToInt()),
+                    alpha = .66f,
+                    filterQuality = FilterQuality.High,
+                )
+            }
             // Staggered silhouettes and amber mist create the reference's
             // layered dusk atmosphere, with no text or UI baked into artwork.
             for (cloud in 0..14) {
