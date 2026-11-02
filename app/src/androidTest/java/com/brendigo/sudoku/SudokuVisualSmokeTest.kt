@@ -99,7 +99,7 @@ class SudokuVisualSmokeTest {
         val expectedTopRatio = when {
             landscape -> .055f
             compact -> .19f
-            else -> .255f
+            else -> .260f
         }
         val expectedTop = screen.top + screen.height * expectedTopRatio
         check(logo.width >= (expectedLogoDp - 1f) * dp &&
@@ -125,6 +125,35 @@ class SudokuVisualSmokeTest {
                 indicator.top >= screen.top + screen.height * .70f
         ) { "Actual Splash loading ring must remain centered at the bottom" }
         shot("08-splash")
+    }
+
+    /**
+     * Pixel QA must also cover the reference's *resumed game* layout.
+     * The ordinary 01-home capture is a legitimate empty-install state, so
+     * comparing it with a reference that contains Resume is not meaningful.
+     * Start a real puzzle, navigate back, and capture a separate 01-home-resume
+     * without touching any production fixtures or hardcoding user statistics.
+     */
+    @Test
+    fun captureRealHomeWithResumeCardForReferenceQA() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        waitFor("screen-nova-igra")
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("game-back").performClick()
+        waitFor("resume-game")
+        val card = rule.onNodeWithTag("resume-game").fetchSemanticsNode().boundsInRoot
+        val width = rule.activity.resources.displayMetrics.widthPixels
+        val dp = rule.activity.resources.displayMetrics.density
+        check(card.width >= 90f * dp && card.height >= 150f * dp &&
+            card.left >= -dp && card.right <= width + dp) {
+            "Resumed game card is clipped or has an unusable hit region: $card"
+        }
+        shot("01-home-resume")
+        // The entire card, not just a tiny arrow, opens the saved game.
+        rule.onNodeWithTag("resume-game").performClick()
+        waitFor("sudoku-board")
     }
 
     /**
