@@ -43,3 +43,8 @@ Odgovarajući `references/01-home.png` mora biti originalna korisnikova slika. I
 ### Statistika — nativna 3D dorada (3. 11. 2026.)
 - Uveden diskretan odsjaj gornjeg ruba statističkih kartica, svjetlosni halo oko četiri stvarne vektorske ikonice, obrubi stupaca i halo oko prstena dovršenosti.
 - Brojke, grafikon, postotak, povijest i dodiri i dalje dolaze iz stvarnog stanja aplikacije. Sljedeći korak ostaje usporedba `06-statistics.png` s izvornom referencom na emulatorskim profilima.
+
+### Postignuća i Postavke — nativne dorade (3. 11. 2026.)
+- Svaka kartica postignuća dobiva tanak tematski osvijetljen gornji rub, bez promjene sadržaja, zaključavanja, bodova ili događaja dodira.
+- U Postavkama su dodani diskretna staklena refleksija panela, radijalni halo ikonica i svijetli 3D gornji sloj Compose prekidača. Bijeli klizač je nijansiran; interakciju, spremanje i accessibility semantics i dalje vode postojeći stvarni `SettingToggle` i `SudokuController`.
+- Referentni `07-achievements.png` i `04-settings.png` treba usporediti sa stvarnim snimkama na više gustoća i veličina zaslona. Nema potvrde numeričke 1:1 jednakosti.

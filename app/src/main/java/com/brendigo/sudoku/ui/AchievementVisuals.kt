@@ -198,6 +198,13 @@ fun AchievementSurface(
             if (muted) {
                 drawRect(Color(0x50041430))
             }
+            // Narrow illuminated rim follows the reference's layered card.
+            drawLine(
+                color = edge.copy(alpha = if (muted) .15f else .52f),
+                start = Offset(w * .06f, 1.5.dp.toPx()),
+                end = Offset(w * .65f, 1.5.dp.toPx()),
+                strokeWidth = 1.25.dp.toPx(),
+            )
         }
         content()
     }

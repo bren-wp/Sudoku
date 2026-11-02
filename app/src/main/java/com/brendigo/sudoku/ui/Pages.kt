@@ -2576,13 +2576,28 @@ private fun SettingToggle(
                     ),
                     RoundedCornerShape(25.dp),
                 )
+                .drawBehind {
+                    // Glass highlight on the real, state-driven native switch.
+                    drawRoundRect(
+                        brush = Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = if (checked) .25f else .09f),
+                                Color.Transparent),
+                        ),
+                        size = androidx.compose.ui.geometry.Size(size.width, size.height * .45f),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(25.dp.toPx()),
+                    )
+                }
                 .border(1.dp, if (checked) Ink.cyan else Ink.muted.copy(alpha = .66f),
                     RoundedCornerShape(25.dp)),
             contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
             Box(
                 Modifier.padding(horizontal = 4.dp).size(20.dp)
-                    .background(Color.White, RoundedCornerShape(50)),
+                    .background(
+                        Brush.verticalGradient(listOf(Color.White, Color(0xFFD9ECFF))),
+                        RoundedCornerShape(50),
+                    )
+                    .border(.5.dp, Color(0xFFAAD9FF), RoundedCornerShape(50)),
             )
         }
     }
