@@ -55,6 +55,17 @@ jobs:
             resolution: 1200x1920
             density: 240
             artifact: sudoku-emulator-tablet-screenshots
+          # Boundary checks for 240dp and 400dp content layouts. These
+          # profiles run only Splash/Home tests; the five above run the
+          # full instrumentation suite.
+          - layout: tiny
+            resolution: 480x800
+            density: 320
+            artifact: sudoku-emulator-tiny-splash-home
+          - layout: medium
+            resolution: 800x1440
+            density: 320
+            artifact: sudoku-emulator-medium-splash-home
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -79,15 +90,19 @@ jobs:
           disable-animations: true
           emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
           script: |
-            # Five distinct layout profiles: reference, compact, 270dp narrow,
-            # 640x360dp landscape and 800dp tablet.
+            # Seven layout profiles, five full suites and two focused boundary tests:
+            # 270dp narrow, 640x360dp landscape, 800dp tablet, 240dp tiny and 400dp medium.
             # Only reference screenshots are compared to the owner's 941x1672 art.
             adb shell wm size ${{ matrix.resolution }}
             # Keep density stable to reveal layout overflow and touch targets.
             adb shell wm density ${{ matrix.density }}
             adb shell wm size
             adb shell wm density
-            bash .github/scripts/run-visual-smoke.sh
+            if [[ "${{ matrix.layout }}" == "tiny" || "${{ matrix.layout }}" == "medium" ]]; then
+              bash .github/scripts/run-visual-smoke.sh --splash-home-only
+            else
+              bash .github/scripts/run-visual-smoke.sh
+            fi
       - name: Upload instrumentation failure reports
         if: failure()
         uses: actions/upload-artifact@v4
