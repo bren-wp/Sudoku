@@ -1645,6 +1645,56 @@ private fun StatTile(
             .clickable(onClick = onClick),
         accent = color, background = metricCardColors(id), corner = 12.dp,
     ) {
+        if (id == "streak") {
+            // Reference-inspired native scenery, independently composited
+            // BEHIND real counters, labels and the clickable StatTile.
+            // No copied screenshot, no simulated user progression.
+            Canvas(Modifier.matchParentSize()) {
+                val w = size.width
+                val h = size.height
+                val moon = Offset(w * .83f, h * .30f)
+                drawCircle(
+                    Brush.radialGradient(
+                        listOf(Color(0x99F6A83E), Color(0x34F5AB4D),
+                            Color.Transparent),
+                        center = moon, radius = w * .43f,
+                    ),
+                    radius = w * .43f, center = moon,
+                )
+                drawCircle(Color(0xFFFBCE65).copy(alpha = .78f),
+                    radius = h * .18f, center = moon)
+                repeat(3) { layer ->
+                    val y = h * (.62f + layer * .09f)
+                    val ridge = Path().apply {
+                        moveTo(w * .34f, h)
+                        lineTo(w * .34f, y)
+                        for (index in 0..32) {
+                            val x = w * (.34f + .66f * index / 32f)
+                            val wave = kotlin.math.sin(index * .56f + layer * 1.1f) * .07f +
+                                kotlin.math.sin(index * .19f + 1.4f) * .045f
+                            lineTo(x, y - h * wave)
+                        }
+                        lineTo(w, h)
+                        close()
+                    }
+                    drawPath(
+                        ridge, Color(0xFF1D2023)
+                            .copy(alpha = .22f + layer * .16f),
+                    )
+                }
+                val roof = Path().apply {
+                    moveTo(w * .897f, h * .54f)
+                    quadraticBezierTo(w * .942f, h * .46f, w * .985f, h * .54f)
+                    lineTo(w * .973f, h * .56f)
+                    lineTo(w * .908f, h * .56f)
+                    close()
+                }
+                drawPath(roof, Color(0xFF161B23).copy(alpha = .90f))
+                drawRect(Color(0xFF161B23).copy(alpha = .86f),
+                    topLeft = Offset(w * .925f, h * .55f),
+                    size = androidx.compose.ui.geometry.Size(w * .032f, h * .22f))
+            }
+        }
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val compact = maxWidth < 176.dp
             Row(
