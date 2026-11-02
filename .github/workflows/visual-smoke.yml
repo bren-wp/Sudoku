@@ -36,6 +36,11 @@ jobs:
           - layout: reference
             resolution: 941x1672
             density: 320
+            # The full 41-test flow exhausted the reference emulator's
+            # graphics buffers and disconnected adb after ~14 cases.
+            # Capture the actual 941x1672 PNGs in a fresh bounded session.
+            # Full-suite coverage remains in the other lanes and tablet shards.
+            visual_args: "--reference-capture"
             artifact: sudoku-emulator-screen-references
           - layout: compact
             resolution: 720x1280
