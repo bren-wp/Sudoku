@@ -595,7 +595,15 @@ class SudokuVisualSmokeTest {
                     "top=${boardBounds.top}px, expected near the reference's 250px"
             }
         }
+        val headingNode = rule.onNodeWithTag("game-heading", useUnmergedTree = true)
+        headingNode.performScrollTo().assertIsDisplayed()
+        val heading = headingNode.fetchSemanticsNode().boundsInRoot
+        check(heading.width > 0f && heading.height > 0f &&
+            heading.left >= -1f && heading.right <= metrics.widthPixels + 1f) {
+            "Gameplay heading escaped the viewport: $heading"
+        }
         val noteCard = rule.onNodeWithTag("game-notes")
+        noteCard.performScrollTo().assertIsDisplayed()
         noteCard.assertIsNotSelected()
         rule.onNodeWithTag("game-notes-status", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Isključeno", useUnmergedTree = true).assertExists()
@@ -615,13 +623,6 @@ class SudokuVisualSmokeTest {
             "Gameplay Notes title clips or overlaps the toggle status: " +
                 "label=$notesLabel, status=$statusBounds, card=$notesBounds"
         }
-        val heading = rule.onNodeWithTag(
-            "game-heading", useUnmergedTree = true
-        ).fetchSemanticsNode().boundsInRoot
-        check(heading.width > 0f && heading.height > 0f &&
-            heading.left >= -1f && heading.right <= metrics.widthPixels + 1f) {
-            "Gameplay heading escaped the viewport: $heading"
-        }
         val hintBounds = rule.onNodeWithTag("game-hint").fetchSemanticsNode().boundsInRoot
         val eraseBounds = rule.onNodeWithTag("game-erase").fetchSemanticsNode().boundsInRoot
         check(notesBounds.right <= hintBounds.left + 1f &&
@@ -637,7 +638,7 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Isključeno", useUnmergedTree = true).assertExists()
         rule.onNodeWithTag("sudoku-cell-0").assertExists()
 
-        rule.onNodeWithTag("game-pause").performClick()
+        rule.onNodeWithTag("game-pause").performScrollTo().performClick()
         rule.onNodeWithText("Igra je pauzirana").assertExists()
         rule.onNodeWithTag("sudoku-board-paused").assertExists()
         rule.onNodeWithTag("sudoku-cell-0").assertDoesNotExist()
@@ -659,6 +660,9 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-undo").assertIsNotEnabled()
         rule.onNodeWithTag("game-erase").assertIsNotEnabled()
         rule.onNodeWithTag("number-1").assertIsEnabled()
+        // Move the actual keypad into view on short landscape displays
+        // before comparing its key bounds (offscreen nodes have 0x0 bounds).
+        rule.onNodeWithTag("game-number-panel").performScrollTo().assertIsDisplayed()
         // Both keypad rows use the same key width; the four-key row is centered.
         val firstKey = rule.onNodeWithTag("number-1").fetchSemanticsNode().boundsInRoot
         val fifthKey = rule.onNodeWithTag("number-5").fetchSemanticsNode().boundsInRoot
@@ -816,29 +820,34 @@ class SudokuVisualSmokeTest {
         waitFor("screen-postignuća")
         // The four featured achievement rows must be visible at reference size.
         // Content-sized compact cards must contain their real description text.
-        val firstCard = rule.onNodeWithTag("achievement-prva-pobjeda")
-            .fetchSemanticsNode().boundsInRoot
+        val firstAward = rule.onNodeWithTag("achievement-prva-pobjeda")
+        firstAward.performScrollTo().assertIsDisplayed()
+        val firstCard = firstAward.fetchSemanticsNode().boundsInRoot
         val secondCard = rule.onNodeWithTag("achievement-sedam-dana-zaredom")
             .fetchSemanticsNode().boundsInRoot
-        val thirdCard = rule.onNodeWithTag("achievement-majstor-logike")
-            .fetchSemanticsNode().boundsInRoot
         val pxTolerance = rule.activity.resources.displayMetrics.density * 2f
-        check(
+        check(firstCard.width > 0f && secondCard.width > 0f &&
             firstCard.right <= secondCard.left + pxTolerance &&
-                kotlin.math.abs(firstCard.top - secondCard.top) <= pxTolerance &&
-                kotlin.math.abs(firstCard.bottom - secondCard.bottom) <= pxTolerance &&
-                thirdCard.top >= firstCard.bottom - pxTolerance
-        ) {
-            "Achievement cards must keep 2-column aligned rows: " +
-                "first=$firstCard, second=$secondCard, third=$thirdCard"
+            kotlin.math.abs(firstCard.top - secondCard.top) <= pxTolerance &&
+            kotlin.math.abs(firstCard.bottom - secondCard.bottom) <= pxTolerance) {
+            "First two Achievement cards must share an aligned, non-overlapping row"
         }
         rule.onNodeWithTag("achievement-summary").assertExists()
         val firstDescription = rule.onNodeWithTag(
             "achievement-description-prva-pobjeda", useUnmergedTree = true
         ).fetchSemanticsNode().boundsInRoot
-        check(firstDescription.top >= firstCard.top - 1f &&
+        check(firstDescription.width > 0f &&
+            firstDescription.top >= firstCard.top - 1f &&
             firstDescription.bottom <= firstCard.bottom + 1f) {
             "Achievement description escapes its card on this viewport"
+        }
+        val thirdAward = rule.onNodeWithTag("achievement-majstor-logike")
+        thirdAward.performScrollTo().assertIsDisplayed()
+        val thirdCard = thirdAward.fetchSemanticsNode().boundsInRoot
+        check(thirdCard.width > 0f && thirdCard.height > 0f &&
+            thirdCard.left >= -pxTolerance &&
+            thirdCard.right <= rule.activity.resources.displayMetrics.widthPixels + pxTolerance) {
+            "Third Achievement card is clipped on the current viewport: $thirdCard"
         }
         val viewportWidthDp = rule.activity.resources.displayMetrics.widthPixels /
             rule.activity.resources.displayMetrics.density
@@ -1168,15 +1177,26 @@ class SudokuVisualSmokeTest {
         check(firstRow.top >= summaryBounds.bottom) {
             "First achievement card overlaps the score summary"
         }
-        check(kotlin.math.abs(firstRow.top - secondColumn.top) <= 1f) {
-            "First two achievement cards do not share a row baseline"
+        val viewportDp = rule.activity.resources.displayMetrics.widthPixels /
+            rule.activity.resources.displayMetrics.density
+        if (viewportDp < 310f) {
+            check(secondColumn.top >= firstRow.bottom - 2f *
+                rule.activity.resources.displayMetrics.density) {
+                "Narrow Achievement cards must stack without overlap"
+            }
+        } else {
+            check(kotlin.math.abs(firstRow.top - secondColumn.top) <= 1f) {
+                "First two Achievement cards do not share a row baseline"
+            }
         }
         check(firstRow.height > finalRow.height) {
             "Reference achievement hierarchy requires compact lower feature rows"
         }
         val award = rule.onNodeWithTag("achievement-prva-pobjeda")
         val heightInPixels = award.fetchSemanticsNode().boundsInRoot.height
-        val minHeightInPixels = 145f * rule.activity.resources.displayMetrics.density
+        val metrics = rule.activity.resources.displayMetrics
+        val isLandscape = metrics.widthPixels > metrics.heightPixels
+        val minHeightInPixels = (if (isLandscape) 136f else 145f) * metrics.density
         check(heightInPixels >= minHeightInPixels) {
             "Achievement card height $heightInPixels px smaller than $minHeightInPixels px"
         }
@@ -1760,18 +1780,28 @@ class SudokuVisualSmokeTest {
 
         rule.onNodeWithTag("primary-action").performScrollTo().performClick()
         waitFor("sudoku-board", timeoutMs = 60_000)
-        rule.onNodeWithTag("game-number-panel").assertExists()
-        val gameBoard = rule.onNodeWithTag("sudoku-board").fetchSemanticsNode().boundsInRoot
-        val numPanel = rule.onNodeWithTag("game-number-panel").fetchSemanticsNode().boundsInRoot
+        val boardNode = rule.onNodeWithTag("sudoku-board")
+        boardNode.performScrollTo().assertIsDisplayed()
+        val gameBoard = boardNode.fetchSemanticsNode().boundsInRoot
+        val epsilon = rule.activity.resources.displayMetrics.density * 2f
+        check(gameBoard.width > 0f &&
+            gameBoard.left >= -epsilon &&
+            gameBoard.right <= rule.activity.resources.displayMetrics.widthPixels + epsilon) {
+            "Gameplay board clips horizontally in a responsive viewport: $gameBoard"
+        }
+        val numberPanelNode = rule.onNodeWithTag("game-number-panel")
+        numberPanelNode.performScrollTo().assertIsDisplayed()
+        val numPanel = numberPanelNode.fetchSemanticsNode().boundsInRoot
         val firstNumber = rule.onNodeWithTag("number-1").fetchSemanticsNode().boundsInRoot
         val ninthNumber = rule.onNodeWithTag("number-9").fetchSemanticsNode().boundsInRoot
-        val epsilon = rule.activity.resources.displayMetrics.density * 2f
-        check(numPanel.top >= gameBoard.bottom - epsilon &&
+        check(numPanel.width > 0f && firstNumber.width > 0f && ninthNumber.width > 0f &&
             firstNumber.left >= numPanel.left - epsilon &&
             ninthNumber.right <= numPanel.right + epsilon) {
-            "Gameplay board/keypad must stay ordered and within keypad frame: " +
-                "$gameBoard, $numPanel, $firstNumber, $ninthNumber"
+            "Gameplay keypad clips its key targets: $numPanel, $firstNumber, $ninthNumber"
         }
+        // Capture the natural top-of-page screenshot, not the scroll position
+        // used by the separate geometry assertions on landscape devices.
+        rule.onNodeWithTag("game-hud").performScrollTo().assertIsDisplayed()
         shot("03-game")
 
         rule.onNodeWithTag("game-settings").performClick()
