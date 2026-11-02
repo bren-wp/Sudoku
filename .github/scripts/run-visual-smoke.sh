@@ -42,10 +42,13 @@ for attempt in 1 2 3; do
   echo "Android visual test attempt: $attempt"
   if gradle --no-daemon :app:connectedDebugAndroidTest "${gradle_args[@]}" 2>&1 | tee /tmp/sudoku-visual-gradle.log; then
     if [[ "${1:-}" == "--reference-capture" ]]; then
-      # MediaStore screenshots in /sdcard/Pictures/SudokuQA survive pm clear;
-      # only this ephemeral emulator's application data is reset.
-      echo "Isolating resume-state screenshot from clean Home capture"
-      adb shell pm clear com.brendigo.sudoku
+      # Keep the clean Home capture intact: it is already complete and
+      # stored in MediaStore before the separate resume-state invocation.
+      # Do not run 'adb shell pm clear' here: on Android 15 it may return
+      # "Failed" even after successful instrumentation and abort this lane.
+      # Isolation is by test ORDER and a separate instrumentation invocation:
+      # only the later test creates/captures 01-home-resume.png, never 01-home.
+      echo "Capturing the real resume-state Home in separate instrumentation"
       # A different instrumentation filter is a distinct Gradle task input.
       # Do not retry assertions, mask exit codes, or fabricate game state.
       gradle --no-daemon :app:connectedDebugAndroidTest \
