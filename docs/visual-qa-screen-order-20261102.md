@@ -48,3 +48,8 @@ Odgovarajući `references/01-home.png` mora biti originalna korisnikova slika. I
 - Svaka kartica postignuća dobiva tanak tematski osvijetljen gornji rub, bez promjene sadržaja, zaključavanja, bodova ili događaja dodira.
 - U Postavkama su dodani diskretna staklena refleksija panela, radijalni halo ikonica i svijetli 3D gornji sloj Compose prekidača. Bijeli klizač je nijansiran; interakciju, spremanje i accessibility semantics i dalje vode postojeći stvarni `SettingToggle` i `SudokuController`.
 - Referentni `07-achievements.png` i `04-settings.png` treba usporediti sa stvarnim snimkama na više gustoća i veličina zaslona. Nema potvrde numeričke 1:1 jednakosti.
+
+## Popravak vizualnog CI-ja — 3. 11. 2026.
+- Pad landscape runnera na SHA `4eb310d00` nastao je pri raspakiravanju `system-images;android-35;default;x86_64` (nevaljan SDK ZIP), **prije pokretanja aplikacijskih testova**. Preinstalacija sada provjerava i `emulator` i `system.img`, pokušava samo SDK preuzimanje najviše tri puta te briše isključivo nedovršenu sistemsku sliku na izoliranom CI runneru.
+- `--reference-capture`: glavna snimka `01-home.png` više ne dijeli istu instrumentacijsku invokaciju sa stvaranjem sačuvane partije za `01-home-resume.png`. Prije zasebne resume invokacije briše se samo podatkovno stanje emulatorove aplikacije, dok stvarne PNG snimke ostaju u MediaStoreu.
+- Nijedan testni assert nije ublažen niti uklonjen; svih 11 emulatorskih profila ostaje uključeno.

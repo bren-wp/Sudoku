@@ -26,7 +26,10 @@ elif [[ "${1:-}" == "--tablet-shard" ]]; then
 elif [[ "${1:-}" == "--reference-capture" ]]; then
   # The owner's Home reference has an unfinished game. Export that real
   # state separately instead of distorting the screenshot from a fresh app.
-  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealHomeWithResumeCardForReferenceQA")
+  # First collect the clean-install Home and other reference screens.
+  # A separate invocation AFTER resetting only the emulator app data creates
+  # the real resume state, so it cannot contaminate 01-home.png.
+  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa")
   export_args+=("--reference-capture")
 elif [[ "${1:-}" == "--tablet-capture" ]]; then
   # Bounded real-Android capture prevents exhausting emulator graphics buffers.
@@ -38,6 +41,17 @@ fi
 for attempt in 1 2 3; do
   echo "Android visual test attempt: $attempt"
   if gradle --no-daemon :app:connectedDebugAndroidTest "${gradle_args[@]}" 2>&1 | tee /tmp/sudoku-visual-gradle.log; then
+    if [[ "${1:-}" == "--reference-capture" ]]; then
+      # MediaStore screenshots in /sdcard/Pictures/SudokuQA survive pm clear;
+      # only this ephemeral emulator's application data is reset.
+      echo "Isolating resume-state screenshot from clean Home capture"
+      adb shell pm clear com.brendigo.sudoku
+      # A different instrumentation filter is a distinct Gradle task input.
+      # Do not retry assertions, mask exit codes, or fabricate game state.
+      gradle --no-daemon :app:connectedDebugAndroidTest \
+        "-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealHomeWithResumeCardForReferenceQA" \
+        2>&1 | tee /tmp/sudoku-resume-gradle.log
+    fi
     if [[ "$skip_export" == false ]]; then
       bash .github/scripts/export-emulator-screenshots.sh "${export_args[@]}"
     fi
