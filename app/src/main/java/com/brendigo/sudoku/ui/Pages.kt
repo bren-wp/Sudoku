@@ -430,13 +430,27 @@ fun HomePage(controller: SudokuController) {
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (maxWidth >= 300.dp) {
+                        // Two columns remain legible at 300-369dp content
+                        // widths. On very narrow phones each tile gets a
+                        // full-width touch target and readable Croatian text.
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            HomeTile("Statistika", "Prati svoj napredak",
+                                Ink.blue, Modifier.weight(1f), compact = true) {
+                                controller.go(Screen.STATS)
+                            }
+                            HomeTile("Postignuća", "Otkrij sve nagrade",
+                                Ink.purple, Modifier.weight(1f), compact = true) {
+                                controller.go(Screen.ACHIEVEMENTS)
+                            }
+                        }
+                    } else {
                         HomeTile("Statistika", "Prati svoj napredak",
-                            Ink.blue, Modifier.weight(1f), compact = true) {
+                            Ink.blue, Modifier.fillMaxWidth(), compact = true) {
                             controller.go(Screen.STATS)
                         }
                         HomeTile("Postignuća", "Otkrij sve nagrade",
-                            Ink.purple, Modifier.weight(1f), compact = true) {
+                            Ink.purple, Modifier.fillMaxWidth(), compact = true) {
                             controller.go(Screen.ACHIEVEMENTS)
                         }
                     }
