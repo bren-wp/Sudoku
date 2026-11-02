@@ -5,7 +5,7 @@ mkdir -p "$OUT"
 adb pull /sdcard/Pictures/SudokuQA/. "$OUT/"
 count=0
 if [[ "${1:-}" == "--splash-home-only" ]]; then
-  pictures=(01-home 08-splash)
+  pictures=(01-home 02-new-game 08-splash)
 else
   pictures=(01-home 02-new-game 03-game 04-settings 05-daily 06-statistics 07-achievements 08-splash 09-wordmark 10-launcher-icon 11-launcher-monochrome)
 fi
