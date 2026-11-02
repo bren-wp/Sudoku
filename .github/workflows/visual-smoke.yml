@@ -56,7 +56,7 @@ jobs:
             density: 240
             artifact: sudoku-emulator-tablet-screenshots
           # Boundary checks for 240dp and 400dp content layouts. These
-          # profiles run only Splash/Home tests; the five above run the
+          # profiles run only Splash/Home/New Game tests; the five above run the
           # full instrumentation suite.
           - layout: tiny
             resolution: 480x800
