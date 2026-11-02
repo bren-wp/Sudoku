@@ -20,9 +20,9 @@ elif [[ "${1:-}" == "--tablet-shard" ]]; then
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.numShards=$total")
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.shardIndex=$index")
   skip_export=true
-elif [[ "${1:-}" == "--tablet-capture" ]]; then
+elif [[ "${1:-}" == "--tablet-capture" || "${1:-}" == "--reference-capture" ]]; then
   # Short isolated capture run produces all eleven screenshot names with
-  # real Android content, without recycling graphics buffers for 41 tests.
+  # real Android content, without recycling graphics buffers for 41 tests.\n  # Full 41-test coverage still runs on the independent tablet shards and\n  # secondary emulator profiles; this lane is reserved for real PNG evidence.
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa")
 fi
 # Only retry known transient Maven Central rate limits. A failing assertion,
