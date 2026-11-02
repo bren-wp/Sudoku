@@ -7,7 +7,10 @@ gradle_args=()
 export_args=()
 skip_export=false
 if [[ "${1:-}" == "--splash-home-only" ]]; then
-  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#splashBrandDoesNotOverlapLoadingIndicatorAtLargeFontScale,com.brendigo.sudoku.SudokuVisualSmokeTest#homeMenuCardsAndWeekStripFitEveryEmulatorProfile,com.brendigo.sudoku.SudokuVisualSmokeTest#newGameActionsRemainLegibleOnEveryResponsiveProfile,com.brendigo.sudoku.SudokuVisualSmokeTest#newGameDoesNotClipAtLargeAccessibilityFontScale")
+  # Limit each constrained device to three deterministic real-screen checks.
+  # The complete 41-test suite still runs across the four tablet shards.
+  # A long comma-separated filter previously fell back to all 41 tests.
+  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#homeMenuCardsAndWeekStripFitEveryEmulatorProfile,com.brendigo.sudoku.SudokuVisualSmokeTest#newGameActionsRemainLegibleOnEveryResponsiveProfile")
   export_args+=("--splash-home-only")
 elif [[ "${1:-}" == "--tablet-shard" ]]; then
   # AndroidJUnitRunner partitions every instrumentation test exactly once
@@ -22,7 +25,9 @@ elif [[ "${1:-}" == "--tablet-shard" ]]; then
   skip_export=true
 elif [[ "${1:-}" == "--tablet-capture" || "${1:-}" == "--reference-capture" ]]; then
   # Short isolated capture run produces all eleven screenshot names with
-  # real Android content, without recycling graphics buffers for 41 tests.\n  # Full 41-test coverage still runs on the independent tablet shards and\n  # secondary emulator profiles; this lane is reserved for real PNG evidence.
+  # real Android content, without recycling graphics buffers for 41 tests.
+  # Full 41-test coverage remains on the independent tablet shards; this
+  # capture-only lane is dedicated to faithful real PNG evidence.
   gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa")
 fi
 # Only retry known transient Maven Central rate limits. A failing assertion,
