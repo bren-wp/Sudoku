@@ -1084,7 +1084,11 @@ class SudokuVisualSmokeTest {
         }
         rule.onNodeWithTag("stats-history-panel").assertExists()
         rule.onNodeWithTag("stats-achievements").assertExists()
-        rule.onNodeWithTag("stat-tile-best").performClick()
+        // On narrow phones the Stats tiles have scrolled off-screen while
+        // we inspect the lower chart and ring. Bring the real tile back
+        // into view before validating its explanatory dialog.
+        rule.onNodeWithTag("stat-tile-best")
+            .performScrollTo().assertIsDisplayed().performClick()
         rule.onNodeWithText("Najbrže vrijeme dovršene Sudoku partije.").assertExists()
         rule.onNodeWithText("Zatvori").performClick()
         // The entire 48dp history header is an accessible click target.
