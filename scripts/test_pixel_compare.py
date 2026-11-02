@@ -1,13 +1,15 @@
 """Regression tests for reference screenshot metrics; no Android emulator required."""
 from __future__ import annotations
 
+import csv
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from PIL import Image
 
-from pixel_compare import REFERENCE_SIZE, compare
+from pixel_compare import REFERENCE_SIZE, SCREENS, compare, main as pixel_compare_main
 from home_pixel_qa import measure_home, measure_regions
 from new_game_pixel_qa import REGIONS as NEW_GAME_REGIONS
 from gameplay_pixel_qa import REGIONS as GAMEPLAY_REGIONS
@@ -22,6 +24,44 @@ from final_ten_reference_qa import TEN, THEMED, audit, validate_image
 
 
 class PixelCompareTest(unittest.TestCase):
+    def test_resume_home_capture_is_explicit_and_never_confused_with_empty_home(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            references = root / "refs"
+            actual = root / "actual"
+            output = root / "diff"
+            references.mkdir()
+            actual.mkdir()
+            for name in SCREENS:
+                # The reference screenshot contains Resume. A clean Home
+                # screenshot must never be passed off as matching that state.
+                Image.new("RGB", REFERENCE_SIZE, (2, 20, 49)).save(
+                    references / f"{name}.png"
+                )
+                Image.new("RGB", REFERENCE_SIZE, (2, 20, 49)).save(
+                    actual / f"{name}.png"
+                )
+            Image.new("RGB", REFERENCE_SIZE, (125, 22, 49)).save(
+                actual / "01-home.png"
+            )
+            Image.new("RGB", REFERENCE_SIZE, (2, 20, 49)).save(
+                actual / "01-home-resume.png"
+            )
+            arguments = [
+                "pixel_compare.py",
+                "--reference-dir", str(references),
+                "--actual-dir", str(actual),
+                "--output-dir", str(output),
+                "--home-resume",
+            ]
+            with patch("sys.argv", arguments):
+                self.assertEqual(pixel_compare_main(), 0)
+            with (output / "report.csv").open(newline="", encoding="utf-8") as handle:
+                rows = list(csv.DictReader(handle))
+            self.assertEqual(rows[0]["screen"], "01-home")
+            self.assertEqual(rows[0]["actual_capture"], "01-home-resume")
+            self.assertEqual(float(rows[0]["mean_error_0_to_255"]), 0)
+
     def test_home_reference_areas_isolate_card_regressions(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
