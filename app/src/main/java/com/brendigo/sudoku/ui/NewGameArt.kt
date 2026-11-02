@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -196,7 +197,7 @@ fun NewGameStartAction(
     modifier: Modifier = Modifier,
 ) {
     val round = RoundedCornerShape(50)
-    Box(modifier.heightIn(min = 53.dp).clip(round)
+    BoxWithConstraints(modifier.heightIn(min = 53.dp).clip(round)
         .background(Brush.verticalGradient(if (enabled) listOf(
             Color(0xFF10C9FF), Color(0xFF087FFB), Color(0xFF0757EE))
             else listOf(Color.DarkGray, Color.Gray)))
@@ -205,6 +206,12 @@ fun NewGameStartAction(
         .semantics { contentDescription = title; role = Role.Button }
         .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center) {
+        // Preserve the reference CTA at normal sizes. Fit its real text
+        // and icon into a 240dp phone with 1.8x accessibility font scale.
+        val scale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+        val narrowAction = maxWidth < 225.dp || scale > 1.3f
+        val labelSize = minOf(21f, ((maxWidth.value - 50f) / (6.9f * scale))
+            .coerceAtLeast(10f)).sp
         Canvas(Modifier.matchParentSize()) {
             drawLine(Color.White.copy(alpha = .30f),
                 Offset(size.width * .07f, 1.5f),
@@ -213,10 +220,11 @@ fun NewGameStartAction(
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center) {
             if (enabled) {
-                BrandIcon("play-filled", Modifier.size(26.dp), Ink.white)
-                Spacer(Modifier.width(14.dp))
+                BrandIcon("play-filled", Modifier.size(if (narrowAction) 20.dp else 26.dp), Ink.white)
+                Spacer(Modifier.width(if (narrowAction) 7.dp else 14.dp))
             }
-            Text(title, color = Ink.white, fontSize = 21.sp,
+            Text(title, modifier = Modifier.testTag("new-game-start-label"),
+                color = Ink.white, fontSize = labelSize,
                 fontWeight = FontWeight.ExtraBold, maxLines = 1)
         }
     }
