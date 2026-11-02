@@ -98,11 +98,7 @@ jobs:
             adb shell wm density ${{ matrix.density }}
             adb shell wm size
             adb shell wm density
-            if [[ "${{ matrix.layout }}" == "tiny" || "${{ matrix.layout }}" == "medium" ]]; then
-              bash .github/scripts/run-visual-smoke.sh --splash-home-only
-            else
-              bash .github/scripts/run-visual-smoke.sh
-            fi
+            bash .github/scripts/run-visual-smoke.sh $(if [ "${{ matrix.layout }}" = "tiny" ] || [ "${{ matrix.layout }}" = "medium" ]; then echo --splash-home-only; fi)
       - name: Upload instrumentation failure reports
         if: failure()
         uses: actions/upload-artifact@v4
