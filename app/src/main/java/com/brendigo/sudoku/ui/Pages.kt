@@ -866,11 +866,22 @@ fun NewGamePage(controller: SudokuController) {
             }
         }
         Spacer(Modifier.height(2.dp))
-        Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
-            .padding(start = 5.dp)) {
-            AccentText("Nova igra", 55, Modifier.testTag("new-game-title"))
-            Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp,
-                modifier = Modifier.testTag("new-game-subtitle"))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            // Keep the 55sp reference heading on full-size phones; fit it to
+            // real available width on 240dp devices and at large font scales.
+            // This stays live Compose text rather than a scaled bitmap.
+            val headingSize = minOf(
+                55,
+                (maxWidth.value / (5.3f * LocalDensity.current.fontScale))
+                    .toInt().coerceAtLeast(20),
+            )
+            Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
+                .padding(start = 5.dp)) {
+                AccentText("Nova igra", headingSize, Modifier.testTag("new-game-title"))
+                Text("Odaberi težinu", color = Ink.muted,
+                    fontSize = if (maxWidth < 300.dp) 17.sp else 21.sp,
+                    modifier = Modifier.testTag("new-game-subtitle"))
+            }
         }
         Spacer(Modifier.height(1.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
