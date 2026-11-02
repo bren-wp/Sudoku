@@ -1654,16 +1654,35 @@ private fun StatTile(
                 ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandIcon(
-                    when (id) {
-                        "played" -> "gamepad"
-                        "best" -> "timer"
-                        "total" -> "timer"
-                        "streak" -> "flame-solid"
-                        else -> "statistics"
-                    },
-                    Modifier.size(if (compact) 34.dp else 44.dp), color,
-                )
+                // Bright individual neon halo behind the existing native
+                // icon. Reference metric cards show a soft cyan/purple/gold
+                // highlight instead of a flat unlit symbol.
+                Box(
+                    Modifier.size(if (compact) 34.dp else 44.dp)
+                        .drawBehind {
+                            val center = Offset(size.width / 2f, size.height / 2f)
+                            drawCircle(
+                                Brush.radialGradient(
+                                    listOf(color.copy(alpha = .28f),
+                                        color.copy(alpha = .09f), Color.Transparent),
+                                    center = center, radius = size.width * .82f,
+                                ),
+                                radius = size.width * .82f, center = center,
+                            )
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    BrandIcon(
+                        when (id) {
+                            "played" -> "gamepad"
+                            "best" -> "timer"
+                            "total" -> "timer"
+                            "streak" -> "flame-solid"
+                            else -> "statistics"
+                        },
+                        Modifier.fillMaxSize(), color,
+                    )
+                }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -1833,14 +1852,15 @@ fun AchievementsPage(controller: SudokuController) {
                                                 Brush.radialGradient(
                                                     listOf(
                                                         achievement.tint.copy(
-                                                            alpha = if (unlocked) .32f else .14f
+                                                            alpha = if (unlocked) .39f
+                                                            else if (rowIndex < 3) .29f else .14f
                                                         ),
                                                         Color.Transparent,
                                                     ),
                                                     center = mid,
-                                                    radius = size.width * .68f,
+                                                    radius = size.width * .79f,
                                                 ),
-                                                radius = size.width * .68f,
+                                                radius = size.width * .79f,
                                                 center = mid,
                                             )
                                         },
@@ -1850,7 +1870,9 @@ fun AchievementsPage(controller: SudokuController) {
                                     BrandIcon(achievementIconFor(achievement.title),
                                         Modifier.size(if (compactFeatured) 37.dp else 47.dp),
                                         if (unlocked) achievement.tint
-                                        else achievement.tint.copy(alpha = .68f))
+                                        else achievement.tint.copy(
+                                            alpha = if (rowIndex < 3) .95f else .68f
+                                        ))
                                     if (!unlocked) {
                                         Box(
                                             Modifier.size(if (compactFeatured) 18.dp else 20.dp)
