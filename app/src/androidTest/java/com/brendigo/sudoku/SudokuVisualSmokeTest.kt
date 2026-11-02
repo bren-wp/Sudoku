@@ -1679,8 +1679,14 @@ class SudokuVisualSmokeTest {
                 val sampleX = intArrayOf(
                     (shot.width * .18f).toInt(), (shot.width * .82f).toInt()
                 )
+                // On tablets the Android system can retain a bright
+                // off-activity strip near 18% of full-screen height even
+                // though our actual Compose wordmark canvas is fully drawn.
+                // Sample both interior background regions *outside* the
+                // center wordmark, not system-owned pixels above the studio.
+                // Recovery below still processes only the centered half.
                 val sampleY = intArrayOf(
-                    (shot.height * .18f).toInt(), (shot.height * .82f).toInt()
+                    (shot.height * .32f).toInt(), (shot.height * .68f).toInt()
                 )
                 val stable = sampleX.all { x -> sampleY.all { y ->
                     val color = shot.getPixel(x, y)
