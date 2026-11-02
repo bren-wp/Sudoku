@@ -1654,35 +1654,16 @@ private fun StatTile(
                 ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Bright individual neon halo behind the existing native
-                // icon. Reference metric cards show a soft cyan/purple/gold
-                // highlight instead of a flat unlit symbol.
-                Box(
-                    Modifier.size(if (compact) 34.dp else 44.dp)
-                        .drawBehind {
-                            val center = Offset(size.width / 2f, size.height / 2f)
-                            drawCircle(
-                                Brush.radialGradient(
-                                    listOf(color.copy(alpha = .28f),
-                                        color.copy(alpha = .09f), Color.Transparent),
-                                    center = center, radius = size.width * .82f,
-                                ),
-                                radius = size.width * .82f, center = center,
-                            )
-                        },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    BrandIcon(
-                        when (id) {
-                            "played" -> "gamepad"
-                            "best" -> "timer"
-                            "total" -> "timer"
-                            "streak" -> "flame-solid"
-                            else -> "statistics"
-                        },
-                        Modifier.fillMaxSize(), color,
-                    )
-                }
+                BrandIcon(
+                    when (id) {
+                        "played" -> "gamepad"
+                        "best" -> "timer"
+                        "total" -> "timer"
+                        "streak" -> "flame-solid"
+                        else -> "statistics"
+                    },
+                    Modifier.size(if (compact) 34.dp else 44.dp), color,
+                )
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -1853,14 +1834,14 @@ fun AchievementsPage(controller: SudokuController) {
                                                     listOf(
                                                         achievement.tint.copy(
                                                             alpha = if (unlocked) .39f
-                                                            else if (rowIndex < 3) .29f else .14f
+                                                            else if (rowIndex < 2) .29f else .14f
                                                         ),
                                                         Color.Transparent,
                                                     ),
                                                     center = mid,
-                                                    radius = size.width * .79f,
+                                                    radius = size.width * if (rowIndex < 2) .79f else .68f,
                                                 ),
-                                                radius = size.width * .79f,
+                                                radius = size.width * if (rowIndex < 2) .79f else .68f,
                                                 center = mid,
                                             )
                                         },
@@ -1871,7 +1852,7 @@ fun AchievementsPage(controller: SudokuController) {
                                         Modifier.size(if (compactFeatured) 37.dp else 47.dp),
                                         if (unlocked) achievement.tint
                                         else achievement.tint.copy(
-                                            alpha = if (rowIndex < 3) .95f else .68f
+                                            alpha = if (rowIndex < 2) .95f else .68f
                                         ))
                                     if (!unlocked) {
                                         Box(
