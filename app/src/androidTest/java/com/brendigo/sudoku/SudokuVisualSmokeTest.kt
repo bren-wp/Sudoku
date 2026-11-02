@@ -78,12 +78,37 @@ class SudokuVisualSmokeTest {
             .fetchSemanticsNode().boundsInRoot
         val dp = rule.activity.resources.displayMetrics.density
         val middle = (screen.left + screen.right) / 2f
-        check(logo.width >= 90f * dp &&
-            logo.height >= 90f * dp &&
+        // Mirror the actual SplashPage breakpoints. An 80dp narrow-screen
+        // logo or a 70dp landscape logo is intentional, not a regression.
+        // Check geometry against its own viewport without weakening the
+        // alignment, clipping or element-order assertions below.
+        val widthDp = screen.width / dp
+        val heightDp = screen.height / dp
+        val landscape = widthDp > heightDp
+        val narrow = widthDp < 310f
+        val compact = heightDp < 700f || widthDp < 385f
+        val expectedLogoDp = when {
+            landscape -> 70f
+            narrow -> 80f
+            compact -> 92f
+            else -> 124f
+        }
+        val expectedTopRatio = when {
+            landscape -> .055f
+            compact -> .19f
+            else -> .255f
+        }
+        val expectedTop = screen.top + screen.height * expectedTopRatio
+        check(logo.width >= (expectedLogoDp - 1f) * dp &&
+            logo.height >= (expectedLogoDp - 1f) * dp &&
+            logo.width <= (expectedLogoDp + 2f) * dp &&
+            logo.height <= (expectedLogoDp + 2f) * dp &&
             kotlin.math.abs(logo.center.x - middle) <= 3f * dp &&
-            logo.top >= screen.top + screen.height * .17f &&
-            logo.top <= screen.top + screen.height * .35f) {
-            "Actual Splash 7-3-9 logo is mis-sized or off-axis: $logo / $screen"
+            kotlin.math.abs(logo.top - expectedTop) <= 4f * dp &&
+            logo.left >= screen.left - dp &&
+            logo.right <= screen.right + dp) {
+            "Actual Splash 7-3-9 logo mismatches the $widthDp x $heightDp dp profile: " +
+                "logo=$logo, viewport=$screen, expected=${expectedLogoDp}dp"
         }
         check(logo.bottom <= title.top + 2f * dp &&
             title.bottom <= byline.top + 2f * dp &&
@@ -97,6 +122,52 @@ class SudokuVisualSmokeTest {
                 indicator.top >= screen.top + screen.height * .70f
         ) { "Actual Splash loading ring must remain centered at the bottom" }
         shot("08-splash")
+    }
+
+    /**
+     * Home navigation tiles and the seven-day strip must remain usable at the
+     * configured device densities and orientations. Scroll each real Compose
+     * action into view before checking its touch region, so small screens do
+     * not return clipped/offscreen bounds.
+     */
+    @Test
+    fun homeMenuCardsAndWeekStripFitEveryEmulatorProfile() {
+        waitFor("home-nova-igra")
+        val density = rule.activity.resources.displayMetrics.density
+        val viewportWidth = rule.activity.resources.displayMetrics.widthPixels
+        val tags = listOf(
+            "home-nova-igra", "home-dnevni-izazov", "home-statistika",
+            "home-postignuća", "home-postavke"
+        )
+        tags.forEach { tag ->
+            val tile = rule.onNodeWithTag(tag)
+            tile.performScrollTo().assertIsDisplayed()
+            val rect = tile.fetchSemanticsNode().boundsInRoot
+            check(rect.width >= 90f * density &&
+                rect.height >= 90f * density &&
+                rect.left >= -density &&
+                rect.right <= viewportWidth + density) {
+                "Home action $tag is clipped or too small: $rect"
+            }
+        }
+        val week = rule.onNodeWithTag("home-week-days")
+        week.performScrollTo().assertIsDisplayed()
+        val row = week.fetchSemanticsNode().boundsInRoot
+        val days = (0..6).map { index ->
+            rule.onNodeWithTag("home-weekday-$index")
+                .fetchSemanticsNode().boundsInRoot
+        }
+        check(days.all {
+            it.width > 0f && it.height > 0f &&
+                it.left >= row.left - density &&
+                it.right <= row.right + density
+        }) { "Home week markers overflow their parent on $viewportWidth px: $days / $row" }
+        days.zipWithNext().forEach { (left, right) ->
+            check(left.right <= right.left + density &&
+                kotlin.math.abs(left.top - right.top) <= 2f * density) {
+                "Home week markers overlap or lose their weekday order: $left / $right"
+            }
+        }
     }
 
     /**
