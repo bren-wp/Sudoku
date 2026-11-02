@@ -41,6 +41,84 @@ jobs:
             resolution: 720x1280
             density: 320
             artifact: sudoku-emulator-compact-screenshots
+          # The extra devices check constrained layout, landscape and wide
+          # tablets. Reference pixel MAE is measured ONLY on 941x1672.
+          - layout: narrow
+            resolution: 540x1080
+            density: 320
+            artifact: sudoku-emulator-narrow-screenshots
+          - layout: landscape
+            resolution: 1280x720
+            density: 320
+            artifact: sudoku-emulator-landscape-screenshots
+          # The complete 41-test suite on this high-resolution emulator
+          # died after ~16 cases with adb offline / ColorBuffer failures.
+          # Four independent 0-based shards preserve *all* tests while
+          # restarting the AVD for each bounded group. The capture job
+          # separately exports the full set of native screenshots.
+          - layout: tablet-shard-0
+            resolution: 1200x1920
+            density: 240
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
+            emulator_gpu_flags: "-feature -Vulkan"
+            visual_args: "--tablet-shard 0 4"
+            artifact: sudoku-tablet-shard-0
+          - layout: tablet-shard-1
+            resolution: 1200x1920
+            density: 240
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
+            emulator_gpu_flags: "-feature -Vulkan"
+            visual_args: "--tablet-shard 1 4"
+            artifact: sudoku-tablet-shard-1
+          - layout: tablet-shard-2
+            resolution: 1200x1920
+            density: 240
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
+            emulator_gpu_flags: "-feature -Vulkan"
+            visual_args: "--tablet-shard 2 4"
+            artifact: sudoku-tablet-shard-2
+          - layout: tablet-shard-3
+            resolution: 1200x1920
+            density: 240
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
+            emulator_gpu_flags: "-feature -Vulkan"
+            visual_args: "--tablet-shard 3 4"
+            artifact: sudoku-tablet-shard-3
+          - layout: tablet-capture
+            resolution: 1200x1920
+            density: 240
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
+            emulator_gpu_flags: "-feature -Vulkan"
+            visual_args: "--tablet-capture"
+            artifact: sudoku-emulator-tablet-screenshots
+          # Boundary checks for 240dp and 400dp content layouts. These
+          # profiles run only Splash/Home/New Game tests; the five above run the
+          # full instrumentation suite.
+          - layout: tiny
+            resolution: 480x800
+            density: 320
+            visual_args: "--splash-home-only"
+            artifact: sudoku-emulator-tiny-splash-home
+          - layout: medium
+            resolution: 800x1440
+            density: 320
+            visual_args: "--splash-home-only"
+            artifact: sudoku-emulator-medium-splash-home
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -63,16 +141,18 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
+          emulator-options: "-no-window -gpu ${{ matrix.gpu_mode || 'swiftshader_indirect' }} -no-snapshot -noaudio -no-boot-anim ${{ matrix.emulator_gpu_flags }}"
           script: |
-            # Exact source reference baseline plus a narrow-screen UI regression.
-            # Never compare compact screenshots directly against 941x1672 art.
+            # Seven layout sizes: four complete suites, four tablet shards,
+            # one tablet screenshot capture and two focused boundary suites:
+            # 270dp narrow, 640x360dp landscape, 800dp tablet, 240dp tiny and 400dp medium.
+            # Only reference screenshots are compared to the owner's 941x1672 art.
             adb shell wm size ${{ matrix.resolution }}
             # Keep density stable to reveal layout overflow and touch targets.
             adb shell wm density ${{ matrix.density }}
             adb shell wm size
             adb shell wm density
-            bash .github/scripts/run-visual-smoke.sh
+            bash .github/scripts/run-visual-smoke.sh ${{ matrix.visual_args }}
       - name: Upload instrumentation failure reports
         if: failure()
         uses: actions/upload-artifact@v4
@@ -83,7 +163,7 @@ jobs:
             app/build/reports/androidTests/connected/**
           if-no-files-found: warn
       - name: Upload actual Android screenshots
-        if: always()
+        if: always() && !startsWith(matrix.layout, 'tablet-shard')
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}

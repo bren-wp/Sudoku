@@ -413,6 +413,7 @@ fun HomePage(controller: SudokuController) {
             }
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val secondaryTilesFitTwoColumns = maxWidth >= 300.dp
             if (maxWidth >= 370.dp) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     HomeTile("Statistika", "Prati svoj napredak",
@@ -430,13 +431,27 @@ fun HomePage(controller: SudokuController) {
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (secondaryTilesFitTwoColumns) {
+                        // Two columns remain legible at 300-369dp content
+                        // widths. On very narrow phones each tile gets a
+                        // full-width touch target and readable Croatian text.
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            HomeTile("Statistika", "Prati svoj napredak",
+                                Ink.blue, Modifier.weight(1f), compact = true) {
+                                controller.go(Screen.STATS)
+                            }
+                            HomeTile("Postignuća", "Otkrij sve nagrade",
+                                Ink.purple, Modifier.weight(1f), compact = true) {
+                                controller.go(Screen.ACHIEVEMENTS)
+                            }
+                        }
+                    } else {
                         HomeTile("Statistika", "Prati svoj napredak",
-                            Ink.blue, Modifier.weight(1f), compact = true) {
+                            Ink.blue, Modifier.fillMaxWidth(), compact = true) {
                             controller.go(Screen.STATS)
                         }
                         HomeTile("Postignuća", "Otkrij sve nagrade",
-                            Ink.purple, Modifier.weight(1f), compact = true) {
+                            Ink.purple, Modifier.fillMaxWidth(), compact = true) {
                             controller.go(Screen.ACHIEVEMENTS)
                         }
                     }
@@ -851,11 +866,23 @@ fun NewGamePage(controller: SudokuController) {
             }
         }
         Spacer(Modifier.height(2.dp))
-        Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
-            .padding(start = 5.dp)) {
-            AccentText("Nova igra", 55, Modifier.testTag("new-game-title"))
-            Text("Odaberi težinu", color = Ink.muted, fontSize = 21.sp,
-                modifier = Modifier.testTag("new-game-subtitle"))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            // Keep the 55sp reference heading on full-size phones; fit it to
+            // real available width on 240dp devices and at large font scales.
+            // This stays live Compose text rather than a scaled bitmap.
+            val headingSize = minOf(
+                55,
+                (maxWidth.value / (5.3f * LocalDensity.current.fontScale))
+                    .toInt().coerceAtLeast(20),
+            )
+            val subtitleSize = if (maxWidth < 300.dp) 17.sp else 21.sp
+            Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
+                .padding(start = 5.dp)) {
+                AccentText("Nova igra", headingSize, Modifier.testTag("new-game-title"))
+                Text("Odaberi težinu", color = Ink.muted,
+                    fontSize = subtitleSize,
+                    modifier = Modifier.testTag("new-game-subtitle"))
+            }
         }
         Spacer(Modifier.height(1.dp))
         BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -2468,13 +2495,31 @@ fun SplashPage() {
     // Smaller or accessibility-scaled displays use the same *real* Compose
     // content, with guarded typography instead of a cropped screenshot.
     BoxWithConstraints(Modifier.fillMaxSize().testTag("splash-screen")) {
+        val landscape = maxWidth > maxHeight
+        val veryNarrow = maxWidth < 310.dp
         val compact = maxHeight < 700.dp || maxWidth < 385.dp
         val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+        // On a 240x400dp phone with enlarged accessible text, reserve a
+        // compact region for branding above the native loading indicator.
+        // The reference-size, default-font composition is unchanged.
+        val tightAccessibility = fontScale > 1.35f && maxHeight < 500.dp
         // Keep the rendered wordmark within a safe horizontal footprint when
         // the system's accessible font scale is unusually large.
         val typeFactor = minOf(1f, 1.35f / fontScale)
-        val headingSp = ((if (compact) 53 else 79) * typeFactor)
-            .toInt().coerceAtLeast(30)
+        val idealHeadingSp = ((when {
+            landscape -> 48
+            veryNarrow -> 42
+            compact -> 53
+            else -> 79
+        }) * typeFactor).toInt().coerceAtLeast(28)
+        // "Sudoku" must remain on one line even on 240dp devices with
+        // 1.8x accessible text. Otherwise a wrapped heading pushes the
+        // tagline into the native loader. Normal reference typography is
+        // unchanged; only constrained width + high font scale is capped.
+        val titleWidthDp = (maxWidth.value - 40f).coerceAtLeast(0f)
+        val maxSingleLineSp = (titleWidthDp / (4.25f * fontScale))
+            .toInt().coerceAtLeast(20)
+        val headingSp = minOf(idealHeadingSp, maxSingleLineSp)
         val tagline = if (compact || fontScale > 1.35f)
             "TRENIRAJ MOZAK SVAKI DAN"
         else "T R E N I R A J   M O Z A K   S V A K I   D A N"
@@ -2483,7 +2528,12 @@ fun SplashPage() {
             Modifier.align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(top = maxHeight * if (compact) .19f else .255f)
+                .padding(top = maxHeight * when {
+                    tightAccessibility -> .035f
+                    landscape -> .055f
+                    compact -> .19f
+                    else -> .255f
+                })
                 .testTag("splash-brand"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -2494,13 +2544,13 @@ fun SplashPage() {
             Box(
                 Modifier.testTag("splash-logo")
                     .drawBehind {
-                        val center = Offset(size.width * .38f, size.height * .69f)
-                        val glowRadius = size.width * .82f
+                        val center = Offset(size.width * .34f, size.height * .70f)
+                        val glowRadius = size.width * .79f
                         drawCircle(
                             Brush.radialGradient(
                                 listOf(
-                                    Ink.cyan.copy(alpha = .40f),
-                                    Ink.blue.copy(alpha = .15f),
+                                    Ink.cyan.copy(alpha = .54f),
+                                    Ink.blue.copy(alpha = .19f),
                                     Color.Transparent,
                                 ),
                                 center = center, radius = glowRadius,
@@ -2510,19 +2560,26 @@ fun SplashPage() {
                         )
                     },
             ) {
-                SudokuLogo(if (compact) 92.dp else 124.dp, glowing = true)
+                SudokuLogo(when {
+                    tightAccessibility -> 64.dp
+                    landscape -> 70.dp
+                    veryNarrow -> 80.dp
+                    compact -> 92.dp
+                    else -> 124.dp
+                }, glowing = true)
             }
-            Spacer(Modifier.height(if (compact) 13.dp else 15.dp))
+            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 13.dp else 15.dp))
             AccentText("Sudoku", headingSp, Modifier.testTag("splash-title"))
             Text(
                 "by Brendigo",
                 color = Ink.muted,
                 letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
-                fontSize = if (compact) 13.sp else 16.sp,
+                fontSize = if (landscape || veryNarrow) 12.sp
+                else if (compact) 13.sp else 16.sp,
                 modifier = Modifier.testTag("splash-byline"),
                 maxLines = 1,
             )
-            Spacer(Modifier.height(if (compact) 12.dp else 11.dp))
+            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 12.dp else 11.dp))
             Text(
                 tagline,
                 color = Ink.cyan,
@@ -2538,8 +2595,8 @@ fun SplashPage() {
         // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (compact) 24.dp else 70.dp)
-                .size(if (compact) 30.dp else 36.dp)
+                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 70.dp)
+                .size(if (landscape) 24.dp else if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
         ) {
