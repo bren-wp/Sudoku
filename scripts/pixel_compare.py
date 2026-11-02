@@ -160,6 +160,8 @@ def main() -> int:
     parser.add_argument("--output-dir", default=Path("qa-pixel-diff"), type=Path)
     parser.add_argument("--ui-mask-dir", type=Path, default=None,
         help="Optional 941x1672 binary masks: white = interactive UI, black = scenery.")
+    parser.add_argument("--home-resume", action="store_true",
+        help="Compare 01-home reference against the real 01-home-resume capture, not a clean install.")
     parser.add_argument("--include-splash", action="store_true",
         help="Include 08-splash when a real launch capture is available.")
     parser.add_argument("--include-branding", action="store_true",
@@ -178,7 +180,9 @@ def main() -> int:
     )
     for name in screens:
         ref = args.reference_dir / f"{name}.png"
-        actual = args.actual_dir / f"{name}.png"
+        actual_name = ("01-home-resume" if args.home_resume and name == "01-home"
+                       else name)
+        actual = args.actual_dir / f"{actual_name}.png"
         if not ref.is_file() or not actual.is_file():
             raise FileNotFoundError(f"Missing reference or screenshot for {name}: {ref} / {actual}")
         is_branding = name in BRANDING
@@ -192,6 +196,10 @@ def main() -> int:
             ref, actual, args.output_dir / name, ui_mask,
             BRANDING_SIZE if is_branding else REFERENCE_SIZE, volatile_mask,
         )
+        # Keep the reference name stable for baseline comparisons while
+        # preserving the actual fixture variant in the exported report.
+        row["screen"] = name
+        row["actual_capture"] = actual_name
         rows.append(row)
         print(f'{name}: mean channel error {row["mean_error_0_to_255"]} / 255; '
               f'within 12 = {row["pixels_within_12_pct"]}%')
