@@ -2487,6 +2487,10 @@ fun SplashPage() {
         val veryNarrow = maxWidth < 310.dp
         val compact = maxHeight < 700.dp || maxWidth < 385.dp
         val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+        // On a 240x400dp phone with enlarged accessible text, reserve a
+        // compact region for branding above the native loading indicator.
+        // The reference-size, default-font composition is unchanged.
+        val tightAccessibility = fontScale > 1.35f && maxHeight < 500.dp
         // Keep the rendered wordmark within a safe horizontal footprint when
         // the system's accessible font scale is unusually large.
         val typeFactor = minOf(1f, 1.35f / fontScale)
@@ -2513,6 +2517,7 @@ fun SplashPage() {
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
                 .padding(top = maxHeight * when {
+                    tightAccessibility -> .035f
                     landscape -> .055f
                     compact -> .19f
                     else -> .255f
@@ -2544,13 +2549,14 @@ fun SplashPage() {
                     },
             ) {
                 SudokuLogo(when {
+                    tightAccessibility -> 64.dp
                     landscape -> 70.dp
                     veryNarrow -> 80.dp
                     compact -> 92.dp
                     else -> 124.dp
                 }, glowing = true)
             }
-            Spacer(Modifier.height(if (landscape) 6.dp else if (compact) 13.dp else 15.dp))
+            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 13.dp else 15.dp))
             AccentText("Sudoku", headingSp, Modifier.testTag("splash-title"))
             Text(
                 "by Brendigo",
@@ -2561,7 +2567,7 @@ fun SplashPage() {
                 modifier = Modifier.testTag("splash-byline"),
                 maxLines = 1,
             )
-            Spacer(Modifier.height(if (landscape) 6.dp else if (compact) 12.dp else 11.dp))
+            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 12.dp else 11.dp))
             Text(
                 tagline,
                 color = Ink.cyan,
