@@ -174,6 +174,63 @@ class SudokuVisualSmokeTest {
     }
 
     /**
+     * The next production screen is genuine Compose UI even at 240dp width.
+     * Assert that typography, size-selector controls, cards and the start
+     * action remain reachable instead of assuming a reference-phone layout.
+     */
+    @Test
+    fun newGameActionsRemainLegibleOnEveryResponsiveProfile() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        waitFor("screen-nova-igra")
+        val density = rule.activity.resources.displayMetrics.density
+        val screenWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val title = rule.onNodeWithTag("new-game-title")
+        title.performScrollTo().assertIsDisplayed()
+        val heading = title.fetchSemanticsNode().boundsInRoot
+        check(heading.width > 0f && heading.height > 0f &&
+            heading.left >= -density &&
+            heading.right <= screenWidth + density) {
+            "New Game heading is horizontally clipped: $heading"
+        }
+        val header = rule.onNodeWithTag("new-game-size-header")
+        header.performScrollTo().assertIsDisplayed()
+        val back = rule.onNodeWithTag("navigate-back")
+            .fetchSemanticsNode().boundsInRoot
+        val selector = rule.onNodeWithTag("new-game-size-selector")
+            .fetchSemanticsNode().boundsInRoot
+        check(back.width >= 44f * density && selector.width > 0f &&
+            back.right <= selector.left + density &&
+            selector.right <= screenWidth + density) {
+            "New Game navigation and size selector collide: $back / $selector"
+        }
+        // Capture the actual user-facing screen without scrolling any cards.
+        val widthDp = screenWidth / density
+        if (widthDp < 300f || widthDp in 395f..405f) shot("02-new-game")
+        rule.onNodeWithTag("size-4").performScrollTo().performClick()
+        rule.onNodeWithTag("size-4").assertIsSelected()
+        rule.onNodeWithTag("size-9").performClick()
+        rule.onNodeWithTag("size-9").assertIsSelected()
+        (0..5).forEach { index ->
+            val card = rule.onNodeWithTag("difficulty-$index")
+            card.performScrollTo().assertIsDisplayed()
+            val rect = card.fetchSemanticsNode().boundsInRoot
+            check(rect.width > 0f && rect.height >= 72f * density &&
+                rect.left >= -density && rect.right <= screenWidth + density) {
+                "Difficulty card $index clips or shrinks: $rect"
+            }
+        }
+        val action = rule.onNodeWithTag("primary-action")
+        action.performScrollTo().assertIsDisplayed()
+        val rect = action.fetchSemanticsNode().boundsInRoot
+        check(rect.width >= 90f * density &&
+            rect.height >= 48f * density &&
+            rect.left >= -density && rect.right <= screenWidth + density) {
+            "New Game start button is unusable: $rect"
+        }
+    }
+
+    /**
      * Splash branding must remain real, readable Compose UI at increased font
      * scale on both 941x1672 and 720x1280 emulator viewports. This protects
      * geometric accessibility; an image-level 1:1 comparison remains separate.
