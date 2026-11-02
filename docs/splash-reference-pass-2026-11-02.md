@@ -9,8 +9,10 @@ Ostali zasloni i originalni logo/ikona su zasebne reference: nisu pozadine za la
 ## Izmjene u ovoj iteraciji
 
 - Sekundarni neonski odsjaj pozadine znaka 7–3–9, dok sam znak ostaje izvorni Compose sadržaj.
-- Pomak bylinea i slogana 10 dp prema gore **samo** na referentnom portretnom rasporedu, bez forsiranja na uskim, kratkim i landscape zaslonima.
+- Prvi pokušaj pomicanja bylinea i slogana od -10 dp uzrokovao je **stvarno preklapanje** i pad instrumentacijskih testova na tabletu, referentnom emulatoru i pri 1.8x fontu. Negativni pomaci su uklonjeni; redoslijed ostaje prirodni Compose Column flow.
 - Indikator učitavanja podignut je za 10 dp na referentnom rasporedu; ostaje pravi Canvas element s accessibility opisom.
+- Glowing logotip dobio je zaseban stakleni gradijentni okvir i dublji središnji 3D sjaj (obična ikona ne mijenja veličinu).
+- Primarni gumbi dobili su stakleni gornji odsjaj i dvotonski obrub; tekst, ikone, klik i accessibility semantika ostaju izvorni Compose elementi.
 - Nema novih mrežnih dozvola, vanjskih fontova, ugradnje screenshota kao zaslona ili promjene spremljenog napretka.
 
 ## Kriteriji prihvaćanja
@@ -24,3 +26,10 @@ Ostali zasloni i originalni logo/ikona su zasebne reference: nisu pozadine za la
 ## Sljedeći korak
 
 Nakon stvarne QA provjere nastaviti na `01-home` (početni zaslon), bez mijenjanja podataka korisnika samo radi izgleda reference.
+
+## Analiza stvarnog pada iz PR #57
+
+- Android visual smoke run 41519151253: `tablet-capture`, `reference` i `medium` pali su zbog `Real Splash logo, heading, subtitle, slogan and loader overlap` (SudokuVisualSmokeTest.kt:116). Pri povećanoj veličini fonta padao je i `splashBrandDoesNotOverlapLoadingIndicatorAtLargeFontScale` (linija 335).
+- `tablet-shard-1` pao je prije pokretanja aplikacije tijekom instalacije emulatora: `Android Emulator: Error on ZipFile unknown archive`. To je odvojeni infrastrukturni kvar; ne dokaz kvara sučelja.
+- Uklonjeni su uzročni negativni tekstualni offseti. 
+- **Novo testiranje nakon popravka je obavezno**. Nema zatvaranja provjere ni spajanja samo zato što je kod izmijenjen.
