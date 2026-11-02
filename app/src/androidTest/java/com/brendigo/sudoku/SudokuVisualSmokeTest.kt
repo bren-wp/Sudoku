@@ -220,7 +220,8 @@ class SudokuVisualSmokeTest {
         }
         check(tagline.bottom <= brand.bottom + slack &&
             brand.bottom + 8f * displayDensity < loading.top) {
-            "Splash branding overlaps the native loading indicator"
+            "Splash branding overlaps the native loading indicator: " +
+                "brand=$brand, tagline=$tagline, loader=$loading, screen=$screen"
         }
         check(loading.bottom <= screen.bottom + slack) {
             "Splash loading indicator is clipped at the bottom"
@@ -677,7 +678,8 @@ class SudokuVisualSmokeTest {
         val empty = hasContentDescription("prazno polje", substring = true)
         val before = rule.onAllNodes(empty).fetchSemanticsNodes().size
         check(before > 0) { "The generated Sudoku had no editable empty cells" }
-        rule.onAllNodes(empty).onFirst().performClick()
+        rule.onAllNodes(empty).onFirst()
+            .performScrollTo().assertIsDisplayed().performClick()
         rule.onAllNodes(empty).onFirst().assertIsSelected()
         rule.onNodeWithTag("number-1").performClick()
         rule.waitForIdle()
@@ -692,8 +694,9 @@ class SudokuVisualSmokeTest {
         }
         rule.onNodeWithTag("game-undo").assertIsNotEnabled()
 
-        rule.onAllNodes(empty).onFirst().performClick()
-        rule.onNodeWithTag("game-notes").performClick()
+        rule.onAllNodes(empty).onFirst()
+            .performScrollTo().assertIsDisplayed().performClick()
+        rule.onNodeWithTag("game-notes").performScrollTo().performClick()
         rule.onNodeWithTag("number-2").performClick()
         rule.waitForIdle()
         check(rule.onAllNodes(empty).fetchSemanticsNodes().size == before) {
@@ -823,22 +826,40 @@ class SudokuVisualSmokeTest {
         val firstAward = rule.onNodeWithTag("achievement-prva-pobjeda")
         firstAward.performScrollTo().assertIsDisplayed()
         val firstCard = firstAward.fetchSemanticsNode().boundsInRoot
-        val secondCard = rule.onNodeWithTag("achievement-sedam-dana-zaredom")
-            .fetchSemanticsNode().boundsInRoot
         val pxTolerance = rule.activity.resources.displayMetrics.density * 2f
-        check(firstCard.width > 0f && secondCard.width > 0f &&
-            firstCard.right <= secondCard.left + pxTolerance &&
-            kotlin.math.abs(firstCard.top - secondCard.top) <= pxTolerance &&
-            kotlin.math.abs(firstCard.bottom - secondCard.bottom) <= pxTolerance) {
-            "First two Achievement cards must share an aligned, non-overlapping row"
+        val contentWidthDp =
+            rule.activity.resources.displayMetrics.widthPixels /
+                rule.activity.resources.displayMetrics.density - 38f
+        if (contentWidthDp < 300f) {
+            // The actual Achievement page stacks cards below 300dp content
+            // width. Never assert that these cards are adjacent columns.
+            val next = rule.onNodeWithTag("achievement-sedam-dana-zaredom")
+            next.performScrollTo().assertIsDisplayed()
+            val secondCard = next.fetchSemanticsNode().boundsInRoot
+            check(firstCard.width > 0f && secondCard.width > 0f &&
+                secondCard.left >= -pxTolerance &&
+                secondCard.right <= rule.activity.resources.displayMetrics.widthPixels + pxTolerance) {
+                "Stacked Achievement card clips horizontally: $secondCard"
+            }
+        } else {
+            val secondCard = rule.onNodeWithTag("achievement-sedam-dana-zaredom")
+                .fetchSemanticsNode().boundsInRoot
+            check(firstCard.width > 0f && secondCard.width > 0f &&
+                firstCard.right <= secondCard.left + pxTolerance &&
+                kotlin.math.abs(firstCard.top - secondCard.top) <= pxTolerance &&
+                kotlin.math.abs(firstCard.bottom - secondCard.bottom) <= pxTolerance) {
+                "First two Achievement cards should share an aligned row"
+            }
         }
+        firstAward.performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("achievement-summary").assertExists()
+        val visibleFirst = firstAward.fetchSemanticsNode().boundsInRoot
         val firstDescription = rule.onNodeWithTag(
             "achievement-description-prva-pobjeda", useUnmergedTree = true
         ).fetchSemanticsNode().boundsInRoot
         check(firstDescription.width > 0f &&
-            firstDescription.top >= firstCard.top - 1f &&
-            firstDescription.bottom <= firstCard.bottom + 1f) {
+            firstDescription.top >= visibleFirst.top - 1f &&
+            firstDescription.bottom <= visibleFirst.bottom + 1f) {
             "Achievement description escapes its card on this viewport"
         }
         val thirdAward = rule.onNodeWithTag("achievement-majstor-logike")
@@ -1804,14 +1825,16 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithTag("game-hud").performScrollTo().assertIsDisplayed()
         shot("03-game")
 
-        rule.onNodeWithTag("game-settings").performClick()
+        rule.onNodeWithTag("game-settings")
+            .performScrollTo().assertIsDisplayed().performClick()
         waitFor("screen-postavke")
         waitFor("navigate-back")
         shot("04-settings")
 
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("sudoku-board")
-        rule.onNodeWithTag("game-back").performClick()
+        rule.onNodeWithTag("game-back")
+            .performScrollTo().assertIsDisplayed().performClick()
         waitFor("home-nova-igra")
 
         homeTile("dnevni-izazov")
