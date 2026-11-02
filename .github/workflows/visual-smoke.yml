@@ -59,45 +59,50 @@ jobs:
           - layout: tablet-shard-0
             resolution: 1200x1920
             density: 240
-            # Emulator 37 deprecated swiftshader_indirect; use the current
-            # officially supported software backend on crash-prone tablets.
-            gpu_mode: software
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
             emulator_gpu_flags: "-feature -Vulkan"
             visual_args: "--tablet-shard 0 4"
             artifact: sudoku-tablet-shard-0
           - layout: tablet-shard-1
             resolution: 1200x1920
             density: 240
-            # Emulator 37 deprecated swiftshader_indirect; use the current
-            # officially supported software backend on crash-prone tablets.
-            gpu_mode: software
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
             emulator_gpu_flags: "-feature -Vulkan"
             visual_args: "--tablet-shard 1 4"
             artifact: sudoku-tablet-shard-1
           - layout: tablet-shard-2
             resolution: 1200x1920
             density: 240
-            # Emulator 37 deprecated swiftshader_indirect; use the current
-            # officially supported software backend on crash-prone tablets.
-            gpu_mode: software
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
             emulator_gpu_flags: "-feature -Vulkan"
             visual_args: "--tablet-shard 2 4"
             artifact: sudoku-tablet-shard-2
           - layout: tablet-shard-3
             resolution: 1200x1920
             density: 240
-            # Emulator 37 deprecated swiftshader_indirect; use the current
-            # officially supported software backend on crash-prone tablets.
-            gpu_mode: software
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
             emulator_gpu_flags: "-feature -Vulkan"
             visual_args: "--tablet-shard 3 4"
             artifact: sudoku-tablet-shard-3
           - layout: tablet-capture
             resolution: 1200x1920
             density: 240
-            # Emulator 37 deprecated swiftshader_indirect; use the current
-            # officially supported software backend on crash-prone tablets.
-            gpu_mode: software
+            # Emulator 37 deprecated swiftshader_indirect, and the generic
+            # software backend also crashed at 1200x1920. Try supported
+            # SwiftShader + ANGLE (SwANGLE), isolated to tablet jobs only.
+            gpu_mode: swangle
             emulator_gpu_flags: "-feature -Vulkan"
             visual_args: "--tablet-capture"
             artifact: sudoku-emulator-tablet-screenshots
