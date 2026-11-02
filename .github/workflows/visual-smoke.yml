@@ -41,6 +41,20 @@ jobs:
             resolution: 720x1280
             density: 320
             artifact: sudoku-emulator-compact-screenshots
+          # The extra devices check constrained layout, landscape and wide
+          # tablets. Reference pixel MAE is measured ONLY on 941x1672.
+          - layout: narrow
+            resolution: 540x1080
+            density: 320
+            artifact: sudoku-emulator-narrow-screenshots
+          - layout: landscape
+            resolution: 1280x720
+            density: 320
+            artifact: sudoku-emulator-landscape-screenshots
+          - layout: tablet
+            resolution: 1200x1920
+            density: 240
+            artifact: sudoku-emulator-tablet-screenshots
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -65,8 +79,9 @@ jobs:
           disable-animations: true
           emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
           script: |
-            # Exact source reference baseline plus a narrow-screen UI regression.
-            # Never compare compact screenshots directly against 941x1672 art.
+            # Five distinct layout profiles: reference, compact, 270dp narrow,
+            # 640x360dp landscape and 800dp tablet.
+            # Only reference screenshots are compared to the owner's 941x1672 art.
             adb shell wm size ${{ matrix.resolution }}
             # Keep density stable to reveal layout overflow and touch targets.
             adb shell wm density ${{ matrix.density }}

@@ -2468,13 +2468,19 @@ fun SplashPage() {
     // Smaller or accessibility-scaled displays use the same *real* Compose
     // content, with guarded typography instead of a cropped screenshot.
     BoxWithConstraints(Modifier.fillMaxSize().testTag("splash-screen")) {
+        val landscape = maxWidth > maxHeight
+        val veryNarrow = maxWidth < 310.dp
         val compact = maxHeight < 700.dp || maxWidth < 385.dp
         val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
         // Keep the rendered wordmark within a safe horizontal footprint when
         // the system's accessible font scale is unusually large.
         val typeFactor = minOf(1f, 1.35f / fontScale)
-        val headingSp = ((if (compact) 53 else 79) * typeFactor)
-            .toInt().coerceAtLeast(30)
+        val headingSp = ((when {
+            landscape -> 48
+            veryNarrow -> 42
+            compact -> 53
+            else -> 79
+        }) * typeFactor).toInt().coerceAtLeast(28)
         val tagline = if (compact || fontScale > 1.35f)
             "TRENIRAJ MOZAK SVAKI DAN"
         else "T R E N I R A J   M O Z A K   S V A K I   D A N"
@@ -2483,7 +2489,11 @@ fun SplashPage() {
             Modifier.align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(top = maxHeight * if (compact) .19f else .255f)
+                .padding(top = maxHeight * when {
+                    landscape -> .055f
+                    compact -> .19f
+                    else -> .255f
+                })
                 .testTag("splash-brand"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -2494,13 +2504,13 @@ fun SplashPage() {
             Box(
                 Modifier.testTag("splash-logo")
                     .drawBehind {
-                        val center = Offset(size.width * .38f, size.height * .69f)
-                        val glowRadius = size.width * .82f
+                        val center = Offset(size.width * .34f, size.height * .70f)
+                        val glowRadius = size.width * .79f
                         drawCircle(
                             Brush.radialGradient(
                                 listOf(
-                                    Ink.cyan.copy(alpha = .40f),
-                                    Ink.blue.copy(alpha = .15f),
+                                    Ink.cyan.copy(alpha = .54f),
+                                    Ink.blue.copy(alpha = .19f),
                                     Color.Transparent,
                                 ),
                                 center = center, radius = glowRadius,
@@ -2510,19 +2520,25 @@ fun SplashPage() {
                         )
                     },
             ) {
-                SudokuLogo(if (compact) 92.dp else 124.dp, glowing = true)
+                SudokuLogo(when {
+                    landscape -> 70.dp
+                    veryNarrow -> 80.dp
+                    compact -> 92.dp
+                    else -> 124.dp
+                }, glowing = true)
             }
-            Spacer(Modifier.height(if (compact) 13.dp else 15.dp))
+            Spacer(Modifier.height(if (landscape) 6.dp else if (compact) 13.dp else 15.dp))
             AccentText("Sudoku", headingSp, Modifier.testTag("splash-title"))
             Text(
                 "by Brendigo",
                 color = Ink.muted,
                 letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
-                fontSize = if (compact) 13.sp else 16.sp,
+                fontSize = if (landscape || veryNarrow) 12.sp
+                else if (compact) 13.sp else 16.sp,
                 modifier = Modifier.testTag("splash-byline"),
                 maxLines = 1,
             )
-            Spacer(Modifier.height(if (compact) 12.dp else 11.dp))
+            Spacer(Modifier.height(if (landscape) 6.dp else if (compact) 12.dp else 11.dp))
             Text(
                 tagline,
                 color = Ink.cyan,
@@ -2538,8 +2554,8 @@ fun SplashPage() {
         // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (compact) 24.dp else 70.dp)
-                .size(if (compact) 30.dp else 36.dp)
+                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 70.dp)
+                .size(if (landscape) 24.dp else if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
         ) {
