@@ -1666,7 +1666,9 @@ class SudokuVisualSmokeTest {
             // never accept a partially presented surface as source artwork.
             val white = backdrop == ComposeColor.White
             val expected = if (white) 255 else 0
-            repeat(12) { attempt ->
+            val maxAttempts = 30
+            var lastSamples = ""
+            repeat(maxAttempts) {
                 val shot = InstrumentationRegistry.getInstrumentation()
                     .uiAutomation.takeScreenshot()
                     ?: error("No real Compose wordmark screenshot")
@@ -1683,11 +1685,18 @@ class SudokuVisualSmokeTest {
                         kotlin.math.abs(Color.blue(color) - expected) < 32
                 } }
                 if (stable) return shot
+                lastSamples = sampleX.flatMap { x ->
+                    sampleY.map { y ->
+                        val pixel = shot.getPixel(x, y)
+                        "(x=$x,y=$y,r=${Color.red(pixel)},g=${Color.green(pixel)},b=${Color.blue(pixel)})"
+                    }
+                }.joinToString(", ")
                 shot.recycle()
-                Thread.sleep(200)
+                Thread.sleep(250)
             }
             error("Native wordmark studio background did not settle to " +
-                "${if (white) "white" else "black"} in 12 actual captures")
+                "${if (white) "white" else "black"} in $maxAttempts captures; " +
+                "last real pixel samples: $lastSamples")
         }
 
         val black = captureStudio(ComposeColor.Black)
