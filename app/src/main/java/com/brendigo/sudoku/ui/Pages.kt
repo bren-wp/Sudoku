@@ -963,10 +963,26 @@ fun NewGamePage(controller: SudokuController) {
                             val iconSize = if (accessibilityCards) 41.dp else 47.dp
                             Box(
                                 Modifier.size(iconSize)
-                                    .background(newGameAccents[i].copy(alpha = .11f),
-                                        RoundedCornerShape(50))
-                                    .border(2.dp, newGameAccents[i],
-                                        RoundedCornerShape(50)),
+                                    // The reference uses a recessed circular
+                                    // 3D badge with a bright rim and a softer
+                                    // halo behind each difficulty glyph.
+                                    .background(
+                                        Brush.radialGradient(listOf(
+                                            newGameAccents[i].copy(alpha = .34f),
+                                            newGameAccents[i].copy(alpha = .13f),
+                                            Color(0xEF00132D),
+                                        )),
+                                        RoundedCornerShape(50),
+                                    )
+                                    .border(
+                                        2.dp,
+                                        Brush.linearGradient(listOf(
+                                            Color.White.copy(alpha = .63f),
+                                            newGameAccents[i],
+                                            newGameAccents[i].copy(alpha = .78f),
+                                        )),
+                                        RoundedCornerShape(50),
+                                    ),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 BrandIcon(
