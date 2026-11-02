@@ -6,7 +6,7 @@ set -euo pipefail
 gradle_args=()
 export_args=()
 if [[ "${1:-}" == "--splash-home-only" ]]; then
-  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#splashBrandDoesNotOverlapLoadingIndicatorAtLargeFontScale,com.brendigo.sudoku.SudokuVisualSmokeTest#homeMenuCardsAndWeekStripFitEveryEmulatorProfile")
+  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#splashBrandDoesNotOverlapLoadingIndicatorAtLargeFontScale,com.brendigo.sudoku.SudokuVisualSmokeTest#homeMenuCardsAndWeekStripFitEveryEmulatorProfile,com.brendigo.sudoku.SudokuVisualSmokeTest#newGameActionsRemainLegibleOnEveryResponsiveProfile")
   export_args+=("--splash-home-only")
 fi
 # Only retry known transient Maven Central rate limits. A failing assertion,
