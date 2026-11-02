@@ -13,7 +13,7 @@
 | 2. Home | Header, kartica „Nastavi”, gumbi, mali prikazi Statistika/Postignuća/Postavke, tjedni niz | `captureRealHomeWithResumeCardForReferenceQA`; `01-home-resume.png`; stvarna pohrana i otvaranje igre |
 | 3. Nova igra | Odabir 9×9/6×6/4×4, šest kategorija, obrubi 3D ikona, primarna akcija | `newGameActionsRemainLegibleOnEveryResponsiveProfile`, `02-new-game.png` |
 | 4. Sudoku ploča | 9×9 linije i odabir, bilješke, savjet, poništi, izbriši, brojčane tipke, igra/pauza | funkcionalni UI suite i stvarni `03-game.png`; vizualno ponovno poravnanje još slijedi |
-| 5. Dnevni izazov | Niz, boje, poklon i dugmad | `05-daily.png`; vizualno ponovno poravnanje još slijedi |
+| 5. Dnevni izazov | Niz, zlatni prsten nagrade, stakleni obrubi, 3D sjaj gumba i akcije | Nativni Compose prolaz; `05-daily.png` za ponovnu emulatorsku usporedbu, 1:1 još nije potvrđeno |
 | 6. Statistika | Grafikon, prsten, brojke, kartice, povijest | `06-statistics.png`; vizualno ponovno poravnanje još slijedi |
 | 7. Postignuća | 2 stupca, transparentni/kartični 3D prikaz, napredak i zaključane nagrade | `07-achievements.png`; vizualno ponovno poravnanje još slijedi |
 | 8. Postavke | 3D prekidači, radio/jezični odabir, informacije, privatnost, izgled | `04-settings.png`; vizualno ponovno poravnanje još slijedi |
@@ -33,3 +33,9 @@ Odgovarajući `references/01-home.png` mora biti originalna korisnikova slika. I
 3. Usporedba *stvarnih* PNG-a, regionalna geometrija i RTL/accessibility/touch testovi.
 4. Bez gubitka spremljenih igara, mrežnih ovisnosti, lažnih UI screenshotova ili izmjena certifikata za potpisivanje.
 5. **Ne označiti 1:1 dovršeno** bez demonstriranih odgovarajućih rezultata i primarne funkcionalnosti svih gumba.
+
+## Prolaz 3. 11. 2026. — dorade u PR-u #58
+- Splash se pri prvom pokretanju prikazuje 2,5 s; zadržani su pravi Compose logotip, indikator i zaštita obnovljene navigacije.
+- Dnevni izazov: suptilni stakleni sjaj kartica, višeslojni zlatni prsten, 3D gornji odsjaj primarnog gumba. Datum, napredak i svi gumbi ostaju stvarni i dinamični.
+- Instrumentacijski test razlikuje 2+1 i tri stupca pomoću istog praga **355dp sadržaja** kao produkcijska komponenta, nakon margina od 18dp po strani.
+- Potrebni su novi stvarni PNG snimci i instrumentacijski rezultati prije zaključka o pixel-perfect podudarnosti.

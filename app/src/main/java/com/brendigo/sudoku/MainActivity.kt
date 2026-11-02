@@ -105,7 +105,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun Application(controller: SudokuController) {
     LaunchedEffect(Unit) {
-        delay(850)
+        // Keep the native 7–3–9 splash visible long enough to recognise the
+        // brand, without resetting a page restored by the activity.
+        delay(2500)
         if (controller.page == Screen.SPLASH) controller.go(Screen.HOME)
     }
     BackHandler(enabled = controller.page != Screen.HOME && controller.page != Screen.SPLASH) {

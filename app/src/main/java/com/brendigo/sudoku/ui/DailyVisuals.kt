@@ -63,6 +63,24 @@ fun DailyFrame(
                     listOf(Color(0xF902173D), Color(0xF704193B), Color(0xFB061736))
                 )
             )
+            // Subtle raised glass; all labels and actions stay native Compose.
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                drawRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(highlight.copy(alpha = .19f), Color.Transparent),
+                        center = Offset(w * .84f, h * .08f),
+                        radius = w * .62f,
+                    ),
+                )
+                drawLine(
+                    color = Color.White.copy(alpha = .18f),
+                    start = Offset(w * .07f, 1.1.dp.toPx()),
+                    end = Offset(w * .60f, 1.1.dp.toPx()),
+                    strokeWidth = 1.dp.toPx(),
+                )
+            }
             .border(1.dp, highlight.copy(alpha = .83f), rounded),
     ) { content() }
 }
@@ -142,6 +160,21 @@ fun DailyRewardEmblem(modifier: Modifier = Modifier) {
                         center = c, radius = size.width * .69f,
                     ),
                     radius = size.width * .69f, center = c,
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        listOf(Color(0x36FFF2BB), Color(0x08FFB61C), Color.Transparent),
+                        center = Offset(size.width * .42f, size.height * .30f),
+                        radius = size.width * .51f,
+                    ),
+                    radius = size.width * .51f,
+                    center = Offset(size.width * .42f, size.height * .30f),
+                )
+                drawCircle(
+                    color = Color(0x72FFEDAC),
+                    radius = size.width * .46f,
+                    center = c,
+                    style = Stroke(width = 1.dp.toPx()),
                 )
             }
             .border(1.6.dp, Ink.gold, RoundedCornerShape(50)),
@@ -246,6 +279,24 @@ fun DailyStartAction(
                     else listOf(Color(0xFF1A3855), Color(0xFF173151)),
                 ),
             )
+            .drawBehind {
+                if (enabled) {
+                    drawRoundRect(
+                        brush = Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = .27f), Color.Transparent),
+                            startY = 0f, endY = size.height * .57f,
+                        ),
+                        size = Size(size.width, size.height * .55f),
+                        cornerRadius = CornerRadius(80.dp.toPx()),
+                    )
+                    drawLine(
+                        color = Color.White.copy(alpha = .34f),
+                        start = Offset(size.width * .10f, 1.2.dp.toPx()),
+                        end = Offset(size.width * .80f, 1.2.dp.toPx()),
+                        strokeWidth = 1.dp.toPx(),
+                    )
+                }
+            }
             .border(1.6.dp, if (enabled) Ink.cyan else Ink.line, rounded)
             .testTag("primary-action")
             .semantics {
