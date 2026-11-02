@@ -228,6 +228,65 @@ class SudokuVisualSmokeTest {
             rect.left >= -density && rect.right <= screenWidth + density) {
             "New Game start button is unusable: $rect"
         }
+        val label = rule.onNodeWithTag(
+            "new-game-start-label", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        check(label.width > 0f && label.left >= rect.left - density &&
+            label.right <= rect.right + density) {
+            "New Game button label overflows its actual touch target: $label / $rect"
+        }
+    }
+
+    /** Check enlarged text without changing system settings across tests. */
+    @Test
+    fun newGameDoesNotClipAtLargeAccessibilityFontScale() {
+        waitFor("home-nova-igra")
+        val displayDensity = rule.activity.resources.displayMetrics.density
+        rule.runOnUiThread {
+            val controllerField = MainActivity::class.java.getDeclaredField("sudoku")
+            controllerField.isAccessible = true
+            val controller = controllerField.get(rule.activity)
+                as com.brendigo.sudoku.data.SudokuController
+            rule.activity.setContent {
+                androidx.compose.runtime.CompositionLocalProvider(
+                    androidx.compose.ui.platform.LocalDensity provides
+                        androidx.compose.ui.unit.Density(displayDensity, 1.8f)
+                ) {
+                    SudokuTheme {
+                        Box(Modifier.fillMaxSize()) {
+                            com.brendigo.sudoku.ui.NewGamePage(controller)
+                        }
+                    }
+                }
+            }
+        }
+        waitFor("new-game-title")
+        val screenWidth = rule.activity.resources.displayMetrics.widthPixels.toFloat()
+        val title = rule.onNodeWithTag("new-game-title")
+        title.performScrollTo().assertIsDisplayed()
+        val titleBounds = title.fetchSemanticsNode().boundsInRoot
+        check(titleBounds.width > 0f &&
+            titleBounds.left >= -displayDensity &&
+            titleBounds.right <= screenWidth + displayDensity) {
+            "1.8x New Game title clips horizontally: $titleBounds"
+        }
+        val selector = rule.onNodeWithTag("new-game-size-selector")
+        selector.performScrollTo().assertIsDisplayed()
+        val bounds = selector.fetchSemanticsNode().boundsInRoot
+        check(bounds.width > 0f && bounds.right <= screenWidth + displayDensity) {
+            "1.8x New Game size selector clips horizontally: $bounds"
+        }
+        val start = rule.onNodeWithTag("primary-action")
+        start.performScrollTo().assertIsDisplayed()
+        val action = start.fetchSemanticsNode().boundsInRoot
+        val label = rule.onNodeWithTag(
+            "new-game-start-label", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        check(action.width > 0f && label.width > 0f &&
+            label.left >= action.left - displayDensity &&
+            label.right <= action.right + displayDensity) {
+            "1.8x New Game CTA label is clipped: $label / $action"
+        }
     }
 
     /**
