@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
@@ -394,6 +395,17 @@ private fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                 },
                             contentAlignment = Alignment.Center,
                         ) {
+                            if (isSelected) {
+                                // Illuminated cyan focus cell; live text, notes
+                                // and click/selection semantics remain above it.
+                                Canvas(Modifier.matchParentSize()) {
+                                    val center = Offset(size.width * .5f, size.height * .5f)
+                                    drawRect(Brush.radialGradient(
+                                        listOf(Color(0x5538EEFF), Color.Transparent),
+                                        center = center, radius = size.width * .77f,
+                                    ))
+                                }
+                            }
                             if (digit > 0) {
                                 Text(
                                     digit.toString(),
@@ -504,7 +516,16 @@ private fun GameTool(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     BrandIcon("note",
-                        Modifier.size(if (condensedTool) 14.dp else 20.dp),
+                        Modifier.size(if (condensedTool) 14.dp else 20.dp)
+                            .drawBehind {
+                                if (active) {
+                                    val center = Offset(size.width / 2f, size.height / 2f)
+                                    drawCircle(Brush.radialGradient(
+                                        listOf(Ink.cyan.copy(alpha = .45f), Color.Transparent),
+                                        center = center, radius = size.width * .95f,
+                                    ), center = center, radius = size.width * .95f)
+                                }
+                            },
                         if (active) Ink.cyan else Ink.muted)
                     Text(
                         "Bilješke", color = Ink.white,
@@ -557,8 +578,17 @@ private fun GameTool(
                             "Izbriši" -> "erase"
                             else -> "grid"
                         },
-                        Modifier.size(if (condensedTool) 23.dp else 29.dp),
-                        Ink.muted,
+                        Modifier.size(if (condensedTool) 23.dp else 29.dp)
+                            .drawBehind {
+                                if (enabled) {
+                                    val center = Offset(size.width / 2f, size.height / 2f)
+                                    drawCircle(Brush.radialGradient(
+                                        listOf(accent.copy(alpha = .35f), Color.Transparent),
+                                        center = center, radius = size.width * .80f,
+                                    ), center = center, radius = size.width * .80f)
+                                }
+                            },
+                        if (enabled) Ink.muted else Ink.muted.copy(alpha = .65f),
                     )
                     Spacer(Modifier.height(if (condensedTool) 1.dp else 3.dp))
                     Text(name, color = Ink.white,
@@ -643,6 +673,12 @@ private fun NumberRow(
                         .alpha(if (enabled) 1f else .50f)
                         .semantics { contentDescription = "Unesi broj $value"; role = Role.Button }
                         .heightIn(min = 48.dp).height(height)
+                        .shadow(
+                            elevation = 3.dp,
+                            shape = RoundedCornerShape(10.dp),
+                            ambientColor = Ink.blue.copy(alpha = .43f),
+                            spotColor = Ink.cyan.copy(alpha = .19f),
+                        )
                         .clip(RoundedCornerShape(10.dp))
                         .background(
                             Brush.verticalGradient(
@@ -653,7 +689,7 @@ private fun NumberRow(
                             val sheenHeight = this.size.height * .52f
                             drawRoundRect(
                                 brush = Brush.verticalGradient(
-                                    listOf(Color(0x3362B8FF), Color.Transparent),
+                                    listOf(Color(0x5562BEFF), Color.Transparent),
                                     startY = 0f, endY = sheenHeight,
                                 ),
                                 size = androidx.compose.ui.geometry.Size(this.size.width, sheenHeight),
