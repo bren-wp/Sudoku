@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
@@ -216,6 +217,14 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
         modifier.testTag(tag)
             .semantics { contentDescription = title; role = Role.Button }
             .heightIn(min = 48.dp).heightIn(min = minHeight)
+            // A small outer cyan/blue halo follows the real interactive
+            // pill, without changing its measured layout or tap target.
+            .then(if (enabled) Modifier.shadow(
+                elevation = 7.dp,
+                shape = RoundedCornerShape(30.dp),
+                ambientColor = Ink.cyan.copy(alpha = .48f),
+                spotColor = Ink.blue.copy(alpha = .65f),
+            ) else Modifier)
             .background(
                 Brush.horizontalGradient(if (enabled)
                     listOf(Color(0xFF04BFFF), Ink.blue, Color(0xFF0755EE))
@@ -838,6 +847,12 @@ private fun HomeTile(
             } else {
                 Box(
                     Modifier.size(44.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(50),
+                            ambientColor = accent.copy(alpha = .38f),
+                            spotColor = accent.copy(alpha = .54f),
+                        )
                         // A restrained radial glass well adds depth while
                         // retaining the original accessible full-card click.
                         .background(
@@ -2728,7 +2743,9 @@ fun SplashPage() {
         // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 80.dp)
+                // 941x1672 reference: the cyan arc sits slightly below the
+                // previous native capture (without touching the bottom art).
+                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 74.dp)
                 .size(if (landscape) 24.dp else if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
@@ -2739,6 +2756,14 @@ fun SplashPage() {
                 sweepAngle = 360f,
                 useCenter = false,
                 style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
+            )
+            // Soft bloom underneath the crisp reference cyan stroke.
+            drawArc(
+                color = Ink.cyan.copy(alpha = .23f),
+                startAngle = -93f,
+                sweepAngle = 145f,
+                useCenter = false,
+                style = Stroke(width = 7.dp.toPx(), cap = StrokeCap.Round),
             )
             drawArc(
                 color = Ink.cyan,
