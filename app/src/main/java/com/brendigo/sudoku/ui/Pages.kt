@@ -46,6 +46,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -945,7 +948,23 @@ fun NewGamePage(controller: SudokuController) {
             val subtitleSize = if (maxWidth < 300.dp) 17.sp else 21.sp
             Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
                 .padding(start = 5.dp)) {
-                AccentText("Nova igra", headingSize, Modifier.testTag("new-game-title"))
+                // The reference wordmark has a deliberately WHITE "Nova" and
+                // an illuminated CYAN "igra". One accessible text node keeps
+                // the title's bounds and test semantics intact on every DPI.
+                Text(
+                    text = buildAnnotatedString {
+                        append("Nova ")
+                        withStyle(SpanStyle(brush = Brush.horizontalGradient(
+                            listOf(Color(0xFF57EDFF), Color(0xFF04C9FF), Color(0xFF1389FA))
+                        ))) { append("igra") }
+                    },
+                    modifier = Modifier.testTag("new-game-title"),
+                    color = Ink.white,
+                    fontSize = headingSize.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-.5).sp,
+                    maxLines = 1,
+                )
                 Text("Odaberi težinu", color = Ink.muted,
                     fontSize = subtitleSize,
                     modifier = Modifier.testTag("new-game-subtitle"))
@@ -978,6 +997,12 @@ fun NewGamePage(controller: SudokuController) {
                             val iconSize = if (accessibilityCards) 41.dp else 47.dp
                             Box(
                                 Modifier.size(iconSize)
+                                    .shadow(
+                                        elevation = if (level == i) 8.dp else 5.dp,
+                                        shape = RoundedCornerShape(50),
+                                        ambientColor = newGameAccents[i].copy(alpha = .68f),
+                                        spotColor = newGameAccents[i].copy(alpha = .72f),
+                                    )
                                     // The reference uses a recessed circular
                                     // 3D badge with a bright rim and a softer
                                     // halo behind each difficulty glyph.
@@ -990,7 +1015,7 @@ fun NewGamePage(controller: SudokuController) {
                                         RoundedCornerShape(50),
                                     )
                                     .border(
-                                        2.dp,
+                                        2.2.dp,
                                         Brush.linearGradient(listOf(
                                             Color.White.copy(alpha = .63f),
                                             newGameAccents[i],
