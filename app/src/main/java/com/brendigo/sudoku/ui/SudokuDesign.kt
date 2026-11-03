@@ -610,6 +610,24 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
                                     center = lightCenter,
                                     radius = radius,
                                 )
+                                // Two independent specular edges make the
+                                // selected 3D tile read as raised glass.
+                                // These highlights stay inside the native
+                                // cell; they are not flattened bitmap art.
+                                drawLine(
+                                    color = Color(0xC9D9FFFF),
+                                    start = Offset(this.size.width * .12f, this.size.height * .07f),
+                                    end = Offset(this.size.width * .86f, this.size.height * .07f),
+                                    strokeWidth = 1.1.dp.toPx(),
+                                    cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                                )
+                                drawLine(
+                                    color = Color(0x880075D9),
+                                    start = Offset(this.size.width * .15f, this.size.height * .93f),
+                                    end = Offset(this.size.width * .86f, this.size.height * .93f),
+                                    strokeWidth = 1.0.dp.toPx(),
+                                    cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                                )
                             } else Modifier)
                             .border(
                                 if (center && glowing) 1.dp else .55.dp,
