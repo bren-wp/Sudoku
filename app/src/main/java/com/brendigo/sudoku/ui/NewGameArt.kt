@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Brush
@@ -57,7 +58,12 @@ fun NewGameDifficultySurface(
         4 -> listOf(Color(0xFF1B1B4B), Color(0xFF12153B), Color(0xFF1F1A50), Color(0xFF271B57), Color(0xFF241B4E))
         else -> listOf(Color(0xFF401B2E), Color(0xFF2C1529), Color(0xFF3B172D), Color(0xFF4C1B30), Color(0xFF491C2F))
     }
-    Box(modifier.clip(rounded).background(Brush.horizontalGradient(base))
+    Box(modifier.shadow(
+        elevation = 3.dp,
+        shape = rounded,
+        ambientColor = tint.copy(alpha = .30f),
+        spotColor = tint.copy(alpha = .32f),
+    ).clip(rounded).background(Brush.horizontalGradient(base))
         .border(1.1.dp, tint, rounded)) {
         Canvas(Modifier.matchParentSize()) {
             val w = size.width
@@ -70,15 +76,36 @@ fun NewGameDifficultySurface(
                 ),
                 radius = w * .42f, center = glowCenter,
             )
+            // Native translucent raised squares, matching the reference's
+            // staggered illuminated board behind each REAL difficulty card.
+            // All strokes remain decorative and never intercept radio taps.
+            val raisedCell = Path().apply {
+                moveTo(w * .704f, 0f)
+                lineTo(w * .817f, 0f)
+                lineTo(w * .784f, h * .57f)
+                lineTo(w * .664f, h * .47f)
+                close()
+            }
+            drawPath(raisedCell, Brush.verticalGradient(listOf(
+                tint.copy(alpha = if (index < 3) .19f else .13f),
+                tint.copy(alpha = if (index < 3) .075f else .045f),
+                Color.Transparent,
+            )))
+            // Subtle bevel running along the top glass edge of the panel.
+            drawLine(
+                Color.White.copy(alpha = .12f),
+                Offset(w * .05f, 1.1f), Offset(w * .93f, 1.1f),
+                strokeWidth = 1.5f,
+            )
             for (column in 0..4) {
                 val x = w * (.65f + column * .108f)
-                drawLine(tint.copy(alpha = if (column == 2) .27f else .12f),
+                drawLine(tint.copy(alpha = if (column == 2) .35f else .16f),
                     Offset(x + h * .20f, 0f), Offset(x - h * .29f, h),
                     strokeWidth = if (column == 2) 2.0f else 1.45f)
             }
             for (row in 0..3) {
                 val y = h * (-.23f + row * .55f)
-                drawLine(tint.copy(alpha = if (row == 2) .27f else .12f),
+                drawLine(tint.copy(alpha = if (row == 2) .34f else .16f),
                     Offset(w * .57f, y - h * .22f), Offset(w * 1.06f, y + h * .19f),
                     strokeWidth = if (row == 2) 2.1f else 1.5f)
             }
@@ -158,7 +185,10 @@ fun NewGameSizeSelector(
     modifier: Modifier = Modifier,
 ) {
     val corners = RoundedCornerShape(12.dp)
-    Row(modifier.height(43.dp).clip(corners)
+    Row(modifier.height(43.dp).shadow(
+        elevation = 2.dp, shape = corners,
+        ambientColor = Ink.blue.copy(alpha = .45f),
+    ).clip(corners)
         .background(Color(0xD0071A42)).border(1.dp, Ink.line, corners)
         .testTag("new-game-size-selector"),
         verticalAlignment = Alignment.CenterVertically) {
@@ -176,6 +206,17 @@ fun NewGameSizeSelector(
                     .border(1.5.dp, Ink.cyan, corners) else Modifier)
                 .clickable(enabled = enabled) { onSelect(option) },
                 contentAlignment = Alignment.Center) {
+                if (active) Canvas(Modifier.matchParentSize()) {
+                    drawLine(
+                        Ink.cyan.copy(alpha = .80f),
+                        Offset(size.width * .08f, 1.2f),
+                        Offset(size.width * .92f, 1.2f),
+                        strokeWidth = 2f,
+                    )
+                    drawRect(Brush.verticalGradient(listOf(
+                        Color.White.copy(alpha = .15f), Color.Transparent,
+                    )), size = androidx.compose.ui.geometry.Size(size.width, size.height * .45f))
+                }
                 // Each of three equal segments must fit at 240dp width,
                 // including at Android 1.8x system text scale.
                 val scale = LocalDensity.current.fontScale.coerceAtLeast(1f)
@@ -204,7 +245,11 @@ fun NewGameStartAction(
     modifier: Modifier = Modifier,
 ) {
     val round = RoundedCornerShape(50)
-    BoxWithConstraints(modifier.heightIn(min = 53.dp).clip(round)
+    BoxWithConstraints(modifier.heightIn(min = 53.dp).shadow(
+        elevation = 5.dp, shape = round,
+        ambientColor = if (enabled) Ink.cyan.copy(alpha = .52f) else Color.Transparent,
+        spotColor = if (enabled) Ink.blue.copy(alpha = .60f) else Color.Transparent,
+    ).clip(round)
         .background(Brush.verticalGradient(if (enabled) listOf(
             Color(0xFF10C9FF), Color(0xFF087FFB), Color(0xFF0757EE))
             else listOf(Color.DarkGray, Color.Gray)))
@@ -220,6 +265,9 @@ fun NewGameStartAction(
         val labelSize = minOf(21f, ((maxWidth.value - 50f) / (6.9f * scale))
             .coerceAtLeast(10f)).sp
         Canvas(Modifier.matchParentSize()) {
+            drawRect(Brush.verticalGradient(listOf(
+                Color.White.copy(alpha = .21f), Color.Transparent,
+            )), size = androidx.compose.ui.geometry.Size(size.width, size.height * .40f))
             drawLine(Color.White.copy(alpha = .30f),
                 Offset(size.width * .07f, 1.5f),
                 Offset(size.width * .93f, 1.5f), strokeWidth = 2f)
