@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
@@ -45,6 +46,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -216,6 +220,14 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
         modifier.testTag(tag)
             .semantics { contentDescription = title; role = Role.Button }
             .heightIn(min = 48.dp).heightIn(min = minHeight)
+            // A small outer cyan/blue halo follows the real interactive
+            // pill, without changing its measured layout or tap target.
+            .then(if (enabled) Modifier.shadow(
+                elevation = 7.dp,
+                shape = RoundedCornerShape(30.dp),
+                ambientColor = Ink.cyan.copy(alpha = .48f),
+                spotColor = Ink.blue.copy(alpha = .65f),
+            ) else Modifier)
             .background(
                 Brush.horizontalGradient(if (enabled)
                     listOf(Color(0xFF04BFFF), Ink.blue, Color(0xFF0755EE))
@@ -838,6 +850,12 @@ private fun HomeTile(
             } else {
                 Box(
                     Modifier.size(44.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(50),
+                            ambientColor = accent.copy(alpha = .38f),
+                            spotColor = accent.copy(alpha = .54f),
+                        )
                         // A restrained radial glass well adds depth while
                         // retaining the original accessible full-card click.
                         .background(
@@ -930,7 +948,23 @@ fun NewGamePage(controller: SudokuController) {
             val subtitleSize = if (maxWidth < 300.dp) 17.sp else 21.sp
             Column(Modifier.fillMaxWidth().testTag("screen-nova-igra")
                 .padding(start = 5.dp)) {
-                AccentText("Nova igra", headingSize, Modifier.testTag("new-game-title"))
+                // The reference wordmark has a deliberately WHITE "Nova" and
+                // an illuminated CYAN "igra". One accessible text node keeps
+                // the title's bounds and test semantics intact on every DPI.
+                Text(
+                    text = buildAnnotatedString {
+                        append("Nova ")
+                        withStyle(SpanStyle(brush = Brush.horizontalGradient(
+                            listOf(Color(0xFF57EDFF), Color(0xFF04C9FF), Color(0xFF1389FA))
+                        ))) { append("igra") }
+                    },
+                    modifier = Modifier.testTag("new-game-title"),
+                    color = Ink.white,
+                    fontSize = headingSize.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-.5).sp,
+                    maxLines = 1,
+                )
                 Text("Odaberi težinu", color = Ink.muted,
                     fontSize = subtitleSize,
                     modifier = Modifier.testTag("new-game-subtitle"))
@@ -963,6 +997,12 @@ fun NewGamePage(controller: SudokuController) {
                             val iconSize = if (accessibilityCards) 41.dp else 47.dp
                             Box(
                                 Modifier.size(iconSize)
+                                    .shadow(
+                                        elevation = if (level == i) 8.dp else 5.dp,
+                                        shape = RoundedCornerShape(50),
+                                        ambientColor = newGameAccents[i].copy(alpha = .68f),
+                                        spotColor = newGameAccents[i].copy(alpha = .72f),
+                                    )
                                     // The reference uses a recessed circular
                                     // 3D badge with a bright rim and a softer
                                     // halo behind each difficulty glyph.
@@ -975,7 +1015,7 @@ fun NewGamePage(controller: SudokuController) {
                                         RoundedCornerShape(50),
                                     )
                                     .border(
-                                        2.dp,
+                                        2.2.dp,
                                         Brush.linearGradient(listOf(
                                             Color.White.copy(alpha = .63f),
                                             newGameAccents[i],
@@ -2728,7 +2768,9 @@ fun SplashPage() {
         // are disabled and remains vertically separated from brand content.
         Canvas(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 80.dp)
+                // 941x1672 reference: the cyan arc sits slightly below the
+                // previous native capture (without touching the bottom art).
+                .padding(bottom = if (landscape) 10.dp else if (compact) 24.dp else 74.dp)
                 .size(if (landscape) 24.dp else if (compact) 30.dp else 36.dp)
                 .testTag("splash-loading")
                 .semantics { contentDescription = "Učitavanje igre" }
@@ -2739,6 +2781,14 @@ fun SplashPage() {
                 sweepAngle = 360f,
                 useCenter = false,
                 style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
+            )
+            // Soft bloom underneath the crisp reference cyan stroke.
+            drawArc(
+                color = Ink.cyan.copy(alpha = .23f),
+                startAngle = -93f,
+                sweepAngle = 145f,
+                useCenter = false,
+                style = Stroke(width = 7.dp.toPx(), cap = StrokeCap.Round),
             )
             drawArc(
                 color = Ink.cyan,

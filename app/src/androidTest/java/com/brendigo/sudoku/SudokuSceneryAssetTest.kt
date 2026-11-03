@@ -23,8 +23,8 @@ class SudokuSceneryAssetTest {
         }
         requireNotNull(bitmap) { "Original nightscape WebP is missing or cannot decode" }
         try {
-            assertEquals(236, bitmap.width)
-            assertEquals(162, bitmap.height)
+            assertEquals("Reference-quality crop must retain the owner's native 941px width", 941, bitmap.width)
+            assertEquals("Reference-quality crop must retain the owner's native 647px scenery", 647, bitmap.height)
             assertTrue("Scenery should retain alpha for blending", bitmap.hasAlpha())
             assertTrue("Top row must fade into the real Compose background",
                 Color.alpha(bitmap.getPixel(bitmap.width / 2, 0)) < 128)
