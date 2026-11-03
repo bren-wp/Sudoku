@@ -17,6 +17,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -591,7 +592,30 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
                                     )
                                 )
                             else Brush.linearGradient(listOf(Color(0xFF071B47), Color(0xFF062452))))
-                            .border(.55.dp, Ink.cyan.copy(alpha = .68f)),
+                            // A second emitted-light pass sits ON TOP of the
+                            // tile fill yet BEHIND the live text numeral.
+                            .then(if (center && glowing) Modifier.drawBehind {
+                                val lightCenter = Offset(this.size.width * .50f, this.size.height * .48f)
+                                val radius = this.size.width * .82f
+                                drawCircle(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(
+                                            Color(0x8869FFFF),
+                                            Color(0x4400D6FF),
+                                            Color.Transparent,
+                                        ),
+                                        center = lightCenter,
+                                        radius = radius,
+                                    ),
+                                    center = lightCenter,
+                                    radius = radius,
+                                )
+                            } else Modifier)
+                            .border(
+                                if (center && glowing) 1.dp else .55.dp,
+                                if (center && glowing) Color(0xFF88FAFF)
+                                else Ink.cyan.copy(alpha = .68f),
+                            ),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(values[r * 3 + c], fontSize = (size.value * .29f).sp,

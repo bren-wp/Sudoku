@@ -32,4 +32,15 @@ PY
   fi
   count=$((count + 1))
 done
+if [[ "${1:-}" == "--reference-capture" ]]; then
+  # A separate capture keeps the fresh-install Home intact. A valid 9x9
+  # session must be started by the test itself to expose the Resume card.
+  resume="$OUT/01-home-resume.png"
+  test -s "$resume" || { echo "::error::Missing resume-state Home PNG"; exit 1; }
+  actual="$(od -An -N8 -tx1 "$resume" | tr -d ' \\n')"
+  [[ "$actual" == "89504e470d0a1a0a" ]] || {
+    echo "::error::Invalid resume-state Home PNG"; exit 1;
+  }
+  count=$((count + 1))
+fi
 echo "Exported and verified $count real PNG screens from Android emulator"

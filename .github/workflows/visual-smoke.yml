@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "app/**"
+      - ".github/scripts/run-visual-smoke.sh"
+      - ".github/scripts/export-emulator-screenshots.sh"
       - ".github/workflows/visual-smoke.yml"
   pull_request:
     paths:
@@ -14,6 +16,7 @@ on:
       - "gradle.properties"
       - "docs/screenshots/**"
       - ".github/scripts/export-emulator-screenshots.sh"
+      - ".github/scripts/run-visual-smoke.sh"
       - ".github/workflows/visual-smoke.yml"
   workflow_dispatch:
 
@@ -134,6 +137,47 @@ jobs:
       - name: Enable KVM
         run: |
           if test -e /dev/kvm; then sudo chmod 666 /dev/kvm; fi
+      # Both emulator AND Android 35 x86_64 system image can arrive as
+      # corrupt ZIPs on GitHub-hosted runners. The emulator-runner itself
+      # installs each once, so provision both beforehand with bounded retries.
+      # Never retry or suppress real app/instrumentation test failures.
+      - name: Provision emulator and Android 35 system image with bounded retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)"
+          test -x "$SDKMANAGER"
+          provision_sdk_package() {
+            local package="$1" expected="$2" label="$3" partial_dir="${4:-}"
+            local attempt
+            for attempt in 1 2 3; do
+              echo "$label SDK installation attempt $attempt/3"
+              if "$SDKMANAGER" --install "$package" --channel=0 &&
+                  test -s "$expected"; then
+                echo "$label SDK package successfully provisioned"
+                return 0
+              fi
+              if [ "$attempt" -lt 3 ]; then
+                # Only remove incomplete runner SDK downloads/package contents,
+                # never source files, AVD state or actual app test results.
+                rm -rf "$ANDROID_HOME/.temp"
+                if [ -n "$partial_dir" ]; then
+                  case "$partial_dir" in
+                    "$ANDROID_HOME/system-images/android-35/default/x86_64") rm -rf "$partial_dir" ;;
+                    *) echo "::error::Unsafe SDK cleanup target"; return 1 ;;
+                  esac
+                fi
+                sleep $((attempt * 4))
+              fi
+            done
+            echo "::error::$label SDK package failed to install after 3 attempts"
+            return 1
+          }
+          provision_sdk_package "emulator" "$ANDROID_HOME/emulator/emulator" "Emulator"
+          provision_sdk_package "system-images;android-35;default;x86_64" \
+            "$ANDROID_HOME/system-images/android-35/default/x86_64/system.img" \
+            "Android 35 x86_64 system image" \
+            "$ANDROID_HOME/system-images/android-35/default/x86_64"
       - name: Run Android UI flow and capture screens
         uses: reactivecircus/android-emulator-runner@v2
         with:

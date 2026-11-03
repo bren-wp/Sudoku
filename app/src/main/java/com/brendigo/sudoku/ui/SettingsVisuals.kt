@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -41,6 +43,16 @@ fun SettingsSurface(
                     )
                 )
             )
+            .drawBehind {
+                // The owner-supplied panels have a soft directional glass
+                // reflection; the text and click targets are separate nodes.
+                drawLine(
+                    color = Color.White.copy(alpha = .16f),
+                    start = Offset(size.width * .055f, 1.dp.toPx()),
+                    end = Offset(size.width * .62f, 1.dp.toPx()),
+                    strokeWidth = 1.dp.toPx(),
+                )
+            }
             .border(1.dp, accent.copy(alpha = .85f), shape),
     ) {
         content()
@@ -66,6 +78,20 @@ fun SettingsGlyph(
                     )
                 )
             )
+            .drawBehind {
+                // 'size' is also the outer Dp parameter of SettingsGlyph;
+                // explicitly select DrawScope.size for pixel dimensions.
+                val canvasSize = this.size
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(tint.copy(alpha = .25f), Color.Transparent),
+                        center = Offset(canvasSize.width * .32f, canvasSize.height * .24f),
+                        radius = canvasSize.width * .77f,
+                    ),
+                    center = Offset(canvasSize.width * .32f, canvasSize.height * .24f),
+                    radius = canvasSize.width * .77f,
+                )
+            }
             .border(1.dp, tint.copy(alpha = .9f), shape),
         contentAlignment = Alignment.Center,
     ) {

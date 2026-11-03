@@ -50,6 +50,13 @@ fun StatisticsSurface(
                 ),
                 radius = w * .85f, center = Offset(w * .80f, h * .04f),
             )
+            // A narrow glass reflection follows the source's upper bevel.
+            drawLine(
+                Color.White.copy(alpha = .16f),
+                start = Offset(w * .055f, 1.dp.toPx()),
+                end = Offset(w * .57f, 1.dp.toPx()),
+                strokeWidth = 1.dp.toPx(),
+            )
         }
         content()
     }

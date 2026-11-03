@@ -963,10 +963,26 @@ fun NewGamePage(controller: SudokuController) {
                             val iconSize = if (accessibilityCards) 41.dp else 47.dp
                             Box(
                                 Modifier.size(iconSize)
-                                    .background(newGameAccents[i].copy(alpha = .11f),
-                                        RoundedCornerShape(50))
-                                    .border(2.dp, newGameAccents[i],
-                                        RoundedCornerShape(50)),
+                                    // The reference uses a recessed circular
+                                    // 3D badge with a bright rim and a softer
+                                    // halo behind each difficulty glyph.
+                                    .background(
+                                        Brush.radialGradient(listOf(
+                                            newGameAccents[i].copy(alpha = .34f),
+                                            newGameAccents[i].copy(alpha = .13f),
+                                            Color(0xEF00132D),
+                                        )),
+                                        RoundedCornerShape(50),
+                                    )
+                                    .border(
+                                        2.dp,
+                                        Brush.linearGradient(listOf(
+                                            Color.White.copy(alpha = .63f),
+                                            newGameAccents[i],
+                                            newGameAccents[i].copy(alpha = .78f),
+                                        )),
+                                        RoundedCornerShape(50),
+                                    ),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 BrandIcon(
@@ -1660,6 +1676,12 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
                                         )),
                                         RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
                                     )
+                                    // Narrow glossy lip, not a static chart image.
+                                    .border(
+                                        .6.dp,
+                                        colors[index].copy(alpha = .82f),
+                                        RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+                                    )
                             )
                             Spacer(Modifier.height(6.dp))
                             Text(names[index], color = Ink.muted, fontSize = 9.sp,
@@ -1695,6 +1717,15 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
             Box(Modifier.fillMaxWidth().height(98.dp),
                 contentAlignment = Alignment.Center) {
                 Canvas(Modifier.size(94.dp)) {
+                    val center = Offset(size.width / 2f, size.height / 2f)
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            listOf(Ink.cyan.copy(alpha = .10f), Color.Transparent),
+                            center = center, radius = size.width * .75f,
+                        ),
+                        radius = size.width * .75f,
+                        center = center,
+                    )
                     drawArc(Ink.blue.copy(alpha = .28f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     if (fraction > 0f) {
@@ -1811,16 +1842,32 @@ private fun StatTile(
                 ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandIcon(
-                    when (id) {
-                        "played" -> "gamepad"
-                        "best" -> "timer"
-                        "total" -> "timer"
-                        "streak" -> "flame-solid"
-                        else -> "statistics"
-                    },
-                    Modifier.size(if (compact) 34.dp else 44.dp), color,
-                )
+                Box(
+                    Modifier.size(if (compact) 34.dp else 44.dp)
+                        .drawBehind {
+                            val center = Offset(size.width * .5f, size.height * .5f)
+                            drawCircle(
+                                brush = Brush.radialGradient(
+                                    listOf(color.copy(alpha = .30f), Color.Transparent),
+                                    center = center, radius = size.width * .78f,
+                                ),
+                                radius = size.width * .78f,
+                                center = center,
+                            )
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    BrandIcon(
+                        when (id) {
+                            "played" -> "gamepad"
+                            "best" -> "timer"
+                            "total" -> "timer"
+                            "streak" -> "flame-solid"
+                            else -> "statistics"
+                        },
+                        Modifier.fillMaxSize(), color,
+                    )
+                }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -2529,13 +2576,28 @@ private fun SettingToggle(
                     ),
                     RoundedCornerShape(25.dp),
                 )
+                .drawBehind {
+                    // Glass highlight on the real, state-driven native switch.
+                    drawRoundRect(
+                        brush = Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = if (checked) .25f else .09f),
+                                Color.Transparent),
+                        ),
+                        size = androidx.compose.ui.geometry.Size(size.width, size.height * .45f),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(25.dp.toPx()),
+                    )
+                }
                 .border(1.dp, if (checked) Ink.cyan else Ink.muted.copy(alpha = .66f),
                     RoundedCornerShape(25.dp)),
             contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
             Box(
                 Modifier.padding(horizontal = 4.dp).size(20.dp)
-                    .background(Color.White, RoundedCornerShape(50)),
+                    .background(
+                        Brush.verticalGradient(listOf(Color.White, Color(0xFFD9ECFF))),
+                        RoundedCornerShape(50),
+                    )
+                    .border(.5.dp, Color(0xFFAAD9FF), RoundedCornerShape(50)),
             )
         }
     }
@@ -2584,7 +2646,10 @@ fun SplashPage() {
                     tightAccessibility -> .035f
                     landscape -> .055f
                     compact -> .19f
-                    else -> .255f
+                    // On the 941 x 1672 reference the 7-3-9 emblem starts
+                    // 8px lower. Adjust the parent layout, not the drawn logo:
+                    // offsets would make the semantics bounds diverge.
+                    else -> .260f
                 })
                 .testTag("splash-brand"),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -2636,7 +2701,7 @@ fun SplashPage() {
                     else -> 124.dp
                 }, glowing = true)
             }
-            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 13.dp else 15.dp))
+            Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 13.dp else 13.dp))
             AccentText("Sudoku", headingSp, Modifier.testTag("splash-title"))
             Text(
                 "by Brendigo",

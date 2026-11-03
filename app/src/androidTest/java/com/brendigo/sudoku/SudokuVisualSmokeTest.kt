@@ -52,9 +52,9 @@ class SudokuVisualSmokeTest {
 
     @Test
     fun captureRealSplashScreenForReferenceQA() {
-        // The real Compose splash exists for only 850ms on launch. Bring that
-        // same screen back after Home so screenshots are deterministic, without
-        // changing release behavior or substituting a mocked screenshot.
+        // The native Compose splash stays visible for 2.5s on first launch.
+        // Restore its actual page for deterministic capture, never substitute
+        // a screenshot or frozen image for the real interface.
         waitFor("home-nova-igra")
         rule.runOnUiThread {
             val controllerField = MainActivity::class.java.getDeclaredField("sudoku")
@@ -99,7 +99,7 @@ class SudokuVisualSmokeTest {
         val expectedTopRatio = when {
             landscape -> .055f
             compact -> .19f
-            else -> .255f
+            else -> .260f
         }
         val expectedTop = screen.top + screen.height * expectedTopRatio
         check(logo.width >= (expectedLogoDp - 1f) * dp &&
@@ -125,6 +125,35 @@ class SudokuVisualSmokeTest {
                 indicator.top >= screen.top + screen.height * .70f
         ) { "Actual Splash loading ring must remain centered at the bottom" }
         shot("08-splash")
+    }
+
+    /**
+     * Pixel QA must also cover the reference's *resumed game* layout.
+     * The ordinary 01-home capture is a legitimate empty-install state, so
+     * comparing it with a reference that contains Resume is not meaningful.
+     * Start a real puzzle, navigate back, and capture a separate 01-home-resume
+     * without touching any production fixtures or hardcoding user statistics.
+     */
+    @Test
+    fun captureRealHomeWithResumeCardForReferenceQA() {
+        waitFor("home-nova-igra")
+        homeTile("nova-igra")
+        waitFor("screen-nova-igra")
+        rule.onNodeWithTag("primary-action").performScrollTo().performClick()
+        waitFor("sudoku-board", timeoutMs = 60_000)
+        rule.onNodeWithTag("game-back").performClick()
+        waitFor("resume-game")
+        val card = rule.onNodeWithTag("resume-game").fetchSemanticsNode().boundsInRoot
+        val width = rule.activity.resources.displayMetrics.widthPixels
+        val dp = rule.activity.resources.displayMetrics.density
+        check(card.width >= 90f * dp && card.height >= 150f * dp &&
+            card.left >= -dp && card.right <= width + dp) {
+            "Resumed game card is clipped or has an unusable hit region: $card"
+        }
+        shot("01-home-resume")
+        // The entire card, not just a tiny arrow, opens the saved game.
+        rule.onNodeWithTag("resume-game").performClick()
+        waitFor("sudoku-board")
     }
 
     /**
@@ -1280,7 +1309,13 @@ class SudokuVisualSmokeTest {
             .fetchSemanticsNode().boundsInRoot
         val compactWidthDp = rule.activity.resources.displayMetrics.widthPixels /
             rule.activity.resources.displayMetrics.density
-        if (compactWidthDp < 410f) {
+        // PageContent subtracts 18dp on each side before DailyPage chooses
+        // between the 2+1 layout and its three-column reference layout.
+        // Match that exact 355dp breakpoint across 392–409dp phones.
+        val dailyContentWidthDp = compactWidthDp - 36f
+        val useCompactMetrics = dailyContentWidthDp < 355f ||
+            rule.activity.resources.configuration.fontScale >= 1.3f
+        if (useCompactMetrics) {
             check(difficultyBounds.right <= timeBounds.left + 1f &&
                 rewardBounds.top >= difficultyBounds.bottom - 1f) {
                 "Compact Daily metrics must form 2+1 rows: " +
