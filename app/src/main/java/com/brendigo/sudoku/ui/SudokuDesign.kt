@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -510,7 +511,7 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
             }
             Spacer(Modifier.width(if (narrow) 7.dp else 5.dp))
             Column(
-                Modifier.offset(y = if (compact) 0.dp else 8.dp),
+                Modifier.offset(y = if (compact) 0.dp else 4.dp),
                 horizontalAlignment = Alignment.End,
             ) {
                 Text(
@@ -519,19 +520,38 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
                     fontSize = headingSize,
                     fontWeight = FontWeight.ExtraBold,
                     style = TextStyle(brush = Brush.horizontalGradient(
-                        listOf(Ink.white, Ink.white, Color(0xFF00C2FF), Ink.teal),
+                        listOf(Ink.white, Ink.white, Color(0xFF43E9FF), Color(0xFF04B9F9)),
                     )),
                     letterSpacing = (-1.2).sp,
                     maxLines = 1,
                 )
-                // The original transparent PNG puts the byline under the
-                // RIGHT edge of "Sudoku"; no horizontal rule precedes it.
+                // The supplied Home wordmark has two restrained rules,
+                // framing a slightly inset byline. They are decorative strokes
+                // around LIVE Compose text, not an embedded logo screenshot.
                 Text(
                     "by Brendigo",
-                    modifier = Modifier.testTag("wordmark-byline"),
-                    fontSize = if (compact || narrow) 10.sp else 11.sp,
+                    modifier = Modifier.testTag("wordmark-byline")
+                        .then(if (!compact && !narrow) Modifier
+                            .offset(x = (-21).dp)
+                            .drawBehind {
+                                val ruleY = size.height * .55f
+                                val ruleColor = Ink.line.copy(alpha = .78f)
+                                drawLine(
+                                    color = ruleColor,
+                                    start = Offset(-64.dp.toPx(), ruleY),
+                                    end = Offset(-12.dp.toPx(), ruleY),
+                                    strokeWidth = .8.dp.toPx(),
+                                )
+                                drawLine(
+                                    color = ruleColor.copy(alpha = .66f),
+                                    start = Offset(size.width + 12.dp.toPx(), ruleY),
+                                    end = Offset(size.width + 20.dp.toPx(), ruleY),
+                                    strokeWidth = .8.dp.toPx(),
+                                )
+                            } else Modifier),
+                    fontSize = if (compact || narrow) 10.sp else 12.sp,
                     color = Ink.muted,
-                    letterSpacing = if (compact || narrow) 2.sp else 2.5.sp,
+                    letterSpacing = if (compact || narrow) 2.sp else 3.sp,
                     maxLines = 1,
                 )
             }
@@ -572,7 +592,30 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
             .padding(2.dp)
             .clip(RoundedCornerShape(innerCorner))
             .background(Color(0xFF061A49))
-            .padding(4.dp),
+            .padding(4.dp)
+            // The reference icon uses ONE continuous illuminated 3x3 grid.
+            // Paint its shared edges over the real Compose digit cells:
+            // individual boxed borders caused a conspicuous checkerboard.
+            .drawWithContent {
+                drawContent()
+                if (glowing) {
+                    listOf(1f / 3f, 2f / 3f).forEach { fraction ->
+                        val x = size.width * fraction
+                        val y = size.height * fraction
+                        val glow = Ink.cyan.copy(alpha = .37f)
+                        drawLine(glow, Offset(x, 0f), Offset(x, size.height),
+                            strokeWidth = 3.6.dp.toPx())
+                        drawLine(glow, Offset(0f, y), Offset(size.width, y),
+                            strokeWidth = 3.6.dp.toPx())
+                        drawLine(Color(0xFF64F4FF).copy(alpha = .92f),
+                            Offset(x, 0f), Offset(x, size.height),
+                            strokeWidth = .75.dp.toPx())
+                        drawLine(Color(0xFF64F4FF).copy(alpha = .92f),
+                            Offset(0f, y), Offset(size.width, y),
+                            strokeWidth = .75.dp.toPx())
+                    }
+                }
+            },
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         repeat(3) { r ->
@@ -630,14 +673,15 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
                                 )
                             } else Modifier)
                             .border(
-                                if (center && glowing) 1.dp else .55.dp,
-                                if (center && glowing) Color(0xFF88FAFF)
-                                else Ink.cyan.copy(alpha = .68f),
+                                if (center && glowing) .7.dp else .15.dp,
+                                if (center && glowing) Color(0xFF88FAFF).copy(alpha = .65f)
+                                else Ink.cyan.copy(alpha = if (glowing) .20f else .58f),
                             ),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(values[r * 3 + c], fontSize = (size.value * .29f).sp,
-                            color = if (center) Ink.cyan else Ink.white, fontWeight = FontWeight.Bold)
+                            color = if (center) Color(0xFFCBF5FF) else Ink.white,
+                            fontWeight = if (center) FontWeight.Bold else FontWeight.Medium)
                     }
                 }
             }
