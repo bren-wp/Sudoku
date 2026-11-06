@@ -530,7 +530,9 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
                 // around LIVE Compose text, not an embedded logo screenshot.
                 Text(
                     "by Brendigo",
-                    modifier = Modifier.testTag("wordmark-byline")
+                    // Test bounds must describe the DRAWN text, not the
+                    // pre-translation wrapper. Compose modifier order matters.
+                    modifier = Modifier
                         .then(if (!compact && !narrow) Modifier
                             .offset(x = (-21).dp)
                             .drawBehind {
@@ -548,7 +550,8 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
                                     end = Offset(size.width + 20.dp.toPx(), ruleY),
                                     strokeWidth = .8.dp.toPx(),
                                 )
-                            } else Modifier),
+                            } else Modifier)
+                        .testTag("wordmark-byline"),
                     fontSize = if (compact || narrow) 10.sp else 12.sp,
                     color = Ink.muted,
                     letterSpacing = if (compact || narrow) 2.sp else 3.sp,
