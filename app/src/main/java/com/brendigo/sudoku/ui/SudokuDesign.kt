@@ -599,19 +599,23 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
             .drawWithContent {
                 drawContent()
                 if (glowing) {
+                    // SudokuLogo has a Dp parameter also named "size":
+                    // qualify the DrawScope canvas dimension explicitly.
+                    val gridWidth = this.size.width
+                    val gridHeight = this.size.height
                     listOf(1f / 3f, 2f / 3f).forEach { fraction ->
-                        val x = size.width * fraction
-                        val y = size.height * fraction
+                        val x = gridWidth * fraction
+                        val y = gridHeight * fraction
                         val glow = Ink.cyan.copy(alpha = .37f)
-                        drawLine(glow, Offset(x, 0f), Offset(x, size.height),
+                        drawLine(glow, Offset(x, 0f), Offset(x, gridHeight),
                             strokeWidth = 3.6.dp.toPx())
-                        drawLine(glow, Offset(0f, y), Offset(size.width, y),
+                        drawLine(glow, Offset(0f, y), Offset(gridWidth, y),
                             strokeWidth = 3.6.dp.toPx())
                         drawLine(Color(0xFF64F4FF).copy(alpha = .92f),
-                            Offset(x, 0f), Offset(x, size.height),
+                            Offset(x, 0f), Offset(x, gridHeight),
                             strokeWidth = .75.dp.toPx())
                         drawLine(Color(0xFF64F4FF).copy(alpha = .92f),
-                            Offset(0f, y), Offset(size.width, y),
+                            Offset(0f, y), Offset(gridWidth, y),
                             strokeWidth = .75.dp.toPx())
                     }
                 }
