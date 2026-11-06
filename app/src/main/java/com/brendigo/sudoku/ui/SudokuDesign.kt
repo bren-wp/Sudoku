@@ -511,7 +511,7 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
             }
             Spacer(Modifier.width(if (narrow) 7.dp else 5.dp))
             Column(
-                Modifier.offset(y = if (compact) 0.dp else 4.dp),
+                Modifier.offset(y = if (compact) 0.dp else 8.dp),
                 horizontalAlignment = Alignment.End,
             ) {
                 Text(
@@ -520,41 +520,20 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
                     fontSize = headingSize,
                     fontWeight = FontWeight.ExtraBold,
                     style = TextStyle(brush = Brush.horizontalGradient(
-                        listOf(Ink.white, Ink.white, Color(0xFF43E9FF), Color(0xFF04B9F9)),
+                        listOf(Ink.white, Ink.white, Color(0xFF00C2FF), Ink.teal),
                     )),
                     letterSpacing = (-1.2).sp,
                     maxLines = 1,
                 )
-                // The supplied Home wordmark has two restrained rules,
-                // framing a slightly inset byline. They are decorative strokes
-                // around LIVE Compose text, not an embedded logo screenshot.
+                // The source has a restrained 11sp byline. A more intrusive
+                // inset and 12sp treatment increased the REAL 941px header
+                // pixel error, so keep the measured better baseline alignment.
                 Text(
                     "by Brendigo",
-                    // Test bounds must describe the DRAWN text, not the
-                    // pre-translation wrapper. Compose modifier order matters.
-                    modifier = Modifier
-                        .then(if (!compact && !narrow) Modifier
-                            .offset(x = (-21).dp)
-                            .drawBehind {
-                                val ruleY = size.height * .55f
-                                val ruleColor = Ink.line.copy(alpha = .78f)
-                                drawLine(
-                                    color = ruleColor,
-                                    start = Offset(-64.dp.toPx(), ruleY),
-                                    end = Offset(-12.dp.toPx(), ruleY),
-                                    strokeWidth = .8.dp.toPx(),
-                                )
-                                drawLine(
-                                    color = ruleColor.copy(alpha = .66f),
-                                    start = Offset(size.width + 12.dp.toPx(), ruleY),
-                                    end = Offset(size.width + 20.dp.toPx(), ruleY),
-                                    strokeWidth = .8.dp.toPx(),
-                                )
-                            } else Modifier)
-                        .testTag("wordmark-byline"),
-                    fontSize = if (compact || narrow) 10.sp else 12.sp,
+                    modifier = Modifier.testTag("wordmark-byline"),
+                    fontSize = if (compact || narrow) 10.sp else 11.sp,
                     color = Ink.muted,
-                    letterSpacing = if (compact || narrow) 2.sp else 3.sp,
+                    letterSpacing = if (compact || narrow) 2.sp else 2.5.sp,
                     maxLines = 1,
                 )
             }
@@ -606,6 +585,21 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
                     // qualify the DrawScope canvas dimension explicitly.
                     val gridWidth = this.size.width
                     val gridHeight = this.size.height
+                    // The owner's icon emits a local cyan bloom across the
+                    // lower-left quadrant; the previous flat grid lost it.
+                    val lowerLeft = Offset(gridWidth * .16f, gridHeight * .76f)
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                Ink.cyan.copy(alpha = .34f),
+                                Ink.blue.copy(alpha = .11f),
+                                Color.Transparent,
+                            ),
+                            center = lowerLeft, radius = gridWidth * .61f,
+                        ),
+                        center = lowerLeft,
+                        radius = gridWidth * .61f,
+                    )
                     listOf(1f / 3f, 2f / 3f).forEach { fraction ->
                         val x = gridWidth * fraction
                         val y = gridHeight * fraction
