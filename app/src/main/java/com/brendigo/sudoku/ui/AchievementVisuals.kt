@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -75,9 +76,18 @@ fun AchievementSurface(
         else -> Ink.blue
     }
     Box(
-        modifier.clip(frame)
+        modifier
+            // The supplied artwork has an emitted-light halo around each
+            // 3D glass panel; shadow is purely visual, not an input layer.
+            .shadow(
+                elevation = if (muted) 2.dp else 5.dp,
+                shape = frame,
+                ambientColor = edge.copy(alpha = if (muted) .16f else .45f),
+                spotColor = edge.copy(alpha = if (muted) .19f else .54f),
+            )
+            .clip(frame)
             .background(Brush.horizontalGradient(base))
-            .border(1.dp, edge.copy(alpha = if (muted) .67f else .95f), frame)
+            .border(1.15.dp, edge.copy(alpha = if (muted) .67f else .98f), frame)
     ) {
         Canvas(Modifier.matchParentSize()) {
             val w = size.width
@@ -112,6 +122,16 @@ fun AchievementSurface(
                     if (warm) Color(0xFFFFD26A).copy(alpha = .89f)
                     else Color(0xFF74C3FF).copy(alpha = .83f),
                     radius = w * .068f, center = moonAt,
+                )
+                // Restrained ring of light, behind genuine award glyphs.
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        listOf(highlight.copy(alpha = .19f), Color.Transparent),
+                        center = Offset(w * .16f, h * .23f),
+                        radius = h * .29f,
+                    ),
+                    center = Offset(w * .16f, h * .23f),
+                    radius = h * .29f,
                 )
                 // Four mountain silhouettes with deterministic heights.
                 repeat(3) { ridge ->
@@ -195,6 +215,16 @@ fun AchievementSurface(
                     startY = h * .24f, endY = h,
                 )
             )
+            // A reference-like raised glass bevel is strongest at the upper
+            // left and fades before the reward badge on the right.
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.White.copy(alpha = if (muted) .045f else .09f),
+                        Color.Transparent),
+                    startY = 0f, endY = h * .24f,
+                ),
+                size = Size(w, h * .24f),
+            )
             if (muted) {
                 drawRect(Color(0x50041430))
             }
@@ -217,7 +247,11 @@ fun AchievementSummarySurface(
 ) {
     val shape = RoundedCornerShape(13.dp)
     Box(
-        modifier.clip(shape)
+        modifier.shadow(
+            elevation = 4.dp, shape = shape,
+            ambientColor = Ink.blue.copy(alpha = .25f),
+            spotColor = Ink.cyan.copy(alpha = .18f),
+        ).clip(shape)
             .background(
                 Brush.horizontalGradient(
                     listOf(Color(0xF9051A40), Color(0xF407204F), Color(0xFA061B43))
@@ -234,9 +268,15 @@ fun AchievementSummarySurface(
                 w * .2f, Offset(w * .14f, h * .5f),
             )
             drawCircle(
-                Brush.radialGradient(listOf(Ink.cyan.copy(alpha = .16f), Color.Transparent),
+                Brush.radialGradient(listOf(Ink.cyan.copy(alpha = .20f), Color.Transparent),
                     center = Offset(w * .71f, h * .5f), radius = w * .25f),
                 w * .25f, Offset(w * .71f, h * .5f),
+            )
+            drawLine(
+                Color.White.copy(alpha = .19f),
+                start = Offset(w * .055f, 1.dp.toPx()),
+                end = Offset(w * .61f, 1.dp.toPx()),
+                strokeWidth = 1.dp.toPx(),
             )
         }
         content()
