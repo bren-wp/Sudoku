@@ -1523,7 +1523,7 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        StatisticsSurface(Modifier.fillMaxWidth().heightIn(min = 108.dp)
+        StatisticsSurface(Modifier.fillMaxWidth().heightIn(min = 104.dp)
             .testTag("stats-achievements")
             .semantics {
                 contentDescription = "Otvori svih 24 postignuća"
@@ -1630,44 +1630,72 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
     val earned = fraction >= 1f
     StatisticsSurface(
         modifier.heightIn(
-            min = if (LocalDensity.current.fontScale >= 1.3f) 100.dp else 84.dp
+            min = if (LocalDensity.current.fontScale >= 1.3f) 105.dp else 72.dp
         ),
-        // Original's four previews retain their independent teal, blue,
-        // purple and cyan accents even when the underlying award is locked.
-        accent = award.tint.copy(alpha = if (earned) 1f else .72f),
+        // All four reference previews use recognisable, luminous award
+        // glyphs; show a small lock overlay until genuinely earned.
+        accent = award.tint.copy(alpha = if (earned) 1f else .75f),
         background = listOf(
-            award.tint.copy(alpha = if (earned) .27f else .17f),
+            award.tint.copy(alpha = if (earned) .28f else .15f),
             Color(0xFF081C40),
         ),
         corner = 9.dp,
     ) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(3.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            BrandIcon(
-                if (earned) award.icon else "lock",
-                Modifier.size(20.dp),
-                if (earned) award.tint else Ink.muted,
-            )
-            Text(
-                award.title, color = Ink.white, fontSize = 9.sp,
-                maxLines = 2, lineHeight = 11.sp, textAlign = TextAlign.Center,
-            )
+            Row(
+                Modifier.fillMaxWidth().weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Box(Modifier.size(26.dp), contentAlignment = Alignment.Center) {
+                    BrandIcon(
+                        award.icon,
+                        Modifier.size(25.dp).drawBehind {
+                            val mid = Offset(size.width * .5f, size.height * .5f)
+                            drawCircle(Brush.radialGradient(
+                                listOf(award.tint.copy(alpha =
+                                    if (earned) .42f else .18f), Color.Transparent),
+                                center = mid, radius = size.width * .88f),
+                                center = mid, radius = size.width * .88f)
+                        },
+                        award.tint.copy(alpha = if (earned) 1f else .55f),
+                    )
+                    if (!earned) {
+                        Box(Modifier.align(Alignment.BottomEnd)
+                            .size(11.dp).background(
+                                Color(0xF0071635), RoundedCornerShape(3.dp)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            BrandIcon("lock", Modifier.size(10.dp), Ink.muted)
+                        }
+                    }
+                }
+                Text(award.title, color = Ink.white, fontSize = 9.sp,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 2, lineHeight = 10.sp,
+                    textAlign = TextAlign.Start)
+            }
             Box(
                 Modifier.fillMaxWidth().height(4.dp)
                     .background(Ink.blue.copy(alpha = .30f),
                         RoundedCornerShape(8.dp)),
             ) {
-                Box(
+                if (fraction > 0f) Box(
                     Modifier.fillMaxWidth(fraction).fillMaxHeight()
-                        .background(award.tint, RoundedCornerShape(8.dp)),
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(award.tint.copy(alpha = .65f), award.tint)
+                            ), RoundedCornerShape(8.dp)),
                 )
             }
             Text(
                 "${award.current.coerceAtMost(award.goal)}/${award.goal}",
                 color = Ink.muted, fontSize = 9.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -1756,9 +1784,9 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                     maxLines = 1, lineHeight = 12.sp)
             }
             Spacer(Modifier.height(6.dp))
-            Box(Modifier.fillMaxWidth().height(98.dp),
+            Box(Modifier.fillMaxWidth().height(103.dp),
                 contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(94.dp)) {
+                Canvas(Modifier.size(100.dp)) {
                     val center = Offset(size.width / 2f, size.height / 2f)
                     drawCircle(
                         brush = Brush.radialGradient(
@@ -1769,12 +1797,18 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                         center = center,
                     )
                     drawArc(Ink.blue.copy(alpha = .28f), 0f, 360f, false,
-                        style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
+                        style = Stroke(10.dp.toPx(), cap = StrokeCap.Round))
                     if (fraction > 0f) {
+                        // Soft glow under the crisp true-data completion arc.
+                        drawArc(
+                            Ink.cyan.copy(alpha = .21f),
+                            -90f, fraction * 360f, false,
+                            style = Stroke(16.dp.toPx(), cap = StrokeCap.Round),
+                        )
                         drawArc(
                             Brush.sweepGradient(listOf(Ink.blue, Ink.cyan, Ink.blue)),
                             -90f, fraction * 360f, false,
-                            style = Stroke(11.dp.toPx(), cap = StrokeCap.Round),
+                            style = Stroke(10.dp.toPx(), cap = StrokeCap.Round),
                         )
                     }
                 }
@@ -1907,7 +1941,15 @@ private fun StatTile(
                             "streak" -> "flame-solid"
                             else -> "statistics"
                         },
-                        Modifier.fillMaxSize(), color,
+                        Modifier.fillMaxSize()
+                            .drawBehind {
+                                val mid = Offset(size.width * .5f, size.height * .5f)
+                                drawCircle(Brush.radialGradient(
+                                    listOf(color.copy(alpha = .24f), Color.Transparent),
+                                    center = mid, radius = size.width * .83f),
+                                    center = mid, radius = size.width * .83f)
+                            },
+                        color,
                     )
                 }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
