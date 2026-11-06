@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -36,16 +35,9 @@ fun StatisticsSurface(
 ) {
     val shape = RoundedCornerShape(corner)
     Box(
-        modifier
-            .shadow(
-                elevation = 3.dp,
-                shape = shape,
-                ambientColor = accent.copy(alpha = .28f),
-                spotColor = accent.copy(alpha = .24f),
-            )
-            .clip(shape)
+        modifier.clip(shape)
             .background(Brush.horizontalGradient(background))
-            .border(1.05.dp, accent.copy(alpha = .88f), shape),
+            .border(1.dp, accent.copy(alpha = .83f), shape),
     ) {
         Canvas(Modifier.matchParentSize()) {
             val w = size.width
@@ -58,16 +50,9 @@ fun StatisticsSurface(
                 ),
                 radius = w * .85f, center = Offset(w * .80f, h * .04f),
             )
-            // Top bevel and low-contrast 3D reflection: keep the metric
-            // labels, charts and tap targets native and unobstructed.
-            drawRect(
-                brush = Brush.verticalGradient(listOf(
-                    Color.White.copy(alpha = .10f), Color.Transparent,
-                ), startY = 0f, endY = h * .26f),
-                size = androidx.compose.ui.geometry.Size(w, h * .26f),
-            )
+            // A narrow glass reflection follows the source's upper bevel.
             drawLine(
-                Color.White.copy(alpha = .17f),
+                Color.White.copy(alpha = .16f),
                 start = Offset(w * .055f, 1.dp.toPx()),
                 end = Offset(w * .57f, 1.dp.toPx()),
                 strokeWidth = 1.dp.toPx(),
