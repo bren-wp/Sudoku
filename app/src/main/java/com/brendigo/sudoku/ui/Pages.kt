@@ -314,30 +314,11 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
         val glow = Offset(w * .785f, h * .37f)
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(Ink.cyan.copy(alpha = .29f), Color.Transparent),
+                colors = listOf(Ink.cyan.copy(alpha = .27f), Color.Transparent),
                 center = glow, radius = w * .15f,
             ),
             radius = w * .15f, center = glow,
         )
-        // Reproduce the reference's luminous tilted 3-cell using native
-        // Canvas geometry. The game-resume card remains a real click target.
-        val selectedCell = Path().apply {
-            moveTo(w * .737f, h * .19f)
-            lineTo(w * .871f, h * .19f)
-            lineTo(w * .837f, h * .548f)
-            lineTo(w * .696f, h * .548f)
-            close()
-        }
-        drawPath(
-            selectedCell,
-            Brush.radialGradient(
-                listOf(Ink.cyan.copy(alpha = .20f),
-                    Ink.blue.copy(alpha = .09f), Color.Transparent),
-                center = glow, radius = h * .34f,
-            ),
-        )
-        drawPath(selectedCell, Ink.cyan.copy(alpha = .74f),
-            style = Stroke(width = 1.1.dp.toPx()))
         drawIntoCanvas { canvas ->
             val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
                 textSize = h * .145f
