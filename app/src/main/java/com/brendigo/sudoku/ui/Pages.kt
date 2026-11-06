@@ -2004,7 +2004,19 @@ fun AchievementsPage(controller: SudokuController) {
                     horizontalArrangement = Arrangement.spacedBy(
                         if (compactSummary) 6.dp else 13.dp),
                 ) {
-                BrandIcon("trophy-solid", Modifier.size(if (compactSummary) 34.dp else 43.dp), Ink.gold)
+                BrandIcon(
+                    "trophy-solid",
+                    Modifier.size(if (compactSummary) 34.dp else 43.dp)
+                        .drawBehind {
+                            val mid = Offset(size.width * .5f, size.height * .5f)
+                            drawCircle(Brush.radialGradient(
+                                listOf(Ink.gold.copy(alpha = .57f),
+                                    Ink.gold.copy(alpha = .17f), Color.Transparent),
+                                center = mid, radius = size.width * .95f),
+                                center = mid, radius = size.width * .95f)
+                        },
+                    Ink.gold,
+                )
                 Column(Modifier.weight(1f)) {
                     Subtitle("Ukupno bodova")
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2015,7 +2027,18 @@ fun AchievementsPage(controller: SudokuController) {
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
                     .background(Ink.blue.copy(alpha = .80f)))
-                BrandIcon("star-solid", Modifier.size(if (compactSummary) 29.dp else 39.dp), Ink.cyan)
+                BrandIcon(
+                    "star-solid",
+                    Modifier.size(if (compactSummary) 29.dp else 39.dp)
+                        .drawBehind {
+                            val mid = Offset(size.width * .5f, size.height * .5f)
+                            drawCircle(Brush.radialGradient(
+                                listOf(Ink.cyan.copy(alpha = .39f), Color.Transparent),
+                                center = mid, radius = size.width * .9f),
+                                center = mid, radius = size.width * .9f)
+                        },
+                    Ink.cyan,
+                )
                 Column(Modifier.weight(.75f)) {
                     Subtitle("Otključano")
                     Text("${data.count { it.current >= it.goal }} / ${data.size}",
@@ -2075,20 +2098,32 @@ fun AchievementsPage(controller: SudokuController) {
                                     Modifier.size(if (compactFeatured) 38.dp else 48.dp)
                                         .drawBehind {
                                             val mid = Offset(size.width / 2f, size.height / 2f)
+                                            val haloRadius = size.width *
+                                                if (rowIndex < 2) .87f else .74f
                                             drawCircle(
                                                 Brush.radialGradient(
                                                     listOf(
                                                         achievement.tint.copy(
-                                                            alpha = if (unlocked) .39f
-                                                            else if (rowIndex < 2) .29f else .14f
+                                                            alpha = if (unlocked) .55f
+                                                            else if (rowIndex < 2) .32f else .17f
                                                         ),
+                                                        achievement.tint.copy(alpha = .055f),
                                                         Color.Transparent,
                                                     ),
                                                     center = mid,
-                                                    radius = size.width * if (rowIndex < 2) .79f else .68f,
+                                                    radius = haloRadius,
                                                 ),
-                                                radius = size.width * if (rowIndex < 2) .79f else .68f,
+                                                radius = haloRadius,
                                                 center = mid,
+                                            )
+                                            // Soft 3D highlight behind the
+                                            // real vector award glyph.
+                                            drawCircle(
+                                                Color.White.copy(alpha =
+                                                    if (unlocked) .11f else .035f),
+                                                radius = size.width * .36f,
+                                                center = Offset(mid.x - size.width * .07f,
+                                                    mid.y - size.height * .10f),
                                             )
                                         },
                                     contentAlignment = Alignment.Center,
@@ -2114,7 +2149,16 @@ fun AchievementsPage(controller: SudokuController) {
                                     }
                                 }
                                 Row(
-                                    Modifier.background(Color(0xBB041B3E),
+                                    Modifier
+                                        .shadow(
+                                            elevation = if (unlocked) 5.dp else 2.dp,
+                                            shape = RoundedCornerShape(30.dp),
+                                            ambientColor = achievement.tint.copy(
+                                                alpha = if (unlocked) .30f else .12f),
+                                            spotColor = achievement.tint.copy(
+                                                alpha = if (unlocked) .43f else .12f),
+                                        )
+                                        .background(Color(0xBB041B3E),
                                             RoundedCornerShape(30.dp))
                                         .border(1.dp, if (unlocked) achievement.tint
                                             else Ink.muted.copy(alpha = .55f),
@@ -2178,11 +2222,17 @@ fun AchievementsPage(controller: SudokuController) {
                                     RoundedCornerShape(12.dp))) {
                                 if (progress > 0f) Box(
                                     Modifier.fillMaxWidth(progress).fillMaxHeight()
+                                        .shadow(
+                                            elevation = if (unlocked) 4.dp else 2.dp,
+                                            shape = RoundedCornerShape(12.dp),
+                                            ambientColor = achievement.tint.copy(alpha = .48f),
+                                            spotColor = achievement.tint.copy(alpha = .46f),
+                                        )
                                         .background(
-                                            Brush.horizontalGradient(listOf(
-                                                achievement.tint.copy(alpha = .64f),
+                                            Brush.verticalGradient(listOf(
+                                                Color.White.copy(alpha = .75f),
                                                 achievement.tint,
-                                                achievement.tint.copy(alpha = .92f)
+                                                achievement.tint.copy(alpha = .86f),
                                             )),
                                             RoundedCornerShape(12.dp),
                                         )
