@@ -1523,7 +1523,7 @@ fun StatsPage(controller: SudokuController) {
                 }
             }
         }
-        StatisticsSurface(Modifier.fillMaxWidth().heightIn(min = 104.dp)
+        StatisticsSurface(Modifier.fillMaxWidth().heightIn(min = 108.dp)
             .testTag("stats-achievements")
             .semantics {
                 contentDescription = "Otvori svih 24 postignuća"
@@ -1630,72 +1630,48 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
     val earned = fraction >= 1f
     StatisticsSurface(
         modifier.heightIn(
-            min = if (LocalDensity.current.fontScale >= 1.3f) 105.dp else 72.dp
+            min = if (LocalDensity.current.fontScale >= 1.3f) 100.dp else 84.dp
         ),
-        // All four reference previews use recognisable, luminous award
-        // glyphs; show a small lock overlay until genuinely earned.
-        accent = award.tint.copy(alpha = if (earned) 1f else .75f),
+        // Original's four previews retain their independent teal, blue,
+        // purple and cyan accents even when the underlying award is locked.
+        accent = award.tint.copy(alpha = if (earned) 1f else .72f),
         background = listOf(
-            award.tint.copy(alpha = if (earned) .28f else .15f),
+            award.tint.copy(alpha = if (earned) .27f else .17f),
             Color(0xFF081C40),
         ),
         corner = 9.dp,
     ) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
-            Row(
-                Modifier.fillMaxWidth().weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Box(Modifier.size(26.dp), contentAlignment = Alignment.Center) {
-                    BrandIcon(
-                        award.icon,
-                        Modifier.size(25.dp).drawBehind {
-                            val mid = Offset(size.width * .5f, size.height * .5f)
-                            drawCircle(Brush.radialGradient(
-                                listOf(award.tint.copy(alpha =
-                                    if (earned) .42f else .18f), Color.Transparent),
-                                center = mid, radius = size.width * .88f),
-                                center = mid, radius = size.width * .88f)
-                        },
-                        award.tint.copy(alpha = if (earned) 1f else .55f),
-                    )
-                    if (!earned) {
-                        Box(Modifier.align(Alignment.BottomEnd)
-                            .size(11.dp).background(
-                                Color(0xF0071635), RoundedCornerShape(3.dp)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            BrandIcon("lock", Modifier.size(10.dp), Ink.muted)
-                        }
-                    }
-                }
-                Text(award.title, color = Ink.white, fontSize = 9.sp,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 2, lineHeight = 10.sp,
-                    textAlign = TextAlign.Start)
-            }
+            BrandIcon(
+                if (earned) award.icon else "lock",
+                Modifier.size(20.dp).then(if (earned) Modifier.shadow(
+                    elevation = 4.dp, shape = RoundedCornerShape(50),
+                    ambientColor = award.tint.copy(alpha = .42f),
+                    spotColor = award.tint.copy(alpha = .54f),
+                ) else Modifier),
+                if (earned) award.tint else Ink.muted,
+            )
+            Text(
+                award.title, color = Ink.white, fontSize = 9.sp,
+                maxLines = 2, lineHeight = 11.sp, textAlign = TextAlign.Center,
+            )
             Box(
                 Modifier.fillMaxWidth().height(4.dp)
                     .background(Ink.blue.copy(alpha = .30f),
                         RoundedCornerShape(8.dp)),
             ) {
-                if (fraction > 0f) Box(
+                Box(
                     Modifier.fillMaxWidth(fraction).fillMaxHeight()
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(award.tint.copy(alpha = .65f), award.tint)
-                            ), RoundedCornerShape(8.dp)),
+                        .background(award.tint, RoundedCornerShape(8.dp)),
                 )
             }
             Text(
                 "${award.current.coerceAtMost(award.goal)}/${award.goal}",
                 color = Ink.muted, fontSize = 9.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
             )
         }
     }
@@ -1739,6 +1715,13 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
                                 (10 + 61 * count / ceiling).dp
                             Box(
                                 Modifier.fillMaxWidth(.73f).height(heightDp)
+                                    .then(if (count > 0) Modifier.shadow(
+                                        elevation = 3.dp,
+                                        shape = RoundedCornerShape(
+                                            topStart = 5.dp, topEnd = 5.dp),
+                                        ambientColor = colors[index].copy(alpha = .41f),
+                                        spotColor = colors[index].copy(alpha = .34f),
+                                    ) else Modifier)
                                     .background(
                                         Brush.verticalGradient(listOf(
                                             colors[index].copy(alpha = .98f),
@@ -1784,9 +1767,9 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                     maxLines = 1, lineHeight = 12.sp)
             }
             Spacer(Modifier.height(6.dp))
-            Box(Modifier.fillMaxWidth().height(103.dp),
+            Box(Modifier.fillMaxWidth().height(98.dp),
                 contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(100.dp)) {
+                Canvas(Modifier.size(94.dp)) {
                     val center = Offset(size.width / 2f, size.height / 2f)
                     drawCircle(
                         brush = Brush.radialGradient(
@@ -1797,18 +1780,17 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                         center = center,
                     )
                     drawArc(Ink.blue.copy(alpha = .28f), 0f, 360f, false,
-                        style = Stroke(10.dp.toPx(), cap = StrokeCap.Round))
+                        style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     if (fraction > 0f) {
-                        // Soft glow under the crisp true-data completion arc.
                         drawArc(
-                            Ink.cyan.copy(alpha = .21f),
+                            Ink.cyan.copy(alpha = .19f),
                             -90f, fraction * 360f, false,
-                            style = Stroke(16.dp.toPx(), cap = StrokeCap.Round),
+                            style = Stroke(15.dp.toPx(), cap = StrokeCap.Round),
                         )
                         drawArc(
                             Brush.sweepGradient(listOf(Ink.blue, Ink.cyan, Ink.blue)),
                             -90f, fraction * 360f, false,
-                            style = Stroke(10.dp.toPx(), cap = StrokeCap.Round),
+                            style = Stroke(11.dp.toPx(), cap = StrokeCap.Round),
                         )
                     }
                 }
@@ -1941,15 +1923,7 @@ private fun StatTile(
                             "streak" -> "flame-solid"
                             else -> "statistics"
                         },
-                        Modifier.fillMaxSize()
-                            .drawBehind {
-                                val mid = Offset(size.width * .5f, size.height * .5f)
-                                drawCircle(Brush.radialGradient(
-                                    listOf(color.copy(alpha = .24f), Color.Transparent),
-                                    center = mid, radius = size.width * .83f),
-                                    center = mid, radius = size.width * .83f)
-                            },
-                        color,
+                        Modifier.fillMaxSize(), color,
                     )
                 }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
@@ -2046,19 +2020,7 @@ fun AchievementsPage(controller: SudokuController) {
                     horizontalArrangement = Arrangement.spacedBy(
                         if (compactSummary) 6.dp else 13.dp),
                 ) {
-                BrandIcon(
-                    "trophy-solid",
-                    Modifier.size(if (compactSummary) 34.dp else 43.dp)
-                        .drawBehind {
-                            val mid = Offset(size.width * .5f, size.height * .5f)
-                            drawCircle(Brush.radialGradient(
-                                listOf(Ink.gold.copy(alpha = .57f),
-                                    Ink.gold.copy(alpha = .17f), Color.Transparent),
-                                center = mid, radius = size.width * .95f),
-                                center = mid, radius = size.width * .95f)
-                        },
-                    Ink.gold,
-                )
+                BrandIcon("trophy-solid", Modifier.size(if (compactSummary) 34.dp else 43.dp), Ink.gold)
                 Column(Modifier.weight(1f)) {
                     Subtitle("Ukupno bodova")
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2069,18 +2031,7 @@ fun AchievementsPage(controller: SudokuController) {
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
                     .background(Ink.blue.copy(alpha = .80f)))
-                BrandIcon(
-                    "star-solid",
-                    Modifier.size(if (compactSummary) 29.dp else 39.dp)
-                        .drawBehind {
-                            val mid = Offset(size.width * .5f, size.height * .5f)
-                            drawCircle(Brush.radialGradient(
-                                listOf(Ink.cyan.copy(alpha = .39f), Color.Transparent),
-                                center = mid, radius = size.width * .9f),
-                                center = mid, radius = size.width * .9f)
-                        },
-                    Ink.cyan,
-                )
+                BrandIcon("star-solid", Modifier.size(if (compactSummary) 29.dp else 39.dp), Ink.cyan)
                 Column(Modifier.weight(.75f)) {
                     Subtitle("Otključano")
                     Text("${data.count { it.current >= it.goal }} / ${data.size}",
@@ -2140,32 +2091,20 @@ fun AchievementsPage(controller: SudokuController) {
                                     Modifier.size(if (compactFeatured) 38.dp else 48.dp)
                                         .drawBehind {
                                             val mid = Offset(size.width / 2f, size.height / 2f)
-                                            val haloRadius = size.width *
-                                                if (rowIndex < 2) .87f else .74f
                                             drawCircle(
                                                 Brush.radialGradient(
                                                     listOf(
                                                         achievement.tint.copy(
-                                                            alpha = if (unlocked) .55f
-                                                            else if (rowIndex < 2) .32f else .17f
+                                                            alpha = if (unlocked) .50f
+                                                            else if (rowIndex < 2) .29f else .14f
                                                         ),
-                                                        achievement.tint.copy(alpha = .055f),
                                                         Color.Transparent,
                                                     ),
                                                     center = mid,
-                                                    radius = haloRadius,
+                                                    radius = size.width * if (rowIndex < 2) .79f else .68f,
                                                 ),
-                                                radius = haloRadius,
+                                                radius = size.width * if (rowIndex < 2) .79f else .68f,
                                                 center = mid,
-                                            )
-                                            // Soft 3D highlight behind the
-                                            // real vector award glyph.
-                                            drawCircle(
-                                                Color.White.copy(alpha =
-                                                    if (unlocked) .11f else .035f),
-                                                radius = size.width * .36f,
-                                                center = Offset(mid.x - size.width * .07f,
-                                                    mid.y - size.height * .10f),
                                             )
                                         },
                                     contentAlignment = Alignment.Center,
@@ -2191,15 +2130,12 @@ fun AchievementsPage(controller: SudokuController) {
                                     }
                                 }
                                 Row(
-                                    Modifier
-                                        .shadow(
-                                            elevation = if (unlocked) 5.dp else 2.dp,
-                                            shape = RoundedCornerShape(30.dp),
-                                            ambientColor = achievement.tint.copy(
-                                                alpha = if (unlocked) .30f else .12f),
-                                            spotColor = achievement.tint.copy(
-                                                alpha = if (unlocked) .43f else .12f),
-                                        )
+                                    Modifier.then(if (unlocked) Modifier.shadow(
+                                        elevation = 4.dp,
+                                        shape = RoundedCornerShape(30.dp),
+                                        ambientColor = achievement.tint.copy(alpha = .38f),
+                                        spotColor = achievement.tint.copy(alpha = .48f),
+                                    ) else Modifier)
                                         .background(Color(0xBB041B3E),
                                             RoundedCornerShape(30.dp))
                                         .border(1.dp, if (unlocked) achievement.tint
@@ -2264,17 +2200,17 @@ fun AchievementsPage(controller: SudokuController) {
                                     RoundedCornerShape(12.dp))) {
                                 if (progress > 0f) Box(
                                     Modifier.fillMaxWidth(progress).fillMaxHeight()
-                                        .shadow(
-                                            elevation = if (unlocked) 4.dp else 2.dp,
+                                        .then(if (unlocked) Modifier.shadow(
+                                            elevation = 3.dp,
                                             shape = RoundedCornerShape(12.dp),
-                                            ambientColor = achievement.tint.copy(alpha = .48f),
-                                            spotColor = achievement.tint.copy(alpha = .46f),
-                                        )
+                                            ambientColor = achievement.tint.copy(alpha = .4f),
+                                            spotColor = achievement.tint.copy(alpha = .44f),
+                                        ) else Modifier)
                                         .background(
-                                            Brush.verticalGradient(listOf(
-                                                Color.White.copy(alpha = .75f),
+                                            Brush.horizontalGradient(listOf(
+                                                achievement.tint.copy(alpha = .64f),
                                                 achievement.tint,
-                                                achievement.tint.copy(alpha = .86f),
+                                                achievement.tint.copy(alpha = .92f)
                                             )),
                                             RoundedCornerShape(12.dp),
                                         )
