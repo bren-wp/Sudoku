@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -524,8 +525,9 @@ fun BrandHeader(modifier: Modifier = Modifier, compact: Boolean = false) {
                     letterSpacing = (-1.2).sp,
                     maxLines = 1,
                 )
-                // The original transparent PNG puts the byline under the
-                // RIGHT edge of "Sudoku"; no horizontal rule precedes it.
+                // The source has a restrained 11sp byline. A more intrusive
+                // inset and 12sp treatment increased the REAL 941px header
+                // pixel error, so keep the measured better baseline alignment.
                 Text(
                     "by Brendigo",
                     modifier = Modifier.testTag("wordmark-byline"),
@@ -572,7 +574,49 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
             .padding(2.dp)
             .clip(RoundedCornerShape(innerCorner))
             .background(Color(0xFF061A49))
-            .padding(4.dp),
+            .padding(4.dp)
+            // The reference icon uses ONE continuous illuminated 3x3 grid.
+            // Paint its shared edges over the real Compose digit cells:
+            // individual boxed borders caused a conspicuous checkerboard.
+            .drawWithContent {
+                drawContent()
+                if (glowing) {
+                    // SudokuLogo has a Dp parameter also named "size":
+                    // qualify the DrawScope canvas dimension explicitly.
+                    val gridWidth = this.size.width
+                    val gridHeight = this.size.height
+                    // The owner's icon emits a local cyan bloom across the
+                    // lower-left quadrant; the previous flat grid lost it.
+                    val lowerLeft = Offset(gridWidth * .16f, gridHeight * .76f)
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                Ink.cyan.copy(alpha = .34f),
+                                Ink.blue.copy(alpha = .11f),
+                                Color.Transparent,
+                            ),
+                            center = lowerLeft, radius = gridWidth * .61f,
+                        ),
+                        center = lowerLeft,
+                        radius = gridWidth * .61f,
+                    )
+                    listOf(1f / 3f, 2f / 3f).forEach { fraction ->
+                        val x = gridWidth * fraction
+                        val y = gridHeight * fraction
+                        val glow = Ink.cyan.copy(alpha = .37f)
+                        drawLine(glow, Offset(x, 0f), Offset(x, gridHeight),
+                            strokeWidth = 3.6.dp.toPx())
+                        drawLine(glow, Offset(0f, y), Offset(gridWidth, y),
+                            strokeWidth = 3.6.dp.toPx())
+                        drawLine(Color(0xFF64F4FF).copy(alpha = .92f),
+                            Offset(x, 0f), Offset(x, gridHeight),
+                            strokeWidth = .75.dp.toPx())
+                        drawLine(Color(0xFF64F4FF).copy(alpha = .92f),
+                            Offset(0f, y), Offset(gridWidth, y),
+                            strokeWidth = .75.dp.toPx())
+                    }
+                }
+            },
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         repeat(3) { r ->
@@ -630,14 +674,15 @@ fun SudokuLogo(size: Dp, glowing: Boolean = false) {
                                 )
                             } else Modifier)
                             .border(
-                                if (center && glowing) 1.dp else .55.dp,
-                                if (center && glowing) Color(0xFF88FAFF)
-                                else Ink.cyan.copy(alpha = .68f),
+                                if (center && glowing) .7.dp else .15.dp,
+                                if (center && glowing) Color(0xFF88FAFF).copy(alpha = .65f)
+                                else Ink.cyan.copy(alpha = if (glowing) .20f else .58f),
                             ),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(values[r * 3 + c], fontSize = (size.value * .29f).sp,
-                            color = if (center) Ink.cyan else Ink.white, fontWeight = FontWeight.Bold)
+                            color = if (center) Color(0xFFCBF5FF) else Ink.white,
+                            fontWeight = if (center) FontWeight.Bold else FontWeight.Medium)
                     }
                 }
             }

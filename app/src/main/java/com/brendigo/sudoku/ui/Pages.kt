@@ -263,7 +263,7 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center) {
             val glyph = when {
-                title.trimStart().startsWith("▶") -> "play"
+                title.trimStart().startsWith("▶") -> "play-filled"
                 title.trimStart().startsWith("✓") -> "check"
                 else -> null
             }
@@ -361,7 +361,7 @@ fun HomePage(controller: SudokuController) {
                 "V I Š E  O D  I G R E  ·  V J E Ž B A  Z A  U M",
                 color = Ink.muted,
                 fontSize = if (maxWidth < 375.dp) 9.sp else 10.sp,
-                letterSpacing = 1.sp,
+                letterSpacing = if (maxWidth < 375.dp) 1.sp else 2.sp,
                 modifier = Modifier.fillMaxWidth().testTag("home-slogan"),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
@@ -818,7 +818,9 @@ private fun HomeTile(
             .semantics { contentDescription = "$title, $subtitle"; role = Role.Button }
             .heightIn(min = if (compact) 94.dp else 146.dp)
             .clickable(onClick = onClick),
-        highlight = accent,
+        highlight = if (compact && accent == Ink.muted)
+            Ink.line.copy(alpha = .85f) else accent,
+        corner = 13.dp,
     ) {
         HomeTileArtwork(accent = accent, compact = compact)
         Column(
@@ -851,17 +853,17 @@ private fun HomeTile(
                 Box(
                     Modifier.size(44.dp)
                         .shadow(
-                            elevation = 4.dp,
+                            elevation = 7.dp,
                             shape = RoundedCornerShape(50),
-                            ambientColor = accent.copy(alpha = .38f),
-                            spotColor = accent.copy(alpha = .54f),
+                            ambientColor = accent.copy(alpha = .56f),
+                            spotColor = accent.copy(alpha = .71f),
                         )
                         // A restrained radial glass well adds depth while
                         // retaining the original accessible full-card click.
                         .background(
                             Brush.radialGradient(listOf(
-                                accent.copy(alpha = .29f),
-                                accent.copy(alpha = .12f),
+                                accent.copy(alpha = .37f),
+                                accent.copy(alpha = .16f),
                                 Color(0xCC03152F),
                             )),
                             RoundedCornerShape(50),
