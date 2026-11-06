@@ -1769,15 +1769,9 @@ class SudokuVisualSmokeTest {
                 logoBounds.width > 0f &&
                     logoBounds.right <= titleBounds.left + tolerance &&
                     titleBounds.bottom <= bylineBounds.top + tolerance &&
-                    // The reference's byline ends 21dp INSIDE the right
-                    // edge of the main wordmark, with two subtle rules.
-                    // Assert that intended inset rather than the previous
-                    // (incorrect) flush-right alignment.
-                    (titleBounds.right - bylineBounds.right) in
-                        (14f * rule.activity.resources.displayMetrics.density)..
-                        (28f * rule.activity.resources.displayMetrics.density)
+                    kotlin.math.abs(bylineBounds.right - titleBounds.right) <= tolerance
             ) {
-                "Wordmark source requires a left 7-3-9 logo, inset byline " +
+                "Wordmark source requires a left 7-3-9 logo, right-aligned byline " +
                     "and no overlap: $logoBounds / $titleBounds / $bylineBounds"
             }
             check(black.width == white.width && black.height == white.height) {
