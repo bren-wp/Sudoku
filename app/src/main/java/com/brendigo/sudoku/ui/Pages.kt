@@ -1642,36 +1642,73 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
         corner = 9.dp,
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(3.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 5.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            BrandIcon(
-                if (earned) award.icon else "lock",
-                Modifier.size(20.dp).then(if (earned) Modifier.shadow(
-                    elevation = 4.dp, shape = RoundedCornerShape(50),
-                    ambientColor = award.tint.copy(alpha = .42f),
-                    spotColor = award.tint.copy(alpha = .54f),
-                ) else Modifier),
-                if (earned) award.tint else Ink.muted,
-            )
-            Text(
-                award.title, color = Ink.white, fontSize = 9.sp,
-                maxLines = 2, lineHeight = 11.sp, textAlign = TextAlign.Center,
-            )
+            // The four reference cards pair their distinctive award artwork
+            // with the title on one row. Keep the *actual* vector visible
+            // even when locked; a small corner padlock conveys status.
+            // Never replace four different awards with four identical locks.
+            Row(
+                Modifier.fillMaxWidth().weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Box(Modifier.size(30.dp), contentAlignment = Alignment.Center) {
+                    BrandIcon(
+                        award.icon,
+                        Modifier.size(29.dp).drawBehind {
+                            if (earned || fraction > 0f) {
+                                val center = Offset(size.width / 2f, size.height / 2f)
+                                drawCircle(
+                                    Brush.radialGradient(
+                                        listOf(award.tint.copy(alpha = if (earned) .36f else .19f),
+                                            Color.Transparent),
+                                        center = center, radius = size.width * .75f,
+                                    ),
+                                    center = center, radius = size.width * .75f,
+                                )
+                            }
+                        },
+                        award.tint.copy(alpha = if (earned) 1f else .72f),
+                    )
+                    if (!earned) {
+                        Box(
+                            Modifier.align(Alignment.BottomEnd)
+                                .size(12.dp)
+                                .background(Color(0xF0041636), RoundedCornerShape(3.dp)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            BrandIcon("lock", Modifier.size(10.dp), Ink.muted)
+                        }
+                    }
+                }
+                Text(
+                    award.title,
+                    modifier = Modifier.weight(1f),
+                    color = Ink.white,
+                    fontSize = 9.sp,
+                    lineHeight = 11.sp,
+                    maxLines = 2,
+                )
+            }
             Box(
                 Modifier.fillMaxWidth().height(4.dp)
                     .background(Ink.blue.copy(alpha = .30f),
                         RoundedCornerShape(8.dp)),
             ) {
-                Box(
-                    Modifier.fillMaxWidth(fraction).fillMaxHeight()
-                        .background(award.tint, RoundedCornerShape(8.dp)),
-                )
+                if (fraction > 0f) {
+                    Box(
+                        Modifier.fillMaxWidth(fraction).fillMaxHeight()
+                            .background(award.tint, RoundedCornerShape(8.dp)),
+                    )
+                }
             }
             Text(
                 "${award.current.coerceAtMost(award.goal)}/${award.goal}",
                 color = Ink.muted, fontSize = 9.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -1974,7 +2011,7 @@ fun AchievementsPage(controller: SudokuController) {
     }
     // 23 measured awards + the Sudoku legend award = 24 distinct achievements.
     val basic = listOf(
-        Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru.", 1, s.finished, 50, Ink.gold),
+        Achievement("🏆", "Prva pobjeda", "Završi svoju prvu igru u bilo kojoj težini.", 1, s.finished, 50, Ink.gold),
         Achievement("▣", "Sedam dana zaredom", "Riješi dnevne izazove sedam dana zaredom.", 7, s.bestStreak, 100, Ink.blue),
         Achievement("✿", "Majstor logike", "Završi 50 igara na teškoj razini.", 50, s.winsByLevel[3], 150, Ink.teal),
         Achievement("ϟ", "Bez greške", "Završi igru bez ijedne pogreške.", 1, s.flawless, 100, Ink.gold),
@@ -2061,6 +2098,10 @@ fun AchievementsPage(controller: SudokuController) {
                 pair.forEach { achievement ->
                     val unlocked = achievement.current >= achievement.goal
                     val compactFeatured = rowIndex in 2..3
+                    // In the provided reference, the first five achievements
+                    // keep their signature icon colors while *locked*. Only
+                    // the badge and progress convey whether they are earned.
+                    val vividFeatured = rowIndex < 3
                     AchievementSurface(
                         title = achievement.title,
                         tint = achievement.tint,
@@ -2095,8 +2136,8 @@ fun AchievementsPage(controller: SudokuController) {
                                                 Brush.radialGradient(
                                                     listOf(
                                                         achievement.tint.copy(
-                                                            alpha = if (unlocked) .50f
-                                                            else if (rowIndex < 2) .29f else .14f
+                                                            alpha = if (unlocked) .57f
+                                                            else if (vividFeatured) .36f else .14f
                                                         ),
                                                         Color.Transparent,
                                                     ),
@@ -2110,12 +2151,22 @@ fun AchievementsPage(controller: SudokuController) {
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     // Keep each award recognizable when locked.
-                                    BrandIcon(achievementIconFor(achievement.title),
-                                        Modifier.size(if (compactFeatured) 37.dp else 47.dp),
+                                    BrandIcon(
+                                        achievementIconFor(achievement.title),
+                                        Modifier.size(if (compactFeatured) 37.dp else 47.dp)
+                                            .graphicsLayer {
+                                                // Enlarges decorative 3D icons
+                                                // without shifting real text,
+                                                // hit areas, scroll or layout.
+                                                val scale = if (vividFeatured) 1.13f else 1f
+                                                scaleX = scale
+                                                scaleY = scale
+                                            },
                                         if (unlocked) achievement.tint
                                         else achievement.tint.copy(
-                                            alpha = if (rowIndex < 2) .95f else .68f
-                                        ))
+                                            alpha = if (vividFeatured) .97f else .61f
+                                        ),
+                                    )
                                     if (!unlocked) {
                                         Box(
                                             Modifier.size(if (compactFeatured) 18.dp else 20.dp)
