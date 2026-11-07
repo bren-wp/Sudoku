@@ -1673,10 +1673,10 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Box(Modifier.size(30.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
                     BrandIcon(
                         award.icon,
-                        Modifier.size(29.dp).drawBehind {
+                        Modifier.size(31.dp).drawBehind {
                             if (earned || fraction > 0f) {
                                 val center = Offset(size.width / 2f, size.height / 2f)
                                 drawCircle(
@@ -1689,7 +1689,7 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                                 )
                             }
                         },
-                        award.tint.copy(alpha = if (earned) 1f else .72f),
+                        award.tint.copy(alpha = if (earned) 1f else .83f),
                     )
                     if (!earned) {
                         Box(
@@ -1706,7 +1706,7 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                     award.title,
                     modifier = Modifier.weight(1f),
                     color = Ink.white,
-                    fontSize = 9.sp,
+                    fontSize = 10.sp,
                     lineHeight = 11.sp,
                     maxLines = 2,
                 )
@@ -1968,7 +1968,7 @@ private fun StatTile(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    Modifier.size(if (compact) 34.dp else 44.dp)
+                    Modifier.size(if (compact) 35.dp else 46.dp)
                         .drawBehind {
                             val center = Offset(size.width * .5f, size.height * .5f)
                             drawCircle(
@@ -1997,11 +1997,12 @@ private fun StatTile(
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(label, color = Ink.muted,
-                        fontSize = if (compact) 11.sp else 12.sp,
-                        lineHeight = if (compact) 13.sp else 14.sp, maxLines = 2)
+                        fontSize = if (compact) 11.sp else 13.sp,
+                        lineHeight = if (compact) 13.sp else 15.sp, maxLines = 2)
                     Text(value, color = Ink.white,
                         fontSize = if (compact && value.length > 7) 15.sp
-                            else if (compact) 20.sp else 23.sp,
+                            else if (compact) 20.sp
+                            else if (value.length > 7) 19.sp else 25.sp,
                         fontWeight = FontWeight.ExtraBold, maxLines = 1,
                     )
                     Text(
@@ -2012,7 +2013,7 @@ private fun StatTile(
                             "streak" -> "Trenutni niz"
                             else -> ""
                         },
-                        color = Ink.muted, fontSize = if (compact) 9.sp else 9.sp,
+                        color = Ink.muted, fontSize = if (compact) 9.sp else 10.sp,
                         maxLines = 1,
                     )
                 }
