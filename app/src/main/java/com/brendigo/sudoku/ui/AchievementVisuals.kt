@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -75,7 +76,13 @@ fun AchievementSurface(
         else -> Ink.blue
     }
     Box(
-        modifier.clip(frame)
+        modifier
+            .then(if (completed) Modifier.shadow(
+                elevation = 5.dp, shape = frame,
+                ambientColor = edge.copy(alpha = .37f),
+                spotColor = edge.copy(alpha = .47f),
+            ) else Modifier)
+            .clip(frame)
             .background(Brush.horizontalGradient(base))
             .border(1.dp, edge.copy(alpha = if (muted) .67f else .95f), frame)
     ) {
@@ -177,7 +184,8 @@ fun AchievementSurface(
                     image = art,
                     dstOffset = IntOffset((w * .47f).roundToInt(), (h * .025f).roundToInt()),
                     dstSize = IntSize((w * .53f).roundToInt(), (h * .69f).roundToInt()),
-                    alpha = if (warm) .80f else .82f,
+                    alpha = if (completed && warm) .93f
+                        else if (warm) .80f else .82f,
                     filterQuality = FilterQuality.High,
                 )
                 drawRect(

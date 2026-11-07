@@ -1648,7 +1648,11 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
         ) {
             BrandIcon(
                 if (earned) award.icon else "lock",
-                Modifier.size(20.dp),
+                Modifier.size(20.dp).then(if (earned) Modifier.shadow(
+                    elevation = 4.dp, shape = RoundedCornerShape(50),
+                    ambientColor = award.tint.copy(alpha = .42f),
+                    spotColor = award.tint.copy(alpha = .54f),
+                ) else Modifier),
                 if (earned) award.tint else Ink.muted,
             )
             Text(
@@ -1711,6 +1715,13 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
                                 (10 + 61 * count / ceiling).dp
                             Box(
                                 Modifier.fillMaxWidth(.73f).height(heightDp)
+                                    .then(if (count > 0) Modifier.shadow(
+                                        elevation = 3.dp,
+                                        shape = RoundedCornerShape(
+                                            topStart = 5.dp, topEnd = 5.dp),
+                                        ambientColor = colors[index].copy(alpha = .41f),
+                                        spotColor = colors[index].copy(alpha = .34f),
+                                    ) else Modifier)
                                     .background(
                                         Brush.verticalGradient(listOf(
                                             colors[index].copy(alpha = .98f),
@@ -1771,6 +1782,11 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
                     drawArc(Ink.blue.copy(alpha = .28f), 0f, 360f, false,
                         style = Stroke(9.dp.toPx(), cap = StrokeCap.Round))
                     if (fraction > 0f) {
+                        drawArc(
+                            Ink.cyan.copy(alpha = .19f),
+                            -90f, fraction * 360f, false,
+                            style = Stroke(15.dp.toPx(), cap = StrokeCap.Round),
+                        )
                         drawArc(
                             Brush.sweepGradient(listOf(Ink.blue, Ink.cyan, Ink.blue)),
                             -90f, fraction * 360f, false,
@@ -2079,7 +2095,7 @@ fun AchievementsPage(controller: SudokuController) {
                                                 Brush.radialGradient(
                                                     listOf(
                                                         achievement.tint.copy(
-                                                            alpha = if (unlocked) .39f
+                                                            alpha = if (unlocked) .50f
                                                             else if (rowIndex < 2) .29f else .14f
                                                         ),
                                                         Color.Transparent,
@@ -2114,7 +2130,13 @@ fun AchievementsPage(controller: SudokuController) {
                                     }
                                 }
                                 Row(
-                                    Modifier.background(Color(0xBB041B3E),
+                                    Modifier.then(if (unlocked) Modifier.shadow(
+                                        elevation = 4.dp,
+                                        shape = RoundedCornerShape(30.dp),
+                                        ambientColor = achievement.tint.copy(alpha = .38f),
+                                        spotColor = achievement.tint.copy(alpha = .48f),
+                                    ) else Modifier)
+                                        .background(Color(0xBB041B3E),
                                             RoundedCornerShape(30.dp))
                                         .border(1.dp, if (unlocked) achievement.tint
                                             else Ink.muted.copy(alpha = .55f),
@@ -2178,6 +2200,12 @@ fun AchievementsPage(controller: SudokuController) {
                                     RoundedCornerShape(12.dp))) {
                                 if (progress > 0f) Box(
                                     Modifier.fillMaxWidth(progress).fillMaxHeight()
+                                        .then(if (unlocked) Modifier.shadow(
+                                            elevation = 3.dp,
+                                            shape = RoundedCornerShape(12.dp),
+                                            ambientColor = achievement.tint.copy(alpha = .4f),
+                                            spotColor = achievement.tint.copy(alpha = .44f),
+                                        ) else Modifier)
                                         .background(
                                             Brush.horizontalGradient(listOf(
                                                 achievement.tint.copy(alpha = .64f),
