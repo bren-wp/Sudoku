@@ -77,14 +77,10 @@ fun AchievementSurface(
     }
     Box(
         modifier
-            // The five illustrated cards have a coloured 3D rim even while
-            // their rewards are locked. Unlock state stays entirely separate
-            // (small lock and true live progress in the calling screen).
-            .then(if (completed || !muted) Modifier.shadow(
-                elevation = if (completed) 5.dp else 3.dp,
-                shape = frame,
-                ambientColor = edge.copy(alpha = if (completed) .37f else .22f),
-                spotColor = edge.copy(alpha = if (completed) .47f else .30f),
+            .then(if (completed) Modifier.shadow(
+                elevation = 5.dp, shape = frame,
+                ambientColor = edge.copy(alpha = .37f),
+                spotColor = edge.copy(alpha = .47f),
             ) else Modifier)
             .clip(frame)
             .background(Brush.horizontalGradient(base))
@@ -210,18 +206,6 @@ fun AchievementSurface(
             if (muted) {
                 drawRect(Color(0x50041430))
             }
-            // A faint raised-glass specular strip sits behind all real text.
-            // Keep it much weaker on genuinely locked, monochrome cards.
-            drawRect(
-                Brush.verticalGradient(
-                    listOf(
-                        Color.White.copy(alpha = if (muted) .025f else .085f),
-                        Color.Transparent,
-                    ),
-                    startY = 0f, endY = h * .23f,
-                ),
-                size = Size(w, h * .23f),
-            )
             // Narrow illuminated rim follows the reference's layered card.
             drawLine(
                 color = edge.copy(alpha = if (muted) .15f else .52f),
