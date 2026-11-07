@@ -1097,17 +1097,32 @@ private fun DailyMetric(
     icon: String, label: String, value: String,
     color: Color, modifier: Modifier = Modifier,
 ) {
-    DailyFrame(modifier.heightIn(min = 57.dp), Ink.blue, radius = 12.dp) {
+    // The three data tiles in the reference have recessed navy surfaces,
+    // not bright cyan outlines competing with the main illustration.
+    DailyFrame(modifier.heightIn(min = 59.dp), Ink.blue.copy(alpha = .55f), radius = 11.dp) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BrandIcon(icon, Modifier.size(29.dp), color)
+            BrandIcon(
+                icon,
+                Modifier.size(30.dp).drawBehind {
+                    val center = Offset(size.width * .5f, size.height * .5f)
+                    drawCircle(
+                        Brush.radialGradient(
+                            listOf(color.copy(alpha = .27f), Color.Transparent),
+                            center = center, radius = size.width * .80f,
+                        ),
+                        center = center, radius = size.width * .80f,
+                    )
+                },
+                color,
+            )
             Spacer(Modifier.width(7.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(label, color = Ink.muted, fontSize = 9.sp,
                     lineHeight = 11.sp, maxLines = 2)
-                Text(value, color = Ink.white, fontSize = 13.sp,
+                Text(value, color = Ink.white, fontSize = 14.sp,
                     fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
@@ -1237,7 +1252,7 @@ fun DailyPage(controller: SudokuController) {
                     color = Ink.muted, fontSize = 11.sp, maxLines = 1)
                 Text(
                     "Misteriozna planina",
-                    fontSize = if (compactHero) 23.sp else 25.sp,
+                    fontSize = if (compactHero) 24.sp else 26.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Ink.white,
                     maxLines = if (compactHero) 2 else 1,
@@ -1658,10 +1673,10 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Box(Modifier.size(30.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
                     BrandIcon(
                         award.icon,
-                        Modifier.size(29.dp).drawBehind {
+                        Modifier.size(31.dp).drawBehind {
                             if (earned || fraction > 0f) {
                                 val center = Offset(size.width / 2f, size.height / 2f)
                                 drawCircle(
@@ -1674,7 +1689,7 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                                 )
                             }
                         },
-                        award.tint.copy(alpha = if (earned) 1f else .72f),
+                        award.tint.copy(alpha = if (earned) 1f else .83f),
                     )
                     if (!earned) {
                         Box(
@@ -1691,7 +1706,7 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                     award.title,
                     modifier = Modifier.weight(1f),
                     color = Ink.white,
-                    fontSize = 9.sp,
+                    fontSize = 10.sp,
                     lineHeight = 11.sp,
                     maxLines = 2,
                 )
@@ -1704,7 +1719,18 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                 if (fraction > 0f) {
                     Box(
                         Modifier.fillMaxWidth(fraction).fillMaxHeight()
-                            .background(award.tint, RoundedCornerShape(8.dp)),
+                            .then(if (earned) Modifier.shadow(
+                                elevation = 2.dp,
+                                shape = RoundedCornerShape(8.dp),
+                                ambientColor = award.tint.copy(alpha = .39f),
+                                spotColor = award.tint.copy(alpha = .41f),
+                            ) else Modifier)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(award.tint.copy(alpha = .69f), award.tint)
+                                ),
+                                RoundedCornerShape(8.dp),
+                            ),
                     )
                 }
             }
@@ -1942,7 +1968,7 @@ private fun StatTile(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    Modifier.size(if (compact) 34.dp else 44.dp)
+                    Modifier.size(if (compact) 35.dp else 46.dp)
                         .drawBehind {
                             val center = Offset(size.width * .5f, size.height * .5f)
                             drawCircle(
@@ -1971,11 +1997,12 @@ private fun StatTile(
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(label, color = Ink.muted,
-                        fontSize = if (compact) 10.sp else 12.sp,
-                        lineHeight = if (compact) 12.sp else 14.sp, maxLines = 2)
+                        fontSize = if (compact) 11.sp else 13.sp,
+                        lineHeight = if (compact) 13.sp else 15.sp, maxLines = 2)
                     Text(value, color = Ink.white,
                         fontSize = if (compact && value.length > 7) 15.sp
-                            else if (compact) 19.sp else 23.sp,
+                            else if (compact) 20.sp
+                            else if (value.length > 7) 19.sp else 25.sp,
                         fontWeight = FontWeight.ExtraBold, maxLines = 1,
                     )
                     Text(
@@ -1986,7 +2013,7 @@ private fun StatTile(
                             "streak" -> "Trenutni niz"
                             else -> ""
                         },
-                        color = Ink.muted, fontSize = if (compact) 8.sp else 9.sp,
+                        color = Ink.muted, fontSize = if (compact) 9.sp else 10.sp,
                         maxLines = 1,
                     )
                 }
@@ -2061,7 +2088,21 @@ fun AchievementsPage(controller: SudokuController) {
                     horizontalArrangement = Arrangement.spacedBy(
                         if (compactSummary) 6.dp else 13.dp),
                 ) {
-                BrandIcon("trophy-solid", Modifier.size(if (compactSummary) 34.dp else 43.dp), Ink.gold)
+                BrandIcon(
+                    "trophy-solid",
+                    Modifier.size(if (compactSummary) 36.dp else 43.dp)
+                        .drawBehind {
+                            val center = Offset(size.width / 2f, size.height / 2f)
+                            drawCircle(
+                                Brush.radialGradient(
+                                    listOf(Ink.gold.copy(alpha = .37f), Color.Transparent),
+                                    center = center, radius = size.width * .95f,
+                                ),
+                                center = center, radius = size.width * .95f,
+                            )
+                        },
+                    Ink.gold,
+                )
                 Column(Modifier.weight(1f)) {
                     Subtitle("Ukupno bodova")
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2072,7 +2113,21 @@ fun AchievementsPage(controller: SudokuController) {
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
                     .background(Ink.blue.copy(alpha = .80f)))
-                BrandIcon("star-solid", Modifier.size(if (compactSummary) 29.dp else 39.dp), Ink.cyan)
+                BrandIcon(
+                    "star-solid",
+                    Modifier.size(if (compactSummary) 29.dp else 39.dp)
+                        .drawBehind {
+                            val center = Offset(size.width / 2f, size.height / 2f)
+                            drawCircle(
+                                Brush.radialGradient(
+                                    listOf(Ink.cyan.copy(alpha = .27f), Color.Transparent),
+                                    center = center, radius = size.width * .88f,
+                                ),
+                                center = center, radius = size.width * .88f,
+                            )
+                        },
+                    Ink.cyan,
+                )
                 Column(Modifier.weight(.75f)) {
                     Subtitle("Otključano")
                     Text("${data.count { it.current >= it.goal }} / ${data.size}",
@@ -2165,7 +2220,7 @@ fun AchievementsPage(controller: SudokuController) {
                                                 // Enlarges decorative 3D icons
                                                 // without shifting real text,
                                                 // hit areas, scroll or layout.
-                                                val scale = if (vividFeatured) 1.13f else 1f
+                                                val scale = if (vividFeatured) 1.19f else 1f
                                                 scaleX = scale
                                                 scaleY = scale
                                             },
@@ -2213,7 +2268,7 @@ fun AchievementsPage(controller: SudokuController) {
                             }
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                 Text(achievement.title, color = Ink.white,
-                                    fontSize = if (compactCards) 13.sp else 15.sp,
+                                    fontSize = if (compactCards) 14.sp else 16.sp,
                                     modifier = Modifier.weight(1f).testTag(
                                         "achievement-title-" + achievement.title.lowercase().replace(" ", "-")),
                                     fontWeight = FontWeight.Bold,
@@ -2232,8 +2287,8 @@ fun AchievementsPage(controller: SudokuController) {
                             }
                             Text(
                                 achievement.text, color = Ink.muted,
-                                fontSize = if (compactFeatured || compactCards) 10.sp else 11.sp,
-                                lineHeight = if (compactFeatured || compactCards) 12.sp else 13.sp,
+                                fontSize = if (compactFeatured || compactCards) 11.sp else 12.sp,
+                                lineHeight = if (compactFeatured || compactCards) 13.sp else 14.sp,
                                 modifier = (if (compactCards) Modifier
                                     else Modifier.weight(1f)).testTag(
                                         "achievement-description-" +

@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -151,8 +152,7 @@ fun BoxScope.DailyHeroBackdrop() {
 @Composable
 fun DailyRewardEmblem(modifier: Modifier = Modifier) {
     Box(
-        modifier
-            .drawBehind {
+        modifier.drawBehind {
                 val c = Offset(size.width / 2f, size.height / 2f)
                 drawCircle(
                     Brush.radialGradient(
@@ -235,6 +235,11 @@ fun DailyWeekMarker(checked: Boolean, dayLabel: String, diameter: Dp = 32.dp) {
     val circle = RoundedCornerShape(50)
     Box(
         Modifier.size(diameter)
+            .then(if (checked) Modifier.shadow(
+                elevation = 4.dp, shape = circle,
+                ambientColor = Ink.cyan.copy(alpha = .45f),
+                spotColor = Ink.cyan.copy(alpha = .52f),
+            ) else Modifier)
             .semantics {
                 contentDescription = "$dayLabel: " +
                     if (checked) "dnevni izazov riješen" else "dnevni izazov nije riješen"
