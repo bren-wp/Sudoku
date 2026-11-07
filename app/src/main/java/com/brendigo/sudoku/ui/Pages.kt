@@ -1719,7 +1719,18 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                 if (fraction > 0f) {
                     Box(
                         Modifier.fillMaxWidth(fraction).fillMaxHeight()
-                            .background(award.tint, RoundedCornerShape(8.dp)),
+                            .then(if (earned) Modifier.shadow(
+                                elevation = 2.dp,
+                                shape = RoundedCornerShape(8.dp),
+                                ambientColor = award.tint.copy(alpha = .39f),
+                                spotColor = award.tint.copy(alpha = .41f),
+                            ) else Modifier)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(award.tint.copy(alpha = .69f), award.tint)
+                                ),
+                                RoundedCornerShape(8.dp),
+                            ),
                     )
                 }
             }
@@ -2076,7 +2087,21 @@ fun AchievementsPage(controller: SudokuController) {
                     horizontalArrangement = Arrangement.spacedBy(
                         if (compactSummary) 6.dp else 13.dp),
                 ) {
-                BrandIcon("trophy-solid", Modifier.size(if (compactSummary) 34.dp else 43.dp), Ink.gold)
+                BrandIcon(
+                    "trophy-solid",
+                    Modifier.size(if (compactSummary) 36.dp else 43.dp)
+                        .drawBehind {
+                            val center = Offset(size.width / 2f, size.height / 2f)
+                            drawCircle(
+                                Brush.radialGradient(
+                                    listOf(Ink.gold.copy(alpha = .37f), Color.Transparent),
+                                    center = center, radius = size.width * .95f,
+                                ),
+                                center = center, radius = size.width * .95f,
+                            )
+                        },
+                    Ink.gold,
+                )
                 Column(Modifier.weight(1f)) {
                     Subtitle("Ukupno bodova")
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2087,7 +2112,21 @@ fun AchievementsPage(controller: SudokuController) {
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
                     .background(Ink.blue.copy(alpha = .80f)))
-                BrandIcon("star-solid", Modifier.size(if (compactSummary) 29.dp else 39.dp), Ink.cyan)
+                BrandIcon(
+                    "star-solid",
+                    Modifier.size(if (compactSummary) 29.dp else 39.dp)
+                        .drawBehind {
+                            val center = Offset(size.width / 2f, size.height / 2f)
+                            drawCircle(
+                                Brush.radialGradient(
+                                    listOf(Ink.cyan.copy(alpha = .27f), Color.Transparent),
+                                    center = center, radius = size.width * .88f,
+                                ),
+                                center = center, radius = size.width * .88f,
+                            )
+                        },
+                    Ink.cyan,
+                )
                 Column(Modifier.weight(.75f)) {
                     Subtitle("Otključano")
                     Text("${data.count { it.current >= it.goal }} / ${data.size}",
