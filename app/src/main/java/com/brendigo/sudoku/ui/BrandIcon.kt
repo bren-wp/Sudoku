@@ -336,6 +336,50 @@ fun BrandIcon(kind: String, modifier: Modifier = Modifier, tint: Color = Ink.cya
                     canvas.drawPath(p,stroke);line(12f,6f,12f,18f)
                 }
                 "bolt" -> poly(14f,2f,6f,13f,12f,13f,10f,22f,19f,10f,13f,10f,14f,2f)
+                "bolt-award" -> {
+                    // The completed/featured golden reference uses a filled
+                    // lightning silhouette, not the generic outline bolt.
+                    // Keep its paint tied to this native icon's tint.
+                    val bolt = Path().apply {
+                        moveTo(13.8f, 1.5f)
+                        lineTo(4.1f, 14f)
+                        lineTo(10.4f, 14f)
+                        lineTo(8.6f, 22.5f)
+                        lineTo(20.2f, 9.6f)
+                        lineTo(13.8f, 9.6f)
+                        close()
+                    }
+                    val glowPaint = Paint(filled).apply {
+                        setShadowLayer(2.0f, 0f, 0f, tint.toArgb())
+                    }
+                    canvas.drawPath(bolt, glowPaint)
+                }
+                "flame-award" -> {
+                    // Cyan/blue (or gold) filled flame for achievement cards.
+                    // Unlike the warm 'flame-solid' metric glyph, this uses
+                    // the award tint, so the theme stays consistent.
+                    val outer = Path().apply {
+                        moveTo(12f, 1.3f)
+                        cubicTo(18f, 7.1f, 20.6f, 12f, 20.2f, 16.5f)
+                        cubicTo(19.8f, 22.7f, 4.1f, 23.5f, 3.7f, 16.6f)
+                        cubicTo(3.5f, 12.6f, 6.6f, 9.1f, 8.1f, 5.2f)
+                        cubicTo(8.0f, 12.1f, 12.1f, 11.7f, 12f, 1.3f)
+                        close()
+                    }
+                    val light = Paint(filled).apply {
+                        setShadowLayer(2f, 0f, 0f, tint.toArgb())
+                    }
+                    canvas.drawPath(outer, light)
+                    val interior = Path().apply {
+                        moveTo(12.3f, 13.1f)
+                        cubicTo(9f, 16.6f, 7.5f, 20.4f, 11.5f, 21.1f)
+                        cubicTo(14.8f, 21f, 16.8f, 18.9f, 12.3f, 13.1f)
+                        close()
+                    }
+                    canvas.drawPath(interior, Paint(filled).apply {
+                        color = android.graphics.Color.rgb(3, 24, 57)
+                    })
+                }
                 "flame-solid" -> {
                     val outer = Path().apply {
                         moveTo(12f, 1f)
@@ -433,8 +477,8 @@ fun achievementIconFor(title: String): String = when (title) {
     "Prvi izazov","Dnevna rutina" -> "calendar"
     "Rješavač izazova" -> "grid"
     "Majstor logike","Samostalni mislilac" -> "brain"
-    "Bez greške","Besprijekoran niz" -> "bolt"
-    "Vrući niz","Zlatni niz" -> "flame"
+    "Bez greške","Besprijekoran niz" -> "bolt-award"
+    "Vrući niz","Zlatni niz" -> "flame-award"
     "Brzinac","Deset sati logike","Strpljivi mislilac" -> "timer"
     "Ekspert","Velemajstor","Sudoku legenda" -> "crown"
     else -> "grid"
