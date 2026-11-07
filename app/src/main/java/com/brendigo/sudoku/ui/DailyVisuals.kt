@@ -58,14 +58,7 @@ fun DailyFrame(
 ) {
     val rounded = RoundedCornerShape(radius)
     Box(
-        modifier
-            .shadow(
-                elevation = 3.dp,
-                shape = rounded,
-                ambientColor = highlight.copy(alpha = .26f),
-                spotColor = highlight.copy(alpha = .29f),
-            )
-            .clip(rounded)
+        modifier.clip(rounded)
             .background(
                 Brush.horizontalGradient(
                     listOf(Color(0xF902173D), Color(0xF704193B), Color(0xFB061736))
@@ -82,17 +75,8 @@ fun DailyFrame(
                         radius = w * .62f,
                     ),
                 )
-                // Very thin glass reflection, strongest above the first
-                // third of the panel. All controls remain real Compose.
-                drawRect(
-                    brush = Brush.verticalGradient(
-                        listOf(Color.White.copy(alpha = .075f), Color.Transparent),
-                        startY = 0f, endY = h * .24f,
-                    ),
-                    size = Size(w, h * .24f),
-                )
                 drawLine(
-                    color = Color.White.copy(alpha = .20f),
+                    color = Color.White.copy(alpha = .18f),
                     start = Offset(w * .07f, 1.1.dp.toPx()),
                     end = Offset(w * .60f, 1.1.dp.toPx()),
                     strokeWidth = 1.dp.toPx(),
@@ -168,14 +152,7 @@ fun BoxScope.DailyHeroBackdrop() {
 @Composable
 fun DailyRewardEmblem(modifier: Modifier = Modifier) {
     Box(
-        modifier
-            .shadow(
-                elevation = 5.dp,
-                shape = RoundedCornerShape(50),
-                ambientColor = Ink.gold.copy(alpha = .42f),
-                spotColor = Ink.gold.copy(alpha = .52f),
-            )
-            .drawBehind {
+        modifier.drawBehind {
                 val c = Offset(size.width / 2f, size.height / 2f)
                 drawCircle(
                     Brush.radialGradient(
@@ -299,11 +276,6 @@ fun DailyStartAction(
     val rounded = RoundedCornerShape(50)
     BoxWithConstraints(
         modifier.heightIn(min = 55.dp)
-            .then(if (enabled) Modifier.shadow(
-                elevation = 7.dp, shape = rounded,
-                ambientColor = Ink.cyan.copy(alpha = .47f),
-                spotColor = Ink.blue.copy(alpha = .48f),
-            ) else Modifier)
             .clip(rounded)
             .background(
                 Brush.verticalGradient(
