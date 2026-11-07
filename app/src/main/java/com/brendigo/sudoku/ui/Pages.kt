@@ -1651,7 +1651,10 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
             // even when locked; a small corner padlock conveys status.
             // Never replace four different awards with four identical locks.
             Row(
-                Modifier.fillMaxWidth().weight(1f),
+                // The preview column is measured in a scrollable parent:
+                // using weight here could collapse the icon/title row to 0dp
+                // on some devices. A bounded native row always renders it.
+                Modifier.fillMaxWidth().heightIn(min = 34.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
