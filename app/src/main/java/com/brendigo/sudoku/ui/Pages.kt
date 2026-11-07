@@ -2102,10 +2102,13 @@ fun AchievementsPage(controller: SudokuController) {
                 pair.forEach { achievement ->
                     val unlocked = achievement.current >= achievement.goal
                     val compactFeatured = rowIndex in 2..3
-                    // In the provided reference, the first five achievements
-                    // keep their signature icon colors while *locked*. Only
-                    // the badge and progress convey whether they are earned.
-                    val vividFeatured = rowIndex < 3
+                    // Only the five colourful reference illustrations
+                    // keep their 3D hue while still locked. "Brzinac",
+                    // "Rješavač" and "Sudoku legenda" stay muted until earned.
+                    val vividFeatured = achievement.title in setOf(
+                        "Prva pobjeda", "Sedam dana zaredom", "Majstor logike",
+                        "Bez greške", "Vrući niz",
+                    )
                     AchievementSurface(
                         title = achievement.title,
                         tint = achievement.tint,
