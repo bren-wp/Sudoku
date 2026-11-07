@@ -150,30 +150,41 @@ jobs:
           provision_sdk_package() {
             local package="$1" expected="$2" label="$3" partial_dir="${4:-}"
             local attempt
-            for attempt in 1 2 3; do
-              echo "$label SDK installation attempt $attempt/3"
+            # Hosted runners sometimes already contain the verified package.
+            # Do not download it again and introduce a corrupt transient ZIP.
+            if test -s "$expected"; then
+              echo "$label SDK package already present"
+              return 0
+            fi
+            for attempt in 1 2 3 4 5; do
+              echo "$label SDK installation attempt $attempt/5"
               if "$SDKMANAGER" --install "$package" --channel=0 &&
                   test -s "$expected"; then
                 echo "$label SDK package successfully provisioned"
                 return 0
               fi
-              if [ "$attempt" -lt 3 ]; then
-                # Only remove incomplete runner SDK downloads/package contents,
-                # never source files, AVD state or actual app test results.
-                rm -rf "$ANDROID_HOME/.temp"
-                if [ -n "$partial_dir" ]; then
-                  case "$partial_dir" in
-                    "$ANDROID_HOME/system-images/android-35/default/x86_64") rm -rf "$partial_dir" ;;
-                    *) echo "::error::Unsafe SDK cleanup target"; return 1 ;;
-                  esac
-                fi
-                sleep $((attempt * 4))
+              # The Google-hosted emulator ZIP occasionally arrives corrupt
+              # ("Error on ZipFile unknown archive"). A fresh SDK download
+              # must not reuse the damaged temp archive or partial install.
+              # Restrict cleanup to known SDK directories on THIS runner;
+              # never delete source, AVD state, screenshots or test reports.
+              rm -rf "$ANDROID_HOME/.temp"
+              if [ -n "$partial_dir" ]; then
+                case "$partial_dir" in
+                  "$ANDROID_HOME/emulator" |                   "$ANDROID_HOME/system-images/android-35/default/x86_64")
+                    if ! test -s "$expected"; then rm -rf "$partial_dir"; fi ;;
+                  *) echo "::error::Unsafe SDK cleanup target"; return 1 ;;
+                esac
+              fi
+              if [ "$attempt" -lt 5 ]; then
+                echo "::warning::$label download failed; retrying from clean SDK cache"
+                sleep $((attempt * 8))
               fi
             done
-            echo "::error::$label SDK package failed to install after 3 attempts"
+            echo "::error::$label SDK package failed to install after 5 clean attempts"
             return 1
           }
-          provision_sdk_package "emulator" "$ANDROID_HOME/emulator/emulator" "Emulator"
+          provision_sdk_package "emulator" "$ANDROID_HOME/emulator/emulator" "Emulator" "$ANDROID_HOME/emulator"
           provision_sdk_package "system-images;android-35;default;x86_64" \
             "$ANDROID_HOME/system-images/android-35/default/x86_64/system.img" \
             "Android 35 x86_64 system image" \
