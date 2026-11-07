@@ -171,7 +171,7 @@ jobs:
               rm -rf "$ANDROID_HOME/.temp"
               if [ -n "$partial_dir" ]; then
                 case "$partial_dir" in
-                  "$ANDROID_HOME/emulator" |                   "$ANDROID_HOME/system-images/android-35/default/x86_64")
+                  "$ANDROID_HOME/emulator"|"$ANDROID_HOME/system-images/android-35/default/x86_64")
                     if ! test -s "$expected"; then rm -rf "$partial_dir"; fi ;;
                   *) echo "::error::Unsafe SDK cleanup target"; return 1 ;;
                 esac
