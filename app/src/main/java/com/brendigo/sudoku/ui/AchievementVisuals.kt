@@ -188,13 +188,20 @@ fun AchievementSurface(
                         else if (warm) .80f else .82f,
                     filterQuality = FilterQuality.High,
                 )
+                // Fade from the *left edge of the entire card*. The earlier
+                // overlay started abruptly at x=34%, making a visible
+                // vertical seam in the screenshot behind the live badge UI.
+                // Keep the owner-supplied scenery strictly decorative.
                 drawRect(
                     brush = Brush.horizontalGradient(
-                        listOf(Color(0xF4071935), Color(0xB7061935), Color.Transparent),
-                        startX = w * .34f, endX = w * .81f,
+                        listOf(
+                            Color(0xFA071935), Color(0xEF071935),
+                            Color(0xB8071935), Color.Transparent,
+                        ),
+                        startX = 0f, endX = w * .92f,
                     ),
-                    topLeft = Offset(w * .34f, 0f),
-                    size = Size(w * .66f, h * .72f),
+                    topLeft = Offset.Zero,
+                    size = Size(w, h * .74f),
                 )
             }
             drawRect(
