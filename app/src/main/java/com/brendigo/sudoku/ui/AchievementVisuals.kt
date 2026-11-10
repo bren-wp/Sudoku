@@ -298,15 +298,33 @@ fun AchievementBadgeArt(
     if (atlas == null || atlas.width < 320 || atlas.height < 64) {
         BrandIcon(achievementIconFor(title), modifier, tint)
     } else {
+        // The 64px atlas deliberately includes transparent padding around
+        // each original silhouette. Crop that empty margin at draw time,
+        // or the icon appears 35–45% smaller than the owner's reference.
+        // Each box is (x, y, width, height) within one 64px atlas cell.
+        val crop = when (cell) {
+            0 -> intArrayOf(5, 7, 52, 50)   // 3D trophy
+            1 -> intArrayOf(9, 9, 47, 47)   // calendar with 7
+            2 -> intArrayOf(8, 8, 52, 47)   // neural outlines
+            3 -> intArrayOf(15, 9, 38, 51)  // lightning bolt
+            else -> intArrayOf(11, 7, 43, 49) // flaming streak
+        }
         Canvas(modifier) {
+            val fit = minOf(
+                size.width / crop[2].toFloat(),
+                size.height / crop[3].toFloat(),
+            )
+            val dw = (crop[2] * fit).roundToInt().coerceAtLeast(1)
+            val dh = (crop[3] * fit).roundToInt().coerceAtLeast(1)
             drawImage(
                 image = atlas,
-                srcOffset = IntOffset(cell * 64, 0),
-                srcSize = IntSize(64, 64),
-                dstSize = IntSize(
-                    size.width.roundToInt().coerceAtLeast(1),
-                    size.height.roundToInt().coerceAtLeast(1),
+                srcOffset = IntOffset(cell * 64 + crop[0], crop[1]),
+                srcSize = IntSize(crop[2], crop[3]),
+                dstOffset = IntOffset(
+                    ((size.width - dw) / 2f).roundToInt(),
+                    ((size.height - dh) / 2f).roundToInt(),
                 ),
+                dstSize = IntSize(dw, dh),
                 filterQuality = FilterQuality.High,
             )
         }
