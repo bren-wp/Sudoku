@@ -1,0 +1,51 @@
+name: Export Sudoku Google Play graphics
+on:
+  push:
+    branches:
+      - "feature/sudoku-play-store-*"
+    paths:
+      - "scripts/generate_play_store.py"
+      - ".github/workflows/play-store-graphics.yml"
+      - "branding/**"
+      - "docs/screenshots/**"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sudoku-play-store-assets-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  export:
+    if: github.repository == 'bren-wp/Sudoku'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image processing tools
+        run: python -m pip install --disable-pip-version-check "Pillow>=11,<13" "CairoSVG>=2.7,<3"
+      - name: Build official-size assets from real screenshots
+        run: python scripts/generate_play_store.py
+      - name: Upload ready-to-use ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sudoku-by-Brendigo-Google-Play-Assets
+          path: play-store-assets/Sudoku-by-Brendigo-Google-Play-Assets.zip
+          if-no-files-found: error
+      - name: Publish images and ZIP on this dedicated feature branch
+        if: startsWith(github.ref,'refs/heads/feature/sudoku-play-store-')
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f play-store-assets/
+          if git diff --cached --quiet; then
+            echo "No changes to assets"
+            exit 0
+          fi
+          git commit -m "assets(play-store): ready-to-use Sudoku graphics and authentic screenshots [skip ci]"
+          git push origin "HEAD:${GITHUB_REF#refs/heads/}"
