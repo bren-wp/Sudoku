@@ -1,0 +1,120 @@
+{
+  "app": "Sudoku by Brendigo",
+  "author": "Brendigo",
+  "website": "https://brendigo.com",
+  "source": "https://github.com/bren-wp/Sudoku",
+  "screenshots": [
+    {
+      "filename": "01-gameplay.png",
+      "original": "docs/screenshots/03-game.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": false
+    },
+    {
+      "filename": "02-home.png",
+      "original": "docs/screenshots/01-home.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": false
+    },
+    {
+      "filename": "03-new-game.png",
+      "original": "docs/screenshots/02-new-game.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": false
+    },
+    {
+      "filename": "04-daily-challenge.png",
+      "original": "docs/screenshots/05-daily.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": false
+    },
+    {
+      "filename": "05-achievements.png",
+      "original": "docs/screenshots/07-achievements.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": false
+    },
+    {
+      "filename": "06-statistics.png",
+      "original": "docs/screenshots/06-statistics.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": false
+    },
+    {
+      "filename": "07-settings.png",
+      "original": "docs/screenshots/04-settings.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": false
+    },
+    {
+      "filename": "08-splash-optional.png",
+      "original": "docs/screenshots/08-splash.webp",
+      "original_dimensions": [
+        941,
+        1672
+      ],
+      "export_dimensions": [
+        1080,
+        1920
+      ],
+      "capture": "real Android emulator screenshot",
+      "optional": true
+    }
+  ]
+}
