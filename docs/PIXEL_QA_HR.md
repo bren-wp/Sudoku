@@ -27,7 +27,7 @@ Izvor: deset izvornih PNG referenci (Android zasloni 941 × 1672 px; logotip i i
 ## Promjene u v1.0.60
 
 - Dnevni izazov: recessed tamnoplavi rubovi triju podatkovnih kartica. Rani pomak `Spacer(32.dp)` na `18.dp` povećao je ukupnu RGB razliku s 24,924 na 25,756, stoga je vraćen izmjereno bolji `32.dp` i minimalna visina 59dp.
-- Statistika: zasebno su promijenjeni stvarno vidljivi nekompaktni KPI vektori 46→54dp, nazivi 13→14sp i kratke brojke 25→27sp uz manji bočni razmak; rezultati ostaju stvarni. Rani prolaz promijenio je samo kompaktni uvjet i nije promijenio screenshot u referentnoj širini.
+- Statistika: testirana je promjena vektora 46→54dp, naziva 13→14sp i kratkih brojeva 25→27sp. Novi stvarni emulator pokazao je **regresiju MAE 26,431→26,823**, stoga je sve vraćeno na izmjereno bolje izvorne veličine; ne proglašavati poboljšanje dok se ne pripreme isti testni rezultati i ne napravi nova regionalna kalibracija.
 - Postignuća: pet naprednih ilustriranih nagrada ima zadržanu prepoznatljivu vektorsku ikonu i vidljiv stvarni progress, a sivi lokot ostaje rezerviran za zaključane milestone-nagrade. Status otključavanja i screen-reader opis ostaju iz stvarnih podataka.
 
 **Launcher v1.0.60:** vlasnikova izvorna transparentna 3D ikona konvertirana je u lokalni WebP foreground (trenutačno optimizirana mobilna rezolucija 96 × 96). Zamijenjen je samo foreground u standardnoj i okrugloj adaptivnoj ikoni; Androidova maska i `launcher_background` ostaju. Nakon novog emulator screenshot QA obavezno izmjeriti SSIM/MAE i provjeriti izrezivanje rubova na različitim uređajima, zatim po potrebi povećati razlučivost resursa. Wordmark je zaseban živi Compose element i još nije 1:1. Ne objavljivati „0 % odstupanja” bez dokazive mjere.
@@ -42,3 +42,10 @@ Izvor: deset izvornih PNG referenci (Android zasloni 941 × 1672 px; logotip i i
 | Dnevni izazov | 24,924 | 25,756 | **+0,831** (regresija; vraćen razmak) |
 
 Ovo su 941×1672 PNG-ovi iz stvarnog Android emulatora osim launchera koji ima izvornih 1254×1254 piksela. Statistika i Dnevni izazov nakon ciljane korekcije zahtijevaju **novo** mjerenje na novom SHA. Vrijednosti iz igraćih snimaka nisu deterministički usklađene s referentnima pa MAE ne predstavlja doslovnu vizualnu podudarnost niti postotak zadovoljstva.
+
+## Konačni QA nakon reverzija
+
+- Izvorna 3D launcher grafika u adaptivnom foregroundu: **37,200→16,175 MAE** na stvarnom izvozu 1254×1254; transparentni rubovi potvrđeni instrumentacijskim testom.
+- Postignuća: **29,444→29,268** (malo poboljšanje, različita stanja nagrada).
+- Dnevni izazov: 24,924→24,964 (razlika +0,040, praktički na prethodnoj osnovi nakon povratka razmaka).
+- Statistika: privremeni povećani KPI elementi 26,431→26,823; povećanja su **povučena** i očekuje se povratak na prethodni MAE nakon novog builda. Stanje testnih podataka uvijek mora biti usklađeno da bismo mogli tvrditi 1:1.
