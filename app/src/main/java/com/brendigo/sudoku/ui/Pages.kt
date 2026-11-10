@@ -1974,7 +1974,7 @@ private fun StatTile(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    Modifier.size(if (compact) 41.dp else 54.dp)
+                    Modifier.size(if (compact) 35.dp else 46.dp)
                         .drawBehind {
                             val center = Offset(size.width * .5f, size.height * .5f)
                             drawCircle(
@@ -1999,17 +1999,16 @@ private fun StatTile(
                         Modifier.fillMaxSize(), color,
                     )
                 }
-                Spacer(Modifier.width(if (compact) 7.dp else 11.dp))
+                Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(label, color = Ink.muted,
-                        fontSize = if (compact) 12.sp else 14.sp,
-                        lineHeight = if (compact) 14.sp else 16.sp, maxLines = 2)
+                        fontSize = if (compact) 11.sp else 13.sp,
+                        lineHeight = if (compact) 13.sp else 15.sp, maxLines = 2)
                     Text(value, color = Ink.white,
                         fontSize = if (compact && value.length > 7) 15.sp
-                            else if (compact && value.length > 5) 18.sp
-                            else if (compact) 24.sp
-                            else if (value.length > 7) 19.sp else 27.sp,
+                            else if (compact) 20.sp
+                            else if (value.length > 7) 19.sp else 25.sp,
                         fontWeight = FontWeight.ExtraBold, maxLines = 1,
                     )
                     Text(
