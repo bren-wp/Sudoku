@@ -49,3 +49,21 @@ Ovo su 941×1672 PNG-ovi iz stvarnog Android emulatora osim launchera koji ima i
 - Postignuća: **29,444→29,268** (malo poboljšanje, različita stanja nagrada).
 - Dnevni izazov: 24,924→24,964 (razlika +0,040, praktički na prethodnoj osnovi nakon povratka razmaka).
 - Statistika: privremeni povećani KPI elementi 26,431→26,823; povećanja su **povučena** i očekuje se povratak na prethodni MAE nakon novog builda. Stanje testnih podataka uvijek mora biti usklađeno da bismo mogli tvrditi 1:1.
+
+## v1.0.61 — drugi kontrolirani prolaz
+
+Polazište: vlasnikove originalne reference, izvozne veličine 941×1672 px i 1254×1254 px, produkcijska v1.0.60.
+
+- Postignuća: zbog nagle granice grafičkog rastera pri 34% širine kartice, zagasiti prijelaz umjetničkog sloja sada započinje od samog lijevog ruba; ovo ne mijenja UI podatke ni klikne površine. Opisi pet istaknutih kartica sada se prelamaju u uži stupac, kao u referenci, bez slike teksta.
+- Statistika: donji pregled četiriju nagrada prikazuje ciljeve `Početnik 50`, `Brzi um 10`, `Pobjednički niz 10` i `Majstor 1`, pri čemu napredak dolazi iz stvarnih `finished`, `fastWins`, `bestStreak` i `winsByLevel[5]`. Ne smije se fabricirati korisničko stanje niti mijenjati 24 postojeća postignuća.
+- Dnevni izazov: `DailyFrame` poštuje *ulaznu alpha vrijednost* obruba/halo efekta. Tri metric kartice time su tamnije kao referenca; ostali puni paneli ostaju nepromijenjeni.
+
+### Obvezni sljedeći korak nakon ovog commita
+
+Uzmi stvarne `Android UI (reference)` PNG-ove za finalni SHA, usporedi MAE/SSIM te svaku regresiju povuci prije mergea. Za doslovnu 1:1 podudarnost još nedostaje jednak reproducibilni korisnički fixture, a vlasnikova 3D ikonografija na svim zaslonima nije u potpunosti prenesena. Ne izmišljati rezultat 0%.
+
+### Izvorne 3D ikonice — lokalni sprite atlas
+
+Pet vlasnikovih originalnih 3D ikonica (trofej, kalendar, mozak, munja, plamen) izdvojeno je **isključivo iz dekorativnih područja** dostavljenog referentnog PNG-a, bez kopiranja teksta, bodova, gumbi ili progresnih vrijednosti. Transparentne siluete spremaju se lokalno u `app/src/main/assets/achievement-badges-atlas.webp` (5 × 64px širokih ćelija u 320×64px atlasu). `AchievementBadgeArt` crta odgovarajuću ćeliju u pravoj Compose kartici; pri nemogućnosti učitavanja vraća se na postojeću vektorsku ikonicu. Nema CDN-ova, lažnih kliknih regija ili hardkodiranih statusa.
+
+**Važno za 1:1:** atlas je kompresijski optimizirana verzija izvorne ikone i zbog 64px po ćeliji ne predstavlja savršenu rekonstrukciju visoke rezolucije. Daljnja kalibracija treba usporediti *stvarni emulator* s izvornim PNG-om. Ako luminancija ili rubovi zbog kompresije daju lošiji MAE, treba promijeniti kvalitetu atlasa ili povući izmjenu.

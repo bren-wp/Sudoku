@@ -188,13 +188,20 @@ fun AchievementSurface(
                         else if (warm) .80f else .82f,
                     filterQuality = FilterQuality.High,
                 )
+                // Fade from the *left edge of the entire card*. The earlier
+                // overlay started abruptly at x=34%, making a visible
+                // vertical seam in the screenshot behind the live badge UI.
+                // Keep the owner-supplied scenery strictly decorative.
                 drawRect(
                     brush = Brush.horizontalGradient(
-                        listOf(Color(0xF4071935), Color(0xB7061935), Color.Transparent),
-                        startX = w * .34f, endX = w * .81f,
+                        listOf(
+                            Color(0xFA071935), Color(0xEF071935),
+                            Color(0xB8071935), Color.Transparent,
+                        ),
+                        startX = 0f, endX = w * .92f,
                     ),
-                    topLeft = Offset(w * .34f, 0f),
-                    size = Size(w * .66f, h * .72f),
+                    topLeft = Offset.Zero,
+                    size = Size(w, h * .74f),
                 )
             }
             drawRect(
@@ -251,3 +258,75 @@ fun AchievementSummarySurface(
     }
 }
 
+
+/**
+ * The five large featured badges are cut from the OWNER-SUPPLIED reference
+ * art, not from an emulator screenshot and not a rasterized UI. They contain
+ * icon silhouettes only: the awards' texts, points, progress, gestures and
+ * semantics are still live Compose components.
+ *
+ * A 5×1 WebP atlas is bundled offline: 5 cells, 64×64 pixels each, ordered
+ * trophy / calendar / brain / bolt / flame. On error fall back to our real
+ * vector glyph; never make the entire badge disappear.
+ */
+@Composable
+fun AchievementBadgeArt(
+    title: String,
+    modifier: Modifier = Modifier,
+    tint: Color = Ink.cyan,
+) {
+    val cell = when (title) {
+        "Prva pobjeda" -> 0
+        "Sedam dana zaredom" -> 1
+        "Majstor logike" -> 2
+        "Bez greške" -> 3
+        "Vrući niz" -> 4
+        else -> -1
+    }
+    if (cell < 0) {
+        BrandIcon(achievementIconFor(title), modifier, tint)
+        return
+    }
+    val context = LocalContext.current
+    val atlas = remember(context) {
+        runCatching {
+            context.assets.open("achievement-badges-atlas.webp").use { stream ->
+                BitmapFactory.decodeStream(stream)?.asImageBitmap()
+            }
+        }.getOrNull()
+    }
+    if (atlas == null || atlas.width < 320 || atlas.height < 64) {
+        BrandIcon(achievementIconFor(title), modifier, tint)
+    } else {
+        // The 64px atlas deliberately includes transparent padding around
+        // each original silhouette. Crop that empty margin at draw time,
+        // or the icon appears 35–45% smaller than the owner's reference.
+        // Each box is (x, y, width, height) within one 64px atlas cell.
+        val crop = when (cell) {
+            0 -> intArrayOf(5, 7, 52, 50)   // 3D trophy
+            1 -> intArrayOf(9, 9, 47, 47)   // calendar with 7
+            2 -> intArrayOf(8, 8, 52, 47)   // neural outlines
+            3 -> intArrayOf(15, 9, 38, 51)  // lightning bolt
+            else -> intArrayOf(11, 7, 43, 49) // flaming streak
+        }
+        Canvas(modifier) {
+            val fit = minOf(
+                size.width / crop[2].toFloat(),
+                size.height / crop[3].toFloat(),
+            )
+            val dw = (crop[2] * fit).roundToInt().coerceAtLeast(1)
+            val dh = (crop[3] * fit).roundToInt().coerceAtLeast(1)
+            drawImage(
+                image = atlas,
+                srcOffset = IntOffset(cell * 64 + crop[0], crop[1]),
+                srcSize = IntSize(crop[2], crop[3]),
+                dstOffset = IntOffset(
+                    ((size.width - dw) / 2f).roundToInt(),
+                    ((size.height - dh) / 2f).roundToInt(),
+                ),
+                dstSize = IntSize(dw, dh),
+                filterQuality = FilterQuality.High,
+            )
+        }
+    }
+}

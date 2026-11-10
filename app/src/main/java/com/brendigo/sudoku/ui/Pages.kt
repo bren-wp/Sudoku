@@ -1565,10 +1565,13 @@ fun StatsPage(controller: SudokuController) {
                     BrandIcon("next", Modifier.size(15.dp), Ink.cyan)
                 }
                 val previews = listOf(
-                    PreviewAward("Prva pobjeda", "star", stats.finished, 1, Ink.teal),
-                    PreviewAward("Brzinac", "timer", stats.fastWins, 1, Ink.blue),
-                    PreviewAward("Pobjednički niz", "flame-solid", stats.bestStreak, 7, Ink.purple),
-                    PreviewAward("Majstor logike", "brain", stats.winsByLevel[3], 50, Ink.cyan),
+                    // Reference-like progression previews with real stats.
+                    // These are targets, not fabricated achieved badges:
+                    // finished games, fast wins, daily streak and master wins.
+                    PreviewAward("Početnik", "star", stats.finished, 50, Ink.teal),
+                    PreviewAward("Brzi um", "timer", stats.fastWins, 10, Ink.blue),
+                    PreviewAward("Pobjednički niz", "flame-solid", stats.bestStreak, 10, Ink.purple),
+                    PreviewAward("Majstor", "lock", stats.winsByLevel[5], 1, Ink.muted),
                 )
                 // Four across on the owner's 941px reference; a legible 2x2
                 // grid on narrower devices or when the system font is enlarged.
@@ -1697,7 +1700,7 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                         },
                         award.tint.copy(alpha = if (earned) 1f else .83f),
                     )
-                    if (!earned) {
+                    if (!earned && award.icon != "lock") {
                         Box(
                             Modifier.align(Alignment.BottomEnd)
                                 .size(12.dp)
@@ -2219,21 +2222,22 @@ fun AchievementsPage(controller: SudokuController) {
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     // Keep each award recognizable when locked.
-                                    BrandIcon(
-                                        achievementIconFor(achievement.title),
-                                        Modifier.size(if (compactFeatured) 37.dp else 47.dp)
+                                    AchievementBadgeArt(
+                                        title = achievement.title,
+                                        modifier = Modifier
+                                            .size(if (compactFeatured) 37.dp else 47.dp)
                                             .graphicsLayer {
-                                                // Enlarges decorative 3D icons
-                                                // without shifting real text,
-                                                // hit areas, scroll or layout.
+                                                // Only art scales; the real
+                                                // badge text and hit area stay
+                                                // independent native UI.
                                                 val scale = if (vividFeatured) 1.19f else 1f
                                                 scaleX = scale
                                                 scaleY = scale
                                             },
-                                        if (unlocked) achievement.tint
-                                        else achievement.tint.copy(
-                                            alpha = if (vividFeatured) .97f else .61f
-                                        ),
+                                        tint = if (unlocked) achievement.tint
+                                            else achievement.tint.copy(
+                                                alpha = if (vividFeatured) .97f else .61f
+                                            ),
                                     )
                                     // The five reference progression cards
                                     // show coloured awards BEFORE completion.
@@ -2301,8 +2305,16 @@ fun AchievementsPage(controller: SudokuController) {
                                 achievement.text, color = Ink.muted,
                                 fontSize = if (compactFeatured || compactCards) 11.sp else 12.sp,
                                 lineHeight = if (compactFeatured || compactCards) 13.sp else 14.sp,
+                                // The source artwork leaves deliberate open
+                                // space to the right of the description.
+                                // Let the five coloured badges wrap into two
+                                // short lines instead of one clipped long
+                                // line across the whole scenery panel.
                                 modifier = (if (compactCards) Modifier
-                                    else Modifier.weight(1f)).testTag(
+                                    else Modifier.weight(1f))
+                                    .fillMaxWidth(
+                                        if (vividFeatured && !stackCards) .76f else 1f
+                                    ).testTag(
                                         "achievement-description-" +
                                             achievement.title.lowercase().replace(" ", "-")),
                                 maxLines = if (compactCards) 4 else 2,
