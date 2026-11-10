@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/launcher_background"/>
-    <foreground android:drawable="@drawable/ic_sudoku"/>
+    <!-- Owner-supplied 7-3-9 luminous artwork, bundled locally (no CDN). -->
+    <foreground android:drawable="@drawable/ic_sudoku_reference"/>
     <monochrome android:drawable="@drawable/ic_sudoku_monochrome"/>
 </adaptive-icon>
