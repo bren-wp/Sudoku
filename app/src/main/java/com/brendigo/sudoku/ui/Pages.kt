@@ -1099,7 +1099,9 @@ private fun DailyMetric(
 ) {
     // The three data tiles in the reference have recessed navy surfaces,
     // not bright cyan outlines competing with the main illustration.
-    DailyFrame(modifier.heightIn(min = 59.dp), Ink.blue.copy(alpha = .55f), radius = 11.dp) {
+    // The reference uses three recessed dark surfaces with minimal blue
+    // outlines, not three strongly raised individual neon buttons.
+    DailyFrame(modifier.heightIn(min = 53.dp), Ink.blue.copy(alpha = .32f), radius = 10.dp) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -1261,7 +1263,10 @@ fun DailyPage(controller: SudokuController) {
                     modifier = Modifier.fillMaxWidth(if (compactHero) 1f else .62f),
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
-                Spacer(Modifier.height(32.dp))
+                // The reference metric row starts roughly 28px higher than
+                // the prior emulator capture at 941x1672. Reduce only the
+                // empty gap; the real hero text, image and actions remain.
+                Spacer(Modifier.height(18.dp))
                 Column(
                     Modifier.fillMaxWidth().testTag("daily-metrics"),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1968,7 +1973,7 @@ private fun StatTile(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    Modifier.size(if (compact) 35.dp else 46.dp)
+                    Modifier.size(if (compact) 41.dp else 46.dp)
                         .drawBehind {
                             val center = Offset(size.width * .5f, size.height * .5f)
                             drawCircle(
@@ -1993,15 +1998,16 @@ private fun StatTile(
                         Modifier.fillMaxSize(), color,
                     )
                 }
-                Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
+                Spacer(Modifier.width(if (compact) 7.dp else 14.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(label, color = Ink.muted,
-                        fontSize = if (compact) 11.sp else 13.sp,
-                        lineHeight = if (compact) 13.sp else 15.sp, maxLines = 2)
+                        fontSize = if (compact) 12.sp else 13.sp,
+                        lineHeight = if (compact) 14.sp else 15.sp, maxLines = 2)
                     Text(value, color = Ink.white,
                         fontSize = if (compact && value.length > 7) 15.sp
-                            else if (compact) 20.sp
+                            else if (compact && value.length > 5) 18.sp
+                            else if (compact) 24.sp
                             else if (value.length > 7) 19.sp else 25.sp,
                         fontWeight = FontWeight.ExtraBold, maxLines = 1,
                     )
@@ -2229,7 +2235,13 @@ fun AchievementsPage(controller: SudokuController) {
                                             alpha = if (vividFeatured) .97f else .61f
                                         ),
                                     )
-                                    if (!unlocked) {
+                                    // The five reference progression cards
+                                    // show coloured awards BEFORE completion.
+                                    // Their genuine progress bar and explicit
+                                    // accessibility status remain the source
+                                    // of truth. Only milestone-style awards
+                                    // use the grey lock overlay in artwork.
+                                    if (!unlocked && !vividFeatured) {
                                         Box(
                                             Modifier.size(if (compactFeatured) 18.dp else 20.dp)
                                                 .align(Alignment.BottomEnd)
