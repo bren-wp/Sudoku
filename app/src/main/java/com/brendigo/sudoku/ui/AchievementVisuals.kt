@@ -258,3 +258,57 @@ fun AchievementSummarySurface(
     }
 }
 
+
+/**
+ * The five large featured badges are cut from the OWNER-SUPPLIED reference
+ * art, not from an emulator screenshot and not a rasterized UI. They contain
+ * icon silhouettes only: the awards' texts, points, progress, gestures and
+ * semantics are still live Compose components.
+ *
+ * A 5×1 WebP atlas is bundled offline: 5 cells, 64×64 pixels each, ordered
+ * trophy / calendar / brain / bolt / flame. On error fall back to our real
+ * vector glyph; never make the entire badge disappear.
+ */
+@Composable
+fun AchievementBadgeArt(
+    title: String,
+    modifier: Modifier = Modifier,
+    tint: Color = Ink.cyan,
+) {
+    val cell = when (title) {
+        "Prva pobjeda" -> 0
+        "Sedam dana zaredom" -> 1
+        "Majstor logike" -> 2
+        "Bez greške" -> 3
+        "Vrući niz" -> 4
+        else -> -1
+    }
+    if (cell < 0) {
+        BrandIcon(achievementIconFor(title), modifier, tint)
+        return
+    }
+    val context = LocalContext.current
+    val atlas = remember(context) {
+        runCatching {
+            context.assets.open("achievement-badges-atlas.webp").use { stream ->
+                BitmapFactory.decodeStream(stream)?.asImageBitmap()
+            }
+        }.getOrNull()
+    }
+    if (atlas == null || atlas.width < 320 || atlas.height < 64) {
+        BrandIcon(achievementIconFor(title), modifier, tint)
+    } else {
+        Canvas(modifier) {
+            drawImage(
+                image = atlas,
+                srcOffset = IntOffset(cell * 64, 0),
+                srcSize = IntSize(64, 64),
+                dstSize = IntSize(
+                    size.width.roundToInt().coerceAtLeast(1),
+                    size.height.roundToInt().coerceAtLeast(1),
+                ),
+                filterQuality = FilterQuality.High,
+            )
+        }
+    }
+}
