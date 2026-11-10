@@ -70,7 +70,7 @@ fun DailyFrame(
                 val h = size.height
                 drawRect(
                     brush = Brush.radialGradient(
-                        colors = listOf(highlight.copy(alpha = .19f), Color.Transparent),
+                        colors = listOf(highlight.copy(alpha = highlight.alpha * .19f), Color.Transparent),
                         center = Offset(w * .84f, h * .08f),
                         radius = w * .62f,
                     ),
@@ -82,7 +82,7 @@ fun DailyFrame(
                     strokeWidth = 1.dp.toPx(),
                 )
             }
-            .border(1.dp, highlight.copy(alpha = .83f), rounded),
+            .border(1.dp, highlight.copy(alpha = highlight.alpha * .83f), rounded),
     ) { content() }
 }
 
