@@ -1909,11 +1909,13 @@ class SudokuVisualSmokeTest {
         // getApplicationIcon() composites an opaque launcher BACKGROUND
         // into the mask; exporting that composite as a stand-alone PNG
         // incorrectly reports alpha=255 even in the original's empty area.
-        // Export the installed adaptive FOREGROUND drawable at the reference
-        // artwork scale. Its colors/geometry are genuinely from the APK.
-        // The platform launcher shape is checked separately below, never
-        // presented as identical to a transparent marketing square.
-        val artworkBounds = intArrayOf(-230, -230, 1484, 1484)
+        // The owner-provided 3D foreground is already a complete square
+        // composition with its own transparent margins, unlike the previous
+        // small vector which needed a 1.37× QA-only enlarged export.
+        // Export at the native composition bounds. Never over-zoom art just
+        // to satisfy an obsolete vector-framing test.
+        // Android's adaptive mask is still checked independently below.
+        val artworkBounds = intArrayOf(0, 0, 1254, 1254)
         val bitmap = Bitmap.createBitmap(1254, 1254, Bitmap.Config.ARGB_8888)
         try {
             val canvas = Canvas(bitmap) // newly allocated ARGB_8888 is transparent
@@ -1930,12 +1932,16 @@ class SudokuVisualSmokeTest {
             check(Color.alpha(bitmap.getPixel(627, 627)) > 0) {
                 "Adaptive launcher has no visible center"
             }
+            // Lossy WebP preserves alpha but high-DPI resampling can create
+            // 1–16/255 antialiased edge pixels around otherwise transparent
+            // art. Verify almost-clear side margins, not brittle == 0 at a
+            // single sampled pixel. Real opaque foreground fails this.
             check(
-                Color.alpha(bitmap.getPixel(110, 610)) == 0 &&
-                    Color.alpha(bitmap.getPixel(1145, 610)) == 0 &&
-                    Color.alpha(bitmap.getPixel(627, 80)) == 0 &&
-                    Color.alpha(bitmap.getPixel(627, 1145)) == 0
-            ) { "Canonical standalone branding export must leave transparent side margins" }
+                Color.alpha(bitmap.getPixel(110, 610)) <= 16 &&
+                    Color.alpha(bitmap.getPixel(1145, 610)) <= 16 &&
+                    Color.alpha(bitmap.getPixel(627, 80)) <= 16 &&
+                    Color.alpha(bitmap.getPixel(627, 1145)) <= 16
+            ) { "Canonical artwork export must preserve transparent margins" }
             saveBrandingQaPng("10-launcher-icon.png", bitmap)
         } finally {
             bitmap.recycle()
