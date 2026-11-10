@@ -26,8 +26,19 @@ Izvor: deset izvornih PNG referenci (Android zasloni 941 × 1672 px; logotip i i
 
 ## Promjene u v1.0.60
 
-- Dnevni izazov: metrike zbijenije, nepotrebna vertikalna praznina u hero-panelu uklonjena radi položaja iz referentne snimke; bez promjene izazova ili datuma.
-- Statistika: gornji KPI vektori i brojke približeni referentnoj skali uz očuvanje širine teksta i klikabilnih regija; bez manipulacije statistikama.
+- Dnevni izazov: recessed tamnoplavi rubovi triju podatkovnih kartica. Rani pomak `Spacer(32.dp)` na `18.dp` povećao je ukupnu RGB razliku s 24,924 na 25,756, stoga je vraćen izmjereno bolji `32.dp` i minimalna visina 59dp.
+- Statistika: zasebno su promijenjeni stvarno vidljivi nekompaktni KPI vektori 46→54dp, nazivi 13→14sp i kratke brojke 25→27sp uz manji bočni razmak; rezultati ostaju stvarni. Rani prolaz promijenio je samo kompaktni uvjet i nije promijenio screenshot u referentnoj širini.
 - Postignuća: pet naprednih ilustriranih nagrada ima zadržanu prepoznatljivu vektorsku ikonu i vidljiv stvarni progress, a sivi lokot ostaje rezerviran za zaključane milestone-nagrade. Status otključavanja i screen-reader opis ostaju iz stvarnih podataka.
 
 **Launcher v1.0.60:** vlasnikova izvorna transparentna 3D ikona konvertirana je u lokalni WebP foreground (trenutačno optimizirana mobilna rezolucija 96 × 96). Zamijenjen je samo foreground u standardnoj i okrugloj adaptivnoj ikoni; Androidova maska i `launcher_background` ostaju. Nakon novog emulator screenshot QA obavezno izmjeriti SSIM/MAE i provjeriti izrezivanje rubova na različitim uređajima, zatim po potrebi povećati razlučivost resursa. Wordmark je zaseban živi Compose element i još nije 1:1. Ne objavljivati „0 % odstupanja” bez dokazive mjere.
+
+## Stvarni PR #64 emulatorski QA nakon prvog prolaza
+
+| Element | MAE prethodni | MAE PR #64 (prvi screenshot) | Promjena |
+|---|---:|---:|---:|
+| Launcher 3D ikona | 37,200 | 16,175 | **−21,025** |
+| Postignuća | 29,444 | 29,268 | **−0,176** |
+| Statistika | 26,431 | 26,431 | 0,000 |
+| Dnevni izazov | 24,924 | 25,756 | **+0,831** (regresija; vraćen razmak) |
+
+Ovo su 941×1672 PNG-ovi iz stvarnog Android emulatora osim launchera koji ima izvornih 1254×1254 piksela. Statistika i Dnevni izazov nakon ciljane korekcije zahtijevaju **novo** mjerenje na novom SHA. Vrijednosti iz igraćih snimaka nisu deterministički usklađene s referentnima pa MAE ne predstavlja doslovnu vizualnu podudarnost niti postotak zadovoljstva.
