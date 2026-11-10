@@ -1101,7 +1101,7 @@ private fun DailyMetric(
     // not bright cyan outlines competing with the main illustration.
     // The reference uses three recessed dark surfaces with minimal blue
     // outlines, not three strongly raised individual neon buttons.
-    DailyFrame(modifier.heightIn(min = 53.dp), Ink.blue.copy(alpha = .32f), radius = 10.dp) {
+    DailyFrame(modifier.heightIn(min = 59.dp), Ink.blue.copy(alpha = .32f), radius = 10.dp) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -1263,10 +1263,11 @@ fun DailyPage(controller: SudokuController) {
                     modifier = Modifier.fillMaxWidth(if (compactHero) 1f else .62f),
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
-                // The reference metric row starts roughly 28px higher than
-                // the prior emulator capture at 941x1672. Reduce only the
-                // empty gap; the real hero text, image and actions remain.
-                Spacer(Modifier.height(18.dp))
+                // Pixel diff from the actual 941×1672 emulator showed a
+                // +0.83 RGB MAE regression and a +2.27 bottom-third shift
+                // when this spacer was reduced to 18dp. Restore the better
+                // measured vertical cadence; keep the subtle metric edges.
+                Spacer(Modifier.height(32.dp))
                 Column(
                     Modifier.fillMaxWidth().testTag("daily-metrics"),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1973,7 +1974,7 @@ private fun StatTile(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    Modifier.size(if (compact) 41.dp else 46.dp)
+                    Modifier.size(if (compact) 41.dp else 54.dp)
                         .drawBehind {
                             val center = Offset(size.width * .5f, size.height * .5f)
                             drawCircle(
@@ -1998,17 +1999,17 @@ private fun StatTile(
                         Modifier.fillMaxSize(), color,
                     )
                 }
-                Spacer(Modifier.width(if (compact) 7.dp else 14.dp))
+                Spacer(Modifier.width(if (compact) 7.dp else 11.dp))
                 Column(Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(label, color = Ink.muted,
-                        fontSize = if (compact) 12.sp else 13.sp,
-                        lineHeight = if (compact) 14.sp else 15.sp, maxLines = 2)
+                        fontSize = if (compact) 12.sp else 14.sp,
+                        lineHeight = if (compact) 14.sp else 16.sp, maxLines = 2)
                     Text(value, color = Ink.white,
                         fontSize = if (compact && value.length > 7) 15.sp
                             else if (compact && value.length > 5) 18.sp
                             else if (compact) 24.sp
-                            else if (value.length > 7) 19.sp else 25.sp,
+                            else if (value.length > 7) 19.sp else 27.sp,
                         fontWeight = FontWeight.ExtraBold, maxLines = 1,
                     )
                     Text(
