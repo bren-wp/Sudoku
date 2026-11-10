@@ -1099,7 +1099,9 @@ private fun DailyMetric(
 ) {
     // The three data tiles in the reference have recessed navy surfaces,
     // not bright cyan outlines competing with the main illustration.
-    DailyFrame(modifier.heightIn(min = 59.dp), Ink.blue.copy(alpha = .55f), radius = 11.dp) {
+    // The reference uses three recessed dark surfaces with minimal blue
+    // outlines, not three strongly raised individual neon buttons.
+    DailyFrame(modifier.heightIn(min = 59.dp), Ink.blue.copy(alpha = .32f), radius = 10.dp) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -1261,6 +1263,10 @@ fun DailyPage(controller: SudokuController) {
                     modifier = Modifier.fillMaxWidth(if (compactHero) 1f else .62f),
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
+                // Pixel diff from the actual 941×1672 emulator showed a
+                // +0.83 RGB MAE regression and a +2.27 bottom-third shift
+                // when this spacer was reduced to 18dp. Restore the better
+                // measured vertical cadence; keep the subtle metric edges.
                 Spacer(Modifier.height(32.dp))
                 Column(
                     Modifier.fillMaxWidth().testTag("daily-metrics"),
@@ -2229,7 +2235,13 @@ fun AchievementsPage(controller: SudokuController) {
                                             alpha = if (vividFeatured) .97f else .61f
                                         ),
                                     )
-                                    if (!unlocked) {
+                                    // The five reference progression cards
+                                    // show coloured awards BEFORE completion.
+                                    // Their genuine progress bar and explicit
+                                    // accessibility status remain the source
+                                    // of truth. Only milestone-style awards
+                                    // use the grey lock overlay in artwork.
+                                    if (!unlocked && !vividFeatured) {
                                         Box(
                                             Modifier.size(if (compactFeatured) 18.dp else 20.dp)
                                                 .align(Alignment.BottomEnd)
