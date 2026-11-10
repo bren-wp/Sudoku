@@ -2222,21 +2222,22 @@ fun AchievementsPage(controller: SudokuController) {
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     // Keep each award recognizable when locked.
-                                    BrandIcon(
-                                        achievementIconFor(achievement.title),
-                                        Modifier.size(if (compactFeatured) 37.dp else 47.dp)
+                                    AchievementBadgeArt(
+                                        title = achievement.title,
+                                        modifier = Modifier
+                                            .size(if (compactFeatured) 37.dp else 47.dp)
                                             .graphicsLayer {
-                                                // Enlarges decorative 3D icons
-                                                // without shifting real text,
-                                                // hit areas, scroll or layout.
+                                                // Only art scales; the real
+                                                // badge text and hit area stay
+                                                // independent native UI.
                                                 val scale = if (vividFeatured) 1.19f else 1f
                                                 scaleX = scale
                                                 scaleY = scale
                                             },
-                                        if (unlocked) achievement.tint
-                                        else achievement.tint.copy(
-                                            alpha = if (vividFeatured) .97f else .61f
-                                        ),
+                                        tint = if (unlocked) achievement.tint
+                                            else achievement.tint.copy(
+                                                alpha = if (vividFeatured) .97f else .61f
+                                            ),
                                     )
                                     // The five reference progression cards
                                     // show coloured awards BEFORE completion.
