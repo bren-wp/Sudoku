@@ -61,3 +61,9 @@ Polazište: vlasnikove originalne reference, izvozne veličine 941×1672 px i 12
 ### Obvezni sljedeći korak nakon ovog commita
 
 Uzmi stvarne `Android UI (reference)` PNG-ove za finalni SHA, usporedi MAE/SSIM te svaku regresiju povuci prije mergea. Za doslovnu 1:1 podudarnost još nedostaje jednak reproducibilni korisnički fixture, a vlasnikova 3D ikonografija na svim zaslonima nije u potpunosti prenesena. Ne izmišljati rezultat 0%.
+
+### Izvorne 3D ikonice — lokalni sprite atlas
+
+Pet vlasnikovih originalnih 3D ikonica (trofej, kalendar, mozak, munja, plamen) izdvojeno je **isključivo iz dekorativnih područja** dostavljenog referentnog PNG-a, bez kopiranja teksta, bodova, gumbi ili progresnih vrijednosti. Transparentne siluete spremaju se lokalno u `app/src/main/assets/achievement-badges-atlas.webp` (5 × 64px širokih ćelija u 320×64px atlasu). `AchievementBadgeArt` crta odgovarajuću ćeliju u pravoj Compose kartici; pri nemogućnosti učitavanja vraća se na postojeću vektorsku ikonicu. Nema CDN-ova, lažnih kliknih regija ili hardkodiranih statusa.
+
+**Važno za 1:1:** atlas je kompresijski optimizirana verzija izvorne ikone i zbog 64px po ćeliji ne predstavlja savršenu rekonstrukciju visoke rezolucije. Daljnja kalibracija treba usporediti *stvarni emulator* s izvornim PNG-om. Ako luminancija ili rubovi zbog kompresije daju lošiji MAE, treba promijeniti kvalitetu atlasa ili povući izmjenu.
