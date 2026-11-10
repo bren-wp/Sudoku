@@ -1,0 +1,33 @@
+# Pixel QA — usporedba s vlasnikovim referencama
+
+Izvor: deset izvornih PNG referenci (Android zasloni 941 × 1672 px; logotip i ikona 1254 × 1254 px) uspoređenih sa stvarnim emulatorom Sudoku **v1.0.59**. RGB MAE mjeri prosječnu apsolutnu razliku po kanalu u rasponu 0–255; manje je bolje.
+
+| Prioritet | Zaslon | RGB MAE v1.0.59 | Najkritičnije područje (MAE) |
+|---|---|---:|---|
+| 1 | Launcher ikona | 36,20 | 3×3 mreža 51,96 |
+| 2 | Postignuća | 29,44 | Drugi red kartica 39,85 |
+| 3 | Statistika | 26,43 | Gornje KPI kartice 34,08 |
+| 4 | Dnevni izazov | 24,92 | CTA i rang-lista 36,56 |
+| 5 | Home s nastavkom | 23,95 | Niz i nagrada 30,41 |
+| 6 | Nova igra | 22,61 | Ekspert / Majstor 27,18 |
+| 7 | Gameplay | 20,23 | Numerička tipkovnica 25,46 |
+| 8 | Postavke | 19,42 | Podnožje / pozadina 24,31 |
+| 9 | Wordmark | 16,25 | Središnji pojas 37,74 |
+| 10 | Splash | 10,38 | Sudoku naziv / autor 35,30 |
+
+## Obvezna pravila rada
+
+- Oznaka **1:1** zabranjena je dok se ne potvrdi podudarnost na istim stanjima, gustoći piksela, fontovima, dimenzijama, lokalizaciji, izgledu statusne trake i režimu sustava.
+- Testne statistike (420 bodova, 8/24, 124 odigrane, 92 % i datum 28. 4. 2025.) nisu produkcijski podaci: za pošten MAE potrebno je postaviti deterministički **isključivo androidTest** fixture. Ne mijenjati stvarne rezultate igrača.
+- Vanjski izgled: boje, tipografija, radijusi, 3D osvjetljenje, dimenzije ikonica, progress-trake, pojedinačne hit-zone i fokus. Obavezno sačuvati touch, accessibility, scrolling, sudokugenerator, navigaciju i offline pohranu.
+- Nepodudarna stanja, datumi i brojke ne smiju se „ispravljati” lažnim hardkodiranim vrijednostima. QA mora dati zasebnu regiju za statički i dinamički sadržaj.
+- Svaki PR: Android CI + vizualni emulator u 11 profila, stvarni PNG iz `Android UI (reference)`, regionalni MAE/SSIM prije i poslije. Revertirati pogoršanja po regijama.
+- Izdanja: APK i AAB uz SHA256SUMS; nepotpisani AAB nije Play-ready i mora biti prerelease.
+
+## Promjene u v1.0.60
+
+- Dnevni izazov: metrike zbijenije, nepotrebna vertikalna praznina u hero-panelu uklonjena radi položaja iz referentne snimke; bez promjene izazova ili datuma.
+- Statistika: gornji KPI vektori i brojke približeni referentnoj skali uz očuvanje širine teksta i klikabilnih regija; bez manipulacije statistikama.
+- Postignuća: pet naprednih ilustriranih nagrada ima zadržanu prepoznatljivu vektorsku ikonu i vidljiv stvarni progress, a sivi lokot ostaje rezerviran za zaključane milestone-nagrade. Status otključavanja i screen-reader opis ostaju iz stvarnih podataka.
+
+**Otvoreno:** launcher/wordmark umjetnički resursi moraju se zasebno nadomjestiti izvornim visokorezolucijskim datotekama, bez rasterizacije iz screenshots UI-ja ili promjene adaptivne safe-zone. Ne objavljivati „0 % odstupanja” bez dokazive nove mjere.
