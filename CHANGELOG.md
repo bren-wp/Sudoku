@@ -1,3 +1,15 @@
+## 1.0.63 — responzivni Android UI, izvorne snimke i mjerljivi pixel QA
+
+- Nastavljen rad isključivo izravno na grani **main**, bez novog PR-a, uz očuvan identitet aplikacije `com.brendigo.sudoku`, `minSdk=26` i `targetSdk=36`.
+- **Naslovnica:** kartica nastavka partije prikazuje proteklo vrijeme i broj praznih polja bez preklapanja na malim zaslonima ili uz povećan sustavni font. Na uobičajenoj referentnoj širini zadržan je postojeći raspored.
+- **Dnevni izazov:** glavni akcijski gumb prilagođava natpis uskim zaslonima i pristupačnom fontu, a osobna rang-lista dobiva širu dodirnu karticu kada je potrebno. Kontrole ostaju pravi interaktivni Jetpack Compose elementi.
+- **Krajolik glavne kartice Dnevnog izazova:** dodan je postupni alfa-prijelaz preko lijevog ruba stvarne WebP ilustracije umjesto naglog okomitog spoja. Položaj mjeseca i pagode te dinamički datum, rezultat i nagrade ostaju nepromijenjeni.
+- Dodan Android instrumentacijski test koji provjerava ostaju li stvarni tekstovi Dnevnog izazova unutar svojih dodirnih kartica.
+- **Marketing:** automatsko snimanje stvarnih osam Android ekrana na grani main i objava njihovih optimiziranih WebP datoteka u `docs/screenshots`. README koristi te snimke, postojeći logotip i ikone; nema generiranih zamjenskih slika ekrana.
+- **Pixel QA:** provjerene originalne korisničke reference prema SHA-256, uspoređene s novim stvarnim PNG-ovima emulatora 941×1672. Na području spoja ilustracije Dnevnog izazova RGB MAE smanjen je **17,2712 → 17,0535**, a cijeli ekran **24,7849 → 24,7803**; obje vrijednosti su na skali 0–255, ne postotak.
+- **Ograničenje:** svih deset izvora nisu potpuno pikselno identični produkcijskom UI-u. Razlika uključuje autentične podatke, datum i neusklađene dekorativne elemente. Cjelovit 1:1 cilj ostaje otvoren, kako je opisano u `docs/pixel-qa-v1.0.63.md`.
+- `versionName=1.0.63`, `versionCode=64`. APK, AAB i SHA256SUMS objavljuju se putem GitHub Actions. Ako nema postojećeg izdavačkog keystorea, izdanje mora biti **prerelease**, s debug-potpisanim APK-om i nepotpisanim AAB-om, a ne Google Play-ready paketi.
+
 ## 1.0.62 — Dnevni izazov, Naslovnica i Nova igra — QA i novo izdanje
 
 - Nastavljen razvoj iz spojenog [PR #68](https://github.com/bren-wp/Sudoku/pull/68): vizualne dorade glavne kartice **Dnevnog izazova** (kontinuiraniji planinski krajolik i višestupanjski tamni prijelaz), prikaza nastavka igre na **Naslovnici** te 3D osvjetljenja oznaka težine na zaslonu **Nova igra**.

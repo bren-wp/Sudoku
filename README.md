@@ -1,149 +1,104 @@
 <div align="center">
 
-<img src="branding/sudoku-logo.svg" alt="Sudoku by Brendigo — logotip s brojevima 7, 3 i 9" width="620" />
+<img src="branding/sudoku-logo.svg" alt="Sudoku by Brendigo — originalni logotip 7, 3 i 9" width="570">
 
-### Više od igre. Vježba za um.
+### Svaki dan novi izazov. Svaki potez vrijedi.
 
-**Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
+**Sudoku kakav zaslužuje tvoj Android — pregledan, elegantan i potpuno offline.**
 
-**Android 8.0+** · **Bez oglasa** · **Bez interneta**
+🧩 **3 veličine ploče** &nbsp;·&nbsp; ⚡ **6 težina** &nbsp;·&nbsp; 🗓️ **Dnevni izazovi** &nbsp;·&nbsp; 🏆 **24 postignuća**
 
-**[Provjeri posljednje stvarno objavljeno GitHub izdanje](https://github.com/bren-wp/Sudoku/releases)**
+[**⬇️ Preuzmi posljednje objavljeno izdanje**](https://github.com/bren-wp/Sudoku/releases) &nbsp;·&nbsp;
+[**📱 Pogledaj aplikaciju**](#-stvarni-zasloni-aplikacije) &nbsp;·&nbsp;
+[**🌐 Brendigo**](https://brendigo.com)
 
-<sub>Broj verzije u izvornom kodu ne znači da je APK/AAB već objavljen. Na stranici izdanja provjeri datoteke i vrstu potpisa.</sub>
-
-<img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
-
-<br />
-
-<a href="https://github.com/bren-wp/Sudoku/releases"><strong>Preuzmi najnovije izdanje</strong></a>
-&nbsp;·&nbsp;
-<a href="#-snimke-aplikacije">Pogledaj svih 8 ekrana</a>
-&nbsp;·&nbsp;
-<a href="#-što-sudoku-nudi">Mogućnosti</a>
-&nbsp;·&nbsp;
-<a href="#-preuzimanje-i-instalacija">Preuzimanje</a>
+<img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — ilustracija neonskog vizualnog identiteta" width="880">
 
 </div>
 
 ---
 
-## 🧩 Sudoku by Brendigo
+## ✨ Logika nikada nije izgledala ovako dobro
 
-Upoznaj klasičnu logičku igru u suvremenom neonsko-plavom izdanju.
-**Sudoku** kombinira 4×4, 6×6 i 9×9 mreže, šest razina, dnevne izazove,
-napredak i postignuća — sve lokalno na uređaju, bez registracije.
+Spoj klasične Sudoku igre, modernog tamnoplavog dizajna i pažljivo oblikovanih neonskih detalja. Igraj brzo u slobodnoj minuti ili posveti više vremena težoj zagonetki — **bez oglasa, registracije i internetske veze**.
 
-<table>
-<tr>
-<td width="28%" align="center">
-<img src="branding/sudoku-icon.svg" alt="Originalna ikonica Sudoku 7–3–9" width="180" />
-<br /><strong>Originalan 7–3–9 vizualni identitet</strong>
-</td>
-<td>
+| 🧩 **Igra po tvojoj mjeri** | 🌙 **Dnevni ritual** | 🏆 **Napredak koji se vidi** |
+| :--- | :--- | :--- |
+| 4×4, 6×6 ili klasični 9×9 Sudoku. Šest težina od *Vrlo lako* do *Majstor*. | Svaki dan zaseban izazov, kalendar, dnevni niz i lokalna rang-lista. | Statistika, povijest partija, bodovi i 24 postignuća. |
 
-**Zašto igrati?**
+## 📱 Stvarni zasloni aplikacije
 
-- 🔹 **Tri veličine mreže** — 4×4, 6×6 i 9×9.
-- ⚡ **Šest razina** — od Vrlo lako do Majstor.
-- 🗓️ **Dnevni izazovi** — jedinstvena zagonetka za svaki datum.
-- 🏆 **24 postignuća** — stvarne nagrade i praćenje napretka.
-- 🧠 **Pomoć pri učenju** — bilješke, savjeti, poništavanje, označavanje brojeva.
-- 🔒 **Privatnost** — bez računa, oglasa, praćenja i internetske dozvole.
-
-</td>
-</tr>
-</table>
-
-## 📱 Snimke aplikacije
-
-U galeriji su **stvarne snimke osam zaslona, uključujući splash** iz Android emulatora
-(941 × 1672 px), optimizirane u WebP format bez zamjene interaktivnog sučelja
-statičnim slikama. Snimke prikazuju testno stanje aplikacije, a ne izmišljene
-korisničke rezultate. Izvor su provjerljivi instrumentacijski testovi i
-[workflow za stvarne snimke](.github/workflows/marketing-screenshots.yml).
-
-Originalne referentne ilustracije, uključujući splash, logotip i ikonu, ostaju
-cilj daljnje **1:1** usklađenosti. Prolazak testova ne znači da je pikselna
-jednakost svih ekrana već potvrđena.
+Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 × 1672 px** i pohranjene u repozitoriju kao optimizirane WebP datoteke. Nisu koncepti, AI-generirane slike ni statične zamjene za funkcionalne zaslone. Prikazuju stanje aplikacije tijekom testiranja; tvoji datumi i rezultati ovise o vlastitom napretku.
 
 <table align="center">
-<tr><th>Početni ekran</th><th>Nova igra</th><th>Sudoku ploča</th></tr>
-<tr>
-<td><a href="docs/screenshots/01-home.webp"><img alt="Početni ekran: nastavak igre, izazovi i nagrade" src="docs/screenshots/01-home.webp" width="230" /></a></td>
-<td><a href="docs/screenshots/02-new-game.webp"><img alt="Odabir veličine i težine nove Sudoku igre" src="docs/screenshots/02-new-game.webp" width="230" /></a></td>
-<td><a href="docs/screenshots/03-game.webp"><img alt="Sudoku igra s mrežom, bilješkama i numeričkom tipkovnicom" src="docs/screenshots/03-game.webp" width="230" /></a></td>
-</tr>
-<tr><th>Dnevni izazov</th><th>Statistika</th><th>Postignuća</th></tr>
-<tr>
-<td><a href="docs/screenshots/05-daily.webp"><img alt="Dnevni izazov s prikazom tjednog niza i nagrade" src="docs/screenshots/05-daily.webp" width="230" /></a></td>
-<td><a href="docs/screenshots/06-statistics.webp"><img alt="Statistika: dovršene igre, grafikon i postignuća" src="docs/screenshots/06-statistics.webp" width="230" /></a></td>
-<td><a href="docs/screenshots/07-achievements.webp"><img alt="Kartice otključanih i zaključanih postignuća" src="docs/screenshots/07-achievements.webp" width="230" /></a></td>
-</tr>
-<tr><th colspan="2">Postavke</th><th>Početni splash</th></tr>
-<tr>
-<td colspan="2" align="center"><a href="docs/screenshots/04-settings.webp"><img alt="Stvarni zaslon postavki: tema, bilješke, provjera pogrešaka i privatnost" src="docs/screenshots/04-settings.webp" width="230" /></a></td>
-<td align="center"><a href="docs/screenshots/08-splash.webp"><img alt="Stvarni početni splash s logotipom Sudoku by Brendigo" src="docs/screenshots/08-splash.webp" width="230" /></a></td>
-</tr>
+  <tr><th>Početna</th><th>Nova igra</th><th>Sudoku partija</th></tr>
+  <tr>
+    <td><a href="docs/screenshots/01-home.webp"><img src="docs/screenshots/01-home.webp" alt="Stvarni Android početni zaslon Sudoku by Brendigo" width="250"></a></td>
+    <td><a href="docs/screenshots/02-new-game.webp"><img src="docs/screenshots/02-new-game.webp" alt="Stvarni odabir veličine i težine Sudoku igre" width="250"></a></td>
+    <td><a href="docs/screenshots/03-game.webp"><img src="docs/screenshots/03-game.webp" alt="Stvarna interaktivna Sudoku ploča s kontrolama" width="250"></a></td>
+  </tr>
+  <tr><th>Dnevni izazov</th><th>Statistika</th><th>Postignuća</th></tr>
+  <tr>
+    <td><a href="docs/screenshots/05-daily.webp"><img src="docs/screenshots/05-daily.webp" alt="Stvarni dnevni izazov s planinskim krajolikom" width="250"></a></td>
+    <td><a href="docs/screenshots/06-statistics.webp"><img src="docs/screenshots/06-statistics.webp" alt="Stvarna statistika i povijest napretka" width="250"></a></td>
+    <td><a href="docs/screenshots/07-achievements.webp"><img src="docs/screenshots/07-achievements.webp" alt="Stvarne kartice Sudoku postignuća" width="250"></a></td>
+  </tr>
+  <tr><th>Postavke</th><th>Splash zaslon</th><th>Ikonica aplikacije</th></tr>
+  <tr>
+    <td><a href="docs/screenshots/04-settings.webp"><img src="docs/screenshots/04-settings.webp" alt="Stvarni zaslon postavki aplikacije" width="250"></a></td>
+    <td><a href="docs/screenshots/08-splash.webp"><img src="docs/screenshots/08-splash.webp" alt="Stvarni početni splash zaslon" width="250"></a></td>
+    <td align="center"><img src="branding/sudoku-icon.svg" alt="Sudoku 7-3-9 launcher vizualni identitet" width="170"></td>
+  </tr>
 </table>
 
-## ✨ Što Sudoku nudi
+## 🎯 Sve što trebaš za odličnu partiju
 
-| Igra i način rada | Pojedinosti |
-| --- | --- |
-| Veličine ploče | **4×4, 6×6 i 9×9**, s provjerom jedinstvenog rješenja |
-| Razina težine | **Vrlo lako, Lako, Srednje, Teško, Ekspert, Majstor** |
-| Pomoć pri igranju | Bilješke, savjet, brisanje, poništavanje, isticanje brojeva |
-| Osobni napredak | Povijest, najbolje vrijeme, rezultati i niz |
-| Izazovi | Dnevna zagonetka vezana uz lokalni datum |
-| Nagrade | 24 postignuća i bodovi |
-| Pristupačnost | Opisi interaktivnih elemenata i prilagodljiv raspored |
-| Povezivost | Potpuno offline, bez registracije |
+- **🔢 Tri Sudoku formata** — 4×4 za prve korake, 6×6 za kraću vježbu i 9×9 za klasično iskustvo.
+- **🧠 Šest razina** — Vrlo lako, Lako, Srednje, Teško, Ekspert i Majstor.
+- **✍️ Praktični alati** — bilješke, savjeti, brisanje, poništavanje, isticanje brojeva i provjera pogrešaka.
+- **⏸️ Nastavi gdje si stao** — lokalno spremljen napredak i povratak u započetu igru.
+- **📅 Dnevni izazovi** — kalendar, niz riješenih dana, nagrade i osobni rezultati.
+- **📊 Detaljna statistika** — odigrane igre, vrijeme, postotak dovršenosti i povijest.
+- **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
+- **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
-> **Napomena o težini:** razine su trenutačno temeljene na količini uklonjenih
-> početnih brojeva. Nisu zasebno ocijenjene naprednim solverom.
+## 📦 Instalacija i izdanje
 
-## ⬇️ Preuzimanje i instalacija
+**[Otvori GitHub Releases i preuzmi dostupni APK](https://github.com/bren-wp/Sudoku/releases)**. APK se instalira na podržani Android uređaj uz dopuštenje za instalaciju aplikacija iz odabranog izvora.
 
-Najnoviji APK i Android App Bundle nalaze se na
-**[GitHub Releases](https://github.com/bren-wp/Sudoku/releases)**.
-Bez konfiguriranih izdavačkih ključeva, objavljeni APK je **testni APK**, a AAB
-**nepotpisan**. Takvi artefakti nisu produkcijski potpisana Google Play izdanja.
+| Zahtjev | Vrijednost |
+| :--- | :--- |
+| Sustav | Android 8.0 (API 26) ili noviji |
+| Identitet aplikacije | <code>com.brendigo.sudoku</code> |
+| Jezik sučelja | Hrvatski |
+| Internet | Nije potreban |
+| Oglasi / praćenje | Nema oglasnih ni analitičkih SDK-ova |
+| Izdavač | **BRENDIGO** · [brendigo.com](https://brendigo.com) |
 
-**Android 8.0+** (API 26) · Paket `com.brendigo.sudoku` · Izdavač **Brendigo**.
+**Važno o potpisivanju:** Ako GitHub izdanje sadrži datoteke označene <code>-test.apk</code> i <code>-unsigned.aab</code>, to je **testno izdanje (prerelease)**. Takav AAB nije potpisan za objavu na Google Playu. Za produkcijsku nadogradnju potreban je odgovarajući postojeći izdavački ključ.
 
-## 🔐 Privatnost i sigurnost
+## 🔐 Privatnost bez kompromisa
 
-Napredak i postavke spremaju se lokalno u privatnom prostoru aplikacije.
-Nema korisničkog računa, oglasa, analitike ni mrežnih dozvola.
-Detalji su u dokumentu [PRIVACY.md](PRIVACY.md). Napredak se ne sinkronizira
-s internetom: deinstalacija ili kvar uređaja mogu ga trajno ukloniti.
+Sudoku radi lokalno, bez prijave, oglasa, obveznog računa ili pristupa internetu. Postavke, rezultati i partije ostaju na uređaju. Po želji možeš izvesti napredak u lozinkom zaštićenu datoteku i kasnije ga vratiti uz pregled podataka prije zamjene postojećeg stanja. **Čuvaj lozinku — ne postoji internetski servis za njezin oporavak.**
 
-**Offline sigurnosna kopija:** U Postavkama je moguće izvesti napredak u
-lozinkom šifriranu `.sudoku` datoteku, a prije uvoza pregledati podatke i
-potvrditi zamjenu lokalnog napretka. Lozinku nije moguće obnoviti.
+[Pročitaj pravila privatnosti](PRIVACY.md).
 
-**Pixel QA:** Deset originalnih referenci uspoređeno je sa stvarnim emulatorskim
-PNG-ovima. Svi zasloni ostaju funkcionalni Compose UI, ali još **nisu pixel-perfect 1:1**.
-Rezultati su u [završnom QA izvještaju](docs/final-ten-screen-qa-v1.0.48.md) i
-[Splash iteraciji v1.0.49](docs/splash-qa-v1.0.49.md) te
-[Home iteraciji v1.0.50](docs/home-qa-v1.0.50.md) te
-[Novoj igri v1.0.51](docs/new-game-qa-v1.0.51.md) i
-[Gameplay iteraciji v1.0.52](docs/gameplay-qa-v1.0.52.md) te
-[Dnevnom izazovu v1.0.53](docs/daily-qa-v1.0.53.md) te
-[Statistici v1.0.54](docs/statistics-qa-v1.0.54.md) i
-[Postignućima i Statistici v1.0.55](docs/achievements-statistics-qa-v1.0.55.md).
+## 🎨 Dizajn i kvaliteta
+
+Sučelje je izrađeno nativnim Android/Jetpack Compose komponentama, a galerija prikazuje stvarne emulatorske snimke zaslona. Izvorne korisnikove dizajnerske reference služe za daljnje pixel-by-pixel provjere. **Potpuna 1:1 podudarnost još nije potvrđena**, a rezultati mjerenja javno su dokumentirani u [pixel-QA izvještaju](docs/pixel-qa-v1.0.63.md).
+
+Za tehničke upute i provjere kvalitete pogledaj [razvojnu dokumentaciju](docs/DEVELOPMENT.md) i [povijest izmjena](CHANGELOG.md).
 
 ---
 
 <div align="center">
 
-**Sudoku by Brendigo** · *Bistriji um. Bolji dan.*
+<img src="branding/sudoku-logo.svg" alt="BRENDIGO Sudoku" width="320">
 
-<img src="branding/sudoku-logo.svg" alt="Sudoku by Brendigo" width="320" />
+**Sudoku by BRENDIGO**
 
-[Izdanja](https://github.com/bren-wp/Sudoku/releases) ·
-[Prijava problema](https://github.com/bren-wp/Sudoku/issues) ·
-[Licencija](LICENSE)
+*Bistriji um. Bolji dan.*
+
+[🌐 brendigo.com](https://brendigo.com) · [📦 Izdanja](https://github.com/bren-wp/Sudoku/releases) · [🛡️ Privatnost](PRIVACY.md) · [📋 Licencija](LICENSE)
 
 </div>
