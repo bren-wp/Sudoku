@@ -16,8 +16,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.geometry.CornerRadius
@@ -148,12 +151,34 @@ fun BoxScope.DailyHeroBackdrop() {
         }
         drawPath(nearRidge, Color(0x9C061A39))
         scenery?.let { art ->
+            // Preserve the reference moon/pagoda coordinates, but softly
+            // reveal the bitmap over the native mountains. Mask only the
+            // decorative WebP, never Compose text, controls or reward data.
+            // The previous sharp WebP left edge at 60% of the card caused a
+            // visible vertical stripe against the continuous mountain ridge.
+            drawContext.canvas.saveLayer(
+                Rect(0f, 0f, w, h * .67f),
+                Paint(),
+            )
             drawImage(
                 image = art,
                 dstOffset = IntOffset((w * .60f).roundToInt(), 3),
                 dstSize = IntSize((w * .395f).roundToInt(), (h * .67f).roundToInt()),
                 filterQuality = FilterQuality.High,
             )
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    0.00f to Color.Transparent,
+                    0.36f to Color.White,
+                    1.00f to Color.White,
+                    startX = w * .60f,
+                    endX = w * .995f,
+                ),
+                topLeft = Offset(w * .60f, 0f),
+                size = Size(w * .395f, h * .67f),
+                blendMode = BlendMode.DstIn,
+            )
+            drawContext.canvas.restore()
         }
         // Keep the existing moon and pagoda coordinates. The former right
         // crop started abruptly at x=60% of the panel; an explicit smooth
