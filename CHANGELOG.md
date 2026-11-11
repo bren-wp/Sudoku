@@ -1,3 +1,16 @@
+## 1.0.62 — Dnevni izazov, Naslovnica i Nova igra — QA i novo izdanje
+
+- Nastavljen razvoj iz spojenog [PR #68](https://github.com/bren-wp/Sudoku/pull/68): vizualne dorade glavne kartice **Dnevnog izazova** (kontinuiraniji planinski krajolik i višestupanjski tamni prijelaz), prikaza nastavka igre na **Naslovnici** te 3D osvjetljenja oznaka težine na zaslonu **Nova igra**.
+- **Postignuća:** prilagođen vertikalni razmještaj stvarnih opisa i progress-kartica. **Statistika:** kompaktniji pregled četiri nagrade, uz zadržavanje pravih podataka i funkcionalne navigacije.
+- Dodani Android instrumentacijski testovi za opise postignuća, raspored kartica i granice lokalne dekoracije Dnevnog izazova te provjeru dostupnosti funkcionalne rang-liste.
+- Korisnikove originalne referentne slike uspoređene su sa stvarnim Android emulator PNG-ovima na nativnih 941×1672 px. Početni RGB MAE: Postignuća **29,32**, Statistika **26,64**, Dnevni izazov **24,84**, Naslovnica sa spremljenom igrom **23,95**, Nova igra **22,61** (RGB skala 0–255, **nije postotak**). Te vrijednosti su **prije posljednjih dorada**; nove snimke i rezultati moraju se odvojeno potvrditi. Ne tvrdi se da je ostvarena pixel-perfect 1:1 podudarnost.
+- Očuvani su postojeći `applicationId=com.brendigo.sudoku`, `minSdk=26`, offline rad, lokalni podaci, statistika i dostupnost svih postignuća. Nema dodatnih mrežnih dozvola, reklamnih SDK-ova ni novih ovisnosti.
+- Povećani su `versionName=1.0.62` i `versionCode=63` kako bi Google Play prepoznao novo izdanje. Paketi se izrađuju zasebno kroz `Publish Sudoku release` na **testiranom main commitu**, uz SHA-256 kontrolne sume.
+- **Izdavački potpis je uvjetan:** bez konfiguriranog izdavačkog keystorea workflow isporučuje **debug-potpisan testni APK i nepotpisan AAB**, označene kao **prerelease** (nije spremno za objavu na Google Playu). Nije moguće potvrditi Play-ready AAB bez valjanoga vlasnikovog certifikata.
+- Provjere prije označavanja uspješnoga izdanja: Android CI, Android visual smoke na 11 profila i izdavački workflow. Ako GitHub Actions padne, ne predstavljati izdanje kao uspješno objavljeno.
+
+Detaljan QA zapis: [Pixel QA — PR #68, najveća odstupanja](docs/pixel-qa-pr-20261111-largest-screens.md).
+
 ## 1.0.55 — Postignuća i prioritetna Statistika, pixel-QA 7/8
 
 - Prije zahvata uspoređeni su svi dostupni Android prikazi s korisnikovim PNG-ovima na 941×1672. Najveći MAE glavnih zaslona: Postignuća **28.85024**, Statistika **26.45647**, Početni zaslon **23.9902**.
