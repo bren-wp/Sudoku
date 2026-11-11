@@ -15,6 +15,7 @@ on:
       - ".github/workflows/android.yml"
       - ".github/workflows/visual-smoke.yml"
       - ".github/workflows/release-classification.yml"
+      - "scripts/verify-release-assets.sh"
   pull_request:
     types: [closed]
   workflow_dispatch:
@@ -167,3 +168,18 @@ jobs:
             # a stable Google Play-ready GitHub release.
             gh release edit "$RELEASE_TAG" -R "$REPO" --prerelease
           fi
+      - name: Verify published APK/AAB, SHA-256 and signing
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_EXISTS: ${{ steps.version.outputs.exists }}
+        run: |
+          set -euo pipefail
+          # A previously published tag may intentionally point to an older
+          # app commit if only workflow or documentation files changed.
+          expected_sha=""
+          if [[ "$RELEASE_EXISTS" != 'true' ]]; then
+            expected_sha="$(git rev-parse HEAD)"
+          fi
+          bash scripts/verify-release-assets.sh "$RELEASE_TAG" "$REPO" \
+            "${PUBLISHER_SIGNED:-auto}" "$expected_sha"
