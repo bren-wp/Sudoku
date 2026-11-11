@@ -35,6 +35,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "9.6.0"
+      - name: Release artifact contract regression tests
+        shell: bash
+        run: |
+          bash -n scripts/verify-release-assets.sh
+          bash -n scripts/test_verify_release_assets.sh
+          bash scripts/test_verify_release_assets.sh
       - name: Unit tests
         run: gradle --no-daemon :app:testDebugUnitTest
       - name: Pixel QA metric regression tests
