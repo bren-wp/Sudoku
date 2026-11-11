@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -352,7 +353,11 @@ fun DailyStartAction(
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        val dense = maxWidth < 300.dp || title.length > 23
+        // Keep the reference typography when space permits, but preserve
+        // readable full labels at 240-270dp and larger system font scales.
+        val compactLabel = maxWidth < 225.dp ||
+            LocalDensity.current.fontScale >= 1.5f
+        val dense = compactLabel || maxWidth < 300.dp || title.length > 23
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -365,10 +370,13 @@ fun DailyStartAction(
             Spacer(Modifier.width(if (dense) 9.dp else 14.dp))
             Text(
                 title.removePrefix("✓").trim(),
+                modifier = Modifier.testTag("daily-primary-action-label"),
                 color = Ink.white,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = if (dense) 15.sp else 20.sp,
-                maxLines = 1,
+                fontSize = if (compactLabel) 13.sp else if (dense) 15.sp else 20.sp,
+                lineHeight = if (compactLabel) 15.sp else 22.sp,
+                textAlign = TextAlign.Center,
+                maxLines = if (compactLabel) 2 else 1,
             )
         }
     }

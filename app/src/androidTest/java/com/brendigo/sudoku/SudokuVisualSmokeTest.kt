@@ -2085,6 +2085,33 @@ class SudokuVisualSmokeTest {
     }
 
     @Test
+    fun dailyPrimaryAndLeaderboardLabelsStayInsideTheirActualCards() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        val epsilon = rule.activity.resources.displayMetrics.density * 2f
+        val pairs = listOf(
+            "primary-action" to "daily-primary-action-label",
+            "daily-leaderboard" to "daily-leaderboard-label",
+        )
+        for ((parentTag, textTag) in pairs) {
+            rule.onNodeWithTag(parentTag).performScrollTo().assertIsDisplayed()
+            val parent = rule.onNodeWithTag(parentTag)
+                .fetchSemanticsNode().boundsInRoot
+            val label = rule.onNodeWithTag(textTag, useUnmergedTree = true)
+                .fetchSemanticsNode().boundsInRoot
+            check(label.width > 0f && label.height > 0f &&
+                label.left >= parent.left - epsilon &&
+                label.right <= parent.right + epsilon &&
+                label.top >= parent.top - epsilon &&
+                label.bottom <= parent.bottom + epsilon) {
+                "Daily interactive label must fit its actual touch card: " +
+                    "$parentTag=$parent, $textTag=$label"
+            }
+        }
+    }
+
+    @Test
     fun screenNavigationAndGameplayControls() {
         waitFor("home-nova-igra")
         // The launch splash is composited for a moment after semantics switch to Home.

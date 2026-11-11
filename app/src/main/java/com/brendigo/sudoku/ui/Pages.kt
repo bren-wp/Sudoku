@@ -386,12 +386,32 @@ fun HomePage(controller: SudokuController) {
                         fontWeight = FontWeight.ExtraBold, fontSize = 23.sp)
                     Text(difficultyTitle(game.level),
                         color = Ink.muted, fontSize = 13.sp)
-                    Row(verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
-                        Text(formatTime(game.elapsed), color = Ink.muted, fontSize = 12.sp)
-                        Text("·  Još " + game.emptyCells + " praznih polja",
-                            color = Ink.muted, fontSize = 12.sp)
+                    // Keep the reference single-line metadata on standard phones.
+                    // At narrow widths, wrap the live empty-cell count below the timer
+                    // instead of clipping it beneath the decorative Sudoku artwork.
+                    BoxWithConstraints(Modifier.fillMaxWidth().testTag("home-resume-meta")) {
+                        val stacked = maxWidth < 320.dp ||
+                            LocalDensity.current.fontScale >= 1.3f
+                        if (stacked) {
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                    BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
+                                    Text(formatTime(game.elapsed),
+                                        color = Ink.muted, fontSize = 12.sp)
+                                }
+                                Text("Još " + game.emptyCells + " praznih polja",
+                                    color = Ink.muted, fontSize = 12.sp)
+                            }
+                        } else {
+                            Row(verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                BrandIcon("timer", Modifier.size(16.dp), Ink.muted)
+                                Text(formatTime(game.elapsed), color = Ink.muted, fontSize = 12.sp)
+                                Text("·  Još " + game.emptyCells + " praznih polja",
+                                    color = Ink.muted, fontSize = 12.sp)
+                            }
+                        }
                     }
                     Spacer(Modifier.height(4.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
@@ -1378,9 +1398,15 @@ fun DailyPage(controller: SudokuController) {
                 enabled = !controller.isGenerating && !controller.dailyAlreadyCompleted(),
             )
         }
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        BoxWithConstraints(Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center) {
+            // The owner's normal-width reference keeps its compact 63% pill.
+            // Small devices and enlarged fonts need room for the actual label.
+            val compactLeaderboard = maxWidth < 350.dp ||
+                LocalDensity.current.fontScale >= 1.3f
             DailyFrame(
-                Modifier.fillMaxWidth(.63f).heightIn(min = 48.dp)
+                Modifier.fillMaxWidth(if (compactLeaderboard) .95f else .63f)
+                    .heightIn(min = 48.dp)
                     .testTag("daily-leaderboard")
                     .semantics {
                         contentDescription = "Otvori osobnu rang-listu"
@@ -1412,7 +1438,9 @@ fun DailyPage(controller: SudokuController) {
                     }
                     Spacer(Modifier.width(9.dp))
                     Text("Pogledaj rang-listu", color = Ink.white,
-                        fontWeight = FontWeight.Bold, fontSize = 16.sp,
+                        modifier = Modifier.testTag("daily-leaderboard-label"),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = if (compactLeaderboard) 14.sp else 16.sp,
                         maxLines = 1)
                 }
             }
