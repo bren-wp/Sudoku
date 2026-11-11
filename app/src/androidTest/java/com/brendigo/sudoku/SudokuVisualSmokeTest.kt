@@ -1239,7 +1239,12 @@ class SudokuVisualSmokeTest {
         homeTile("statistika")
         waitFor("screen-statistika")
         assertArtInside("stats-streak-3d-badge", "stat-tile-streak")
-        rule.onNodeWithTag("stats-award-preview-2").performScrollTo()
+        // The individual preview tag lives in Compose's unmerged tree.
+        // Scroll to the merged, accessible parent panel instead of trying
+        // performScrollTo() on a child hidden by merged semantics. The actual
+        // 3D artwork remains checked against the unmerged child geometry.
+        rule.onNodeWithTag("stats-achievements").performScrollTo()
+            .assertIsDisplayed()
         assertArtInside("stats-award-streak-3d-badge", "stats-award-preview-2")
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
