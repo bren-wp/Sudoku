@@ -97,6 +97,29 @@ jobs:
             [[ "$classification" == "true" ]] ||
               { echo "::error::Unsigned release was not classified as prerelease"; exit 1; }
           fi
+      - name: Extract real release notes from CHANGELOG.md
+        if: steps.version.outputs.exists != 'true'
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_TAG#v}"
+          awk -v version="$version" '
+            /^## / {
+              if (found) exit
+              if ($0 == "## " version || index($0, "## " version " ") == 1) {
+                found=1
+                print
+                next
+              }
+            }
+            found { print }
+          ' CHANGELOG.md > release-changelog.md
+          test -s release-changelog.md || {
+            echo "::error::CHANGELOG.md has no entry for $RELEASE_TAG"
+            exit 1
+          }
       - name: Configure optional publisher signing
         if: steps.version.outputs.exists != 'true'
         shell: bash
@@ -144,6 +167,8 @@ jobs:
               "SHA256SUMS sadrži kontrolne SHA-256 sažetke oba artefakta." \
               "Prije objave na Google Playu provjerite certifikat i provedite završnu provjeru aplikacije." \
               > release-notes.md
+            printf '\n' >> release-notes.md
+            cat release-changelog.md >> release-notes.md
             gh release create "$RELEASE_TAG" release-assets/* -R "$REPO" \
               --target "$SOURCE_SHA" --title "Sudoku $RELEASE_TAG" \
               --notes-file release-notes.md
@@ -161,6 +186,8 @@ jobs:
               "SUDOKU_KEYSTORE_BASE64, SUDOKU_SIGNING_KEY_ALIAS, " \
               "SUDOKU_SIGNING_STORE_PASSWORD i SUDOKU_SIGNING_KEY_PASSWORD." \
               > release-notes.md
+            printf '\n' >> release-notes.md
+            cat release-changelog.md >> release-notes.md
             gh release create "$RELEASE_TAG" release-assets/* -R "$REPO" \
               --target "$SOURCE_SHA" --title "Sudoku $RELEASE_TAG" \
               --notes-file release-notes.md --prerelease
