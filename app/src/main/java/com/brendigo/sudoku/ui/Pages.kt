@@ -1655,7 +1655,7 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
     val earned = fraction >= 1f
     StatisticsSurface(
         modifier.heightIn(
-            min = if (LocalDensity.current.fontScale >= 1.3f) 100.dp else 84.dp
+            min = if (LocalDensity.current.fontScale >= 1.3f) 92.dp else 72.dp
         ),
         // Original's four previews retain their independent teal, blue,
         // purple and cyan accents even when the underlying award is locked.
@@ -1667,8 +1667,8 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
         corner = 9.dp,
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 5.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             // The four reference cards pair their distinctive award artwork
             // with the title on one row. Keep the *actual* vector visible
@@ -1678,21 +1678,21 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                 // The preview column is measured in a scrollable parent:
                 // using weight here could collapse the icon/title row to 0dp
                 // on some devices. A bounded native row always renders it.
-                Modifier.fillMaxWidth().heightIn(min = 34.dp),
+                Modifier.fillMaxWidth().heightIn(min = 31.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(29.dp), contentAlignment = Alignment.Center) {
                     if (award.title == "Pobjednički niz") {
                         AchievementBadgeArt(
                             "Vrući niz",
-                            Modifier.size(31.dp).testTag("stats-award-streak-3d-badge"),
+                            Modifier.size(28.dp).testTag("stats-award-streak-3d-badge"),
                             award.tint,
                         )
                     } else {
                         BrandIcon(
                         award.icon,
-                        Modifier.size(31.dp).drawBehind {
+                        Modifier.size(28.dp).drawBehind {
                             if (earned || fraction > 0f) {
                                 val center = Offset(size.width / 2f, size.height / 2f)
                                 drawCircle(
@@ -2208,10 +2208,17 @@ fun AchievementsPage(controller: SudokuController) {
                             Modifier.fillMaxWidth()
                                 .then(if (compactCards) Modifier.heightIn(min = rowHeight)
                                       else Modifier.fillMaxHeight())
-                                .padding(horizontal = if (compactCards) 8.dp else 13.dp,
-                                    vertical = if (compactCards) 9.dp else 12.dp),
+                                .padding(
+                                    start = if (compactCards) 8.dp else 13.dp,
+                                    end = if (compactCards) 8.dp else 13.dp,
+                                    top = if (compactCards) 9.dp else 12.dp,
+                                    // The reference has two real description
+                                    // lines; the old 12dp bottom gutter left
+                                    // room unused while clipping line two.
+                                    bottom = if (compactCards) 9.dp else 4.dp,
+                                ),
                             verticalArrangement = Arrangement.spacedBy(
-                                if (compactCards) 4.dp else 3.dp),
+                                if (compactCards) 4.dp else 2.dp),
                         ) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Box(
@@ -2327,6 +2334,10 @@ fun AchievementsPage(controller: SudokuController) {
                                 // line across the whole scenery panel.
                                 modifier = (if (compactCards) Modifier
                                     else Modifier.weight(1f))
+                                    // Reserve two full line-heights on the
+                                    // fixed-height reference cards. Smaller
+                                    // viewports keep flexible growing cards.
+                                    .then(if (compactCards) Modifier else Modifier.heightIn(min = 28.dp))
                                     .fillMaxWidth(
                                         if (vividFeatured && !stackCards) .76f else 1f
                                     ).testTag(

@@ -1013,6 +1013,15 @@ class SudokuVisualSmokeTest {
             firstDescription.bottom <= visibleFirst.bottom + 1f) {
             "Achievement description escapes its card on this viewport"
         }
+        // Owner's 941x1672 art shows two lines of copy in the first
+        // featured card. Guard against the prior cropped, single-line text.
+        if (contentWidthDp >= 375f &&
+            rule.activity.resources.configuration.fontScale < 1.3f) {
+            check(firstDescription.height >=
+                rule.activity.resources.displayMetrics.density * 26f) {
+                "Featured achievement description has only one clipped line: $firstDescription"
+            }
+        }
         val thirdAward = rule.onNodeWithTag("achievement-majstor-logike")
         thirdAward.performScrollTo().assertIsDisplayed()
         val thirdCard = thirdAward.fetchSemanticsNode().boundsInRoot
@@ -1276,6 +1285,12 @@ class SudokuVisualSmokeTest {
         val widthDp = rule.activity.resources.displayMetrics.widthPixels / density
         check(cards.all { it.width > 0f && it.height >= 70f * density }) {
             "Each real Statistics achievement preview must be readable: $cards"
+        }
+        if (widthDp >= 410f &&
+            rule.activity.resources.configuration.fontScale < 1.3f) {
+            check(cards.all { it.height <= 105f * density }) {
+                "Four-column reference previews became oversized: $cards"
+            }
         }
         if (widthDp < 410f) {
             check(
