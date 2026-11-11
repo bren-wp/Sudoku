@@ -6,7 +6,11 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.62** · Android 8.0+ · Bez oglasa · Bez interneta
+**Android 8.0+** · **Bez oglasa** · **Bez interneta**
+
+**[Provjeri posljednje stvarno objavljeno GitHub izdanje](https://github.com/bren-wp/Sudoku/releases)**
+
+<sub>Broj verzije u izvornom kodu ne znači da je APK/AAB već objavljen. Na stranici izdanja provjeri datoteke i vrstu potpisa.</sub>
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
