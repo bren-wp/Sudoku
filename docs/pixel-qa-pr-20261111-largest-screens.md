@@ -32,3 +32,13 @@ The fresh-home screenshot (not comparable to the reference *resume* state) was 3
 - The full first-eight-screen raw MAE must be recomputed using a **new screenshot artifact from the PR head**, before anyone can claim improvement or 1:1.
 - Visual QA should be done on identical seeded user states; the above comparison includes dynamic differences.
 - No screenshots or reference artwork are committed into the runnable UI. No image generation or fake Compose screen has been used.
+
+## PR #68 follow-up: Daily hero, Home resume and New Game — 2026-11-11
+
+Reference-based side-by-side inspection identified a vertical seam where the daily hero image begins at 60% of the card width. The reference shows mountain shapes extending farther into the center behind real live text. This iteration adds *native, still mountain ridges* and a multi-stop scrim in `DailyHeroBackdrop`; the bundled moon/pagoda artwork stays at the original focal coordinates. The daily screen keeps its live date, streak, badge/points, weekly progress, CTA and offline leaderboard.
+
+Home: the resume card's caption returns to the reference's muted tone and the real action is proportionally wider. New Game: the six selection badges receive a slightly brighter embossed rim/elevation without changing their clickable dimensions or engine state.
+
+Added a 11-profile Android instrumentation test verifying that the daily native scenery is bounded by the live hero card, the metrics exist and the leaderboard dialog still opens.
+
+**This is a candidate change, not a measured improvement yet.** Original references and previous real screenshots are valid baseline only. After the new PR commit finishes the reference emulator run, remeasure region MAE and revert any worsening. Do not claim 1:1/0% deviation until same-state comparison proves it.

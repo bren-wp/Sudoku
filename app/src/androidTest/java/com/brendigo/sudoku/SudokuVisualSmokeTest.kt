@@ -1315,6 +1315,36 @@ class SudokuVisualSmokeTest {
     }
 
     /**
+     * The mountain/moon picture is decorative Canvas art, never a pasted UI
+     * screenshot. The live hero, metrics and CTA must remain tappable and the
+     * scenery cannot spill outside its own clipped card at any viewport.
+     */
+    @Test
+    fun dailyHeroSceneryRemainsClippedAndChallengeControlsStayLive() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        val panel = rule.onNodeWithTag("daily-hero")
+        panel.performScrollTo().assertIsDisplayed()
+        val panelRect = panel.fetchSemanticsNode().boundsInRoot
+        val sceneryRect = rule.onNodeWithTag(
+            "daily-hero-scenery", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        val px = rule.activity.resources.displayMetrics.density * 2f
+        check(
+            sceneryRect.width > 0f && sceneryRect.height > 0f &&
+            sceneryRect.left >= panelRect.left - px &&
+            sceneryRect.right <= panelRect.right + px &&
+            sceneryRect.top >= panelRect.top - px &&
+            sceneryRect.bottom <= panelRect.bottom + px
+        ) { "Live hero scenery escapes the actual daily card: $sceneryRect / $panelRect" }
+        rule.onNodeWithTag("daily-metrics", useUnmergedTree = true).assertExists()
+        rule.onNodeWithTag("daily-leaderboard").performScrollTo()
+            .assertIsDisplayed().performClick()
+        rule.onNodeWithText("Osobna rang-lista").assertExists()
+    }
+
+    /**
      * Day counts/dates are always real device/user data. Verify the layout
      * instead of changing completed days just to reproduce an illustration.
      */

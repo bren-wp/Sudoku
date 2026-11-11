@@ -380,7 +380,7 @@ fun HomePage(controller: SudokuController) {
                 ResumeBoardArtwork(Modifier.matchParentSize())
                 Column(Modifier.padding(start = 20.dp, top = 9.dp, end = 12.dp, bottom = 9.dp),
                     verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text("N A S T A V I  I G R U", color = Ink.cyan,
+                    Text("N A S T A V I  I G R U", color = Ink.muted,
                         fontSize = 10.sp, letterSpacing = 2.sp)
                     Text("Prekinuta igra", color = Ink.white,
                         fontWeight = FontWeight.ExtraBold, fontSize = 23.sp)
@@ -395,7 +395,7 @@ fun HomePage(controller: SudokuController) {
                     }
                     Spacer(Modifier.height(4.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
-                        Modifier.fillMaxWidth(.45f), minHeight = 42.dp)
+                        Modifier.fillMaxWidth(.52f), minHeight = 42.dp)
                 }
             }
         }
@@ -1001,7 +1001,7 @@ fun NewGamePage(controller: SudokuController) {
                             Box(
                                 Modifier.size(iconSize)
                                     .shadow(
-                                        elevation = if (level == i) 8.dp else 5.dp,
+                                        elevation = if (level == i) 9.dp else 6.dp,
                                         shape = RoundedCornerShape(50),
                                         ambientColor = newGameAccents[i].copy(alpha = .68f),
                                         spotColor = newGameAccents[i].copy(alpha = .72f),
@@ -1018,9 +1018,9 @@ fun NewGamePage(controller: SudokuController) {
                                         RoundedCornerShape(50),
                                     )
                                     .border(
-                                        2.2.dp,
+                                        2.5.dp,
                                         Brush.linearGradient(listOf(
-                                            Color.White.copy(alpha = .63f),
+                                            Color.White.copy(alpha = .70f),
                                             newGameAccents[i],
                                             newGameAccents[i].copy(alpha = .78f),
                                         )),

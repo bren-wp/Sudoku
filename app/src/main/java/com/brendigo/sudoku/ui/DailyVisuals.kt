@@ -101,7 +101,7 @@ fun BoxScope.DailyHeroBackdrop() {
             }
         }.getOrNull()
     }
-    Canvas(Modifier.matchParentSize()) {
+    Canvas(Modifier.matchParentSize().testTag("daily-hero-scenery")) {
         val w = size.width
         val h = size.height
         drawRect(
@@ -110,6 +110,42 @@ fun BoxScope.DailyHeroBackdrop() {
                 Color(0xFF5D4A31), Color(0xFF976C37),
             )),
         )
+        // Carry the original mountains into the dark text half of the card
+        // without copying any text/buttons from the reference screenshot.
+        // These still mountain ridges are native draw paths: no bitmap UI,
+        // animation, battery work, or changes to the existing moon/pagoda.
+        val farRidge = Path().apply {
+            moveTo(w * .29f, h * .70f)
+            lineTo(w * .29f, h * .62f)
+            lineTo(w * .37f, h * .48f)
+            lineTo(w * .42f, h * .57f)
+            lineTo(w * .49f, h * .39f)
+            lineTo(w * .57f, h * .56f)
+            lineTo(w * .65f, h * .45f)
+            lineTo(w * .74f, h * .63f)
+            lineTo(w * .74f, h * .70f)
+            close()
+        }
+        drawPath(
+            farRidge,
+            Brush.verticalGradient(
+                listOf(Color(0x6B496280), Color(0x9F142E51), Color(0xB6071C3B)),
+                startY = h * .37f,
+                endY = h * .72f,
+            ),
+        )
+        val nearRidge = Path().apply {
+            moveTo(w * .27f, h * .77f)
+            lineTo(w * .27f, h * .68f)
+            lineTo(w * .35f, h * .61f)
+            lineTo(w * .43f, h * .72f)
+            lineTo(w * .52f, h * .58f)
+            lineTo(w * .61f, h * .68f)
+            lineTo(w * .71f, h * .60f)
+            lineTo(w * .77f, h * .76f)
+            close()
+        }
+        drawPath(nearRidge, Color(0x9C061A39))
         scenery?.let { art ->
             drawImage(
                 image = art,
@@ -118,14 +154,19 @@ fun BoxScope.DailyHeroBackdrop() {
                 filterQuality = FilterQuality.High,
             )
         }
-        // The broader source artwork looked attractive but shifted the moon
-        // and pagoda and increased 941x1672 RGB MAE (23.640 -> 23.759).
-        // Preserve the measured original focal scale and location.
+        // Keep the existing moon and pagoda coordinates. The former right
+        // crop started abruptly at x=60% of the panel; an explicit smooth
+        // multi-stop dark scrim hides the seam while allowing mountain
+        // silhouettes to read through the center-right under live text.
         drawRect(
             Brush.horizontalGradient(
-                listOf(Color(0xE0041733), Color(0xE0041733),
-                    Color(0x66041733), Color.Transparent),
-                startX = 0f, endX = w * .98f,
+                0.00f to Color(0xF9041733),
+                0.34f to Color(0xEC041733),
+                0.55f to Color(0xCF041733),
+                0.64f to Color(0x99041733),
+                0.84f to Color.Transparent,
+                startX = 0f,
+                endX = w,
             ),
             topLeft = Offset.Zero,
             size = Size(w, h * .70f),
