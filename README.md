@@ -6,7 +6,7 @@
 
 **Premium Sudoku za Android • Na hrvatskom • Bez interneta • Bez oglasa**
 
-**Izdanje 1.0.55** · Android 8.0+ · Bez oglasa · Bez interneta
+**Izdanje 1.0.62** · Android 8.0+ · Bez oglasa · Bez interneta
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — plava neonska mreža, noćne planine i mjesečina" width="880" />
 
