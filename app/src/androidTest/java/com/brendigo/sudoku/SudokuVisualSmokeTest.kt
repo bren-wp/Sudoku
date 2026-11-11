@@ -1203,6 +1203,54 @@ class SudokuVisualSmokeTest {
         rule.onNodeWithText("Prikaži istaknuta postignuća").assertExists()
     }
 
+    /**
+     * Featured reference artwork is rendered as live, bounded Compose content.
+     * The original screenshot is not overlaid on any UI, and real player
+     * progress, badges and interactions remain owned by SudokuController.
+     */
+    @Test
+    fun ownerThreeDimensionalBadgesFitAchievementsStatisticsAndDailyPanels() {
+        waitFor("home-nova-igra")
+        val atlas = rule.activity.assets.open("achievement-badges-atlas.webp")
+            .use { android.graphics.BitmapFactory.decodeStream(it) }
+        check(atlas != null && atlas.width >= 320 && atlas.height >= 64) {
+            "The bundled, offline owner badge atlas is missing or truncated"
+        }
+        val tolerance = rule.activity.resources.displayMetrics.density * 2f
+        fun assertArtInside(tag: String, parent: String) {
+            val art = rule.onNodeWithTag(tag, useUnmergedTree = true)
+                .fetchSemanticsNode().boundsInRoot
+            val frame = rule.onNodeWithTag(parent, useUnmergedTree = true)
+                .fetchSemanticsNode().boundsInRoot
+            check(art.width > 0f && art.height > 0f &&
+                art.left >= frame.left - tolerance &&
+                art.right <= frame.right + tolerance &&
+                art.top >= frame.top - tolerance &&
+                art.bottom <= frame.bottom + tolerance) {
+                "Reference badge $tag extends outside its live $parent panel: $art / $frame"
+            }
+        }
+        homeTile("postignuća")
+        waitFor("screen-postignuća")
+        assertArtInside("achievement-summary-3d-badge", "achievement-summary")
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("statistika")
+        waitFor("screen-statistika")
+        assertArtInside("stats-streak-3d-badge", "stat-tile-streak")
+        rule.onNodeWithTag("stats-award-preview-2").performScrollTo()
+        assertArtInside("stats-award-streak-3d-badge", "stats-award-preview-2")
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        assertArtInside("daily-streak-3d-badge", "daily-summary")
+        rule.onNodeWithTag("daily-leaderboard").performScrollTo().performClick()
+        rule.onNodeWithText("Osobna rang-lista").assertExists()
+    }
+
     @Test
     fun statisticsAwardPreviewGeometryWorksAcrossBothViewports() {
         waitFor("home-nova-igra")

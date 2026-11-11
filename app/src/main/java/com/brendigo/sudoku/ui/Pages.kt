@@ -1171,7 +1171,7 @@ fun DailyPage(controller: SudokuController) {
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                BrandIcon("flame-solid", Modifier.size(30.dp), Ink.gold)
+                                AchievementBadgeArt("Vrući niz", Modifier.size(30.dp).testTag("daily-streak-3d-badge"), Ink.gold)
                                 Spacer(Modifier.width(5.dp))
                                 Column {
                                     Text("${controller.currentStreak(today)}", color = Ink.gold,
@@ -1212,7 +1212,7 @@ fun DailyPage(controller: SudokuController) {
                         Box(Modifier.width(1.dp).height(60.dp)
                             .background(Ink.blue.copy(alpha = .66f)))
                         Row(Modifier.weight(.97f), verticalAlignment = Alignment.CenterVertically) {
-                            BrandIcon("flame-solid", Modifier.size(43.dp), Ink.gold)
+                            AchievementBadgeArt("Vrući niz", Modifier.size(43.dp).testTag("daily-streak-3d-badge"), Ink.gold)
                             Spacer(Modifier.width(2.dp))
                             Column(horizontalAlignment = Alignment.Start) {
                                 Text("${controller.currentStreak(today)}", color = Ink.gold,
@@ -1683,7 +1683,14 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
-                    BrandIcon(
+                    if (award.title == "Pobjednički niz") {
+                        AchievementBadgeArt(
+                            "Vrući niz",
+                            Modifier.size(31.dp).testTag("stats-award-streak-3d-badge"),
+                            award.tint,
+                        )
+                    } else {
+                        BrandIcon(
                         award.icon,
                         Modifier.size(31.dp).drawBehind {
                             if (earned || fraction > 0f) {
@@ -1699,7 +1706,8 @@ private fun StatsAwardPreview(award: PreviewAward, modifier: Modifier) {
                             }
                         },
                         award.tint.copy(alpha = if (earned) 1f else .83f),
-                    )
+                        )
+                    }
                     if (!earned && award.icon != "lock") {
                         Box(
                             Modifier.align(Alignment.BottomEnd)
@@ -1991,16 +1999,22 @@ private fun StatTile(
                         },
                     contentAlignment = Alignment.Center,
                 ) {
-                    BrandIcon(
-                        when (id) {
-                            "played" -> "gamepad"
-                            "best" -> "timer"
-                            "total" -> "timer"
-                            "streak" -> "flame-solid"
-                            else -> "statistics"
-                        },
-                        Modifier.fillMaxSize(), color,
-                    )
+                    if (id == "streak") {
+                        AchievementBadgeArt(
+                            "Vrući niz",
+                            Modifier.fillMaxSize().testTag("stats-streak-3d-badge"),
+                            color,
+                        )
+                    } else {
+                        BrandIcon(
+                            when (id) {
+                                "played" -> "gamepad"
+                                "best", "total" -> "timer"
+                                else -> "statistics"
+                            },
+                            Modifier.fillMaxSize(), color,
+                        )
+                    }
                 }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
                 Column(Modifier.weight(1f),
@@ -2097,9 +2111,10 @@ fun AchievementsPage(controller: SudokuController) {
                     horizontalArrangement = Arrangement.spacedBy(
                         if (compactSummary) 6.dp else 13.dp),
                 ) {
-                BrandIcon(
-                    "trophy-solid",
+                AchievementBadgeArt(
+                    "Prva pobjeda",
                     Modifier.size(if (compactSummary) 36.dp else 43.dp)
+                        .testTag("achievement-summary-3d-badge")
                         .drawBehind {
                             val center = Offset(size.width / 2f, size.height / 2f)
                             drawCircle(
