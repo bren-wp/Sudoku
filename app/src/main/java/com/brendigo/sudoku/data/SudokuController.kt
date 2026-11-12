@@ -77,6 +77,9 @@ class SudokuController(
     }
 
     suspend fun resumeRegularGame(): Boolean {
+        // A simultaneous puzzle generation or backup restore must not mutate
+        // the active session / Undo history while a checkpoint is suspended.
+        if (isGenerating || importingBackup) return false
         // Preserve an in-memory daily session before switching puzzle types.
         if (game?.daily == true && !checkpointBeforeSwitch()) return false
         val saved = readGame("regular_game") ?: return false
@@ -170,6 +173,15 @@ class SudokuController(
 
     suspend fun startNew(size: Int, level: Int, daily: Boolean = false) {
         if (isGenerating) return
+        if (importingBackup) {
+            toast = "Povrat sigurnosne kopije je u tijeku. Pokušaj ponovno."
+            return
+        }
+        // Guard the entire transition, including the first potentially
+        // suspending checkpoint. Otherwise a rapid second tap can create a
+        // competing game and overwrite progress while resuming a daily puzzle.
+        isGenerating = true
+        try {
         val today = LocalDate.now()
         val date = today.toString()
         if (daily && dailyAlreadyCompleted()) {
@@ -187,7 +199,8 @@ class SudokuController(
             if (game?.daily == false && !checkpointBeforeSwitch()) return
             val saved = readGame("daily_game")
             if (saved != null && saved.daily && saved.day == date && !saved.completed && !saved.failed) {
-                if (game?.daily == false && !checkpointBeforeSwitch()) return
+                // The earlier checkpoint already completed; no state changes
+                // or suspension happened between it and readGame().
                 game = saved
                 undoHistory.clear()
                 undoHistory.addAll(readUndoHistory("daily_undo", saved))
@@ -196,8 +209,6 @@ class SudokuController(
                 return
             }
         }
-        isGenerating = true
-        try {
             val result = if (daily) {
                 DailyPuzzleGeneration.create(size, level, today) ?: run {
                     // Midnight or a manual time-zone change occurred while the
