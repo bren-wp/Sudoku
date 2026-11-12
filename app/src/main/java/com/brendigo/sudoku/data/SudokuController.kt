@@ -64,6 +64,11 @@ class SudokuController(
     }
 
     fun hasSavedRegularGame(): Boolean {
+        // The newest regular game can still be in the ordered IO queue.
+        // Do not offer a stale disk save after a just-finished puzzle.
+        game?.takeIf { !it.daily }?.let { active ->
+            return !active.completed && !active.failed
+        }
         val regular = readGame("regular_game") ?: return false
         return !regular.daily && !regular.completed && !regular.failed
     }
@@ -83,7 +88,15 @@ class SudokuController(
         if (isGenerating || importingBackup) return false
         isGenerating = true
         try {
-            // Preserve an in-memory daily session before switching puzzle types.
+            // Never reload an older regular_game snapshot over a more
+            // recent in-memory regular puzzle (which may still be queued).
+            game?.takeIf { !it.daily }?.let { active ->
+                if (active.completed || active.failed) return false
+                page = Screen.GAME
+                return true
+            }
+            // Switching away from the daily session must persist its latest
+            // board and Undo stack before loading the regular named snapshot.
             if (game?.daily == true && !checkpointBeforeSwitch()) return false
             val saved = readGame("regular_game") ?: return false
             if (saved.daily || saved.completed || saved.failed) return false
