@@ -77,19 +77,25 @@ class SudokuController(
     }
 
     suspend fun resumeRegularGame(): Boolean {
-        // A simultaneous puzzle generation or backup restore must not mutate
-        // the active session / Undo history while a checkpoint is suspended.
+        // The Resume action is also a suspendable session transition, not a
+        // simple read. Claim the same UI guard used by startNew() before
+        // checkpointing an active daily game.
         if (isGenerating || importingBackup) return false
-        // Preserve an in-memory daily session before switching puzzle types.
-        if (game?.daily == true && !checkpointBeforeSwitch()) return false
-        val saved = readGame("regular_game") ?: return false
-        if (saved.daily || saved.completed || saved.failed) return false
-        game = saved
-        undoHistory.clear()
-        undoHistory.addAll(readUndoHistory("regular_undo", saved))
-        page = Screen.GAME
-        saveGame()
-        return true
+        isGenerating = true
+        try {
+            // Preserve an in-memory daily session before switching puzzle types.
+            if (game?.daily == true && !checkpointBeforeSwitch()) return false
+            val saved = readGame("regular_game") ?: return false
+            if (saved.daily || saved.completed || saved.failed) return false
+            game = saved
+            undoHistory.clear()
+            undoHistory.addAll(readUndoHistory("regular_undo", saved))
+            page = Screen.GAME
+            saveGame()
+            return true
+        } finally {
+            isGenerating = false
+        }
     }
 
     fun go(destination: Screen) {
