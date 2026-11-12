@@ -1,3 +1,13 @@
+## 1.0.69 — čišći gameplay, sigurna podjela datoteka i dead-code audit
+
+- **Razdvojeni zasloni:** `Pages.kt` (preko 3.000 redaka) podijeljen je na sedam zaslonskih Kotlin datoteka; zajednički UI pomoćnici ostaju u `Pages.kt`. Izvorne Compose funkcije, test-tagovi i UI geometrija nisu namjerno mijenjani.
+- **Igra je sada modularnija:** `GamePage.kt`, `GameBoard.kt` i `GameControls.kt` odvajaju tok igre, interaktivnu mrežu i numeričku tipkovnicu. Podatkovni tipovi `Screen`, `Options`, `Session`, `Completed` i `Statistics` premješteni su u `SudokuModels.kt`.
+- **Odabir ćelije se trajno sprema:** svaka stvarna promjena odabranog polja raspoređuje jedan koalescirani autosave izvan glavne niti; ponovni pritisak iste ćelije ne pokreće zapis. Novi Android instrumentacijski test potvrđuje oporavak odabira iz diska i zaštitu pri pauzi.
+- **Responzivna mreža:** veličina znamenaka ograničava se raspoloživom širinom ćelija i skalom Android fonta. Ciljana veličina i dizajn na referentnom uređaju ostaju nepromijenjeni kada ima dovoljno prostora.
+- **Dead-code pregled:** provedena statička provjera 31 Kotlin datoteke glavnog izvornog koda, importova i privatnih deklaracija. Nisu potvrđeni dodatni sigurni kandidati za brisanje; automatsko uklanjanje živih Compose elemenata ili resursa nije rađeno. Detalji i nedovršeni dijelovi audita: `docs/gameplay-refactor-deadcode-v1.0.69.md`.
+- **Isporuka:** `versionName=1.0.69`, `versionCode=70`. Stvarna objava ovisi o CI, vizualnim testovima i publish provjeri. Bez izdavačkog ključa dopušteno je samo testno izdanje s nepotpisanim AAB-om.
+- **Ograničenje pixel QA:** 1:1 jednakost svih stvarnih zaslona i originalnih referenci još nije kvantitativno potvrđena; testovi rasporeda nisu dokaz apsolutnog odstupanja 0 %.
+
 ## 1.0.68 — manje diskovnih zapisa i pouzdaniji QA izvornog 3D dizajna
 
 - **Optimizacija Android pohrane:** svi autosave zapisi i dalje se izvršavaju izvan glavne Android niti. Novi procesno serijalizirani red spaja uzastopne automatske snimke iste SharedPreferences instance dok prethodni diskovni zapis još traje, što smanjuje nepotrebne `fsync` pozive tijekom brzog unošenja brojeva i bilješki.

@@ -67,13 +67,13 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 - **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
 - **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
-## 🚀 Novo u Sudoku v1.0.68
+## 🚀 Novo u Sudoku v1.0.69
 
-- **Još brži potezi i manje diskovnih zapisa** — uz pozadinsko spremanje sada se spajaju uzastopne automatske snimke, bez gubitka posljednjeg poteza ili obaveznih provjera trajnosti.
-- **Pouzdaniji nastavak partije** — redoslijed spremanja, statistika i Undo zaštićeni su od zastarjelih zapisa. Dodatno je uklonjen suvišni migracijski zapis koji je mogao izazvati utrku pri ponovnom učitavanju partije.
-- **Sigurnosne kopije bez zastajkivanja** — šifrirani izvoz i kontrola uvoza čekaju pohranu asinkrono, bez blokiranja zaslona.
-- **Pouzdanije stvarne snimke igre** — test razlikuje stvarni Android sistemski dijalog od svijetlog 3D Splash dizajna. Galerija prikazuje autentične emulatorske snimke, a ne generirane makete.
-- **Verifikacija izdanja** — GitHub izdanje sadrži APK, AAB i SHA256SUMS. Nepotpisani AAB nije paket za izravno izdavanje na Google Playu.
+- **Gameplay pamti posljednje odabrano polje** — promjene se spremaju izvan glavne Android niti, bez dodatnog diskovnog zapisa ako ponovno dotakneš isto polje.
+- **Pregledniji brojevi na uskim telefonima** — znamenke se prilagođavaju stvarnom prostoru i povećanom sustavnom fontu, a referentna tipografija ostaje gdje stane.
+- **Čišći i održiviji izvorni kod** — zasloni igre izdvojeni su u sedam samostalnih Compose datoteka; Sudoku ploča i tipkovnica odvojene su od upravljanja gameplayom, a modeli od kontrolera.
+- **Regresijska zaštita** — dodan je Android test trajnosti odabira ćelije; postojeći vizualni testovi i provjere stabilnosti ostaju sastavni dio CI-a.
+- **Dead-code pregled** — provjeren je izvorni kod 31 Kotlin datoteke; nijedna funkcionalna komponenta nije uklonjena samo zato što se čini nekorištenom. [Detaljan tehnički pregled](docs/gameplay-refactor-deadcode-v1.0.69.md).
 
 ## 📦 Instalacija i izdanje
 
