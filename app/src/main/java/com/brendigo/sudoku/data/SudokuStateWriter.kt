@@ -1,7 +1,6 @@
 package com.brendigo.sudoku.data
 
 import android.content.SharedPreferences
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +22,16 @@ internal object SudokuStateWriter {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val queueLock = Any()
     private var tail: Deferred<Boolean>? = null
+    private var pendingPreferences: SharedPreferences? = null
+    private var pendingState: SudokuDiskSnapshot? = null
+
+    /** In-process restoration while the ordered writer is still draining. */
+    fun pendingSnapshotFor(preferences: SharedPreferences): SudokuDiskSnapshot? =
+        synchronized(queueLock) {
+            pendingState.takeIf {
+                pendingPreferences === preferences && tail?.isCompleted == false
+            }
+        }
 
     fun enqueue(preferences: SharedPreferences, snapshot: SudokuDiskSnapshot) {
         submit(preferences, snapshot)
@@ -36,6 +45,8 @@ internal object SudokuStateWriter {
         snapshot: SudokuDiskSnapshot,
     ): Deferred<Boolean> = synchronized(queueLock) {
         val previous = tail
+        pendingPreferences = preferences
+        pendingState = snapshot
         scope.async {
             previous?.join()
             runCatching { write(preferences, snapshot) }.getOrDefault(false)
