@@ -129,7 +129,7 @@ class SudokuController(context: Context) {
         return saved.daily && saved.day == date && !saved.completed && !saved.failed
     }
 
-    fun resumeRegularGame(): Boolean {
+    suspend fun resumeRegularGame(): Boolean {
         // Preserve an in-memory daily session before switching puzzle types.
         if (game?.daily == true && !checkpointBeforeSwitch()) return false
         val saved = readGame("regular_game") ?: return false
@@ -163,11 +163,18 @@ class SudokuController(context: Context) {
         }
     }
 
-    /** Persist a just-entered move when Android moves the activity into background. */
-    fun flush(): Boolean {
+    /**
+     * Await an ordered durable checkpoint without blocking the calling thread.
+     * Every previously queued game/score update finishes before this snapshot.
+     */
+    suspend fun flush(): Boolean {
         if (importingBackup) return true
-        // A failed commit must prevent an export/restore from using older data.
-        return saveGame(synchronous = true)
+        return SudokuStateWriter.checkpoint(prefs, diskSnapshot())
+    }
+
+    /** onStop must never wait for a filesystem commit on the Android UI thread. */
+    fun flushInBackground() {
+        saveGame()
     }
 
     fun clearToast() {
@@ -179,10 +186,14 @@ class SudokuController(context: Context) {
      * Otherwise onStop() can race the imported SharedPreferences commit and
      * overwrite it with an older in-memory game.
      */
-    fun prepareForBackupRestore(): Boolean {
-        if (!flush()) return false
+    suspend fun prepareForBackupRestore(): Boolean {
+        if (importingBackup) return false
+        // Lock BEFORE suspension: onStop and other callbacks must not enqueue
+        // a stale snapshot while the restored archive is being committed.
         importingBackup = true
-        return true
+        val saved = SudokuStateWriter.checkpoint(prefs, diskSnapshot())
+        if (!saved) importingBackup = false
+        return saved
     }
 
     /** A failed import must not permanently disable autosaving. */
@@ -200,12 +211,12 @@ class SudokuController(context: Context) {
      * unavailable device storage. In that case the current session stays
      * playable and the user can retry after resolving the storage problem.
      */
-    private fun checkpointBeforeSwitch(): Boolean {
+    private suspend fun checkpointBeforeSwitch(): Boolean {
         if (importingBackup) {
             toast = "Povrat sigurnosne kopije je u tijeku. Pokušaj ponovno."
             return false
         }
-        if (game == null || saveGame(synchronous = true)) return true
+        if (game == null || flush()) return true
         toast = "Spremanje napretka nije uspjelo. Provjeri pohranu i pokušaj ponovno."
         return false
     }
@@ -224,6 +235,9 @@ class SudokuController(context: Context) {
             return
         }
         if (daily) {
+            // Pending background writes from an earlier daily session must
+            // finish before the named save is inspected for a Resume decision.
+            if (game?.daily == false && !checkpointBeforeSwitch()) return
             val saved = readGame("daily_game")
             if (saved != null && saved.daily && saved.day == date && !saved.completed && !saved.failed) {
                 if (game?.daily == false && !checkpointBeforeSwitch()) return
@@ -442,19 +456,11 @@ class SudokuController(context: Context) {
                 game = s.copy(notes = SudokuCandidates.automaticNotes(
                     s.board, s.size, s.boxRows, s.boxColumns
                 ))
-                saveGame()
             }
         }
-        prefs.edit().putString("options", JSONObject().apply {
-            put("dark", next.dark)
-            put("animations", next.animations)
-            put("autoNotes", next.autoNotes)
-            put("checkMistakes", next.checkMistakes)
-            put("highlightEquals", next.highlightEquals)
-            put("sound", next.sound)
-            put("vibration", next.vibration)
-            put("language", next.language)
-        }.toString()).apply()
+        // Include settings in the same ordered background snapshot as game
+        // and statistics, including when no puzzle has been started yet.
+        saveGame()
     }
 
     private fun rememberMove(session: Session, cell: Int) {
@@ -599,87 +605,31 @@ class SudokuController(context: Context) {
         return Statistics()
     }
 
-    /** Write stats alongside its game in a single SharedPreferences transaction. */
-    private fun writeStats(editor: SharedPreferences.Editor) {
-        val snapshot = JSONObject().apply {
-            put("played", stats.played)
-            put("finished", stats.finished)
-            put("totalSeconds", stats.totalSeconds)
-            put("totalPlayedSeconds", stats.totalPlayedSeconds)
-            put("best", stats.best)
-            put("streak", stats.streak)
-            put("bestStreak", stats.bestStreak)
-            put("lastDaily", stats.lastDaily)
-            put("flawless", stats.flawless)
-            put("dailyWins", stats.dailyWins)
-            put("dailyPoints", stats.dailyPoints)
-            put("completedDailyDates", JSONArray(stats.completedDailyDates))
-            put("noHintWins", stats.noHintWins)
-            put("fastWins", stats.fastWins)
-            put("longWins", stats.longWins)
-            put("winsBySize", JSONArray(stats.winsBySize))
-            put("levels", JSONArray(stats.winsByLevel))
-            put("history", JSONArray().apply {
-                stats.history.forEach { entry ->
-                    put(JSONObject().apply {
-                        put("level", entry.level)
-                        put("size", entry.size)
-                        put("seconds", entry.seconds)
-                        put("date", entry.date)
-                        put("daily", entry.daily)
-                        put("hints", entry.hints)
-                    })
-                }
-            })
-        }.toString()
-        editor.putString("stats", snapshot)
-        editor.putString("stats_backup", snapshot)
-    }
+    /**
+     * Copy mutable board arrays on the caller thread; encode JSON and commit
+     * on the process-wide IO writer. The snapshot is safe even when the
+     * player immediately starts another puzzle or edits more cells.
+     */
+    private fun diskSnapshot(): SudokuDiskSnapshot = SudokuDiskSnapshot(
+        session = game?.let { current ->
+            current.copy(
+                solution = current.solution.copyOf(),
+                givens = current.givens.copyOf(),
+                board = current.board.copyOf(),
+                notes = current.notes.copyOf(),
+            )
+        },
+        statistics = stats,
+        options = options,
+        moves = undoHistory.map { move ->
+            SudokuDiskMove(move.cell, move.oldValue, move.oldNotes)
+        },
+    )
 
-    private fun saveGame(synchronous: Boolean = false): Boolean {
+    private fun saveGame(): Boolean {
         if (importingBackup) return true
-        val s = game ?: return true
-        val snapshot = JSONObject().apply {
-            put("size", s.size)
-            put("boxRows", s.boxRows)
-            put("boxColumns", s.boxColumns)
-            put("level", s.level)
-            put("solution", JSONArray(s.solution.toList()))
-            put("givens", JSONArray(s.givens.toList()))
-            put("board", JSONArray(s.board.toList()))
-            put("notes", JSONArray(s.notes.toList()))
-            put("selected", s.selected)
-            put("elapsed", s.elapsed)
-            put("mistakes", s.mistakes)
-            put("hints", s.hints)
-            put("notesMode", s.notesMode)
-            put("paused", s.paused)
-            put("daily", s.daily)
-            put("day", s.day)
-            put("completed", s.completed)
-            put("failed", s.failed)
-        }.toString()
-        val history = JSONArray().apply {
-            undoHistory.forEach { move ->
-                put(JSONObject().apply {
-                    put("cell", move.cell)
-                    put("value", move.oldValue)
-                    put("notes", move.oldNotes)
-                })
-            }
-        }.toString()
-        val editor = prefs.edit().putString("game", snapshot).putString("undo", history)
-        // The game result, score, streak and history are atomically committed.
-        // A process death can no longer persist the reward without the win.
-        writeStats(editor)
-        if (s.daily) editor.putString("daily_game", snapshot).putString("daily_undo", history)
-        else editor.putString("regular_game", snapshot).putString("regular_undo", history)
-        return runCatching {
-            if (synchronous) editor.commit() else {
-                editor.apply()
-                true
-            }
-        }.getOrDefault(false)
+        SudokuStateWriter.enqueue(prefs, diskSnapshot())
+        return true
     }
 
     private fun readGame(key: String = "game"): Session? {
