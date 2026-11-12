@@ -41,6 +41,9 @@ jobs:
           bash -n scripts/verify-release-assets.sh
           bash -n scripts/test_verify_release_assets.sh
           bash scripts/test_verify_release_assets.sh
+          bash -n scripts/reconcile-release-classification.sh
+          bash -n scripts/test_release_classification.sh
+          bash scripts/test_release_classification.sh
       - name: Unit tests
         run: gradle --no-daemon :app:testDebugUnitTest
       - name: Pixel QA metric regression tests

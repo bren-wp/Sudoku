@@ -1,3 +1,12 @@
+## 1.0.65 — sigurnost klasifikacije GitHub izdanja
+
+- **Popravak release metapodataka:** kontrola sada pregledava sva objavljena GitHub izdanja umjesto samo najnovijeg taga. Svako izdanje s AAB-om naziva `*-unsigned.aab` mora biti označeno kao `prerelease`; nakon popravka ponovno se čita stvarno stanje API-ja.
+- **Otpornost na kasnije promjene:** provjera se pokreće pri objavi i uređivanju izdanja, završetku publish workflowa, promjeni kontrolne skripte te periodično svakoga sata. Naknadna pogrešna klasifikacija zato se može automatski otkriti i ispraviti.
+- **Regresijski testovi:** offline test pokriva pogrešno označen AAB, očuvanje stabilnoga potpisanog izdanja, neuspjeli PATCH i naknadno vraćanje pogrešne oznake prije završne provjere.
+- **Identitet aplikacije:** `applicationId=com.brendigo.sudoku`, `minSdk=26`, `targetSdk=36` i postojeća pravila spremanja podataka ostaju nepromijenjeni.
+- **Isporuka:** `versionName=1.0.65`, `versionCode=66`; produkcijsko potpisivanje ovisi o prethodno konfiguriranom službenom ključu. Bez ključa release mora ostati testni s nepotpisanim AAB-om.
+- **Preostalo:** potpuni 1:1 vizualni QA, sigurnosni audit, audit mrtvoga koda, performanse i instrumentacijski testovi nisu obuhvaćeni ovim ciljanim popravkom i ostaju otvoreni prema master planu.
+
 ## 1.0.64 — Google Play, prilagodba zaslona i provjerene Android snimke
 
 - **Google Play:** README sada sadrži klikabilnu hrvatsku Google Play značku i zasebno klikabilnu ikonicu Sudoku aplikacije. Obje vode na izravnu poveznicu `https://play.google.com/store/apps/details?id=com.brendigo.sudoku`. Izvorna SVG značka čuva se neizmijenjena u `branding/google-play-hr.svg`, uz bilješku o Googleovu zaštitnom znaku.

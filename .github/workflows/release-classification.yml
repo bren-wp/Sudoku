@@ -1,66 +1,44 @@
 name: Verify Sudoku release classification
 
-# Release metadata may change after Publish completes. This independent,
-# trusted main-branch reconciliation prevents an unsigned Android App Bundle
-# from being advertised as a production-ready release.
+# Independently reconcile unsigned releases even after later metadata edits.
+# Github-token-authored edits do not reliably emit additional release events.
 on:
   workflow_run:
     workflows: ["Publish Sudoku release"]
     types: [completed]
-  # Catch manual release edits as well as publish workflow completion.
-  # Avoid an edit loop: we PATCH only when an unsigned tag is not prerelease.
   release:
     types: [published, edited]
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-classification.yml"
+      - "scripts/reconcile-release-classification.sh"
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: sudoku-release-classification
+  cancel-in-progress: false
+
 jobs:
   classify:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'release' &&
-       github.event.release.draft == false) ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
-      RELEASE_EVENT_TAG: ${{ github.event.release.tag_name || '' }}
     steps:
       - name: Checkout trusted main
         uses: actions/checkout@v4
         with:
           ref: main
           persist-credentials: false
-      - name: Enforce test-release classification for unsigned bundles
+      - name: Reconcile all published unsigned-AAB releases
         shell: bash
         run: |
           set -euo pipefail
-          version="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n 1)"
-          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          tag="${RELEASE_EVENT_TAG:-v$version}"
-          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          release="$(gh api "repos/$REPO/releases/tags/$tag")"
-          id="$(jq -r '.id' <<< "$release")"
-          assets="$(jq -r '.assets[].name' <<< "$release")"
-          if grep -Fq -- '-unsigned.aab' <<< "$assets"; then
-            if [[ "$(jq -r '.prerelease' <<< "$release")" != true ]]; then
-              # Repairs an older release manually relabelled as stable.
-              gh api --method PATCH "repos/$REPO/releases/$id" -F prerelease=true --silent
-            fi
-            # Always re-read real release metadata: never infer signature
-            # readiness from a tag name, an earlier run, or branch state.
-            actual="$(gh api "repos/$REPO/releases/tags/$tag" --jq '.prerelease')"
-            test "$actual" = true || {
-              echo "::error::Unsigned $tag is not classified as prerelease"
-              exit 1
-            }
-            echo "Unsigned $tag correctly classified as prerelease."
-          else
-            echo "No unsigned AAB for $tag; no metadata mutation required."
-          fi
+          bash scripts/reconcile-release-classification.sh "$REPO"
