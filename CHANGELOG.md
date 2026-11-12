@@ -1,3 +1,13 @@
+## 1.0.70 — zaštita gameplay sesija i trajnosti posljednjeg poteza
+
+- **Dvostruki zahtjevi:** `startNew()` zaključava prijelaz prije prvog suspendabilnog checkpointa, uključujući pokušaj nastavka dnevnog izazova. Dodatni pritisak ne može paralelno pokrenuti drugu partiju niti poduplati statistiku.
+- **Resume i restore:** `resumeRegularGame()` koristi isti guard i uvijek ga oslobađa putem `finally`; pokretanje tijekom povrata šifrirane kopije se odbija.
+- **Bez zastarjelog vraćanja:** aktivna redovna partija se ne prepisuje starijim `regular_game` podatkom s diska; dovršena ili neuspjela redovna igra ne nudi se za nastavak dok IO commit kasni.
+- **Diskovna optimizacija:** uklonjen drugi, nepotrebni checkpoint prije učitavanja postojećeg dnevnog izazova. Serijalizirani pozadinski IO i izvorni SharedPreferences format ostaju nepromijenjeni.
+- **Instrumentacijski testovi:** `SudokuTransitionSerializationTest` s četiri failure-injection scenarija za blokirani `commit()`, konkurentne zahtjeve, zastarjele snimke i trajnost statistike.
+- **Vizualni QA i dead-code:** izvorni Compose zasloni, 3D ilustracije i test-tagovi ostaju netaknuti. Ovaj ciljani popravak ne dokazuje punu 1:1 jednakost niti zamjenjuje sveobuhvatni R8, SBOM/CVE i fizički Android audit.
+- **Izdanje:** `versionName=1.0.70`, `versionCode=71`. GitHub Release s testnim APK-om, nepotpisanim AAB-om i SHA256SUMS dopušten je tek nakon zelenih CI i vizualnih testova; bez publisher potpisa izdanje ostaje `prerelease`. Dokumentacija: `docs/gameplay-transition-audit-v1.0.70.md`.
+
 ## 1.0.69 — čišći gameplay, sigurna podjela datoteka i dead-code audit
 
 - **Razdvojeni zasloni:** `Pages.kt` (preko 3.000 redaka) podijeljen je na sedam zaslonskih Kotlin datoteka; zajednički UI pomoćnici ostaju u `Pages.kt`. Izvorne Compose funkcije, test-tagovi i UI geometrija nisu namjerno mijenjani.
