@@ -438,45 +438,39 @@ class SudokuVisualSmokeTest {
         check(device.findObject(By.textContains("Viewing full screen")) == null) {
             "The Android immersive disclosure obscures the screenshot"
         }
-        var screenshot = instrumentation.uiAutomation.takeScreenshot()
-            ?: error("Emulator did not return a screenshot")
-        // The launcher may briefly show an Android ANR dialog even when the app
-        // itself is healthy. Only dismiss a visible system-owned dialog, then
-        // wait and re-capture. Never skip failures inside our own app.
-        fun modalSamples(image: Bitmap): Int {
-            val points = listOf(
-                .35f to .10f, .50f to .10f, .65f to .10f,
-                .35f to .49f, .50f to .45f, .50f to .50f,
-                .50f to .55f, .65f to .49f
-            )
-            return points.count { (rx, ry) ->
-                val pixel = image.getPixel(
-                    (image.width * rx).toInt(), (image.height * ry).toInt()
-                )
-                android.graphics.Color.red(pixel) > 208 &&
-                    android.graphics.Color.green(pixel) > 208 &&
-                    android.graphics.Color.blue(pixel) > 208
+        // A bright logo, glass card or white glow belongs to Sudoku's
+        // original 3D design. RGB brightness alone is *not* evidence of an
+        // Android system modal; older pixel-sampling heuristics rejected valid
+        // Splash captures while no ANR dialog was present.
+        fun systemAnrTitle() =
+            device.findObject(By.textContains("isn't responding"))
+                ?: device.findObject(By.textContains("is not responding"))
+                ?: device.findObject(By.textContains("isn’t responding"))
+                ?: device.findObject(By.textContains("ne reagira"))
+
+        if (systemAnrTitle() != null) {
+            // Only act on a verified OS ANR prompt, and prefer Wait rather
+            // than terminating the app being tested.
+            val waitButton = device.findObject(By.text("Wait"))
+                ?: device.findObject(By.text("Pričekaj"))
+            check(waitButton != null) {
+                "Android system ANR dialog obscures $name without a Wait action"
             }
-        }
-        var brightSamples = modalSamples(screenshot)
-        if (brightSamples >= 3) {
-            val button = device.findObject(By.text("Close app"))
-                ?: device.findObject(By.textContains("Close app"))
-                ?: device.findObject(By.text("Wait"))
-            check(button != null) {
-                "Light system overlay obscures $name, but no system ANR action was found"
-            }
-            button.click()
+            waitButton.click()
             Thread.sleep(900)
             instrumentation.waitForIdleSync()
-            screenshot.recycle()
-            screenshot = instrumentation.uiAutomation.takeScreenshot()
-                ?: error("Emulator did not return a screenshot after dialog")
-            brightSamples = modalSamples(screenshot)
+            check(systemAnrTitle() == null) {
+                "Android system ANR dialog still obscures $name"
+            }
         }
-        check(brightSamples < 3) {
-            "System overlay or launcher ANR still obscures $name: $brightSamples"
+        // A different foreground package indicates a real external overlay
+        // rather than legitimate bright pixels in our Compose artwork.
+        val foregroundPackage = device.currentPackageName
+        check(foregroundPackage == null || foregroundPackage == rule.activity.packageName) {
+            "Unexpected foreground package $foregroundPackage obscures $name"
         }
+        val screenshot = instrumentation.uiAutomation.takeScreenshot()
+            ?: error("Emulator did not return a screenshot")
         val resolver = rule.activity.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, "$name.png")
