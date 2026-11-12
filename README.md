@@ -67,10 +67,10 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 - **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
 - **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
-## 🚀 Novo u Sudoku v1.0.66
+## 🚀 Novo u Sudoku v1.0.67
 
 - **Brži unos brojeva i bilješki** — spremanje i obrada lokalnih podataka odvijaju se izvan glavne Android niti, uz očuvanu provjeru trajnog zapisa.
-- **Pouzdaniji nastavak partije** — redoslijed spremanja, statistika, Undo i Android životni ciklus zaštićeni su od zastarjelih zapisa.
+- **Pouzdaniji nastavak partije** — redoslijed spremanja, statistika i Undo zaštićeni su od zastarjelih zapisa. Dodatno je uklonjen suvišni migracijski zapis koji je mogao izazvati utrku pri ponovnom učitavanju partije.
 - **Sigurnosne kopije bez zastajkivanja** — šifrirani izvoz i kontrola uvoza čekaju pohranu asinkrono, bez blokiranja zaslona.
 - **Stvarne snimke igre** — galerija prikazuje autentične Android zaslone, a ne generirane makete; dizajn i 3D identitet ostaju očuvani.
 - **Verifikacija izdanja** — GitHub izdanje sadrži APK, AAB i SHA256SUMS. Nepotpisani AAB nije paket za izravno izdavanje na Google Playu.
