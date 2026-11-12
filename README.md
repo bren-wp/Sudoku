@@ -67,6 +67,13 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 - **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
 - **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
+## 🚀 Novo u Sudoku v1.0.64
+
+- **Precizniji Dnevni izazov** — pravilno raspoređen sedmodnevni kalendar na velikim i malim Android zaslonima.
+- **Čitljivija Statistika** — pametno slaganje kartica postignuća, bez gubitka informacija.
+- **Google Play na jedan dodir** — hrvatska značka i ikonica vode izravno na stranicu Sudoku by Brendigo.
+- **Provjerljive snimke aplikacije** — svih osam slika generirano je stvarnim Android emulatorskim prikazom; ne koriste se AI makete.
+
 ## 📦 Instalacija i izdanje
 
 <a href="https://play.google.com/store/apps/details?id=com.brendigo.sudoku" title="Sudoku by Brendigo na Google Playu"><img src="branding/google-play-hr.svg" alt="Preuzmi Sudoku na Google Playu" height="60"></a>
@@ -92,7 +99,7 @@ Sudoku radi lokalno, bez prijave, oglasa, obveznog računa ili pristupa internet
 
 ## 🎨 Dizajn i kvaliteta
 
-Sučelje je izrađeno nativnim Android/Jetpack Compose komponentama, a galerija prikazuje stvarne emulatorske snimke zaslona. Izvorne korisnikove dizajnerske reference služe za daljnje pixel-by-pixel provjere. **Potpuna 1:1 podudarnost još nije potvrđena**, a rezultati mjerenja javno su dokumentirani u [pixel-QA izvještaju](docs/pixel-qa-v1.0.63.md).
+Sučelje je izrađeno nativnim Android/Jetpack Compose komponentama, a galerija prikazuje stvarne emulatorske snimke zaslona. Izvorne korisnikove dizajnerske reference služe za daljnje pixel-by-pixel provjere. **Potpuna 1:1 podudarnost još nije potvrđena**, a rezultati mjerenja javno su dokumentirani u [pixel-QA izvještaju](docs/pixel-qa-v1.0.64.md).
 
 Za tehničke upute i provjere kvalitete pogledaj [razvojnu dokumentaciju](docs/DEVELOPMENT.md) i [povijest izmjena](CHANGELOG.md).
 

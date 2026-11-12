@@ -1,3 +1,14 @@
+## 1.0.64 — Google Play, prilagodba zaslona i provjerene Android snimke
+
+- **Google Play:** README sada sadrži klikabilnu hrvatsku Google Play značku i zasebno klikabilnu ikonicu Sudoku aplikacije. Obje vode na izravnu poveznicu `https://play.google.com/store/apps/details?id=com.brendigo.sudoku`. Izvorna SVG značka čuva se neizmijenjena u `branding/google-play-hr.svg`, uz bilješku o Googleovu zaštitnom znaku.
+- **Dnevni izazov:** tjedni kalendar raspoređuje sedam dana u jednako široke stupce i prilagođava veličinu oznaka dostupnoj širini. Time se sprječava preklapanje fiksnih kružnica na uskim zaslonima, uz očuvanje referentnog izgleda na standardnoj širini.
+- **Statistika:** četiri prikaza nagrada u jednome retku čuvaju se pri normalnoj širini, dok na užim uređajima prelaze u 2×2 prikaz radi čitljivosti teksta, ikona i napretka. Statistički podaci nisu zamijenjeni demonstracijskim vrijednostima.
+- **Testovi:** dodatni Android instrumentacijski test uspoređuje stvarne granice sedmodnevnog kalendara i četiri kartice nagrada u oba oblika. Suženi emulatorski profil izvršava i ovaj test. Android unit testovi, lint, pixel-QA regresijski testovi te APK/AAB build prošli su na funkcionalnom commitu.
+- **Stvarni screenshotovi:** GitHub Actions `Refresh Sudoku marketing screenshots` regenerirao je osam stvarnih emulatorskih snimki pri 941×1672 px te su ažurirane WebP datoteke u `docs/screenshots`. README ih prikazuje kao snimke aplikacije, ne kao generirane koncepte.
+- **Pixel QA:** izvorni PNG-ovi ostaju mjerilo; promjena ukupnog RGB MAE za Dnevni izazov na istom emulatorskom formatu iznosila je 24,7852 → 24,7777 (skala 0–255). To nije postotak, a dio promjena nastaje iz stvarnog datuma i stanja partije. Sve izmjerene vrijednosti i ograničenja nalaze se u `docs/pixel-qa-v1.0.64.md`; ne tvrdi se potpuno 1:1 podudaranje.
+- **Sigurnost izdanja:** release-classification workflow provjerava i ručno uređena/objavljena GitHub izdanja, tako da AAB bez izdavačkog potpisa ne smije ostati predstavljen kao produkcijski stable release.
+- **Verzija:** `versionName=1.0.64`, `versionCode=65`. `applicationId=com.brendigo.sudoku`, minSdk 26 i targetSdk 36 ostaju nepromijenjeni. Ako postojeći odgovarajući izdavački keystore nije konfiguriran, GitHub isporučuje testni APK i nepotpisani AAB kao `prerelease`; to nije Google Play potpisano izdanje.
+
 ## 1.0.63 — responzivni Android UI, izvorne snimke i mjerljivi pixel QA
 
 - Nastavljen rad isključivo izravno na grani **main**, bez novog PR-a, uz očuvan identitet aplikacije `com.brendigo.sudoku`, `minSdk=26` i `targetSdk=36`.
