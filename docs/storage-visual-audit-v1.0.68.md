@@ -30,6 +30,7 @@
 
 - Stari `Deferred` lanac zamijenjen je jednim redom s jasno odvojenom `enqueue()` i `checkpoint()` granom; uklonjeni su bespotrebni `Deferred` i `async` importi.
 - U vizualnom testu uklonjeni su pomoćna RGB heuristika i ponovljeni screenshot poslije lažne detekcije ANR-a; sada se ANR može obraditi samo temeljem vidljivog teksta sistemskog dijaloga.
+- Statički je pregledana **21 Kotlin datoteka** glavnog izvornog koda (podatkovni sloj, engine i Compose). Uklonjeno je sedam potvrđeno nekorištenih importova: `Stroke` iz AchievementVisuals; `drawIntoCanvas`, `nativeCanvas`, `selected`, `DpSize` iz DailyVisuals; `Options` iz Pages; `fillMaxSize` iz StatisticsVisuals. Uvezeni `getValue`/`setValue` zadržani su jer omogućuju Kotlin property delegation, unatoč tome što se ne pojavljuju kao doslovni pozivi u izvoru.
 - Nisu uklanjani Compose elementi ni resursi na temelju nepouzdane tekstualne pretrage.
 - Za potpuni audit svih transitive dependencyja, R8 reachabilityja i neupotrebljenih sredstava nužni su Android lint, gradle dependencies i analiza rezultata CI-a. **Ne tvrdi se da je cjelokupni dead-code audit dovršen.**
 
