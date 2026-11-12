@@ -92,21 +92,30 @@ class SudokuController(context: Context) {
         private set
     // Each game type has its own save. Recover from a valid named snapshot if
     // the legacy shared snapshot was missing or damaged.
+    // Activity recreation may happen before queued IO finishes. Prefer the
+    // newest in-process state over an older on-disk snapshot in that case.
+    private val pendingState = SudokuStateWriter.pendingSnapshotFor(prefs)
     private val restoredGame = SavedGameRecovery.choose(
-        readGame("game"), readGame("regular_game"), readGame("daily_game"),
+        pendingState?.session ?: readGame("game"),
+        readGame("regular_game"), readGame("daily_game"),
         LocalDate.now(),
     )
     var game by mutableStateOf(restoredGame.session)
         private set
-    var stats by mutableStateOf(readStats())
+    var stats by mutableStateOf(pendingState?.statistics ?: readStats())
         private set
-    var options by mutableStateOf(readOptions())
+    var options by mutableStateOf(pendingState?.options ?: readOptions())
         private set
     var isGenerating by mutableStateOf(false)
         private set
     var toast by mutableStateOf("")
         private set
-    private val undoHistory = readUndoHistory(restoredGame.undoKey, game)
+    private val undoHistory = if (pendingState?.session === restoredGame.session &&
+        restoredGame.undoKey == "undo") {
+        ArrayDeque<Move>().apply {
+            pendingState.moves.forEach { addLast(Move(it.cell, it.oldValue, it.oldNotes)) }
+        }
+    } else readUndoHistory(restoredGame.undoKey, game)
     private var settingsOrigin = Screen.HOME
     private var importingBackup = false
 
