@@ -32,9 +32,11 @@ import kotlinx.coroutines.delay
 class MainActivity : ComponentActivity() {
     private lateinit var sudoku: SudokuController
 
-    override fun onStop() {
-        sudoku.flush()
-        super.onStop()
+    override fun onPause() {
+        // Runs before the replacement Activity is created; onStop can be
+        // delivered later and would risk enqueuing an obsolete save.
+        sudoku.flushInBackground()
+        super.onPause()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

@@ -67,12 +67,13 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 - **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
 - **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
-## 🚀 Novo u Sudoku v1.0.64
+## 🚀 Novo u Sudoku v1.0.66
 
-- **Precizniji Dnevni izazov** — pravilno raspoređen sedmodnevni kalendar na velikim i malim Android zaslonima.
-- **Čitljivija Statistika** — pametno slaganje kartica postignuća, bez gubitka informacija.
-- **Google Play na jedan dodir** — hrvatska značka i ikonica vode izravno na stranicu Sudoku by Brendigo.
-- **Provjerljive snimke aplikacije** — svih osam slika generirano je stvarnim Android emulatorskim prikazom; ne koriste se AI makete.
+- **Brži unos brojeva i bilješki** — spremanje i obrada lokalnih podataka odvijaju se izvan glavne Android niti, uz očuvanu provjeru trajnog zapisa.
+- **Pouzdaniji nastavak partije** — redoslijed spremanja, statistika, Undo i Android životni ciklus zaštićeni su od zastarjelih zapisa.
+- **Sigurnosne kopije bez zastajkivanja** — šifrirani izvoz i kontrola uvoza čekaju pohranu asinkrono, bez blokiranja zaslona.
+- **Stvarne snimke igre** — galerija prikazuje autentične Android zaslone, a ne generirane makete; dizajn i 3D identitet ostaju očuvani.
+- **Verifikacija izdanja** — GitHub izdanje sadrži APK, AAB i SHA256SUMS. Nepotpisani AAB nije paket za izravno izdavanje na Google Playu.
 
 ## 📦 Instalacija i izdanje
 
