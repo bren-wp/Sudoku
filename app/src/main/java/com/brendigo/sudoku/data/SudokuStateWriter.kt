@@ -1,11 +1,11 @@
 package com.brendigo.sudoku.data
 
 import android.content.SharedPreferences
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -21,36 +21,82 @@ import org.json.JSONObject
 internal object SudokuStateWriter {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val queueLock = Any()
-    private var tail: Deferred<Boolean>? = null
-    private var pendingPreferences: SharedPreferences? = null
-    private var pendingState: SudokuDiskSnapshot? = null
 
-    /** In-process restoration while the ordered writer is still draining. */
+    // Save bursts can otherwise enqueue dozens of expensive fsync() calls
+    // during rapid keypad interaction. Keep the latest queued auto-save; never
+    // combine two durable checkpoints or replace an in-flight disk commit.
+    private class WriteRequest(
+        val preferences: SharedPreferences,
+        var snapshot: SudokuDiskSnapshot,
+        val checkpoint: CompletableDeferred<Boolean>? = null,
+    )
+
+    private val queue = ArrayDeque<WriteRequest>()
+    private var active: WriteRequest? = null
+    private var draining = false
+
+    /**
+     * Read only the newest not-yet-written data for a real Activity recreate.
+     * The caller opts in explicitly; a fresh controller reads disk instead.
+     */
     fun pendingSnapshotFor(preferences: SharedPreferences): SudokuDiskSnapshot? =
         synchronized(queueLock) {
-            pendingState.takeIf {
-                pendingPreferences === preferences && tail?.isCompleted == false
-            }
+            queue.lastOrNull { it.preferences === preferences }?.snapshot
+                ?: active?.takeIf { it.preferences === preferences }?.snapshot
         }
 
     fun enqueue(preferences: SharedPreferences, snapshot: SudokuDiskSnapshot) {
-        submit(preferences, snapshot)
+        synchronized(queueLock) {
+            val latest = queue.lastOrNull()
+            if (latest != null && latest.checkpoint == null &&
+                latest.preferences === preferences) {
+                latest.snapshot = snapshot
+            } else {
+                queue.addLast(WriteRequest(preferences, snapshot))
+            }
+            startDrainingLocked()
+        }
     }
 
-    suspend fun checkpoint(preferences: SharedPreferences, snapshot: SudokuDiskSnapshot): Boolean =
-        submit(preferences, snapshot).await()
+    /**
+     * Never conflate an explicit durability barrier with a later auto-save.
+     * All older writes finish first and this exact snapshot is committed.
+     */
+    suspend fun checkpoint(preferences: SharedPreferences, snapshot: SudokuDiskSnapshot): Boolean {
+        val completion = CompletableDeferred<Boolean>()
+        synchronized(queueLock) {
+            queue.addLast(WriteRequest(preferences, snapshot, completion))
+            startDrainingLocked()
+        }
+        return completion.await()
+    }
 
-    private fun submit(
-        preferences: SharedPreferences,
-        snapshot: SudokuDiskSnapshot,
-    ): Deferred<Boolean> = synchronized(queueLock) {
-        val previous = tail
-        pendingPreferences = preferences
-        pendingState = snapshot
-        scope.async {
-            previous?.join()
-            runCatching { write(preferences, snapshot) }.getOrDefault(false)
-        }.also { tail = it }
+    /** Must only be called while holding queueLock. */
+    private fun startDrainingLocked() {
+        if (draining) return
+        draining = true
+        scope.launch {
+            while (true) {
+                val item = synchronized(queueLock) {
+                    if (queue.isEmpty()) {
+                        draining = false
+                        active = null
+                        null
+                    } else {
+                        queue.removeFirst().also { active = it }
+                    }
+                } ?: break
+                // Individual IO failures must not kill the worker or strand
+                // later checkpoints; return false to the waiting operation.
+                val saved = runCatching {
+                    write(item.preferences, item.snapshot)
+                }.getOrDefault(false)
+                synchronized(queueLock) {
+                    if (active === item) active = null
+                }
+                item.checkpoint?.complete(saved)
+            }
+        }
     }
 
     private fun write(prefs: SharedPreferences, state: SudokuDiskSnapshot): Boolean {
