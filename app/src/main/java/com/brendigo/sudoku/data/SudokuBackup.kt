@@ -281,8 +281,10 @@ object SudokuBackup {
                     notes.getInt(i) and ((1 shl (size + 1)) - 2).inv() != 0
             }
         ) throw IOException("Sudoku igra nije valjana.")
-        if (game.optBoolean("completed") && !current.contentEquals(solution))
+        if (game.optBoolean("completed") &&
+            (game.optBoolean("failed") || !current.contentEquals(solution))) {
             throw IOException("Dovršena igra nema valjano rješenje.")
+        }
         val daily = game.optBoolean("daily")
         if ((key == "daily_game" && !daily) || (key == "regular_game" && daily))
             throw IOException("Pogrešna vrsta spremljene igre.")
