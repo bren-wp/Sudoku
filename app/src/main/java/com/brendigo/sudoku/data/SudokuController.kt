@@ -84,7 +84,10 @@ data class Session(
 
 private data class Move(val cell: Int, val oldValue: Int, val oldNotes: Int)
 
-class SudokuController(context: Context) {
+class SudokuController(
+    context: Context,
+    restorePendingInProcess: Boolean = false,
+) {
     companion object { const val MAX_HINTS = 3 }
     private val prefs: SharedPreferences =
         context.applicationContext.getSharedPreferences("sudoku_state_v1", Context.MODE_PRIVATE)
@@ -94,7 +97,8 @@ class SudokuController(context: Context) {
     // the legacy shared snapshot was missing or damaged.
     // Activity recreation may happen before queued IO finishes. Prefer the
     // newest in-process state over an older on-disk snapshot in that case.
-    private val pendingState = SudokuStateWriter.pendingSnapshotFor(prefs)
+    private val pendingState = if (restorePendingInProcess)
+        SudokuStateWriter.pendingSnapshotFor(prefs) else null
     private val restoredGame = SavedGameRecovery.choose(
         pendingState?.session ?: readGame("game"),
         readGame("regular_game"), readGame("daily_game"),
@@ -122,7 +126,9 @@ class SudokuController(context: Context) {
     init {
         // Migrate the in-progress classic game created by versions <= 1.0.3
         // before switching between a normal game and the daily challenge.
-        if (game?.daily == false) saveGame()
+        // A fresh controller must never re-save an already migrated puzzle.
+        // The old unconditional write could race later recovery/restore IO.
+        if (game?.daily == false && !prefs.contains("regular_game")) saveGame()
     }
 
     fun hasSavedRegularGame(): Boolean {
