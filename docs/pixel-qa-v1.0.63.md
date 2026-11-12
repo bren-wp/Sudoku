@@ -54,3 +54,22 @@ ROI koordinate odnose se na snimke 941×1672 px. Mjereni su stvarni PNG-ovi prij
 4. Prolazak unit testova ili screenshot capture workflowa ne dokazuje 0% odstupanja; status svih 11 profila provjerava se zasebno kroz Android visual smoke.
 
 **Zaključak:** ostvarena je lokalna, mjerljiva korekcija pozadine i poboljšanje responzivnosti. Potpuna 1:1 jednakost i 0% odstupanja nisu postignuti.
+
+## Završna provjera objavljenih WebP zaslona
+
+Nakon što je `v1.0.63` izrađen, [marketing workflow #43123927101](https://github.com/bren-wp/Sudoku/actions/runs/43123927101) još je jednom izvezao **stvarne Android PNG-ove** iz završnog izvornog commita `0a5cf51` i osvježio `docs/screenshots/*.webp`. Nove su snimke uspoređene s istih 10 SHA-256 provjerenih vlasnikovih referenci, bez promjene dimenzija ili skaliranja.
+
+| Zaslon | Završni RGB MAE / 255 |
+| --- | ---: |
+| Naslovnica sa spremljenom igrom | 24,1152 |
+| Nova igra | 22,6224 |
+| Aktivna igra | 20,2383 |
+| Postavke | 19,4239 |
+| Dnevni izazov | 24,7852 |
+| Statistika | 26,5834 |
+| Postignuća | 29,8627 |
+| Splash | 10,3842 |
+| Wordmark (samo RGB) | 18,8339 |
+| Launcher foreground (samo RGB) | 16,1747 |
+
+Mala razlika završnog globalnog rezultata Dnevnog izazova (24,7803 → 24,7852) između dvije emulatorske serije uključuje dinamičko stanje i ponovno snimanje. To nije dovoljan dokaz vizualne regresije. Lokalni test spoja planinskog krajolika i dalje pokazuje poboljšanje iz prethodne tablice. Potpuna 1:1 podudarnost nije dokazana.
