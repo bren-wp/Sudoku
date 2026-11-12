@@ -74,7 +74,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sudoku = SudokuController(applicationContext)
+        sudoku = SudokuController(
+            applicationContext,
+            restorePendingInProcess = savedInstanceState != null,
+        )
         when (savedInstanceState?.getString("sudoku.active_screen")) {
             Screen.NEW_GAME.name -> sudoku.go(Screen.NEW_GAME)
             Screen.GAME.name -> if (sudoku.game != null) sudoku.go(Screen.GAME)

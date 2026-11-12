@@ -76,6 +76,11 @@ class SudokuAsyncPersistenceTest {
                 controller.select(cells[1])
                 controller.enter(puzzle.solution[cells[1]])
             }
+            // Only an actual Activity recreation may opt into the in-process
+            // pending snapshot, never a fresh validation/recovery controller.
+            val recreated = SudokuController(isolated, restorePendingInProcess = true)
+            assertEquals(puzzle.solution[cells[0]], requireNotNull(recreated.game).board[cells[0]])
+            assertEquals(puzzle.solution[cells[1]], requireNotNull(recreated.game).board[cells[1]])
             slow.releaseCommit.countDown()
             assertTrue("Final durable checkpoint failed", controller.flush())
             assertFalse("A disk commit ran on the Android main thread", slow.wroteOnMain.get())

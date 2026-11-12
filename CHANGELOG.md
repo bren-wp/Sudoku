@@ -1,3 +1,11 @@
+## 1.0.67 — hitni ispravak migracije i oporavka partije
+
+- **Popravljen regresijski test `tablet-shard-2`:** analiza stvarnog Android JUnit izvještaja izdvojila je neuspjeh `SudokuSavedGameRecoveryTest.forgedCompletedFlagCannotHideAValidRegularSaveOrFreezeAnUnsolvedBoard`. Uzrok: kontroler je pri svakom učitavanju postojećeg normalnog zapisa pokretao novi pozadinski zapis i mogao prebrisati naknadno korumpirani testni snapshot.
+- **Migracija bez nepotrebnog I/O-a:** inicijalizacija spremi klasičnu partiju samo kada nedostaje stari named `regular_game` ključ. Uobičajeno otvaranje već migrirane partije više ne raspoređuje dodatno pisanje.
+- **Sigurno obnavljanje tijekom rekreacije:** `pendingSnapshotFor` se koristi samo pri stvarnoj Android rekreaciji s `savedInstanceState`, a ne za svaki novi kontroler koji treba provjeriti stanje trajne pohrane. Time se sprječava da povjereni in-process snapshot prikrije nevaljan ili zamijenjen podatak iz SharedPreferences.
+- **Android regresija:** proširen `SudokuAsyncPersistenceTest` za provjeru najnovijeg pending snapshota tijekom usporenog IO zapisa; postojeći test oštećene dovršene partije služi kao regresijski gate.
+- **Objava:** `versionName=1.0.67`, `versionCode=68`. Publikacija APK/AAB i SHA256SUMS te pravilna `prerelease` klasifikacija ovise o završnim GitHub Actions rezultatima. Potpuna 1:1 vizualna podudarnost i svi sigurnosni skenovi nisu ovim hotfixom proglašeni potvrđenima.
+
 ## 1.0.66 — asinkrono spremanje, sigurnost partija i UI regresije
 
 - **Glavna Android nit:** serijalizacija JSON zapisa, statistike, postavki i dnevne/obične partije te `SharedPreferences.commit()` prebačeni su u jedinstven procesni IO red. Interakcije s igrom više ne čekaju zapis na disk.
