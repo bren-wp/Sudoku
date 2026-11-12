@@ -237,16 +237,18 @@ class SudokuController(context: Context) {
         }
         isGenerating = true
         try {
-            val result = withContext(Dispatchers.Default) {
-                SudokuEngine.create(size, level, if (daily) today.toEpochDay().toInt() else kotlin.random.Random.nextInt())
-            }
-            // Generating can cross local midnight (or a manual clock/time-zone
-            // change). Never save yesterday's puzzle as today's new challenge.
-            // Leave the existing in-memory session and statistics untouched.
-            if (daily && LocalDate.now() != today) {
-                toast = "Datum dnevnog izazova promijenio se. Pokušaj ponovno."
-                page = Screen.DAILY
-                return
+            val result = if (daily) {
+                DailyPuzzleGeneration.create(size, level, today) ?: run {
+                    // Midnight or a manual time-zone change occurred while the
+                    // puzzle was being generated. Never save a stale daily game.
+                    toast = "Datum dnevnog izazova promijenio se. Pokušaj ponovno."
+                    page = Screen.DAILY
+                    return
+                }
+            } else {
+                withContext(Dispatchers.Default) {
+                    SudokuEngine.create(size, level)
+                }
             }
             // Preserve the exact current puzzle before replacing it, even
             // when its last selection or elapsed seconds were not checkpointed.
