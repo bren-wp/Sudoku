@@ -96,6 +96,26 @@ class SudokuBackupSafetyRegressionTest {
                 } catch (_: IOException) { }
                 assertEquals(previous, SudokuBackup.snapshot(context))
             }
+
+            // A forged completion flag must not pass the same validation that
+            // protects ordinary SharedPreferences recovery.
+            val originalGame = JSONObject(requireNotNull(previous["game"]))
+            for (failed in listOf(false, true)) {
+                val invalidGame = JSONObject(originalGame.toString()).apply {
+                    put("completed", true)
+                    put("failed", failed)
+                }.toString()
+                val damaged = previous + ("game" to invalidGame)
+                try {
+                    SudokuBackup.restore(context, damaged)
+                    fail("Unsolved completed puzzle must be rejected")
+                } catch (_: IOException) { }
+                try {
+                    SudokuBackup.encrypt(damaged, secret.copyOf())
+                    fail("Unsolved completed puzzle must not be exported")
+                } catch (_: IOException) { }
+                assertEquals(previous, SudokuBackup.snapshot(context))
+            }
         } finally {
             prefs.edit().clear().commit()
         }

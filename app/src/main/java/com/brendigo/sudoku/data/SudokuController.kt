@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.brendigo.sudoku.engine.SudokuEngine
 import com.brendigo.sudoku.engine.SudokuCandidates
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -239,6 +240,14 @@ class SudokuController(context: Context) {
             val result = withContext(Dispatchers.Default) {
                 SudokuEngine.create(size, level, if (daily) today.toEpochDay().toInt() else kotlin.random.Random.nextInt())
             }
+            // Generating can cross local midnight (or a manual clock/time-zone
+            // change). Never save yesterday's puzzle as today's new challenge.
+            // Leave the existing in-memory session and statistics untouched.
+            if (daily && LocalDate.now() != today) {
+                toast = "Datum dnevnog izazova promijenio se. Pokušaj ponovno."
+                page = Screen.DAILY
+                return
+            }
             // Preserve the exact current puzzle before replacing it, even
             // when its last selection or elapsed seconds were not checkpointed.
             if (!checkpointBeforeSwitch()) return
@@ -268,6 +277,10 @@ class SudokuController(context: Context) {
             stats = stats.copy(played = stats.played + 1)
             saveGame()
             page = Screen.GAME
+        } catch (cancelled: CancellationException) {
+            // Activity recreation must cancel the pending generation rather
+            // than silently turning cancellation into a gameplay error.
+            throw cancelled
         } catch (error: Exception) {
             toast = "Igru nije moguće pokrenuti. Pokušaj ponovno."
         } finally {
@@ -702,6 +715,8 @@ class SudokuController(context: Context) {
                 session.selected in -1 until size * size &&
                 session.elapsed >= 0 && session.mistakes in 0..3 &&
                 session.hints in 0..MAX_HINTS &&
+                (!session.completed || (!session.failed &&
+                    session.board.contentEquals(session.solution))) &&
                 (!session.daily || runCatching { LocalDate.parse(session.day) }.isSuccess) &&
                 SudokuEngine.isValidCompleted(session.solution, size,
                     session.boxRows, session.boxColumns) &&
