@@ -110,8 +110,8 @@ class SudokuController(context: Context) {
         private set
     var toast by mutableStateOf("")
         private set
-    private val undoHistory = if (pendingState?.session === restoredGame.session &&
-        restoredGame.undoKey == "undo") {
+    private val undoHistory = if (pendingState?.session != null &&
+        pendingState.session === restoredGame.session && restoredGame.undoKey == "undo") {
         ArrayDeque<Move>().apply {
             pendingState.moves.forEach { addLast(Move(it.cell, it.oldValue, it.oldNotes)) }
         }
