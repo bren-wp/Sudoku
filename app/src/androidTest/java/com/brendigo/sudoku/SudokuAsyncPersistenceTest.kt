@@ -15,6 +15,7 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /** Actual Android SharedPreferences, with a slow filesystem write injected. */
 @RunWith(AndroidJUnit4::class)
@@ -25,6 +26,7 @@ class SudokuAsyncPersistenceTest {
         val enteredCommit = CountDownLatch(1)
         val releaseCommit = CountDownLatch(1)
         val wroteOnMain = AtomicBoolean(false)
+        val commits = AtomicInteger(0)
 
         override fun edit(): SharedPreferences.Editor {
             val editor = delegate.edit()
@@ -35,6 +37,7 @@ class SudokuAsyncPersistenceTest {
                 }
 
                 override fun commit(): Boolean {
+                    commits.incrementAndGet()
                     if (Looper.myLooper() == Looper.getMainLooper()) wroteOnMain.set(true)
                     if (waitForCommit.compareAndSet(true, false)) {
                         enteredCommit.countDown()
@@ -97,4 +100,39 @@ class SudokuAsyncPersistenceTest {
             check(backing.edit().clear().commit())
         }
     }
+    @Test fun rapidAutoSavesAreCoalescedWithoutLosingTheFinalSnapshot() = runBlocking {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val base = instrumentation.targetContext
+        val backing = base.getSharedPreferences("sudoku_write_coalescing_v1068_test", Context.MODE_PRIVATE)
+        check(backing.edit().clear().commit())
+        val slow = SlowPreferences(backing)
+        val isolated = object : ContextWrapper(base) {
+            override fun getApplicationContext(): Context = this
+            override fun getSharedPreferences(name: String?, mode: Int): SharedPreferences = slow
+        }
+        try {
+            val controller = SudokuController(isolated)
+            controller.startNew(4, 0)
+            assertTrue(controller.flush())
+            val previousCommits = slow.commits.get()
+            slow.waitForCommit.set(true)
+            instrumentation.runOnMainSync { controller.toggleNotes() }
+            assertTrue("First write never reached IO", slow.enteredCommit.await(3, TimeUnit.SECONDS))
+            // Fifty rapid UI interactions while the first fsync is held.
+            // Coalescing must keep at most one ordinary queued auto-save.
+            instrumentation.runOnMainSync {
+                repeat(50) { controller.toggleNotes() }
+            }
+            slow.releaseCommit.countDown()
+            assertTrue(controller.flush())
+            val delta = slow.commits.get() - previousCommits
+            assertTrue("Too many writes for a burst of UI updates: $delta", delta in 2..3)
+            assertFalse(slow.wroteOnMain.get())
+            assertTrue(requireNotNull(SudokuController(isolated).game).notesMode)
+        } finally {
+            slow.releaseCommit.countDown()
+            check(backing.edit().clear().commit())
+        }
+    }
+
 }

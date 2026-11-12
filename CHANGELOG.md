@@ -1,3 +1,13 @@
+## 1.0.68 — manje diskovnih zapisa i pouzdaniji QA izvornog 3D dizajna
+
+- **Optimizacija Android pohrane:** svi autosave zapisi i dalje se izvršavaju izvan glavne Android niti. Novi procesno serijalizirani red spaja uzastopne automatske snimke iste SharedPreferences instance dok prethodni diskovni zapis još traje, što smanjuje nepotrebne `fsync` pozive tijekom brzog unošenja brojeva i bilješki.
+- **Očuvana trajnost:** eksplicitni `suspend checkpoint` nikada se ne spaja s automatskim zapisom. Čeka sve prethodne stavke i potvrđuje vlastiti zapis ili javlja neuspjeh. Redoslijed izmjena ploče, Undo, statistike i postavki ostaje očuvan.
+- **Android regresija performansi:** test s blokiranim diskovnim `commit()` sada provjerava da 51 uzastopna promjena načina bilješki završava s najviše tri diskovna zapisa (prvi aktivni, spojeni sljedeći i kontrolna točka), bez blokiranja glavne niti i bez gubitka posljednjeg stanja.
+- **Referentni Splash QA:** v1.0.67 main `reference` emulatorski test pao je jer je stari heuristički RGB uzorak zamijenio originalne svijetle elemente 3D Splash zaslona za Android sistemski modal. Uklonjena je neutemeljena klasifikacija po svjetlini; test sada traži stvarni sistemski ANR naslov i akciju `Wait`, te provjerava pripada li prednja aktivna aplikacija Sudokuu.
+- **Vizualni sadržaj:** ostaje stvarni izvorni Compose UI, stvarne screenshot snimke i 11 profila. Ne tvrdi se da je potpun 1:1 pixel-perfect potvrđen; za to i dalje treba kvantitativna usporedba svakog zaslona s izvornim referencama.
+- **Sigurnost i dead-code:** nije dodana nijedna mrežna dozvola, oglasni SDK niti vanjska biblioteka. Statičkim pregledom svih 21 Kotlin datoteka izvornoga koda identificirano je i uklonjeno sedam nekorištenih UI importova bez mijenjanja Compose elemenata. Pregledana su sigurnost kontrolnih točaka, životni ciklus i QA skripta; detalji i otvorena područja navedeni su u `docs/storage-visual-audit-v1.0.68.md`.
+- **Isporuka:** `versionName=1.0.68`, `versionCode=69`. Novi GitHub Release (APK, AAB, SHA256SUMS) smije biti proglašen dovršenim tek nakon stvarne objave i provjere artefakata. Bez službenoga publisher ključa APK ostaje testni, a AAB nepotpisan, uz obvezno označavanje `prerelease`.
+
 ## 1.0.67 — hitni ispravak migracije i oporavka partije
 
 - **Popravljen regresijski test `tablet-shard-2`:** analiza stvarnog Android JUnit izvještaja izdvojila je neuspjeh `SudokuSavedGameRecoveryTest.forgedCompletedFlagCannotHideAValidRegularSaveOrFreezeAnUnsolvedBoard`. Uzrok: kontroler je pri svakom učitavanju postojećeg normalnog zapisa pokretao novi pozadinski zapis i mogao prebrisati naknadno korumpirani testni snapshot.
