@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var sudoku: SudokuController
 
     override fun onStop() {
-        sudoku.flush()
+        sudoku.flushInBackground()
         super.onStop()
     }
 
