@@ -7,10 +7,10 @@ gradle_args=()
 export_args=()
 skip_export=false
 if [[ "${1:-}" == "--splash-home-only" ]]; then
-  # Limit each constrained device to three deterministic real-screen checks.
+  # Limit each constrained device to four deterministic real-screen checks.
   # The complete 41-test suite still runs across the four tablet shards.
   # A long comma-separated filter previously fell back to all 41 tests.
-  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#homeMenuCardsAndWeekStripFitEveryEmulatorProfile,com.brendigo.sudoku.SudokuVisualSmokeTest#newGameActionsRemainLegibleOnEveryResponsiveProfile")
+  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#homeMenuCardsAndWeekStripFitEveryEmulatorProfile,com.brendigo.sudoku.SudokuVisualSmokeTest#newGameActionsRemainLegibleOnEveryResponsiveProfile,com.brendigo.sudoku.SudokuVisualSmokeTest#compactDailyWeekAndStatisticsAwardTilesNeverOverlap")
   export_args+=("--splash-home-only")
 elif [[ "${1:-}" == "--tablet-shard" ]]; then
   # AndroidJUnitRunner partitions every instrumentation test exactly once

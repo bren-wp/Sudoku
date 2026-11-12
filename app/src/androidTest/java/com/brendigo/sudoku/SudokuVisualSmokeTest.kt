@@ -1286,13 +1286,13 @@ class SudokuVisualSmokeTest {
         check(cards.all { it.width > 0f && it.height >= 70f * density }) {
             "Each real Statistics achievement preview must be readable: $cards"
         }
-        if (widthDp >= 410f &&
+        if (widthDp >= 426f &&
             rule.activity.resources.configuration.fontScale < 1.3f) {
             check(cards.all { it.height <= 105f * density }) {
                 "Four-column reference previews became oversized: $cards"
             }
         }
-        if (widthDp < 410f) {
+        if (widthDp < 426f) {
             check(
                 cards[0].right <= cards[1].left + density &&
                 cards[2].right <= cards[3].left + density &&
@@ -2081,6 +2081,52 @@ class SudokuVisualSmokeTest {
             saveBrandingQaPng("11-launcher-monochrome.png", monoBitmap)
         } finally {
             monoBitmap.recycle()
+        }
+    }
+
+    @Test
+    fun compactDailyWeekAndStatisticsAwardTilesNeverOverlap() {
+        waitFor("home-nova-igra")
+        homeTile("dnevni-izazov")
+        waitFor("screen-dnevni-izazov")
+        rule.onNodeWithTag("daily-weekly-streak").performScrollTo()
+            .assertIsDisplayed()
+        val density = rule.activity.resources.displayMetrics.density
+        val line = rule.onNodeWithTag("daily-weekly-streak")
+            .fetchSemanticsNode().boundsInRoot
+        val days = (0..6).map { index ->
+            rule.onNodeWithTag("daily-weekday-$index")
+                .fetchSemanticsNode().boundsInRoot
+        }
+        check(days.all { day ->
+            day.width > 0f && day.left >= line.left - density &&
+                day.right <= line.right + density
+        }) { "Daily week labels escape their native card: $days / $line" }
+        check(days.zipWithNext().all { (left, right) ->
+            left.right <= right.left + density
+        }) { "Daily week labels overlap at constrained display width: $days" }
+        rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
+        waitFor("home-nova-igra")
+        homeTile("statistika")
+        waitFor("screen-statistika")
+        rule.onNodeWithTag("stats-achievements").performScrollTo()
+            .assertIsDisplayed()
+        val cards = (0..3).map { index ->
+            rule.onNodeWithTag("stats-award-preview-$index",
+                useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        }
+        val widthDp = rule.activity.resources.displayMetrics.widthPixels / density
+        if (widthDp < 426f) {
+            check(cards[0].right <= cards[1].left + density &&
+                cards[2].right <= cards[3].left + density &&
+                cards[0].bottom <= cards[2].top + density &&
+                cards[1].bottom <= cards[3].top + density) {
+                "Compact stats awards must be a non-overlapping 2x2 grid: $cards"
+            }
+        } else {
+            check(cards.zipWithNext().all { (left, right) ->
+                left.right <= right.left + density
+            }) { "Reference stats awards must be aligned horizontally: $cards" }
         }
     }
 

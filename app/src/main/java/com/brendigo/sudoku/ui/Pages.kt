@@ -1343,6 +1343,18 @@ fun DailyPage(controller: SudokuController) {
                     monday.plusDays(i.toLong()).toString() in completedDays &&
                         monday.plusDays((i + 1).toLong()).toString() in completedDays
                 }
+                // The 941px reference keeps seven equal-width native day cells.
+                // At 240dp a fixed 31dp circle would require 217dp before
+                // dates, exceeding the available width after page/card gutters.
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val dayCellWidth = maxWidth / 7
+                    val markerDiameter = minOf(31.dp,
+                        (dayCellWidth - 2.dp).coerceAtLeast(18.dp))
+                    val dayLabelSize = when {
+                        dayCellWidth < 28.dp -> 8.sp
+                        dayCellWidth < 35.dp -> 9.sp
+                        else -> 10.sp
+                    }
                 Row(
                     Modifier.fillMaxWidth().testTag("daily-weekly-streak").drawBehind {
                         val lineY = size.height * .48f
@@ -1363,21 +1375,23 @@ fun DailyPage(controller: SudokuController) {
                         .forEachIndexed { index, label ->
                             val date = monday.plusDays(index.toLong())
                             Column(
-                                Modifier.testTag("daily-weekday-$index"),
+                                Modifier.weight(1f).testTag("daily-weekday-$index"),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Text(label, color = Ink.muted, fontSize = 10.sp)
+                                Text(label, color = Ink.muted,
+                                    fontSize = dayLabelSize, maxLines = 1)
                                 Spacer(Modifier.height(3.dp))
                                 DailyWeekMarker(date.toString() in completedDays,
-                                    dayLabel = label, diameter = 31.dp)
+                                    dayLabel = label, diameter = markerDiameter)
                                 Spacer(Modifier.height(3.dp))
                                 Text("${date.dayOfMonth}.${date.monthValue}.",
                                     color = if (date == today) Ink.white else Ink.muted,
-                                    fontSize = 10.sp,
+                                    fontSize = dayLabelSize, maxLines = 1,
                                     fontWeight = if (date == today)
                                         FontWeight.Bold else FontWeight.Normal)
                             }
                         }
+                }
                 }
             }
         }
@@ -1604,7 +1618,9 @@ fun StatsPage(controller: SudokuController) {
                 // Four across on the owner's 941px reference; a legible 2x2
                 // grid on narrower devices or when the system font is enlarged.
                 BoxWithConstraints(Modifier.fillMaxWidth().testTag("stats-award-grid")) {
-                    val compactAwards = maxWidth < 350.dp ||
+                    // Four previews match the reference at full phone width;
+                    // 350–389dp need two rows to preserve icon/title legibility.
+                    val compactAwards = maxWidth < 390.dp ||
                         LocalDensity.current.fontScale >= 1.3f
                     if (compactAwards) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

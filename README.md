@@ -8,9 +8,14 @@
 
 🧩 **3 veličine ploče** &nbsp;·&nbsp; ⚡ **6 težina** &nbsp;·&nbsp; 🗓️ **Dnevni izazovi** &nbsp;·&nbsp; 🏆 **24 postignuća**
 
-[**⬇️ Preuzmi posljednje objavljeno izdanje**](https://github.com/bren-wp/Sudoku/releases) &nbsp;·&nbsp;
+[**⬇️ GitHub izdanja**](https://github.com/bren-wp/Sudoku/releases) &nbsp;·&nbsp;
+[**▶️ Google Play**](https://play.google.com/store/apps/details?id=com.brendigo.sudoku) &nbsp;·&nbsp;
 [**📱 Pogledaj aplikaciju**](#-stvarni-zasloni-aplikacije) &nbsp;·&nbsp;
 [**🌐 Brendigo**](https://brendigo.com)
+
+<a href="https://play.google.com/store/apps/details?id=com.brendigo.sudoku" title="Otvori Sudoku by Brendigo na Google Playu"><img src="branding/google-play-hr.svg" alt="Preuzmi na Google Playu — službena hrvatska značka" height="60"></a>
+&nbsp;&nbsp;
+<a href="https://play.google.com/store/apps/details?id=com.brendigo.sudoku" title="Sudoku by Brendigo — Google Play"><img src="branding/sudoku-icon.svg" alt="Ikonica aplikacije Sudoku: otvori Google Play" height="60"></a>
 
 <img src="branding/sudoku-feature-graphic.svg" alt="Sudoku by Brendigo — ilustracija neonskog vizualnog identiteta" width="880">
 
@@ -64,7 +69,9 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 
 ## 📦 Instalacija i izdanje
 
-**[Otvori GitHub Releases i preuzmi dostupni APK](https://github.com/bren-wp/Sudoku/releases)**. APK se instalira na podržani Android uređaj uz dopuštenje za instalaciju aplikacija iz odabranog izvora.
+<a href="https://play.google.com/store/apps/details?id=com.brendigo.sudoku" title="Sudoku by Brendigo na Google Playu"><img src="branding/google-play-hr.svg" alt="Preuzmi Sudoku na Google Playu" height="60"></a>
+
+**[Otvori aplikaciju na Google Playu](https://play.google.com/store/apps/details?id=com.brendigo.sudoku)** ili **[preuzmi testni APK s GitHub Releases](https://github.com/bren-wp/Sudoku/releases)**. Google Play poveznica vodi na identifikator paketa `com.brendigo.sudoku`; dostupnost aplikacije ovisi o zemlji, računu i statusu objave. Testni APK iz GitHuba može se instalirati na podržani Android uz dopuštenje za instalaciju iz odabranog izvora.
 
 | Zahtjev | Vrijednost |
 | :--- | :--- |
@@ -99,6 +106,6 @@ Za tehničke upute i provjere kvalitete pogledaj [razvojnu dokumentaciju](docs/D
 
 *Bistriji um. Bolji dan.*
 
-[🌐 brendigo.com](https://brendigo.com) · [📦 Izdanja](https://github.com/bren-wp/Sudoku/releases) · [🛡️ Privatnost](PRIVACY.md) · [📋 Licencija](LICENSE)
+[🌐 brendigo.com](https://brendigo.com) · [▶️ Google Play](https://play.google.com/store/apps/details?id=com.brendigo.sudoku) · [📦 Izdanja](https://github.com/bren-wp/Sudoku/releases) · [🛡️ Privatnost](PRIVACY.md) · [📋 Licencija](LICENSE)
 
 </div>
