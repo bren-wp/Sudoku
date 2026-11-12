@@ -1,3 +1,14 @@
+## 1.0.66 — asinkrono spremanje, sigurnost partija i UI regresije
+
+- **Glavna Android nit:** serijalizacija JSON zapisa, statistike, postavki i dnevne/obične partije te `SharedPreferences.commit()` prebačeni su u jedinstven procesni IO red. Interakcije s igrom više ne čekaju zapis na disk.
+- **Integritet napretka:** svaka promjena snima odvojene kopije polja ploče i Undo povijesti. Igra, oba zapisa statistike i Undo spremaju se zajedno unutar jedne transakcije, a kontrolne točke za zamjenu partije i sigurnosne kopije čekaju sve prethodne zapise.
+- **Životni ciklus:** tijekom `onPause()` zakazuje se neblokirajući zapis; kod stvaranja nove Android aktivnosti može se preuzeti noviji nepotvrđeni podatak iz memorije procesa kako se ne bi prikazao zastarjeli napredak.
+- **Sigurnosne kopije:** izvoz prvo potvrđuje trajni checkpoint, a povrat stanja postavlja zaštitu od starih zapisa prije čekanja na IO. Lozinka za izvoz briše se iz privremenog znakovnog polja čak i pri prekidu.
+- **Regresijski test:** novi Android test blokira probni zapis na disku te provjerava da glavna nit i dalje reagira i da nakon checkpointa posljednji potez ostaje spremljen. Postojeći testovi disk-failure scenarija i enkriptiranog uvoza ostaju aktivni.
+- **Audit:** prioritetni pregled pohrane, lifecycle/backup race-condition scenarija, dozvola i nepotrebnih importova. Ostale provjere i otvorene rizike bilježi `docs/persistence-security-deadcode-v1.0.66.md`.
+- **Vizualna usklađenost:** UI resursi i izgled nisu mijenjani; postojeći 11-profilni Android vizualni smoke ostaje regresijska provjera. Nije utvrđena potpuna 1:1 pikselna jednakost svih referenci, što ostaje otvoren cilj.
+- **Izdanje:** `versionName=1.0.66`, `versionCode=67`; build i objava APK/AAB/SHA256SUMS idu kroz postojeći GitHub Actions workflow nakon prolaska testova i spajanja PR-a. Bez konfiguriranog vlasničkog potpisnog ključa to smije biti samo testni `prerelease` (debug APK + nepotpisani AAB), ne Play-ready izdanje.
+
 ## 1.0.65 — sigurnost klasifikacije GitHub izdanja
 
 - **Popravak release metapodataka:** kontrola sada pregledava sva objavljena GitHub izdanja umjesto samo najnovijeg taga. Svako izdanje s AAB-om naziva `*-unsigned.aab` mora biti označeno kao `prerelease`; nakon popravka ponovno se čita stvarno stanje API-ja.
