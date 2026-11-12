@@ -139,4 +139,71 @@ class SudokuTransitionSerializationTest {
             check(backing.edit().clear().commit())
         }
     }
+
+    @Test fun resumeOfActiveRegularGameCannotOverwriteQueuedMoves() = runBlocking {
+        val (context, backing, slow) = fixture()
+        try {
+            val controller = SudokuController(context)
+            controller.startNew(4, 0)
+            assertTrue(controller.flush())
+            val puzzle = requireNotNull(controller.game)
+            val target = puzzle.board.indices.first {
+                puzzle.isEditable(it) && it != puzzle.selected
+            }
+
+            slow.blockNextCommit.set(true)
+            controller.select(target)
+            assertTrue("Autosave did not reach disk", slow.commitStarted.await(10, TimeUnit.SECONDS))
+            controller.enter(puzzle.solution[target])
+            controller.go(com.brendigo.sudoku.data.Screen.HOME)
+
+            // The persisted state is intentionally out of date.
+            assertTrue(controller.hasSavedRegularGame())
+            assertTrue("Resuming a live regular game should not wait for disk",
+                controller.resumeRegularGame())
+            assertEquals(puzzle.solution[target], requireNotNull(controller.game).board[target])
+
+            slow.allowCommit.countDown()
+            assertTrue(controller.flush())
+            assertEquals(puzzle.solution[target],
+                requireNotNull(SudokuController(context).game).board[target])
+        } finally {
+            slow.allowCommit.countDown()
+            check(backing.edit().clear().commit())
+        }
+    }
+
+    @Test fun justCompletedRegularGameCannotBeResurrectedFromStaleDisk() = runBlocking {
+        val (context, backing, slow) = fixture()
+        try {
+            val controller = SudokuController(context)
+            controller.startNew(4, 0)
+            assertTrue(controller.flush())
+            val puzzle = requireNotNull(controller.game)
+            slow.blockNextCommit.set(true)
+            controller.select(puzzle.board.indices.first {
+                puzzle.isEditable(it) && it != puzzle.selected
+            })
+            assertTrue("Autosave did not reach disk", slow.commitStarted.await(10, TimeUnit.SECONDS))
+
+            // Complete every editable cell while the old snapshot is blocked.
+            puzzle.board.indices.filter { puzzle.isEditable(it) }.forEach { cell ->
+                controller.select(cell)
+                controller.enter(puzzle.solution[cell])
+            }
+            assertTrue(requireNotNull(controller.game).completed)
+            assertEquals(1, controller.stats.finished)
+            controller.go(com.brendigo.sudoku.data.Screen.HOME)
+            assertFalse("A finished game must not show a stale Resume", controller.hasSavedRegularGame())
+            assertFalse("Cannot revive a finished game from queued old disk data",
+                controller.resumeRegularGame())
+
+            slow.allowCommit.countDown()
+            assertTrue(controller.flush())
+            assertEquals(1, SudokuController(context).stats.finished)
+        } finally {
+            slow.allowCommit.countDown()
+            check(backing.edit().clear().commit())
+        }
+    }
 }
