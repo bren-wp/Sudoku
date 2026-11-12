@@ -349,6 +349,7 @@ private fun ResumeBoardArtwork(modifier: Modifier = Modifier) {
 
 @Composable
 fun HomePage(controller: SudokuController) {
+    val scope = rememberCoroutineScope()
     val today = rememberToday()
     PageContent(
         topPadding = 22.dp,
@@ -423,7 +424,7 @@ fun HomePage(controller: SudokuController) {
             NeonPanel(
                 Modifier.fillMaxWidth().testTag("resume-classic")
                     .semantics { contentDescription = "Nastavi spremljenu klasičnu igru"; role = Role.Button }
-                    .clickable { controller.resumeRegularGame() }
+                    .clickable { scope.launch { controller.resumeRegularGame() } }
                     .heightIn(min = 72.dp),
                 highlight = Ink.teal
             ) {
