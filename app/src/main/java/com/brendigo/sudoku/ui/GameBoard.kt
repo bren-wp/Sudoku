@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -37,13 +38,24 @@ internal fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
     val n = game.size
     val selected = game.selected
     val selectionNumber = if (selected >= 0) game.board[selected] else 0
-    Box(
+    BoxWithConstraints(
         modifier.aspectRatio(1f).testTag("sudoku-board")
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xFA03132D))
             .border(1.5.dp, Ink.cyan.copy(alpha = .77f), RoundedCornerShape(14.dp))
             .padding(6.dp),
     ) {
+        // Keep the 941px reference font at normal density, but constrain it
+        // on narrow, high-font-scale windows so digits fit inside each cell.
+        val baseFontSp = when (n) {
+            9 -> 25f
+            6 -> 29f
+            else -> 39f
+        }
+        val availableCellDp = maxWidth.value / n
+        val fittedFontSp = (availableCellDp * .74f /
+            LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtLeast(12f)
+        val digitFontSize = minOf(baseFontSp, fittedFontSp).sp
         if (game.paused) {
             // Conceal digits and notes while the stopwatch is stopped.
             Column(
@@ -112,7 +124,7 @@ internal fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                             else -> "uneseno ${digit}"
                                         }
                                 }
-                                .clickable(enabled = !game.completed && !game.failed) {
+                                .clickable(enabled = !game.paused && !game.completed && !game.failed) {
                                     onSelect(index)
                                 },
                             contentAlignment = Alignment.Center,
@@ -136,11 +148,7 @@ internal fun SudokuBoard(game: Session, highlight: Boolean, showErrors: Boolean,
                                         fixed -> Ink.white
                                         else -> Color(0xFF65A6FF)
                                     },
-                                    fontSize = when (n) {
-                                        9 -> 25.sp
-                                        6 -> 29.sp
-                                        else -> 39.sp
-                                    },
+                                    fontSize = digitFontSize,
                                     fontWeight = if (fixed) FontWeight.Medium else FontWeight.Bold,
                                 )
                             } else if (game.notes[index] != 0) {
