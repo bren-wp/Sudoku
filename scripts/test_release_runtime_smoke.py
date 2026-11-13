@@ -24,6 +24,18 @@ class ReleaseRuntimeSmokeParserTest(unittest.TestCase):
         self.assertIsNone(find_label(nodes, "Not visible"))
         self.assertEqual((28, 45), find_label(nodes, "UNESI BROJ 1")[1])
 
+    def test_pause_button_is_not_the_explanatory_sentence(self):
+        # Real emulator XML contains both a sentence and the button.
+        # The automation must require the visible play glyph, or it would
+        # tap the explanatory text and keep the game paused.
+        xml = """<hierarchy>
+        <node text="Vrijeme je zaustavljeno. Nastavi kada budeš spreman."
+              bounds="[20,200][400,270]"/>
+        <node text="▶ Nastavi" bounds="[220,300][400,360]"/>
+        </hierarchy>"""
+        nodes = parse_visible_nodes(xml)
+        self.assertEqual((310, 330), find_label(nodes, "▶ Nastavi")[1])
+
     def test_absent_semantics_fail_closed(self):
         self.assertIsNone(find_label(parse_visible_nodes(
             '<hierarchy><node bounds="[1,2][10,20]"/></hierarchy>'
