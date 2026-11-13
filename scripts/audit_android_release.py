@@ -64,7 +64,7 @@ def inspect_r8(mapping_dir: Path) -> dict:
         raise ValueError("Missing or empty R8 release mapping.txt")
     # R8's top-level class mappings have no indentation, unlike methods.
     class_count = sum(
-        bool(re.match(r"^\\S.* -> [^ ]+:$", line))
+        bool(re.match(r"^\S.* -> [^ ]+:$", line))
         for line in mapping.read_text(encoding="utf-8", errors="replace").splitlines()
     )
     if class_count == 0:
@@ -91,7 +91,7 @@ def inspect_permissions(aapt2: str, apk: Path) -> dict:
         text=True, capture_output=True, check=True, timeout=30,
     )
     permissions_text = result.stdout
-    found = sorted(set(re.findall(r"android\\.permission\\.[A-Z_]+", permissions_text)))
+    found = sorted(set(re.findall(r"android\.permission\.[A-Z_]+", permissions_text)))
     forbidden = sorted(set(found).intersection(FORBIDDEN_PERMISSIONS))
     if forbidden:
         raise ValueError(f"Unexpected release APK permissions: {', '.join(forbidden)}")
