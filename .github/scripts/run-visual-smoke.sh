@@ -58,6 +58,12 @@ for attempt in 1 2 3; do
     if [[ "$skip_export" == false ]]; then
       bash .github/scripts/export-emulator-screenshots.sh "${export_args[@]}"
     fi
+    if [[ "${1:-}" == "--reference-capture" ]]; then
+      # AFTER reference debug screenshots are captured, exercise the separate
+      # R8-minified release build with an ephemeral emulator QA signature.
+      # Keep the existing 11 lanes and reference PNG evidence unchanged.
+      bash .github/scripts/run-release-runtime-smoke.sh
+    fi
     exit 0
   fi
   if ! grep -Eiq '429|Too Many Requests|maven central.*temporarily|Read timed out|Connection reset'       /tmp/sudoku-visual-gradle.log; then
