@@ -30,6 +30,28 @@ Sigurnosne kontrole:
 
 Službena OSV dokumentacija: https://google.github.io/osv.dev/post-v1-querybatch/
 
+## Rezultat stvarnog skeniranja — 13. studenoga 2026.
+
+Izvor: [Android CI #43341674597](https://github.com/bren-wp/Sudoku/actions/runs/43341674597), artefakt **Sudoku-release-sbom-r8-osv-audit**.
+
+**Online OSV provjera:** 90 od 90 stvarnih Maven verzija uspješno upitano; 0 paketa ima poznati OSV nalaz, 0 jedinstvenih OSV savjetovanja. Log4j pozitivna kontrola uspješna. Rezultati su po svakoj komponenti u osv-release-components.csv i potpunom osv-release-report.json. To znači samo **nijedan OSV zapis za navedene verzije u trenutku provjere**, a ne potpunu odsutnost budućih ili nepoznatih CVE-ova.
+
+**R8 usage.txt:** ukupno 39.112 uklonjenih zapisa; **13.776 klasa** i **25.336 članova** prema stvarnoj R8 klasifikaciji. Preostali class mapping sadrži 2.794 zapisa. Nema neprepoznatih redaka.
+
+| Skupina | R8 zapisi uklonjenih klasa | R8 zapisi uklonjenih članova |
+| --- | ---: | ---: |
+| Vlastiti com.brendigo.sudoku kod | 139 | 311 |
+| AndroidX Compose | 9.276 | 14.930 |
+| Ostali AndroidX | 2.072 | 3.854 |
+| Kotlin i korutine | 2.200 | 6.236 |
+| Google | 2 | 1 |
+| Druge ovisnosti | 87 | 4 |
+| **Ukupno** | **13.776** | **25.336** |
+
+**Konkretni R8 simboli iz vlastitoga koda:** SudokuCandidates.sameHouse(int,int,int,int,int); dijelovi konstruktorâ/data-class API-ja modela Completed, Options, Session i Statistics; te originalni simboli za SudokuController.canErase(), canUndo(), canHint(), tick(), select() i MainActivity. Potonji se mogu **inlinirati ili preoblikovati** te njihovo pojavljivanje u usage.txt ne znači da UI funkcionalnost smije biti izbrisana iz izvornika. To je osobito važno za MainActivity i SudokuController: bez provjere stvarne release APK ulazne točke nikakav automatski source-level dead-code delete nije opravdan. Cijeli popis aplikacijskih simbola u datoteci r8-unused-app-symbols.txt (450 zapisa) dio je Actions artefakta.
+
+**Nadalje otvoreno:** izričita instalacija i pokretanje optimiziranog release APK-a na emulatoru/fizičkom uređaju, runtime reflection/keep pravila, neindeksirani CVE-ovi, praktična eksploatabilnost i stroga 1:1 jednakost svih zaslona.
+
 ## Pixel QA
 
 Pronađeno je svih deset originalnih privatnih PNG referenci. Svih deset SHA-256 otisaka sada su u scripts/final_ten_reference_qa.py. Potpuni numerički izvještaj v1.0.71 nalazi se u docs/pixel-qa-owner-v1.0.71-measured.md. Sva su odstupanja izmjerena, ali nijedna referenca nije identična u svim pikselima.
