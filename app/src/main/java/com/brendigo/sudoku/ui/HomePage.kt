@@ -204,7 +204,7 @@ fun HomePage(controller: SudokuController) {
                     }
                     Spacer(Modifier.height(4.dp))
                     SolidAction("▶   Nastavi", { controller.go(Screen.GAME) },
-                        Modifier.fillMaxWidth(.52f), minHeight = 42.dp)
+                        Modifier.fillMaxWidth(.47f), minHeight = 42.dp)
                 }
             }
         }
