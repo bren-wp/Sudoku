@@ -127,12 +127,11 @@ fun SplashPage() {
                 letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
                 fontSize = if (landscape || veryNarrow) 12.sp
                 else if (compact) 13.sp else 16.sp,
-                // The source byline sits directly below the heading glyphs.
-                // Compose's font ascent/descent leaves the live caption lower
-                // than the 941px artwork. Shift its drawing/semantics bounds,
-                // without moving the emblem or disturbing small displays.
+                // Small bounded baseline adjustment only: larger offsets
+                // overlapped the title's Compose semantics and failed the
+                // real reference emulator layout test.
                 modifier = Modifier
-                    .offset(y = if (!compact && !landscape) (-11).dp else 0.dp)
+                    .offset(y = if (!compact && !landscape) (-2).dp else 0.dp)
                     .testTag("splash-byline"),
                 maxLines = 1,
             )
@@ -146,7 +145,7 @@ fun SplashPage() {
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 modifier = Modifier.fillMaxWidth()
-                    .offset(y = if (!compact && !landscape) (-8).dp else 0.dp)
+                    .offset(y = if (!compact && !landscape) (-2).dp else 0.dp)
                     .testTag("splash-tagline"),
             )
         }
