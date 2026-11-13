@@ -127,7 +127,13 @@ fun SplashPage() {
                 letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
                 fontSize = if (landscape || veryNarrow) 12.sp
                 else if (compact) 13.sp else 16.sp,
-                modifier = Modifier.testTag("splash-byline"),
+                // The source byline sits directly below the heading glyphs.
+                // Compose's font ascent/descent leaves the live caption lower
+                // than the 941px artwork. Shift its drawing/semantics bounds,
+                // without moving the emblem or disturbing small displays.
+                modifier = Modifier
+                    .offset(y = if (!compact && !landscape) (-11).dp else 0.dp)
+                    .testTag("splash-byline"),
                 maxLines = 1,
             )
             Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 12.dp else 11.dp))
@@ -139,7 +145,9 @@ fun SplashPage() {
                 else androidx.compose.ui.unit.TextUnit.Unspecified,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                modifier = Modifier.fillMaxWidth().testTag("splash-tagline"),
+                modifier = Modifier.fillMaxWidth()
+                    .offset(y = if (!compact && !landscape) (-8).dp else 0.dp)
+                    .testTag("splash-tagline"),
             )
         }
         // A deterministic loading arc stays visible when Android animations
