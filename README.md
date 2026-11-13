@@ -67,15 +67,15 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 - **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
 - **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
-## 🚀 Novo u Sudoku v1.0.71
+## 🚀 Novo u Sudoku v1.0.72
 
-- **Pametnije brisanje u gameplayu** — automatski generirane bilješke u praznom polju više ne pokreću lažni Erase i Undo potez. Brisanje upisanih brojeva i ručnih bilješki ostaje dostupno.
-- **Pouzdaniji pixel QA** — provjera 1:1 sada broji stvarne RGB/RGBA piksele, uključujući alfa kanal; čak ni jedna različita komponenta ne može se sakriti zaokruživanjem MAE.
-- **Stvarni R8 audit izdanja** — CI provjerava rezultat minifikacije i sadržaj kompajliranog release APK-a, ne samo Gradle konfiguraciju.
-- **SBOM ovisnosti** — CycloneDX popis direktnih i tranzitivnih release biblioteka te sigurnosni izvještaj dostupni su u GitHub Actions artefaktima.
-- **Autentične snimke zaslona** — README i dalje koristi stvarne Android emulatorske screenshotove, ne generirane slike ni makete.
+- **Stvarno mjerenje 10 izvornih referenci** — originalni dizajni pronađeni su i uspoređeni s autentičnim Android snimkama v1.0.71, pri izvornim dimenzijama. Nije potvrđen 1:1 izgled svih zaslona; [tablica izmjerenih rezultata](docs/pixel-qa-owner-v1.0.71-measured.md) prikazuje konkretna odstupanja.
+- **Provjera autentičnosti izvornika** — svih deset originalnih referentnih PNG-ova sada ima poznat SHA-256 otisak, pa zamijenjena datoteka ne može proći mjerenje.
+- **Stvarna analiza uklonjenog koda R8** — CI broji zasebno uklonjene klase i metode te objavljuje konkretne aplikacijske simbole koji nisu u release APK-u, bez objavljivanja osjetljivog mappinga.
+- **Provjera svih release ovisnosti prema OSV-u** — automatski mrežni upit za svaku stvarnu Maven verziju iz CycloneDX SBOM-a, s kontrolom valjanosti odgovora, CVE/GHSA nalazima i blokiranjem izdanja kada postoji poznata ranjivost.
+- **Nema oglasa ni dodatnih Android dozvola** — zadržan je izvorni offline koncept i testirana stabilnost igre.
 
-[Tehnički izvještaj gameplaya, 1:1 mjerenja i sigurnosti](docs/pixel-r8-security-audit-v1.0.71.md). Izvorni privatni PNG-ovi nisu u repozitoriju; potpuna nova 1:1 jednakost sa svih deset referenci zato nije potvrđena.
+[Tehnički R8/OSV audit v1.0.72](docs/r8-osv-audit-v1.0.72.md). OSV skeniranje ne dokazuje odsutnost nepoznatih ranjivosti; pixel-QA mjerenje ne znači automatski 0 % odstupanja.
 
 ## 📦 Instalacija i izdanje
 
