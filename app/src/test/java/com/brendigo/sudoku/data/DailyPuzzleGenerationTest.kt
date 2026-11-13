@@ -39,6 +39,19 @@ class DailyPuzzleGenerationTest {
         assertNull(generated)
     }
 
+    @Test fun midnightAfterGenerationButDuringCheckpointInvalidatesDailySession() = runBlocking {
+        // The initial generator check passes, then ordered persistence may
+        // suspend until a different calendar day. Never publish stale day.
+        var clock = firstDay
+        val generated = DailyPuzzleGeneration.create(
+            4, 1, firstDay, currentDay = { clock },
+        )
+        assertTrue(generated != null)
+        // Simulate the second date read occurring after the disk checkpoint.
+        clock = firstDay.plusDays(1)
+        assertFalse(DailyPuzzleGeneration.isCurrentDay(firstDay) { clock })
+    }
+
     @Test fun cancellationIsNotTransformedIntoAPlayablePuzzle() = runBlocking {
         try {
             DailyPuzzleGeneration.create(
