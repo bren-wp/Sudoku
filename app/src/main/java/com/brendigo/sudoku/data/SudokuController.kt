@@ -247,7 +247,7 @@ class SudokuController(
             // The durable checkpoint is suspendable. Local midnight or a time-zone
             // change can occur AFTER generation's first date check, while IO
             // finishes. Never publish yesterday's challenge as a new session.
-            if (daily && LocalDate.now() != today) {
+            if (daily && !DailyPuzzleGeneration.isCurrentDay(today)) {
                 toast = "Datum dnevnog izazova promijenio se. Pokušaj ponovno."
                 page = Screen.DAILY
                 return
