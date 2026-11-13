@@ -64,6 +64,11 @@ class SudokuController(
     }
 
     fun hasSavedRegularGame(): Boolean {
+        // The newest regular game can still be in the ordered IO queue.
+        // Do not offer a stale disk save after a just-finished puzzle.
+        game?.takeIf { !it.daily }?.let { active ->
+            return !active.completed && !active.failed
+        }
         val regular = readGame("regular_game") ?: return false
         return !regular.daily && !regular.completed && !regular.failed
     }
@@ -77,16 +82,33 @@ class SudokuController(
     }
 
     suspend fun resumeRegularGame(): Boolean {
-        // Preserve an in-memory daily session before switching puzzle types.
-        if (game?.daily == true && !checkpointBeforeSwitch()) return false
-        val saved = readGame("regular_game") ?: return false
-        if (saved.daily || saved.completed || saved.failed) return false
-        game = saved
-        undoHistory.clear()
-        undoHistory.addAll(readUndoHistory("regular_undo", saved))
-        page = Screen.GAME
-        saveGame()
-        return true
+        // The Resume action is also a suspendable session transition, not a
+        // simple read. Claim the same UI guard used by startNew() before
+        // checkpointing an active daily game.
+        if (isGenerating || importingBackup) return false
+        isGenerating = true
+        try {
+            // Never reload an older regular_game snapshot over a more
+            // recent in-memory regular puzzle (which may still be queued).
+            game?.takeIf { !it.daily }?.let { active ->
+                if (active.completed || active.failed) return false
+                page = Screen.GAME
+                return true
+            }
+            // Switching away from the daily session must persist its latest
+            // board and Undo stack before loading the regular named snapshot.
+            if (game?.daily == true && !checkpointBeforeSwitch()) return false
+            val saved = readGame("regular_game") ?: return false
+            if (saved.daily || saved.completed || saved.failed) return false
+            game = saved
+            undoHistory.clear()
+            undoHistory.addAll(readUndoHistory("regular_undo", saved))
+            page = Screen.GAME
+            saveGame()
+            return true
+        } finally {
+            isGenerating = false
+        }
     }
 
     fun go(destination: Screen) {
@@ -170,6 +192,15 @@ class SudokuController(
 
     suspend fun startNew(size: Int, level: Int, daily: Boolean = false) {
         if (isGenerating) return
+        if (importingBackup) {
+            toast = "Povrat sigurnosne kopije je u tijeku. Pokušaj ponovno."
+            return
+        }
+        // Guard the entire transition, including the first potentially
+        // suspending checkpoint. Otherwise a rapid second tap can create a
+        // competing game and overwrite progress while resuming a daily puzzle.
+        isGenerating = true
+        try {
         val today = LocalDate.now()
         val date = today.toString()
         if (daily && dailyAlreadyCompleted()) {
@@ -187,7 +218,8 @@ class SudokuController(
             if (game?.daily == false && !checkpointBeforeSwitch()) return
             val saved = readGame("daily_game")
             if (saved != null && saved.daily && saved.day == date && !saved.completed && !saved.failed) {
-                if (game?.daily == false && !checkpointBeforeSwitch()) return
+                // The earlier checkpoint already completed; no state changes
+                // or suspension happened between it and readGame().
                 game = saved
                 undoHistory.clear()
                 undoHistory.addAll(readUndoHistory("daily_undo", saved))
@@ -196,8 +228,6 @@ class SudokuController(
                 return
             }
         }
-        isGenerating = true
-        try {
             val result = if (daily) {
                 DailyPuzzleGeneration.create(size, level, today) ?: run {
                     // Midnight or a manual time-zone change occurred while the

@@ -67,13 +67,15 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 - **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
 - **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
-## 🚀 Novo u Sudoku v1.0.69
+## 🚀 Novo u Sudoku v1.0.70
 
-- **Gameplay pamti posljednje odabrano polje** — promjene se spremaju izvan glavne Android niti, bez dodatnog diskovnog zapisa ako ponovno dotakneš isto polje.
-- **Pregledniji brojevi na uskim telefonima** — znamenke se prilagođavaju stvarnom prostoru i povećanom sustavnom fontu, a referentna tipografija ostaje gdje stane.
-- **Čišći i održiviji izvorni kod** — zasloni igre izdvojeni su u sedam samostalnih Compose datoteka; Sudoku ploča i tipkovnica odvojene su od upravljanja gameplayom, a modeli od kontrolera.
-- **Regresijska zaštita** — dodan je Android test trajnosti odabira ćelije; postojeći vizualni testovi i provjere stabilnosti ostaju sastavni dio CI-a.
-- **Dead-code pregled** — provjeren je izvorni kod 31 Kotlin datoteke; nijedna funkcionalna komponenta nije uklonjena samo zato što se čini nekorištenom. [Detaljan tehnički pregled](docs/gameplay-refactor-deadcode-v1.0.69.md).
+- **Zaštićeno pokretanje partija** — dva brza dodira na „Nova igra” ili „Dnevni izazov” više ne mogu istodobno zamijeniti istu partiju dok traje spremanje na disk.
+- **Sigurniji povratak u igru** — najnoviji potezi aktivne klasične partije čuvaju se u memoriji i ne zamjenjuju se starijim spremanjem iz pozadinskog reda.
+- **Bez ponovnog otvaranja dovršene igre** — odigrana partija se ne nudi kao nedovršena ako njezin posljednji zapis na disk još traje.
+- **Manje nepotrebnog čekanja** — uklonjena je suvišna diskovna kontrolna točka pri povratku u postojeći dnevni izazov.
+- **Dodatna Android regresijska zaštita** — testni kod namjerno blokira zapis na disk i provjerava četiri kritična slučaja, uključujući statistiku, završetak partije i obnovu podataka.
+
+[Detaljan tehnički i sigurnosni pregled v1.0.70](docs/gameplay-transition-audit-v1.0.70.md). Izgled zaslona nije promijenjen; 1:1 usklađenost svih izvornika još nije dokazana.
 
 ## 📦 Instalacija i izdanje
 
