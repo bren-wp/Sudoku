@@ -75,6 +75,29 @@ jobs:
           fi
       - name: Build debug APK, release APK and AAB
         run: gradle --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease
+      - name: Release-only CycloneDX dependency inventory
+        run: gradle --no-daemon :app:cyclonedxDirectBom
+      - name: Verify compiled release permissions, R8 and dependency inventory
+        shell: bash
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_release_audit.py' -v
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/release/*.apk)
+          test "${#apks[@]}" -eq 1
+          python3 scripts/audit_android_release.py \
+            --apk "${apks[0]}" \
+            --mapping-dir app/build/outputs/mapping/release \
+            --sbom app/build/reports/cyclonedx-direct/bom.json \
+            --aapt2 "$ANDROID_HOME/build-tools/36.0.0/aapt2" \
+            --report app/build/reports/security/release-audit.json
+      - name: Upload public release security evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sudoku-release-sbom-r8-audit
+          path: |
+            app/build/reports/cyclonedx-direct/bom.json
+            app/build/reports/security/release-audit.json
+          if-no-files-found: error
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:

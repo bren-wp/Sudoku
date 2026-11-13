@@ -532,5 +532,38 @@ class PixelCompareTest(unittest.TestCase):
                 )
 
 
+    def test_single_sub_mae_pixel_difference_cannot_pass_exact_gate(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            original = Image.new("RGB", REFERENCE_SIZE, (16, 24, 55))
+            changed = original.copy()
+            changed.putpixel((0, 0), (17, 24, 55))
+            original.save(folder / "reference.png")
+            changed.save(folder / "actual.png")
+            result = compare(folder / "reference.png", folder / "actual.png",
+                             folder / "output")
+            # One 1-channel change over 1.57 million pixels rounds MAE to 0.
+            self.assertEqual(0, result["mean_error_0_to_255"])
+            self.assertFalse(result["exact_1_to_1"])
+            self.assertEqual(941 * 1672 - 1, result["exact_rgb_pixels"])
+
+    def test_single_alpha_difference_cannot_pass_branding_exact_gate(self):
+        from pixel_compare import BRANDING_SIZE
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            original = Image.new("RGBA", BRANDING_SIZE, (0, 0, 0, 0))
+            changed = original.copy()
+            changed.putpixel((1, 1), (0, 0, 0, 1))
+            original.save(folder / "reference.png")
+            changed.save(folder / "actual.png")
+            result = compare(folder / "reference.png", folder / "actual.png",
+                             folder / "output", expected_size=BRANDING_SIZE)
+            self.assertEqual(0, result["mean_error_0_to_255"])
+            self.assertEqual(0, result["alpha_mae_0_to_255"])
+            self.assertFalse(result["exact_1_to_1"])
+            self.assertEqual(1254 * 1254, result["exact_rgb_pixels"])
+            self.assertLess(result["exact_rgba_pixels_pct"], 100)
+
+
 if __name__ == "__main__":
     unittest.main()

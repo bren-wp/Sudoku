@@ -1,3 +1,12 @@
+## 1.0.71 — točan 1:1 pixel gate, gameplay bilješke i R8/SBOM audit
+
+- **Game Erase:** dok su automatske bilješke uključene, brisanje već praznog polja više nije ponuđeno i ne stvara lažni Undo ili pozadinski zapis. Ručne bilješke i upisani brojevi i dalje se brišu. Dodana Android regresija `SudokuAutoNotesEraseTest`.
+- **Pikselna preciznost:** `pixel_compare.py` i `final_ten_reference_qa.py` više ne smatraju zaokruženi RGB MAE 0,000 dokazom jednakosti. Nova stroga provjera broji sve jednake RGB/RGBA piksele, a testovi otkrivaju i jedan različit RGB ili alfa kanal.
+- **Cjelovitiji build audit:** CycloneDX 3.5.1 iz razriješenog `releaseRuntimeClasspath` inventara izravne i tranzitivne ovisnosti. CI analizira **stvarni APK** putem Android `aapt2` i R8 `mapping.txt`, te arhivira BOM i izvještaj kao Actions artefakte.
+- **Sigurnosne granice:** zabranjene internet/lokacija/SMS/oglasi/test-dependency sposobnosti provjeravaju se gdje su primjenjive; audit inventara nije zamjena za CVE/OSV skeniranje, analizu resursa, penetration-test ni fizičke uređaje. Privatni R8 mapping ne objavljuje se.
+- **Pixel QA granice:** deset originalnih vlasnikovih PNG-ova nisu u repozitoriju. Povijesne v1.0.64 RGB MAE metrike ostaju navedene i nisu predstavljene kao v1.0.71 mjerenja. Stroga 1:1 podudarnost nije potvrđena.
+- **Izvještaj:** `docs/pixel-r8-security-audit-v1.0.71.md`. **Verzija:** `versionName=1.0.71`, `versionCode=72`. Release APK/AAB/SHA256SUMS objavljuju se tek nakon potvrđenih zelenih CI i testova; bez vlasničkog potpisa to je testni `prerelease`.
+
 ## 1.0.70 — zaštita gameplay sesija i trajnosti posljednjeg poteza
 
 - **Dvostruki zahtjevi:** `startNew()` zaključava prijelaz prije prvog suspendabilnog checkpointa, uključujući pokušaj nastavka dnevnog izazova. Dodatni pritisak ne može paralelno pokrenuti drugu partiju niti poduplati statistiku.

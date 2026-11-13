@@ -67,15 +67,15 @@ Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 �
 - **🏆 24 postignuća** — stvarni ciljevi i bodovi, bez izmišljenog napretka.
 - **🔒 Kontrola nad podacima** — lokalna pohrana i opcionalni šifrirani izvoz/uvoz napretka.
 
-## 🚀 Novo u Sudoku v1.0.70
+## 🚀 Novo u Sudoku v1.0.71
 
-- **Zaštićeno pokretanje partija** — dva brza dodira na „Nova igra” ili „Dnevni izazov” više ne mogu istodobno zamijeniti istu partiju dok traje spremanje na disk.
-- **Sigurniji povratak u igru** — najnoviji potezi aktivne klasične partije čuvaju se u memoriji i ne zamjenjuju se starijim spremanjem iz pozadinskog reda.
-- **Bez ponovnog otvaranja dovršene igre** — odigrana partija se ne nudi kao nedovršena ako njezin posljednji zapis na disk još traje.
-- **Manje nepotrebnog čekanja** — uklonjena je suvišna diskovna kontrolna točka pri povratku u postojeći dnevni izazov.
-- **Dodatna Android regresijska zaštita** — testni kod namjerno blokira zapis na disk i provjerava četiri kritična slučaja, uključujući statistiku, završetak partije i obnovu podataka.
+- **Pametnije brisanje u gameplayu** — automatski generirane bilješke u praznom polju više ne pokreću lažni Erase i Undo potez. Brisanje upisanih brojeva i ručnih bilješki ostaje dostupno.
+- **Pouzdaniji pixel QA** — provjera 1:1 sada broji stvarne RGB/RGBA piksele, uključujući alfa kanal; čak ni jedna različita komponenta ne može se sakriti zaokruživanjem MAE.
+- **Stvarni R8 audit izdanja** — CI provjerava rezultat minifikacije i sadržaj kompajliranog release APK-a, ne samo Gradle konfiguraciju.
+- **SBOM ovisnosti** — CycloneDX popis direktnih i tranzitivnih release biblioteka te sigurnosni izvještaj dostupni su u GitHub Actions artefaktima.
+- **Autentične snimke zaslona** — README i dalje koristi stvarne Android emulatorske screenshotove, ne generirane slike ni makete.
 
-[Detaljan tehnički i sigurnosni pregled v1.0.70](docs/gameplay-transition-audit-v1.0.70.md). Izgled zaslona nije promijenjen; 1:1 usklađenost svih izvornika još nije dokazana.
+[Tehnički izvještaj gameplaya, 1:1 mjerenja i sigurnosti](docs/pixel-r8-security-audit-v1.0.71.md). Izvorni privatni PNG-ovi nisu u repozitoriju; potpuna nova 1:1 jednakost sa svih deset referenci zato nije potvrđena.
 
 ## 📦 Instalacija i izdanje
 

@@ -3,6 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+    // Build-time only: does not ship in the APK. Scans the resolved release
+    // dependency graph instead of a hand-maintained, possibly stale list.
+    id("org.cyclonedx.bom") version "3.5.1"
 }
 android {
     namespace = "com.brendigo.sudoku"
@@ -11,8 +14,8 @@ android {
         applicationId = "com.brendigo.sudoku"
         minSdk = 26
         targetSdk = 36
-        versionCode = 71
-        versionName = "1.0.70"
+        versionCode = 72
+        versionName = "1.0.71"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     val signingStore = System.getenv("SUDOKU_SIGNING_STORE_FILE")
@@ -58,6 +61,13 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
+}
+
+// The release SBOM MUST exclude debug, unit-test and androidTest libraries.
+// It inventories the exact releaseRuntimeClasspath selected by Gradle.
+tasks.named<org.cyclonedx.gradle.CyclonedxDirectTask>("cyclonedxDirectBom") {
+    includeConfigs = listOf("releaseRuntimeClasspath")
+    testConfigs = emptyList()
 }
 
 dependencies {

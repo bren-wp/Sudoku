@@ -291,7 +291,9 @@ class SudokuController(
         val s = game ?: return false
         val cell = s.selected
         return s.isEditable(cell) && !s.paused && !s.completed && !s.failed &&
-            (s.board[cell] != 0 || s.notes[cell] != 0)
+            // Automatic notes would immediately be regenerated on erase.
+            // An empty auto-notes cell is not a meaningful erase action.
+            (s.board[cell] != 0 || (!options.autoNotes && s.notes[cell] != 0))
     }
 
     fun canHint(): Boolean {
@@ -359,7 +361,7 @@ class SudokuController(
         val s = game ?: return
         val cell = s.selected
         if (!s.isEditable(cell) || s.paused || s.completed || s.failed) return
-        if (s.board[cell] == 0 && s.notes[cell] == 0) return
+        if (s.board[cell] == 0 && (options.autoNotes || s.notes[cell] == 0)) return
         rememberMove(s, cell)
         val board = s.board.clone()
         val notes = s.notes.clone()
