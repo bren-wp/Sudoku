@@ -48,9 +48,19 @@ REGIONS = {
 TEN = tuple(REGIONS) + ("09-wordmark", "10-launcher-icon")
 THEMED = "11-launcher-monochrome"
 
-# Original artwork is deliberately stored outside this repository.
-# These two published fingerprints prevent an accidental substitute reference.
-BRAND_REFERENCE_SHA256 = {
+# The ten owner's original PNGs (24 Oct 2026) are private and MUST NOT
+# be committed. These SHA-256 fingerprints authenticate all eight screens
+# and both brand assets. Prevent passing the audit using a substituted or
+# accidentally mismatched image named "01-home.png", etc.
+OWNER_REFERENCE_SHA256 = {
+    "01-home": "f930940fe9ecece5f955b25c76b019c7c310313bf0f0e70bcb17c1a6aba89694",
+    "02-new-game": "ff7a66b6a58285443e6a70f764d5a19d877aa986e948a2a0962b9df10039330e",
+    "03-game": "ebcb1e1f5d5fc3f081894f048ade85ef59e6cbed015d6f6e6132c89b6820e9dc",
+    "04-settings": "4a97ac27d3ecca33d7ef8068a30ada888c8a349fe9718d24a996f43239027a9c",
+    "05-daily": "b558b297b49be88e858b0cab6f9978263a48c8e4acb0a8aab6e24a4e8365e01d",
+    "06-statistics": "64c2f4e6c090bbd693801a965fdeb46dbde02fb22dbae06b7a288e6b0523dafa",
+    "07-achievements": "461e193d686e3b778c97d50ec2a661317d5115be465c909a85bd8405e5e3b5c8",
+    "08-splash": "795992a79de684f67b3f5924fce7377ed429f4e5c272124c16115ad9885f636c",
     "09-wordmark": "7534ad4d8bbfef116ad7d092cb91027f5d393a6008b7ecb37a7a33aed7047fd1",
     "10-launcher-icon": "0b7a48a510a6e86cfb2121b24b758d7de7cd4541fd50ac3f1f555801f7763ae9",
 }
@@ -87,7 +97,7 @@ def audit(reference_dir: Path, actual_dir: Path, output_dir: Path) -> dict:
         validate_image(reference, expected_size, name.startswith(("09-", "10-")))
         validate_image(actual, expected_size, name.startswith(("09-", "10-")))
         original = sha256(reference)
-        if name in BRAND_REFERENCE_SHA256 and original != BRAND_REFERENCE_SHA256[name]:
+        if original != OWNER_REFERENCE_SHA256[name]:
             raise ValueError(
                 f"{name}: NOT the owner's unmodified original; SHA256={original}"
             )
