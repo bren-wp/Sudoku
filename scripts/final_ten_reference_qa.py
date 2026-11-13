@@ -118,12 +118,16 @@ def audit(reference_dir: Path, actual_dir: Path, output_dir: Path) -> dict:
             region_rows = result["regions"]
 
         alpha = report["alpha_mae_0_to_255"]
-        exact = report["mean_error_0_to_255"] == 0 and (alpha is None or alpha == 0)
+        # The pixel-level boolean is not rounded to three decimal places.
+        exact = report["exact_1_to_1"]
         rows.append({
             "screen": name,
             "reference_sha256": source_hashes[name],
             "actual_sha256": actual_hashes[name],
             "exact_1_to_1": exact,
+            "exact_rgb_pixels": report["exact_rgb_pixels"],
+            "exact_rgb_pixels_pct": report["exact_rgb_pixels_pct"],
+            "exact_rgba_pixels_pct": report["exact_rgba_pixels_pct"],
             "rgb_mae_0_to_255": report["mean_error_0_to_255"],
             "alpha_mae_0_to_255": alpha,
             "rgba_mae_0_to_255": report["rgba_mae_0_to_255"],
