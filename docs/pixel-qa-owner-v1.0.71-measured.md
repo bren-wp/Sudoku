@@ -44,6 +44,7 @@ python scripts/final_ten_reference_qa.py \
   --reference-dir /putanja/originalni-PNG \
   --actual-dir /putanja/emulatorski-PNG \
   --output-dir qa-pixel-diff/v1.0.71 \
+  --home-resume \
   --allow-imperfect
 ```
 
