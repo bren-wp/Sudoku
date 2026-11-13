@@ -14,7 +14,7 @@ Ovaj ciklus mijenja samo **izvorne Compose komponente i njihove dimenzije**, ne 
 | Statistika | Prazni Nedavni napredak zatvara se oko 10px prerano i pomiče Postignuća prema gore | `history.empty minHeight` 140 → 152dp; stvarni podatci ostaju iz kontrolera |
 | Postignuća | Posljednji istaknuti red kartica završava oko 11px prenisko | Standardni četvrti red 137 → 125dp; ostali redovi i kompaktne fleksibilne kartice nepromijenjeni |
 | Dnevni izazov | Ispod tri metrika hero kartice suvišan prazan prostor; tjedni red i gumb vizualno niže | Donji padding standardnog hero sadržaja 12 → 3dp, razmak 32 → 30dp, tjedni minimum 122 → 126dp |
-| Splash | Tekst `by Brendigo` ~10px, tagline ~8px niže od originalnog izgleda u 425px pregledu | Vizualni pomaci `-11dp` i `-8dp` za standardni portrait, bez pomaka logotipa i loadera |
+| Splash | Tekst `by Brendigo` ~10px, tagline ~8px niže od originalnog izgleda u 425px pregledu | Mali kontrolirani pomaci `-2dp` bylinea i taglinea u standardnom portraitu, bez dodira s naslovom ili loaderom. Veći pomaci `-11dp`/`-8dp` dokazano su pali na Android testu zbog preklapanja semantičkih granica te su odbačeni |
 
 *Koordinate u srednjem stupcu vizualno su procijenjene iz usporednog prikaza 941px originala i Android PNG-a smanjenog na istih 425px **samo za ručni pregled**. QA mjerenje i izvještaj uvijek koriste originalne 941/1254px datoteke bez interpolacije. Provjera na novih 10 snimki potvrđuje je li MAE zaista bolji; smanjenje razmaka nije dokaz 0 %.*
 
