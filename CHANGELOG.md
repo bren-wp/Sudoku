@@ -1,3 +1,12 @@
+## 1.0.74 — zaštita datuma dnevne partije i R8 release runtime gate (u razvoju)
+
+- **Dnevni izazov:** ponovna provjera lokalnog kalendarskog dana nakon suspendabilnog spremanja prethodne partije i prije aktiviranja nove. Time kasni checkpoint ne može objaviti jučerašnji izazov pod starim datumom.
+- **Stvarni release runtime:** 11 postojećih emulatorskih profila ostaje; referentni profil nakon debug screenshotova zasebno izrađuje, privremeno QA potpisuje, instalira i koristi R8 optimizirani APK. Testira stvarne dostupne tipke, pauzu, unos i ponovno pokretanje sa spremljenom partijom.
+- **Testovi:** regresija za promjenu datuma poslije generiranja, Python testovi dostupnih oznaka i koordinata, postojeći Gradle/OSV/SBOM/R8/11-emulator CI.
+- **Pixel QA:** ovom promjenom nisu mjerene nove RGB/RGBA razlike niti mijenjan Compose izgled. Stroga 1:1 podudarnost nije potvrđena; vlasnički originali se ne zamjenjuju emulator QA slikama.
+- **Status:** `versionName=1.0.74`, `versionCode=75` samo na razvojnoj grani. Ne spajati ni objaviti bez potvrđenih CI/provjera. Bez publisher ključa dopušten je isključivo testni prerelease APK + nepotpisani AAB + SHA256SUMS.
+- **Tehnički zapis:** `docs/release-runtime-and-daily-qa-v1.0.74.md`.
+
 ## 1.0.73 — geometrijsko usklađivanje stvarnih Android zaslona
 
 - **Naslovnica:** uži gumb **Nastavi** na kartici spremljene partije, bliži izvornom omjeru bez smanjenja visine dodirne površine.

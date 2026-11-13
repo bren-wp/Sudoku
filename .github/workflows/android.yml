@@ -44,6 +44,8 @@ jobs:
           bash -n scripts/reconcile-release-classification.sh
           bash -n scripts/test_release_classification.sh
           bash scripts/test_release_classification.sh
+          bash -n .github/scripts/run-release-runtime-smoke.sh
+          python3 -m unittest discover -s scripts -p 'test_release_runtime_smoke.py' -v
       - name: Unit tests
         run: gradle --no-daemon :app:testDebugUnitTest
       - name: Pixel QA metric regression tests

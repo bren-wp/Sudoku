@@ -6,6 +6,9 @@ on:
     paths:
       - "app/**"
       - ".github/scripts/run-visual-smoke.sh"
+      - ".github/scripts/run-release-runtime-smoke.sh"
+      - "scripts/release_runtime_smoke.py"
+      - "scripts/test_release_runtime_smoke.py"
       - ".github/scripts/export-emulator-screenshots.sh"
       - ".github/workflows/visual-smoke.yml"
   pull_request:
@@ -17,6 +20,9 @@ on:
       - "docs/screenshots/**"
       - ".github/scripts/export-emulator-screenshots.sh"
       - ".github/scripts/run-visual-smoke.sh"
+      - ".github/scripts/run-release-runtime-smoke.sh"
+      - "scripts/release_runtime_smoke.py"
+      - "scripts/test_release_runtime_smoke.py"
       - ".github/workflows/visual-smoke.yml"
   workflow_dispatch:
 
