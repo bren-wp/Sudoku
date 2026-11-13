@@ -86,13 +86,19 @@ def validate_image(path: Path, size: tuple[int, int], require_alpha: bool = Fals
             raise ValueError(f"{path}: transparent branding MUST be an RGBA PNG")
 
 
-def audit(reference_dir: Path, actual_dir: Path, output_dir: Path) -> dict:
+def actual_capture_name(name: str, home_resume: bool = False) -> str:
+    """Select the real saved-session Home capture for the owner's reference."""
+    return "01-home-resume" if home_resume and name == "01-home" else name
+
+
+def audit(reference_dir: Path, actual_dir: Path, output_dir: Path,
+          home_resume: bool = False) -> dict:
     # Validate every input first: partial screenshots are not a successful audit.
     source_hashes = {}
     actual_hashes = {}
     for name in TEN:
         reference = reference_dir / f"{name}.png"
-        actual = actual_dir / f"{name}.png"
+        actual = actual_dir / f"{actual_capture_name(name, home_resume)}.png"
         expected_size = BRANDING_SIZE if name.startswith(("09-", "10-")) else REFERENCE_SIZE
         validate_image(reference, expected_size, name.startswith(("09-", "10-")))
         validate_image(actual, expected_size, name.startswith(("09-", "10-")))
@@ -113,7 +119,7 @@ def audit(reference_dir: Path, actual_dir: Path, output_dir: Path) -> dict:
     rows = []
     for name in TEN:
         source = reference_dir / f"{name}.png"
-        actual = actual_dir / f"{name}.png"
+        actual = actual_dir / f"{actual_capture_name(name, home_resume)}.png"
         folder = output_dir / name
         if name in REGIONS:
             report = compare(source, actual, folder, expected_size=REFERENCE_SIZE)
@@ -132,6 +138,7 @@ def audit(reference_dir: Path, actual_dir: Path, output_dir: Path) -> dict:
         exact = report["exact_1_to_1"]
         rows.append({
             "screen": name,
+            "actual_capture": actual_capture_name(name, home_resume),
             "reference_sha256": source_hashes[name],
             "actual_sha256": actual_hashes[name],
             "exact_1_to_1": exact,
@@ -176,8 +183,11 @@ def main() -> int:
     parser.add_argument("--actual-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("qa-pixel-diff/final"))
     parser.add_argument("--allow-imperfect", action="store_true")
+    parser.add_argument("--home-resume", action="store_true",
+                        help="Compare the owner's Home-with-Resume against 01-home-resume.png")
     args = parser.parse_args()
-    result = audit(args.reference_dir, args.actual_dir, args.output_dir)
+    result = audit(args.reference_dir, args.actual_dir, args.output_dir,
+                   home_resume=args.home_resume)
     print("All TEN actually pixel-exact 1:1:", result["all_ten_exact_1_to_1"])
     return 0 if result["all_ten_exact_1_to_1"] or args.allow_imperfect else 2
 
