@@ -244,6 +244,14 @@ class SudokuController(
             // Preserve the exact current puzzle before replacing it, even
             // when its last selection or elapsed seconds were not checkpointed.
             if (!checkpointBeforeSwitch()) return
+            // The durable checkpoint is suspendable. Local midnight or a time-zone
+            // change can occur AFTER generation's first date check, while IO
+            // finishes. Never publish yesterday's challenge as a new session.
+            if (daily && LocalDate.now() != today) {
+                toast = "Datum dnevnog izazova promijenio se. Pokušaj ponovno."
+                page = Screen.DAILY
+                return
+            }
             undoHistory.clear()
             game = Session(
                 size = result.size,
