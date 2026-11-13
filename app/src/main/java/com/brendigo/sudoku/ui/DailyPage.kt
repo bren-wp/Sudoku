@@ -211,10 +211,9 @@ fun DailyPage(controller: SudokuController) {
                     modifier = Modifier.fillMaxWidth(if (compactHero) 1f else .62f),
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
-                // Pixel diff from the actual 941×1672 emulator showed a
-                // +0.83 RGB MAE regression and a +2.27 bottom-third shift
-                // when this spacer was reduced to 18dp. Restore the better
-                // measured vertical cadence; keep the subtle metric edges.
+                // A previous 18dp experiment pushed the chip row far above
+                // the reference. Keep 30dp for the native 941px profile;
+                // compact layouts retain 32dp and flexible card growth.
                 Spacer(Modifier.height(if (compactHero) 32.dp else 30.dp))
                 Column(
                     Modifier.fillMaxWidth().testTag("daily-metrics"),
