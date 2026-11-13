@@ -108,7 +108,9 @@ def main() -> int:
         tap("Unesi broj 1")
         tap("Pauziraj ili nastavi igru")
         wait_for("Igra je pauzirana")
-        tap("Nastavi")
+        # Match the real pause-dialog button, not the explanatory sentence
+        # "Vrijeme je zaustavljeno. Nastavi kada budeš spreman."
+        tap("▶ Nastavi")
         wait_for("Unesi broj 1")
         time.sleep(3)  # Allow the coalesced autosave to reach disk.
         run("adb", "shell", "am", "force-stop", "com.brendigo.sudoku")
