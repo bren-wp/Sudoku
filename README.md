@@ -31,6 +31,12 @@ Spoj klasične Sudoku igre, modernog tamnoplavog dizajna i pažljivo oblikovanih
 | :--- | :--- | :--- |
 | 4×4, 6×6 ili klasični 9×9 Sudoku. Šest težina od *Vrlo lako* do *Majstor*. | Svaki dan zaseban izazov, kalendar, dnevni niz i lokalna rang-lista. | Statistika, povijest partija, bodovi i 24 postignuća. |
 
+## ✨ Preciznije sučelje u v1.0.73
+
+Nastavljamo usklađivati **stvarne, interaktivne Android zaslone** s izvornim referencama, bez lažnog prikaza odigranih partija ili zamjene komponenti slikom: uži gumb **Nastavi** na naslovnici, visina završnog reda **Postignuća**, prazan prikaz nedavnog napretka u **Statistici**, razmaci kartica i tjednog niza u **Dnevnom izazovu** te položaj natpisa na **uvodnom zaslonu**. Zadržani su responsivnost, pristupačnost, stvarni korisnički napredak i potpuno offline igranje.
+
+Usporedba se izvodi na izvornim PNG-ovima s provjerenim SHA-256 otiscima i stvarnim snimkama Android emulatora. **0 % odstupanja ne proglašava se dok usporedba svih deset PNG-ova ne potvrdi strogu jednakost.** [Izvještaj o sljedećim koracima i mjerenju](docs/ui-parity-iteration-v1.0.73.md).
+
 ## 📱 Stvarni zasloni aplikacije
 
 Ovo su **stvarne snimke Android aplikacije**, snimljene na emulatoru pri **941 × 1672 px** i pohranjene u repozitoriju kao optimizirane WebP datoteke. Nisu koncepti, AI-generirane slike ni statične zamjene za funkcionalne zaslone. Prikazuju stanje aplikacije tijekom testiranja; tvoji datumi i rezultati ovise o vlastitom napretku.
