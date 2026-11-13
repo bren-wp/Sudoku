@@ -1,61 +1,70 @@
-# SUDOKU by Brendigo — glavni razvojni prompt
+# SUDOKU by BRENDIGO — glavni razvojni prompt (aktualizirano 13.11.2026.)
 
-> **Namjena:** ovaj tekst može se zalijepiti kao zadatak razvojnom AI agentu ili koristiti kao trajna definicija kvalitete projekta. Obveze su provjerljive: ne smije se napisati „gotovo”, „1:1”, „produkcijski spremno” ili „objavljeno” bez odgovarajućeg dokaza.
+> Ovaj prompt je operativna specifikacija razvoja postojeće Android aplikacije, a ne potvrda da su svi zadaci već izvršeni. Cilj je strogi 1:1 prikaz u unaprijed definiranim referentnim stanjima i stabilan, pristupačan, siguran i u cijelosti funkcionalan proizvod. Nulta odstupanja nikad se ne smiju izmišljati.
 
-## Glavni zadatak
+## Uloga, repozitorij i način rada
 
-Nastavi razvoj postojeće **Android** aplikacije **SUDOKU by Brendigo** u repozitoriju **https://github.com/bren-wp/Sudoku**. Radi na **postojećem otvorenom PR-u #55** (`feature/sudoku-v148-settings-pixel-qa`) dok god je otvoren; nemoj otvarati paralelne PR-ove, resetirati arhitekturu, brisati postojeće značajke, mijenjati `applicationId` (`com.brendigo.sudoku`) niti gubiti postojeće podatke korisnika.
+Radi kao senior Android/Kotlin/Jetpack Compose inženjer, inženjer za testiranje, sigurnost i dizajnersku usklađenost. Repozitorij: https://github.com/bren-wp/Sudoku ; aplikacija: SUDOKU by BRENDIGO ; web: https://brendigo.com ; applicationId: com.brendigo.sudoku.
 
-Središnji prioritet: **za svaki zaslon i svako stanje posebno postići vizualno što vjernije, mjerljivo poklapanje s izvornom referencom — pixel po pixel, cilj 1:1**. Sve kontrole moraju ostati stvarne i funkcionalne u Kotlin/Jetpack Compose UI-ju, ne slika cijelog zaslona s lažnim gumbima. Ne generiraj konceptne slike u razgovoru umjesto stvarnih zaslona aplikacije.
+1. Prije izmjena pročitaj aktualni main, otvorene PR-ove, stvarne GitHub Actions rezultate, issue backlog, README, CHANGELOG, manifest, Gradle, sve Kotlin datoteke, resurse, skripte i dokumentaciju.
+2. Obavezno radi na zasebnoj grani i otvori **pull request prema main**. Nastavi u istoj razvojnoj grani i PR-u za isti opseg; ne dupliciraj nedovršene UI promjene iz paralelnih PR-ova. Posebno provjeri otvoreni PR #79 (v1.0.73), rebase ili integracijski redoslijed i konflikte. Ne mijenjaj main izravno i ne spajaj PR bez testova.
+3. Sačuvaj sve postojeće značajke, package/application ID, lokalan korisnički napredak, datoteke spremljenih partija, statistiku, postignuća, save/backup formate i korisničke postavke. Svaku migraciju učini unatrag kompatibilnom i testiraj je.
+4. Na početku PR-a prikaži inventar: potvrđeni problem, putanja/datoteka, dokaz ili reprodukcija, prioritet (P0/P1/P2), predloženi zahvat, test, status i rizik regresije.
+5. Ne prijavljuj neprovedene testove kao uspješne, ni buduće izdanje kao već objavljeno. Bez generiranja konceptnih slika u razgovoru: koristi izvorne referentne PNG-ove i stvarne screenshotove iz Android emulatora.
 
-## Redoslijed zaslona
+## 1 — Stroga 1:1 vizualna usklađenost
 
-1. **Splash / pokretanje** — brand, lokalni logo, sustavni splash, edge-to-edge, pravilno učitavanje.
-2. **Početna** — naslov, nastavljanje igre, kartice, dnevni niz, footer i navigacija.
-3. **Nova igra** — 4×4, 6×6, 9×9, izbor razine i početak valjane nove partije.
-4. **Igra** — Sudoku mreža, bilješke, kandidati, unos, brisanje, poništavanje, pomoć, pogreške, timer, pauza i dovršetak.
-5. **Dnevni izazov** — stabilan izazov po lokalnom datumu, dnevni niz i očuvanje napretka.
-6. **Statistika** — stvarni podaci, ispravna agregacija, prazna stanja i prikaz.
-7. **Postignuća** — stvarni kriteriji otključavanja, ikone, kartice i prikaz svih nagrada.
-8. **Postavke** — izgled, igra, zvuk/vibracija, jezik, informacije, privatnost, izvoz/uvoz šifrirane sigurnosne kopije.
-9. **Branding** — adaptivna, monokromatska i Play ikona te wordmark.
-10. **Sva dodatna stanja** — dijalozi, promjena orijentacije, manji ekrani, veći font, bez podataka, pogreške i potvrde.
+Izvorni dizajnerski originali: osam 941 × 1672 px PNG referenci (01 Naslovnica s aktivnim Nastavi, 02 Nova igra, 03 Gameplay, 04 Postavke, 05 Dnevni izazov, 06 Statistika, 07 Postignuća, 08 Splash), 1254 × 1254 px PNG wordmark (09) i launcher ikona (10). Privatne originale ne objavljuj u javnom repozitoriju. Provjeri njihov SHA-256 protiv scripts/final_ten_reference_qa.py; ne zamjenjuj ih WebP snimkama iz README-ja niti rasteriziranom imitacijom funkcionalnog ekrana.
 
-Za svaki zaslon napravi stvarnu snimku iz Android emulatora, usporedi je s odgovarajućom izvornom referencom, ispravi geometriju, fontove, boje, sjene, rubove, ikone, gradijente, razmake i tipografiju. Nakon svake dovršene provjere napiši **što je promijenjeno, koji su testovi prošli, mjerljivu razliku i koji je idući zaslon po redu**. Ne proglašavaj 1:1 ako nije izmjereno.
+**Stvarni referentni output:** pokreni odgovarajući commit na Android emulatoru, 941 × 1672 px / 320 dpi, hrvatski lokalitet, usklađeni font scale, sistemska navigacija, tema, osvjetljenje i animacije. Za branding izvozi stvarni adaptivni, okrugli i monokromatski prikaz na 1254 × 1254. Uskladi zagonetku, odabrano polje, datum, statistiku, stanje postignuća, Undo, timer i prazna stanja. Za screenshot QA koristi isključivo izolirane instrumentacijske podatke koji ne ulaze u produkcijsku aplikaciju i ne mijenjaju stvarne korisničke podatke.
 
-## Vizualni QA i dokaz
+**Za svaki zaslon i podstanje** izmjeri punu RGB/RGBA preciznu jednakost piksela (bez zaokruživanja), RGB MAE 0–255, α MAE gdje je primjenjivo, regionalne MAE vrijednosti, točno jednake piksele, vizualni overlay/diff, geometriju, tipografiju, 3D ikonografiju, gradijente, sjene, boje, radijuse, razmake, HUD, hit target i kontrast. Odvoji fiksni UI od dinamičkog sadržaja, ali uvijek sačuvaj globalni unmasked izvještaj. Ne skaliraj originalne PNG-ove radi uljepšavanja rezultata. CI PASS bez svih izvornih PNG-ova nije potvrda 1:1.
 
-- Izvorne reference zaslona su **941×1672 px**, a izvornici logotipa i ikone **1254×1254 px**. Referentni PNG-ovi nisu dio repozitorija; uzmi ih samo iz vlasnikovih originalnih datoteka.
-- Usporedi determinističko stanje istog zaslona s istim datumom, sadržajem, jezikom, gustoćom i fontom. Mjere: puni RGB MAE, regijski MAE, postotak piksela unutar ±12/±24 kanala, overlay i diff.
-- Koristi postojeći `scripts/pixel_compare.py`; ne skrivaj regresije maskama. U reportu razdvoji promjenjive podatke i stabilnu geometriju.
-- Provjeri emulator **941×1672 @320dpi** i kompaktni **720×1280 @320dpi**; dodaj provjere 320dp širine, većeg fonta i landscape/tablet stanja gdje je primjenjivo.
-- Ne mijenjaj arhitekturu radi lakšeg lažiranja snimaka. Fiksne slike referenci nikada nisu zamjena za Android UI.
-- Ne mijenjaj originalne reference i ne tvrdi da su marketinške WebP snimke izvornici.
+**Referentni redoslijed:** prioritet prema zadnjem pouzdanom izmjerenom MAE za stvarne ekrane: Postignuća, Statistika, Dnevni izazov, Naslovnica, Nova igra, Gameplay, Postavke, Splash; zasebno launcher/wordmark. Ovo je redoslijed za dijagnostiku, a ne lažni postotak odstupanja. Nakon svake iteracije izmjeri novi SHA protiv istih izvornika; usporedi prije/poslije i odbaci regresije bez funkcionalnog opravdanja.
 
-## Funkcionalnost i trajnost podataka
+**Svi vidljivi dijelovi moraju biti stvarne Compose kontrole**, pristupačni, responzivni i klikabilni. Nikad ne postavljaj screenshot preko gumba ili HUD-a; dekorativni lokalni bitmap/sprite dopušten je samo za stvarne ilustrativne elemente.
 
-- Revidiraj generator i validator Sudoku zagonetki: dimenzije, broj rješenja (jedinstvenost gdje je zahtijevana), težinu, postojeće brojeve, valjane poteze i otkrivanje završetka.
-- Osiguraj da svaka akcija igre radi, uključujući brzo višestruko tapkanje, rotaciju, povratak iz pozadine, obnovu procesa, prebacivanje dnevne/klasične igre i povratak kroz navigaciju.
-- Provjeri spremanje igre, bilješki, postavki, statistike, postignuća, dnevnih izazova i šifriranih offline sigurnosnih kopija. Nema nenamjernih brisanja ni koruptivnih migracija; testiraj prekid tijekom pisanja i neispravne podatke.
-- Nove opcije moraju imati stvarno ponašanje, ne prazne handlere, izmišljene vrijednosti ili „uskoro dostupno” bez zahtjeva.
-- Sve što je moguće radi **offline**, bez nepotrebnih mrežnih servisa, praćenja ili novih dozvola.
+## 2 — Ekrani, radna stanja i funkcionalni testovi
 
-## Android, kvaliteta koda i sigurnost
+- **Splash / inicijalizacija:** identitet BRENDIGO, stvarni lokalni logo, Android 12+ splash API i legacy start, font, byline, pravilan prelazak na Home, bez bijelog bljeska i preklapanja sa sustavnim barovima; portrait, landscape, cold/warm start, activity recreation.
+- **Naslovnica:** precizne kartice, 3D obrubi, raspored, tipografija, status spremljene partije, ispravna tipka Nastavi i linkovi Nova igra/Dnevni izazov/Statistika/Postignuća/Postavke; svaka navigacija testirana.
+- **Nova igra:** 4×4/6×6/9×9, šest težina, valjana jedinstvena rješenja, rad selektora, odabir razine, zabrana dvostrukog paralelnog starta, pravilan nastanak igre nakon povratka i promjene orijentacije. Razlikovati *gustoću zadanih brojeva* od stvarne logičke težine koju solver mjeri.
+- **Gameplay:** 9×9, 6×6 i 4×4; kvadratna mreža, numerička tipkovnica, označavanje retka/stupca/okvira, brojke i pencil marks, automatske bilješke, undo, erase, hint, pogreške/3 života, pauza, timer, dovršetak i povratak. Testirati brze dodire, rubne ćelije, uzastopni Undo, broj već u ćeliji, rješavanje posljednjim unosom i hintom, 3. pogrešku, rotaciju, odlazak u Settings i povratak.
+- **Dnevni izazov:** deterministički puzzle po datumu, datum i zona, midnight/DST, utrka generiranja preko ponoći, nastavak nedovršene dnevne igre, odvojeni normal/daily saveovi, samo jedna nagrada po danu, streak, kalendar i promjena datuma tokom igre.
+- **Statistika:** played, finished, vremena, best, postotci, six-level breakdown, historie, progress, empty state, dodatni prikazi; nikad izmišljene brojke. Osigurati integritet brojača nakon crasha, restorea i zamjene game sessiona.
+- **Postignuća:** provjeriti svih 24 stvarnih uvjeta, otključavanje, napredovanje, redoslijed, ikonice, 3D kartice, dijalozi, navigaciju, tipografiju i responsivni prikaz; bez lažnog napretka.
+- **Postavke:** stvarni efekt svake opcije, spremanje, čuvanje stanja, vraćanje iz igre, zvuk/vibracija, reduced motion, opis pristupačnosti, privatnost i šifrirani izvoz/uvoz uz pregled prije zamjene.
+- **Launcher i branding:** 1:1 ikona, adaptivni maskable safe zone, crop na različitim launchers, monokromatska tematizirana ikona Android 13+, round icon, bez bijelih rubova i artefakata; stvarni Play grafički materijali.
+- **Dodatna stanja:** bez podataka, error, paused, game over, completed, achievement detail, potvrde, SAF picker, backup password/error, TalkBack focus, hardverska tipkovnica, rotacija i različiti sistemski fontovi.
 
-- Zadrži i testiraj postojeći skup dok je kompatibilan: **Android Gradle Plugin 9.5.0, Gradle 9.6.0, Kotlin Compose plugin 2.4.21, compile/target SDK 36, minSdk 26, Java 17**. Ovisnosti nadograđuj pojedinačno, tek nakon provjere kompatibilnosti i testova.
-- Primijeni aktualne Android/Google Play zahtjeve: edge-to-edge, sistemske insets, API 36, pristupačnost (TalkBack, jasni opisi i dostupna područja dodira), font scale, svijetli/tamni prikaz ako je podržan i ispravan back-navigation.
-- Napravi **full dead-code audit, security audit, dependency audit, lint audit, performance audit i resource audit**. Ukloni nepotrebne klase, duplikate, zastarjele resurse i dokumentirane rizike bez funkcionalnih regresija.
-- Sigurnosne kopije validiraj prije uvoza; šifrirani podaci moraju ostati šifrirani i prijenos mora biti bez gubitka podataka. Ne stavljaj tajne, lozinke, signing key ili osobne podatke u repozitorij/logove.
-- Ne dodavaj vanjske biblioteke, permisije, SDK-ove ili mrežne pozive bez jasnog opravdanja. Koristi lokalne grafičke resurse.
+## 3 — Responsivnost i pristupačnost
 
-## Testiranje, CI i izdanje
+Provjeri stvarne CI profile: 941×1672/320dpi referenca, 720×1280, 540×1080, 1280×720 landscape, četiri 1200×1920/240dpi tabletna shard posla, tablet capture, 480×800 i 800×1440. Na svim ekranima provjeri najmanje 1.0x/1.3x/2.0x font scale, dynamic type, talkback labels i navigaciju, minimalnu dodirnu površinu u granicama praktične pristupačnosti, kontrast, edge-to-edge/insets, izbjegavanje preklapanja, rotaciju i vraćanje aktivnosti. QA na sporednim uređajima mjeri funkcionalnu prilagodbu, **ne** uspoređuje različite rezolucije sa slikom reference kao da je ista matrica piksela.
 
-- Za svaku promjenu osiguraj ciljane JUnit/Android instrumentacijske testove. Pokreni ili provjeri `gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease :app:bundleRelease`.
-- Zadrži usklađene workflowe **Android CI**, **Android visual smoke** i **Refresh Sudoku marketing screenshots**, uz odvojeni workflow za **Publish Sudoku release**. Dokumentiraj sve padove, uzrok i potvrdu popravka.
-- Stvarne snimke zaslona moraju nastati iz pokrenute aplikacije. Objavi ih kao CI artefakte i, kad je dozvoljeno, ažuriraj `docs/screenshots/`.
-- GitHub release izdaj **tek nakon potvrđenih provjera i spajanja u main**, s ispravnim `versionCode`/`versionName`, changelogom, opisom izdanja, APK/AAB artefaktima i SHA-256 provjerama. **Google Play AAB mora biti potpisan valjanim upload ključem**; nepotpisani AAB ili debug APK nikad ne predstavljaj kao spreman za Play.
-- Ažuriraj README, razvojne upute, QA dokumente i changelog. Ukloni zastarjele i lažne tvrdnje o 1:1 ili produkcijskoj spremnosti.
+## 4 — Ispravnost podataka, performanse i sigurnost
 
-## Kriterij završetka
+- Audit cijelog Game/Controller/Writer/Backup toka. Checkpoint prije zamjene normal/daily partije, otkazivanje coroutine poslova, serijalizacija JSON-a izvan UI threada, istodobni brzi tapovi, proces death i povrat Activityja, disk-full i corrupt JSON, rollback nakon neuspjelog restorea. Postojeće podatke nikad ne brisati preventivno.
+- Šifrirane kopije: AES-GCM i PBKDF2 parametre, salt/nonce, provjeru autentikacije, limit veličine, dopuštene ključeve, provjeru statistike, prihvatljivu migraciju formata, odbijanje tampered arhive, pogrešne lozinke i izvanrednih ulaza; ne logirati plaintext, tajne ni puzzle solution.
+- Full **security audit**: manifest/izvezene komponente, Android permisije i network calls, backup pravila, cleartext, dynamic dependencies, supply chain i OSV/CVE/GHSA, CycloneDX SBOM, release R8 i keep rules, GitHub Actions permissions, third-party action version pinning, tajne, signing identitet, Play policies. Datumi i rezultati skena moraju biti vezani za commit.
+- Full **dead-code audit**: detektirati neiskorištene Kotlin simbole, Compose grane, resurse, drawables i duplikate, ali ne brisati po R8 usage popisu bez dokazivanja izvornog reachabilityja i scenarija. Analizirati stvarni release R8 output i zadržati funkcionalna UI ponašanja.
+- Full **performance audit**: smanjiti redundantne Compose recomposition, Canvas draw allocation, prevelike WebP bitmape, nepotrebne disk commitove, JSON churn, ANR, hladno pokretanje, trajanje generiranja 9×9, jank i memoriju na najsporijim podržanim uređajima. Mjeriti prije/poslije.
+- Ovisnosti ažurirati selektivno uz potvrdu kompatibilnosti. Trenutačno u main na datum pregleda: AGP 9.5.0, Gradle 9.6.0, Compose Kotlin plugin 2.4.21, SDK 36, minSdk 26, Java 17. Ne upisivati izmišljene nove verzije bez stvarne provjere.
 
-Zadatak nije završen dok: (1) sve kontrole svih osam zaslona i dodatnih stanja nisu funkcionalno provjerene; (2) vizualni izvještaj za sve dostupne originalne reference nije izveden na **stvarnim** screenshotovima, bez nedokazanog 1:1; (3) testovi, lint, build i Android emulator CI nisu zeleni; (4) oporavak spremljenih podataka i šifriranih sigurnosnih kopija nije potvrđen; (5) release nije stvarno objavljen sa stvarnim artefaktima, bez lažne potvrde potpisa; i (6) dokumentacija točno opisuje stvarno stanje. Ako nešto nije izvedivo, navedi konkretno ograničenje, dokaz i idući korak.
+## 5 — Testovi, CI i release ugovor
+
+Za svaki P0/P1 problem dodaj JUnit ili instrumentacijski test koji reproducira grešku, zatim popravak i dokaz zelenog rezultata. Potrebno: :app:testDebugUnitTest, :app:lintDebug, :app:assembleDebug, :app:assembleRelease, :app:bundleRelease, CycloneDX release-only SBOM, OSV za 100 % release Maven verzija, R8 mapping/usage, analiza izgrađenih permisija, svih 11 emulatorskih poslova te **stvarno instaliranje i pokretanje minificiranog release APK-a** (ako ga sadašnji CI ne pokriva, dodaj novi gate).
+
+Snimke ekrana iz stvarnog Android emulatora moraju pratiti aktualni commit. Re-capture README galerije i Play screenshotova nakon UI izmjena, uz dokaz da nisu statični mockupovi. U PR opis unijeti putanje izmijenjenih datoteka, test rezultate, regionalne pixel razlike i otvorene rizike; review komentare riješiti prije spajanja.
+
+Release izlazi **poslije mergea i zelenih provjera** s povećanim versionCode i odgovarajućim versionName, realnim changelogom, APK, AAB i SHA256SUMS, GitHub release tagom i provjerenim potpisima. Ako nema originalnog izdavačkog ključa, ne predstavljati -test.apk i -unsigned.aab kao Play-ready ni stable produkcijsko izdanje; ostaviti prerelease. Nema lažne potvrde da je release izdan.
+
+## 6 — Kriteriji prihvaćanja
+
+1. Na svakoj izvornoj 941×1672 i 1254×1254 referenci: iste referentne datoteke i deterministički emulator screenshot, nulta stroga RGB/RGBA razlika ako se tvrdi da je pojedini prikaz 1:1.
+2. Svi uređaji i veliki fontovi: nema clippinga, neupotrebljivih kontrola ni gubitka podataka; sva funkcionalna stanja prolaze.
+3. Nijedna greška logike/snimke/nagrade/backup restorea i nema neobjašnjenih padova CI-ja.
+4. Nema poznatih neriješenih P0/P1 sigurnosnih nalaza u opsegu produkcije; ostali nalazi javno i precizno dokumentirani.
+5. Tek potvrđeni CI, screenshot, SBOM/OSV, runtime release i release asset rezultati smiju biti označeni [x].
+6. Ako se 0 odstupanja ne može postići zbog dinamike, font rasterizacije ili razloga izvornika, prikazati točne preostale razlike i plan, bez uljepšavanja.
+
+**Operativni izlaz svakog ciklusa:** stanje trenutnog PR-a, ostvarene izmjene s putanjama, tablica prije/poslije pixel MAE po ekranu i stabilnim regijama, testovi sa stvarnim ishodom, status sigurnosti, regresije, sljedeći P0/P1 zahvat, status izdanja. Ne postavljaj nepotrebna pitanja ako je repozitorij već dostupan; radi dalje kroz PR i svaki nalaz veži za dokaz.
