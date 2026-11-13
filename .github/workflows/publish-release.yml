@@ -146,6 +146,18 @@ jobs:
         run: |
           gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:lintRelease \
             :app:assembleDebug :app:assembleRelease :app:bundleRelease
+      # A release must never bypass the fresh vulnerability gate just because
+      # the PR job passed: verify the same merged source and resolved versions.
+      - name: Build merged-source SBOM and scan every release dependency in OSV
+        if: steps.version.outputs.exists != 'true'
+        shell: bash
+        run: |
+          gradle --no-daemon :app:cyclonedxDirectBom
+          python3 scripts/osv_release_scan.py \
+            --sbom app/build/reports/cyclonedx-direct/bom.json \
+            --report app/build/reports/security/osv-release-report.json \
+            --csv app/build/reports/security/osv-release-components.csv \
+            --fail-on-findings
       - name: Publish APK and AAB (signed only when publisher key is configured)
         if: steps.version.outputs.exists != 'true'
         shell: bash

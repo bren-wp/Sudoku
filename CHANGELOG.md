@@ -1,3 +1,12 @@
+## 1.0.72 — svih deset originalnih referenci izmjereno, konkretni R8 i OSV/CVE audit
+
+- **Pravi originali:** svih deset vlasnikovih referentnih PNG-ova od 24.10.2026. pronađeno je u privatnoj biblioteci i uspoređeno sa stvarnim Android snimkama v1.0.71 od 13.11.2026. Mjerenje je na izvornoj rezoluciji uz stvarnu početnu stranicu s Resume. Svih 10 izvornika imaju pouzdane SHA-256 otiske unutar `scripts/final_ten_reference_qa.py`, ali ostaju izvan javnog repozitorija.
+- **Pixel QA:** mjerenja prikazuju sirovi RGB MAE na skali 0–255 i precizan udio 100% jednakih RGB/RGBA piksela za svih 10 referenci; nijedna još nije identična. Izvještaj: `docs/pixel-qa-owner-v1.0.71-measured.md`. Brojke v1.0.71 nisu lažno predstavljene kao v1.0.72.
+- **R8:** `scripts/analyze_r8_usage.py` obrađuje stvarni release `usage.txt` i `mapping.txt`, odvojeno broji uklonjene klase i članove po skupinama te izvozi konkretne aplikacijske simbole u privatni build artifact. Ne uklanja se izvorni kod samo zato što je simbol optimiziran iz release APK-a.
+- **OSV/CVE:** `scripts/osv_release_scan.py` skenira svaki točan Maven group:artifact:version iz stvarnog CycloneDX release SBOM-a preko OSV querybatch; poznata ranjiva Log4j verzija služi isključivo za provjeru valjanosti API upita. Prate se sve stranice i detalji s dostupnim CVE aliasima, a parcijalni/bezuspješni upiti ne prolaze. CI i publish blokiraju poznate nalaze.
+- **Dokumenti i testovi:** `docs/r8-osv-audit-v1.0.72.md`, proširena Python regresija autentičnosti svih deset izvornika i deterministički testovi OSV/R8 parsera.
+- **Isporuka:** `versionName=1.0.72`, `versionCode=73`. Novo izdanje i SHA-256 provjere zahtijevaju zeleni Android CI, OSV gate i svih 11 emulatorskih profila. Bez publisher ključa izdanje ostaje testni prerelease.
+
 ## 1.0.71 — točan 1:1 pixel gate, gameplay bilješke i R8/SBOM audit
 
 - **Game Erase:** dok su automatske bilješke uključene, brisanje već praznog polja više nije ponuđeno i ne stvara lažni Undo ili pozadinski zapis. Ručne bilješke i upisani brojevi i dalje se brišu. Dodana Android regresija `SudokuAutoNotesEraseTest`.
