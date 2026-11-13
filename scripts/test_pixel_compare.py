@@ -20,7 +20,7 @@ from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
 from splash_pixel_qa import REGIONS as SPLASH_REGIONS
 from wordmark_pixel_qa import WORDMARK_REGIONS, opaque_bounds, wordmark_report
 from launcher_icon_pixel_qa import ICON_REGIONS, alpha_bounds, launcher_report, verify_monochrome
-from final_ten_reference_qa import TEN, THEMED, audit, validate_image
+from final_ten_reference_qa import TEN, THEMED, OWNER_REFERENCE_SHA256, audit, validate_image
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -80,6 +80,14 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_all_ten_owner_reference_fingerprints_are_checked(self):
+        self.assertEqual(set(TEN), set(OWNER_REFERENCE_SHA256))
+        self.assertTrue(all(len(digest) == 64 for digest in OWNER_REFERENCE_SHA256.values()))
+        self.assertEqual(
+            "7534ad4d8bbfef116ad7d092cb91027f5d393a6008b7ecb37a7a33aed7047fd1",
+            OWNER_REFERENCE_SHA256["09-wordmark"],
+        )
 
     def test_final_ten_gate_requires_every_real_screenshot(self):
         with tempfile.TemporaryDirectory() as tmp:
