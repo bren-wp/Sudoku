@@ -5,6 +5,18 @@ import kotlin.random.Random
 
 /** A deterministic, dependency-free Sudoku generator with uniqueness verification. */
 object SudokuEngine {
+    /**
+     * The shipped game uses exactly 2x2, 2x3 and 3x3 subgrids.
+     * A product-only check would accept 1x4 or 3x2 boxes and validate
+     * a different puzzle variant as though it were a saved Sudoku game.
+     */
+    private fun hasCanonicalBoxes(size: Int, br: Int, bc: Int): Boolean = when (size) {
+        4 -> br == 2 && bc == 2
+        6 -> br == 2 && bc == 3
+        9 -> br == 3 && bc == 3
+        else -> false
+    }
+
     data class Puzzle(
         val size: Int,
         val boxRows: Int,
@@ -52,7 +64,7 @@ object SudokuEngine {
     }
 
     fun isValidCompleted(board: IntArray, size: Int, br: Int, bc: Int): Boolean {
-        if (size !in setOf(4, 6, 9) || br <= 0 || bc <= 0 || br * bc != size ||
+        if (!hasCanonicalBoxes(size, br, bc) ||
             board.size != size * size) return false
         val expected = (1..size).toSet()
         for (r in 0 until size) {
@@ -72,7 +84,7 @@ object SudokuEngine {
 
     /** Counts at most limit solutions, using a minimum-remaining-values search. */
     fun countSolutions(input: IntArray, size: Int, br: Int, bc: Int, limit: Int = 2): Int {
-        if (size !in setOf(4, 6, 9) || br <= 0 || bc <= 0 || br * bc != size ||
+        if (!hasCanonicalBoxes(size, br, bc) ||
             input.size != size * size || limit < 1) return 0
         val board = input.clone()
         var solutions = 0
