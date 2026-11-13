@@ -90,14 +90,43 @@ jobs:
             --sbom app/build/reports/cyclonedx-direct/bom.json \
             --aapt2 "$ANDROID_HOME/build-tools/36.0.0/aapt2" \
             --report app/build/reports/security/release-audit.json
-      - name: Upload public release security evidence
+      - name: Analyze concrete R8 removed classes and members
+        shell: bash
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_extended_security_audit.py' -v
+          python3 scripts/analyze_r8_usage.py \
+            --mapping-dir app/build/outputs/mapping/release \
+            --json app/build/reports/security/r8-removed-symbols.json \
+            --app-symbols app/build/reports/security/r8-unused-app-symbols.txt
+      - name: OSV scan of ALL release Maven components
+        shell: bash
+        run: |
+          python3 scripts/osv_release_scan.py \
+            --sbom app/build/reports/cyclonedx-direct/bom.json \
+            --report app/build/reports/security/osv-release-report.json \
+            --csv app/build/reports/security/osv-release-components.csv
+      - name: Upload release security evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Sudoku-release-sbom-r8-audit
+          name: Sudoku-release-sbom-r8-osv-audit
           path: |
             app/build/reports/cyclonedx-direct/bom.json
-            app/build/reports/security/release-audit.json
-          if-no-files-found: error
+            app/build/reports/security/
+          if-no-files-found: warn
+      - name: Block release when OSV finds a known vulnerable dependency
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("app/build/reports/security/osv-release-report.json").read_text())
+          assert report["component_count"] == report["queried_component_count"] and report["positive_control_verified"]
+          findings = report["components_with_matches"]
+          if findings:
+              raise SystemExit(f"OSV: {findings} release dependencies have known advisories; review the uploaded report")
+          print(f"OSV: {report['component_count']} exact Maven versions scanned; no matching OSV advisories at scan time")
+          PY
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
