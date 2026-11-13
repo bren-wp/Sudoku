@@ -20,7 +20,7 @@ from achievements_pixel_qa import REGIONS as ACHIEVEMENTS_REGIONS
 from splash_pixel_qa import REGIONS as SPLASH_REGIONS
 from wordmark_pixel_qa import WORDMARK_REGIONS, opaque_bounds, wordmark_report
 from launcher_icon_pixel_qa import ICON_REGIONS, alpha_bounds, launcher_report, verify_monochrome
-from final_ten_reference_qa import TEN, THEMED, OWNER_REFERENCE_SHA256, audit, validate_image
+from final_ten_reference_qa import TEN, THEMED, OWNER_REFERENCE_SHA256, actual_capture_name, audit, validate_image
 
 
 class PixelCompareTest(unittest.TestCase):
@@ -80,6 +80,11 @@ class PixelCompareTest(unittest.TestCase):
             self.assertTrue((folder / "evidence" / "overlay.png").is_file())
             self.assertTrue((folder / "evidence" / "difference.png").is_file())
             self.assertTrue((folder / "evidence" / "regions.csv").is_file())
+
+    def test_final_ten_qa_accepts_real_home_with_resume_capture(self):
+        self.assertEqual("01-home", actual_capture_name("01-home"))
+        self.assertEqual("01-home-resume", actual_capture_name("01-home", True))
+        self.assertEqual("02-new-game", actual_capture_name("02-new-game", True))
 
     def test_all_ten_owner_reference_fingerprints_are_checked(self):
         self.assertEqual(set(TEN), set(OWNER_REFERENCE_SHA256))
