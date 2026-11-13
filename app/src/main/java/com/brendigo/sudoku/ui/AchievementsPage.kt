@@ -159,7 +159,11 @@ fun AchievementsPage(controller: SudokuController) {
                         compactCards && rowIndex < 4 -> 174.dp
                         compactCards -> 184.dp
                         rowIndex < 2 -> 151.dp
-                        rowIndex < 4 -> 137.dp
+                        rowIndex == 2 -> 137.dp
+                        // The owner's last featured row ends well above the
+                        // scenery; the old 137dp height extended it ~11px.
+                        // Small-screen accessible cards retain flexible mins.
+                        rowIndex == 3 -> 125.dp
                         else -> 151.dp
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

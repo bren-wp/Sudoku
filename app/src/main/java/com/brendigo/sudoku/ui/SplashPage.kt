@@ -127,7 +127,12 @@ fun SplashPage() {
                 letterSpacing = if (fontScale > 1.35f) 2.sp else 5.sp,
                 fontSize = if (landscape || veryNarrow) 12.sp
                 else if (compact) 13.sp else 16.sp,
-                modifier = Modifier.testTag("splash-byline"),
+                // Small bounded baseline adjustment only: larger offsets
+                // overlapped the title's Compose semantics and failed the
+                // real reference emulator layout test.
+                modifier = Modifier
+                    .offset(y = if (!compact && !landscape) (-2).dp else 0.dp)
+                    .testTag("splash-byline"),
                 maxLines = 1,
             )
             Spacer(Modifier.height(if (tightAccessibility || landscape) 6.dp else if (compact) 12.dp else 11.dp))
@@ -139,7 +144,9 @@ fun SplashPage() {
                 else androidx.compose.ui.unit.TextUnit.Unspecified,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                modifier = Modifier.fillMaxWidth().testTag("splash-tagline"),
+                modifier = Modifier.fillMaxWidth()
+                    .offset(y = if (!compact && !landscape) (-2).dp else 0.dp)
+                    .testTag("splash-tagline"),
             )
         }
         // A deterministic loading arc stays visible when Android animations

@@ -1,3 +1,14 @@
+## 1.0.73 — geometrijsko usklađivanje stvarnih Android zaslona
+
+- **Naslovnica:** uži gumb **Nastavi** na kartici spremljene partije, bliži izvornom omjeru bez smanjenja visine dodirne površine.
+- **Postignuća:** četvrti red istaknutih kartica na standardnom referentnom viewportu smanjen na izmjereno nižu visinu; uske i pristupačno povećane kartice zadržavaju fleksibilnu visinu.
+- **Statistika:** prazan panel povijesti ima veću visinu usklađenu s izvornim rasporedom, bez izmišljanja odigranih partija ili dovršetaka.
+- **Dnevni izazov:** smanjen prevelik donji razmak ispod triju metrika, korigiran razmak do metrika te visina tjednog niza. Kompaktni raspored ostaje fleksibilan.
+- **Splash:** byline i tagline korigirani su prema referentnim koordinatama, bez pomicanja interaktivnog sadržaja ili izmjene slogana.
+- **Sigurnost i regresije:** provjeriti Gradle build, lint, punih 11 emulatorskih profila, testove i online OSV/R8 gate. Spremanje i gameplay nisu mijenjani.
+- **Ograničenja:** stvarni primjeri odigranih igara i napretka na originalnim dizajnerskim referencama nisu korisničko stanje i ne smiju se hardkodirati radi umjetnog 1:1 rezultata. Potpuni pixel-exact parity **nije potvrđen** prije novog mjerenja.
+- **Izdanje:** `versionName=1.0.73`, `versionCode=74`; nakon prolaska provjera objaviti testni APK, nepotpisani AAB i SHA256SUMS, uz poštenu release klasifikaciju.
+
 ## 1.0.72 — svih deset originalnih referenci izmjereno, konkretni R8 i OSV/CVE audit
 
 - **Pravi originali:** svih deset vlasnikovih referentnih PNG-ova od 24.10.2026. pronađeno je u privatnoj biblioteci i uspoređeno sa stvarnim Android snimkama v1.0.71 od 13.11.2026. Mjerenje je na izvornoj rezoluciji uz stvarnu početnu stranicu s Resume. Svih 10 izvornika imaju pouzdane SHA-256 otiske unutar `scripts/final_ten_reference_qa.py`, ali ostaju izvan javnog repozitorija.

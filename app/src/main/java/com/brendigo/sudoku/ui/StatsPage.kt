@@ -89,7 +89,10 @@ fun StatsPage(controller: SudokuController) {
         }
         StatisticsSurface(
             Modifier.fillMaxWidth().heightIn(
-                min = if (stats.history.isEmpty()) 140.dp else 136.dp
+                // The owner's reference reserves more of the recent-progress card even
+                // when history has no real results. Keep it empty, never
+                // manufacture sample games merely to fill the panel.
+                min = if (stats.history.isEmpty()) 152.dp else 136.dp
             ).testTag("stats-history-panel")
         ) {
             Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {

@@ -191,7 +191,11 @@ fun DailyPage(controller: SudokuController) {
             DailyHeroBackdrop()
             Column(
                 Modifier.fillMaxWidth().heightIn(min = 202.dp)
-                    .padding(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 12.dp),
+                    // On the full-width reference there is only a narrow
+                    // gap below the three metric chips, not 12dp of empty
+                    // card. Retain the accessible compact spacing.
+                    .padding(start = 16.dp, top = 16.dp, end = 8.dp,
+                        bottom = if (compactHero) 12.dp else 3.dp),
                 verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text("D A N A Š N J I   I Z A Z O V",
@@ -207,11 +211,10 @@ fun DailyPage(controller: SudokuController) {
                     modifier = Modifier.fillMaxWidth(if (compactHero) 1f else .62f),
                     color = Ink.muted, fontSize = 14.sp, lineHeight = 19.sp,
                     maxLines = 2)
-                // Pixel diff from the actual 941×1672 emulator showed a
-                // +0.83 RGB MAE regression and a +2.27 bottom-third shift
-                // when this spacer was reduced to 18dp. Restore the better
-                // measured vertical cadence; keep the subtle metric edges.
-                Spacer(Modifier.height(32.dp))
+                // A previous 18dp experiment pushed the chip row far above
+                // the reference. Keep 30dp for the native 941px profile;
+                // compact layouts retain 32dp and flexible card growth.
+                Spacer(Modifier.height(if (compactHero) 32.dp else 30.dp))
                 Column(
                     Modifier.fillMaxWidth().testTag("daily-metrics"),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -239,7 +242,7 @@ fun DailyPage(controller: SudokuController) {
             }
         }
         }
-        DailyFrame(Modifier.fillMaxWidth().heightIn(min = 122.dp)
+        DailyFrame(Modifier.fillMaxWidth().heightIn(min = 126.dp)
             .testTag("daily-streak-panel")) {
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp),
