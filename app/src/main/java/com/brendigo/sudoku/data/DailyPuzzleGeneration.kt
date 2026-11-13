@@ -26,6 +26,12 @@ internal object DailyPuzzleGeneration {
         },
     ): SudokuEngine.Puzzle? {
         val puzzle = creator(size, level, day.toEpochDay().toInt())
-        return puzzle.takeIf { currentDay() == day }
+        return puzzle.takeIf { isCurrentDay(day, currentDay) }
     }
+
+    /** Reusable guard: callers must recheck after any later suspendable IO. */
+    fun isCurrentDay(
+        puzzleDay: LocalDate,
+        currentDay: () -> LocalDate = { LocalDate.now() },
+    ): Boolean = currentDay() == puzzleDay
 }
