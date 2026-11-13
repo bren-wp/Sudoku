@@ -51,6 +51,20 @@ def compare(
     mean_r, mean_g, mean_b = ImageStat.Stat(difference).mean
     mae = (mean_r + mean_g + mean_b) / 3
     pixel_count = expected.width * expected.height
+    # Rounded RGB MAE may be 0.000 even when one pixel differs.
+    # Exactness must use integer, channel-by-channel pixel equality.
+    exact_channels = [
+        difference.getchannel(channel).point(
+            lambda value: 255 if value == 0 else 0
+        )
+        for channel in ("R", "G", "B")
+    ]
+    exact_rgb_mask = ImageChops.multiply(
+        ImageChops.multiply(exact_channels[0], exact_channels[1]),
+        exact_channels[2],
+    )
+    exact_rgb_pixels = exact_rgb_mask.histogram()[255]
+    exact_rgba_pixels = None
 
     def within_tolerance(threshold: int) -> float:
         # A pixel is within tolerance only when EACH RGB channel is close,
@@ -73,6 +87,10 @@ def compare(
             reference_rgba.getchannel("A"), actual_rgba.getchannel("A")
         )
         alpha_mae = round(ImageStat.Stat(alpha_difference).mean[0], 3)
+        exact_rgba_pixels = ImageChops.multiply(
+            exact_rgb_mask,
+            alpha_difference.point(lambda value: 255 if value == 0 else 0),
+        ).histogram()[255]
         rgba_mae = round((mean_r + mean_g + mean_b +
                           alpha_mae) / 4, 3)
         close_alpha = alpha_difference.point(
@@ -142,6 +160,16 @@ def compare(
     return {
         "screen": actual.stem,
         "mean_error_0_to_255": round(mae, 3),
+        "exact_1_to_1": (
+            exact_rgb_pixels == pixel_count and
+            (exact_rgba_pixels is None or exact_rgba_pixels == pixel_count)
+        ),
+        "exact_rgb_pixels": exact_rgb_pixels,
+        "exact_rgb_pixels_pct": round(exact_rgb_pixels * 100 / pixel_count, 6),
+        "exact_rgba_pixels_pct": (
+            round(exact_rgba_pixels * 100 / pixel_count, 6)
+            if exact_rgba_pixels is not None else None
+        ),
         "pixels_within_12_pct": round(within_12 * 100, 2),
         "pixels_within_24_pct": round(within_24 * 100, 2),
         "ui_region_mae": ui_error,
@@ -207,12 +235,8 @@ def main() -> int:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-    exact = all(
-        float(row["mean_error_0_to_255"]) == 0 and
-        (row["alpha_mae_0_to_255"] is None or
-         float(row["alpha_mae_0_to_255"]) == 0)
-        for row in rows
-    )
+    # Zero after floating-point rounding is not identical to a pixel match.
+    exact = all(row["exact_1_to_1"] for row in rows)
     print("Exact pixel match across all screens:", exact)
     if args.baseline_report is not None:
         with args.baseline_report.open(newline="", encoding="utf-8") as source:
