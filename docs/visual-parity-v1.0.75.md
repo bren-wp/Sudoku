@@ -36,6 +36,19 @@ Svi RGB MAE brojevi su u intenzitetu 0–255. Ovo je **izravna usporedba stvarni
 
 **Strogi rezultat: 0/10.** Razlike na ekranima bez kôdnih izmjena (npr. gameplay) nastaju iz različitog dinamičkog stanja; nisu dokaz poboljšanja aplikacijskog layouta. Nakon vraćanja Home u prethodno stanje treba ponoviti mjerenje s najnovijim SHA.
 
+## Druga stvarna provjera: Home rollback i izolirane fixture snimke
+
+Referentni emulator [#43641921157](https://github.com/bren-wp/Sudoku/actions/runs/43641921157), SHA `237c7b84`, uspješno je izvezao sve standardne snimke i tri nove testne snimke (`fixture-03-game.png`, `fixture-06-statistics.png`, `fixture-07-achievements.png`) u artefaktu `14132438635`. To su stvarni `UiAutomation.takeScreenshot()` PNG-ovi; vlasnički originali ostali su privatni i autentificirani SHA-256 otiscima.
+
+- **Home**: povratak krajolika uspio je — globalni RGB MAE ponovno je **23.903772**, potpuno isti kao izvorna snimka prije pokušaja. Donji ROI također se vratio na izvornu geometriju.
+- **Daily**: ukupni MAE **24.682672**, poboljšanje prethodne dekorativne korekcije ostaje.
+- **Achievements**: ukupni MAE **29.514219**, poboljšanje prethodne dekorativne korekcije ostaje.
+- **Statistics**: globalni MAE bio je 26.310780 dok je nakratko isprobana nova dubinska linija; **nije** proglašen boljim jer su pojedinačni gamepad/štoperica ROI-jevi regresirali (+0.651631, +0.676698 i +0.412566). Naknadnim commitom `6c016994` dodatna linija vraćena je na prethodni, bolji single-vector prikaz. Čeka se autentična provjera **tog** commita.
+- **Gameplay**: ukupni MAE na 237c7b84 iznosi 20.136121 (promjenjiva zagonetka); to nije dokaz geometrijskog poboljšanja.
+- **Wordmark/Launcher**: i dalje 18.833920 i 16.174683 MAE; bez lažne tvrdnje da je logo ili ikona 1:1.
+
+Sva **deset** originala na SHA 237c7b84 i dalje su **0/10** strogo RGBA/piksel točna. Te vrijednosti ne dokazuju rezultat nakon naknadnog povrata statističkih vektora. Potrebna je ponovna emulatorska provjera trenutnog PR heada i svih 11 profila.
+
 ## Reproducibilna stroga provjera
 
 `scripts/compare_visual_iteration.py` zahtijeva svih deset originala i oba skupa screenshotova, njihove stvarne dimenzije i svih deset izvornik SHA-256. Uz globalni RGB MAE bilježi MAE za stabilniji donji ROI `y ∈ [0.79h, h]`, točne RGB **i RGBA** piksele i SHA-256 svih snimki. Razlika MAE ne može nadomjestiti `exact_1_to_1`. Komanda:
