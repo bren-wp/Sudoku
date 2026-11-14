@@ -27,12 +27,15 @@ def measure_rgb(reference: Image.Image, actual: Image.Image) -> dict:
         reference.convert("RGBA"), actual.convert("RGBA")
     )
     mean = sum(ImageStat.Stat(diff).mean) / 3
+    rgba_channel_means = ImageStat.Stat(alpha_diff).mean
     exact = sum(1 for pixel in diff.getdata() if pixel == (0, 0, 0))
     exact_rgba = sum(1 for pixel in alpha_diff.getdata()
                      if pixel == (0, 0, 0, 0))
     total = reference.width * reference.height
     return {
         "mae_0_to_255": mean,
+        "alpha_mae_0_to_255": rgba_channel_means[3],
+        "rgba_mae_0_to_255": sum(rgba_channel_means) / 4,
         "exact_rgb_pixels": exact,
         "exact_rgba_pixels": exact_rgba,
         "exact_rgb_percent": 100 * exact / total,
@@ -58,6 +61,10 @@ def compare_one(ref: Path, before: Path, after: Path, bottom_start: float) -> di
         "before_full_mae": before_full["mae_0_to_255"],
         "after_full_mae": after_full["mae_0_to_255"],
         "full_mae_delta": after_full["mae_0_to_255"] - before_full["mae_0_to_255"],
+        "before_alpha_mae": before_full["alpha_mae_0_to_255"],
+        "after_alpha_mae": after_full["alpha_mae_0_to_255"],
+        "before_rgba_mae": before_full["rgba_mae_0_to_255"],
+        "after_rgba_mae": after_full["rgba_mae_0_to_255"],
         "before_bottom_mae": before_bottom["mae_0_to_255"],
         "after_bottom_mae": after_bottom["mae_0_to_255"],
         "bottom_mae_delta": after_bottom["mae_0_to_255"] - before_bottom["mae_0_to_255"],
