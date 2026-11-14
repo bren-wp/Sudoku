@@ -9,28 +9,32 @@
 - Prije izmjene: stvarne Android snimke prethodnog PR-a #81 iz `sudoku-emulator-screen-references`, Actions run #43515302886, SHA `33e10b8`; produkcijski Compose UI jednak je v1.0.74.
 - Razlika izvornik ↔ stvarna snimka **nije samo geometrijska**: referentne slike sadrže različit datum, broj završenih igara, napredak, odabir polja i Sudoku zagonetku. Statistika i Postignuća moraju ostati vezani uz stvarne korisničke podatke.
 
-## Hipoteza i stvarni kod
+## Intervencija, stvarno mjerenje i uklonjena regresija
 
-**P1 vizualni — dekorativni donji sloj:** na Home, Daily, Statistics i Achievements stvarni scenografski sloj `scenery-reference.webp` pojavljuje se previsoko u odnosu na original: pozadinski cvjetovi i vodena površina ulaze iza kartica. U `SudokuDesign.kt` pomaknut je isključivo početak **dekorativnog**, neinteraktivnog sloja s `0.730 × visina` na `0.790 × visina`, bez izmjene ploče, HUD-a, gumba, kartica, resursa ili podataka. Splash, Gameplay, New Game i Settings imaju svoje zasebne postojeće prijelaze i nisu mijenjani.
+**P1 vizualni — dekorativni donji sloj:** pomak početka neinteraktivnog `scenery-reference.webp` sloja s `0.730h` na `0.790h` isproban je na Home, Daily, Statistics i Achievements. Prvi stvarni screenshotovi iz [Android visual smoke #43639001341](https://github.com/bren-wp/Sudoku/actions/runs/43639001341) na SHA `9865735` potvrđuju bolji donji ROI za Daily (−0,438641 MAE), Statistics (−0,538098) i Achievements (−0,658204).
 
-To je **hipoteza za verifikaciju**, ne tvrdnja da se MAE poboljšao: potrebno je ponoviti autentični screenshot PR heada i odbaciti izmjenu ako donji ROI ili cijeli zaslon regresira bez opravdanja.
+**Home regresija odbijena:** isti pomak pogoršao je donji ROI Naslovnice za +0,468180 MAE, premda je ukupni MAE nešto pao. Zato kod na SHA `4f7a560` eksplicitno vraća **Home na 0.730h**, a zadržava **Daily/Statistics/Achievements na 0.790h**. Točno stanje nakon te korekcije mora se potvrditi novim screenshotom aktualnog PR heada.
 
-## Before / After (za popunjavanje nakon Android CI)
+Splash, Gameplay, New Game i Settings imaju svoje postojeće prijelaze i nisu mijenjani; svi gumbi, kartice, tipografija, 3D bedževi, HUD, spremanje i statistika ostaju stvarne Compose/logičke komponente. 
 
-Svi RGB MAE brojevi su u intenzitetu 0–255. To nisu postoci. Prije su dokazane vrijednosti iz PR-a #81; nakon je zasad **neizmjereno**.
+## Stvarna Before / After usporedba prvog kandidata
 
-| Zaslon | Prije: cijeli RGB MAE | Poslije | Prije: 1:1 | Poslije |
-| --- | ---: | --- | --- | --- |
-| Home (Resume) | 23.903772 | čeka stvarni PNG | ne | čeka |
-| New Game | 22.622370 | čeka stvarni PNG | ne | čeka |
-| Gameplay | 20.361789 | čeka stvarni PNG | ne | čeka |
-| Settings | 19.421990 | čeka stvarni PNG | ne | čeka |
-| Daily | 24.743339 | čeka stvarni PNG | ne | čeka |
-| Statistics | 26.541994 | čeka stvarni PNG | ne | čeka |
-| Achievements | 29.749992 | čeka stvarni PNG | ne | čeka |
-| Splash | 10.370861 | čeka stvarni PNG | ne | čeka |
-| Wordmark | 18.833920 | čeka stvarni PNG | ne | čeka |
-| Launcher | 16.174683 | čeka stvarni PNG | ne | čeka |
+Svi RGB MAE brojevi su u intenzitetu 0–255. Ovo je **izravna usporedba stvarnih Android PNG-ova** (baseline SHA `33e10b8`, kandidat SHA `9865735`) protiv istih privatnih vlasnikovih originala. Originali su SHA-256 verificirani, bez interpolacije. Brojevi za 986... nisu automatski rezultati **naknadnog** korekcijskog SHA `4f7a560`.
+
+| Zaslon | Prije puni MAE | Prvi kandidat puni MAE | Promjena donjeg ROI | 1:1 |
+| --- | ---: | ---: | ---: | --- |
+| Home / Resume | 23.903772 | 23.816400 | **+0.468180 — regresija, vraćeno u kodu** | ne |
+| New Game | 22.622370 | 22.622370 | +0.000000 | ne |
+| Gameplay | 20.361789 | 20.167486 | +0.000000 | ne |
+| Settings | 19.421990 | 19.422299 | +0.001468 | ne |
+| Daily | 24.743339 | 24.682672 | **−0.438641** | ne |
+| Statistics | 26.541994 | 26.300123 | **−0.538098** | ne |
+| Achievements | 29.749992 | 29.514219 | **−0.658204** | ne |
+| Splash | 10.370861 | 10.370861 | +0.000000 | ne |
+| Wordmark | 18.833920 | 18.833920 | +0.000000 | ne |
+| Launcher | 16.174683 | 16.174683 | +0.000000 | ne |
+
+**Strogi rezultat: 0/10.** Razlike na ekranima bez kôdnih izmjena (npr. gameplay) nastaju iz različitog dinamičkog stanja; nisu dokaz poboljšanja aplikacijskog layouta. Nakon vraćanja Home u prethodno stanje treba ponoviti mjerenje s najnovijim SHA.
 
 ## Reproducibilna stroga provjera
 
