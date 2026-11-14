@@ -1,6 +1,6 @@
 ## 1.0.75 — izmjeriva 1:1 korekcija donje scenografije (kandidat)
 
-- **Home, Dnevni izazov, Statistika i Postignuća:** početak čisto dekorativnog pejzažnog sloja spušten je sa 73 % na 79 % visine zaslona radi usporedbe s izvornim cvjetovima/jezerom. Sve Compose kontrole, HUD, napredak i pristupačnost ostaju stvarni i nepromijenjeni.
+- **Dnevni izazov, Statistika i Postignuća:** početak čisto dekorativnog pejzažnog sloja spušten je sa 73 % na 79 % visine zaslona. Stvarni referentni emulator prvi je potvrdio smanjenje donjeg RGB MAE za 0,439 / 0,538 / 0,658. **Naslovnica vraćena** na 73 % jer se donji regionalni MAE pogoršao za 0,468; potrebno je ponoviti snimanje nakon te korekcije. Sve Compose kontrole, HUD, napredak i pristupačnost ostaju stvarni i nepromijenjeni.
 - **Pixel QA prije/poslije:** novi `scripts/compare_visual_iteration.py` strogo provjerava svih deset vlasnikovih originalnih SHA-256 PNG-ova i oba stvarna skupa Android snimaka; mjeri cijeli RGB MAE, donji ROI, RGB/RGBA jednakost i potpune SHA-256 rezultate. Dodani regresijski testovi, uključujući samo alfa razliku.
 - **Nedovršeno:** izmjera poslije zahvata, sva emulatorska testiranja, security/release provjere, potpuno poravnanje svih zaslona, dodatni 3D i tipografski zahvati. Nikakav 1:1 rezultat nije unaprijed proglašen.
 - **Izdanje:** `versionName=1.0.75`, `versionCode=76` samo na razvojnoj grani. Ne spajati ni objaviti prije potvrđenih CI, vizualnih i R8/OSV provjera. Bez publisher potpisa samo prerelease.
