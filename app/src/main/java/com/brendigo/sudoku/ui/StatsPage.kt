@@ -605,21 +605,16 @@ private fun StatTile(
                             color,
                         )
                     } else {
-                        // The source's 3D gamepad/stopwatch has a shallow
-                        // recessed contour, not a flat duplicated bitmap.
-                        // Draw a sub-2dp dark lower edge under the actual
-                        // accessible vector glyph; keep the icon geometry,
-                        // label and clickable tile unchanged.
+                        // The real reference emulator measured a
+                        // 0.41–0.68 RGB MAE regression when adding a second
+                        // offset contour. Preserve the original, sharper
+                        // single-vector icon until a genuinely better 3D
+                        // treatment passes the same native ROI comparison.
                         val kind = when (id) {
                             "played" -> "gamepad"
                             "best", "total" -> "timer"
                             else -> "statistics"
                         }
-                        BrandIcon(
-                            kind,
-                            Modifier.fillMaxSize().offset(x = 1.dp, y = 1.5.dp),
-                            color.copy(alpha = .30f),
-                        )
                         BrandIcon(kind, Modifier.fillMaxSize(), color)
                     }
                 }
