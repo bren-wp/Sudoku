@@ -53,6 +53,10 @@ Na svim drugim uređajima ostaju zasebni Compose i funkcionalni testovi. Brojke 
 
 ## Testovi i release
 
+**Referentna stanja za statičnu grafiku:** dodatni test u `SudokuVisualSmokeTest` reproducira stvarne Compose stranice Statistika, Postignuća i Gameplay s konzistentnim naprednim sintetičkim podacima kroz odvojeni testni `SharedPreferences`. Odvojene snimke `fixture-06-statistics.png`, `fixture-07-achievements.png`, `fixture-03-game.png` nikad ne zamjenjuju 10 live-state referenci; zatim se testni zapis briše. Pojedinačni 3D badge ROI-jevi i granice native gumba dodatno su mjerljive. [Metoda i ograničenja](isolated-reference-fixture-qa-v1.0.75.md).
+
+- [ ] Tri stvarna fixture PNG-a i dimenzije 941×1672 potvrđeni na referentnom emulatoru
+- [ ] Test APK kompiliran u Android CI (ne samo :app:testDebugUnitTest)
 - [ ] Python kontrolni testovi (RGB/RGBA alfa, nepripadajuće dimenzije, ROI) na head SHA
 - [ ] Android JUnit, lint, debug/release APK i AAB, release runtime smoke
 - [ ] CycloneDX, online OSV, R8, compiled manifest i security audit
