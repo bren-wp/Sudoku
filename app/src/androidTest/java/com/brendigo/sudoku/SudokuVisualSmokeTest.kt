@@ -2348,6 +2348,14 @@ class SudokuVisualSmokeTest {
                 controller.game?.size == 9) {
                 "The real GamePage did not load the 9×9 fixture"
             }
+            // A populated reference screenshot is not permission to invent
+            // impossible production progression. Every fixture subtotal
+            // must agree with the actual controller's completed-game count.
+            check(controller.stats.winsByLevel.sum() == controller.stats.finished &&
+                controller.stats.winsBySize.sum() == controller.stats.finished &&
+                controller.stats.totalPlayedSeconds >= controller.stats.totalSeconds) {
+                "Visual fixture contains contradictory achievement/gameplay statistics"
+            }
             rule.runOnUiThread {
                 controller.go(Screen.STATS)
                 rule.activity.setContent {
