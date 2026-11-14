@@ -584,6 +584,7 @@ private fun StatTile(
             ) {
                 Box(
                     Modifier.size(if (compact) 35.dp else 46.dp)
+                        .testTag("stat-icon-$id")
                         .drawBehind {
                             val center = Offset(size.width * .5f, size.height * .5f)
                             drawCircle(
@@ -604,14 +605,22 @@ private fun StatTile(
                             color,
                         )
                     } else {
+                        // The source's 3D gamepad/stopwatch has a shallow
+                        // recessed contour, not a flat duplicated bitmap.
+                        // Draw a sub-2dp dark lower edge under the actual
+                        // accessible vector glyph; keep the icon geometry,
+                        // label and clickable tile unchanged.
+                        val kind = when (id) {
+                            "played" -> "gamepad"
+                            "best", "total" -> "timer"
+                            else -> "statistics"
+                        }
                         BrandIcon(
-                            when (id) {
-                                "played" -> "gamepad"
-                                "best", "total" -> "timer"
-                                else -> "statistics"
-                            },
-                            Modifier.fillMaxSize(), color,
+                            kind,
+                            Modifier.fillMaxSize().offset(x = 1.dp, y = 1.5.dp),
+                            color.copy(alpha = .30f),
                         )
+                        BrandIcon(kind, Modifier.fillMaxSize(), color)
                     }
                 }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
