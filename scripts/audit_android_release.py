@@ -70,10 +70,12 @@ def inspect_r8(mapping_dir: Path) -> dict:
     if class_count == 0:
         raise ValueError("R8 mapping has no class remappings")
     usage = mapping_dir / "usage.txt"
-    usage_count = (
-        sum(1 for line in usage.open(encoding="utf-8", errors="replace"))
-        if usage.is_file() else None
-    )
+    # Always close the stream; automated CI previously emitted an unclosed
+    # ResourceWarning while auditing the actual optimized release mapping.
+    usage_count = None
+    if usage.is_file():
+        with usage.open(encoding="utf-8", errors="replace") as stream:
+            usage_count = sum(1 for _ in stream)
     return {
         "r8_mapping_present": True,
         "r8_mapping_bytes": mapping.stat().st_size,
