@@ -2373,6 +2373,19 @@ class SudokuVisualSmokeTest {
                 }
             }
             waitFor("stat-tile-played")
+            val dp = rule.activity.resources.displayMetrics.density
+            for (key in listOf("played", "best", "total", "streak")) {
+                val card = rule.onNodeWithTag("stat-tile-$key").fetchSemanticsNode().boundsInRoot
+                val vector = rule.onNodeWithTag("stat-icon-$key", useUnmergedTree = true)
+                    .fetchSemanticsNode().boundsInRoot
+                check(vector.width >= 34f * dp &&
+                    vector.left >= card.left - dp &&
+                    vector.right <= card.right + dp &&
+                    vector.top >= card.top - dp &&
+                    vector.bottom <= card.bottom + dp) {
+                    "Real 3D/vector icon $key clips or overflows its metric card: $vector / $card"
+                }
+            }
             rule.onNode(hasContentDescription("Odigrane igre: 124")).assertIsDisplayed()
             rule.onNode(hasContentDescription("Najbolje vrijeme: 02:18"))
                 .assertIsDisplayed()
