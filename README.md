@@ -33,7 +33,7 @@ Spoj klasične Sudoku igre, modernog tamnoplavog dizajna i pažljivo oblikovanih
 
 ## 🎯 Vizualna QA iteracija v1.0.75 (u razvoju)
 
-Uspoređujemo autentičnih 10 vlasnikovih PNG referenci sa stvarnim Android screenshotovima iste verzije i commita. Kod u razvojnom PR-u spušta samo dekorativni cvjetni/jezerski sloj na Dnevnom izazovu, Statistici i Postignućima, uz očuvanje svih Compose kontrola. Naslovnica je vraćena na stari položaj nakon potvrđenog regionalnog pogoršanja. Na prvim stvarnim snimkama donji ROI tih triju ekrana izmjereno se poboljšao, ali novi završni SHA i dalje zahtijeva provjeru. Za nultu 1:1 razliku potrebna je stvarna ponovljena RGBA usporedba; trenutačno **nije potvrđena**. Detalji: [QA v1.0.75](docs/visual-parity-v1.0.75.md).
+Uspoređujemo autentičnih 10 vlasnikovih PNG referenci sa stvarnim Android screenshotovima iste verzije i commita. Kod u razvojnom PR-u spušta samo dekorativni cvjetni/jezerski sloj na Dnevnom izazovu, Statistici i Postignućima, uz očuvanje svih Compose kontrola. Naslovnica je vraćena na stari položaj nakon potvrđenog regionalnog pogoršanja. Na prvim stvarnim snimkama donji ROI tih triju ekrana izmjereno se poboljšao, ali novi završni SHA i dalje zahtijeva provjeru. Za nultu 1:1 razliku potrebna je stvarna ponovljena RGBA usporedba; trenutačno **nije potvrđena**. Detalji: [QA v1.0.75](docs/visual-parity-v1.0.75.md). Tri zasebne **izolirane testne screenshot** snimke čuvaju produkcijske podatke i reproduciraju naprednog igrača: [Android fixture QA](docs/isolated-reference-fixture-qa-v1.0.75.md).
 
 ## ✨ Preciznije sučelje u v1.0.73
 
