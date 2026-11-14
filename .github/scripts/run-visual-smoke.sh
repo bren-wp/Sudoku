@@ -29,7 +29,7 @@ elif [[ "${1:-}" == "--reference-capture" ]]; then
   # First collect the clean Home and other reference screens.
   # A later separate instrumentation invocation creates the real resume
   # state. The completed first capture remains immutable in MediaStore.
-  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa")
+  gradle_args+=("-Pandroid.testInstrumentationRunnerArguments.class=com.brendigo.sudoku.SudokuVisualSmokeTest#captureRealSplashScreenForReferenceQA,com.brendigo.sudoku.SudokuVisualSmokeTest#screenNavigationAndGameplayControls,com.brendigo.sudoku.SudokuVisualSmokeTest#captureActualComposeWordmarkForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureNativeLauncherForTenReferenceQa,com.brendigo.sudoku.SudokuVisualSmokeTest#captureReferenceLikeStatsAchievementsAndGameplayWithoutPlayerData")
   export_args+=("--reference-capture")
 elif [[ "${1:-}" == "--tablet-capture" ]]; then
   # Bounded real-Android capture prevents exhausting emulator graphics buffers.
