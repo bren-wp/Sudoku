@@ -477,7 +477,11 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 newGame -> .800f
                 gameplay -> .795f
                 settings -> .830f
-                else -> .730f
+                // In the owner's Home, Daily, Statistics and Achievements
+                // originals the flowering lakeside foreground starts below
+                // the action cards, not behind their lower rows. Keep the
+                // decorative crop below those real Compose controls.
+                else -> .790f
             }
             val height = 1f - y
             drawImage(
