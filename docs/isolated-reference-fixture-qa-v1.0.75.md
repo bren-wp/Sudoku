@@ -29,15 +29,15 @@ Datum `lastDaily` u testu postavlja se na lokalni datum emulatora kako bi pravi 
 - `statistics_pixel_qa.py`: dodatni statični ROI-jevi gamepada, dvaju štoperica i bedža niza.
 - `achievements_pixel_qa.py`: dodatni ROI-jevi 3D trofeja, kalendara, mozga i munje.
 - `gameplay_pixel_qa.py`: ROI-jevi stvarnih native Back/Pause/Settings kontrola, ne dinamičkog Sudoku polja.
-- `StatsPage`: vrlo mala dubinska vektorska sjena ispod postojećeg gamepada/štoperice, bez promjene klikabilnih površina.
+- `StatsPage`: potvrđene su mjerljive zasebne ikone svih četiriju kartica. Pokušaj dodavanja drugog sub-2dp 3D obruba **povučen** je nakon stvarnog referentnog snimanja: RGB MAE povećao se za +0,651631 (gamepad), +0,676698 (najbolja štoperica) i +0,412566 (ukupna štoperica). Vraćen je kvalitetniji prethodni single-vector prikaz; testne oznake i geometrijski testovi zadržani.
 - `audit_android_release.py`: zatvoren `usage.txt` stream u R8 sigurnosnom auditu; uklonjen potencijalni `ResourceWarning`.
 - Android CI provjerava i Bash sintaksu instrumentacijskog pokretanja i izvoza screenshotova.
 
 ## Nužni kriteriji zatvaranja
 
-- [ ] Build, JUnit, Android lint, sigurnosne provjere i statični testovi na **točnom završnom SHA**
+- [ ] Build, JUnit, Android lint, sigurnosne provjere i statični testovi na **točnom završnom SHA** (prije posljednjeg povrata ikona prošli su na `237c7b8`, sada čeka novi SHA)
 - [ ] **11/11** emulatorskih poslova završilo s `success` (ne `cancelled`, `skipped` ili `queued`)
-- [ ] Tri fixture PNG-a dokazana iz stvarnog referentnog emulatora s izvornom rezolucijom
+- [x] Tri fixture PNG-a dokazana na stvarnom referentnom emulatoru [run #43641921157](https://github.com/bren-wp/Sudoku/actions/runs/43641921157), artifact `14132438635`, 941×1672; **naknadna** korekcija ikona zahtijeva ponovnu provjeru novog SHA
 - [ ] Izmjeriti prije/poslije lokalne ROI-jeve 3D ikona i vidjeti je li novi vektorski sloj stvarno bolji; povući ako regresira
 - [ ] Ponoviti SHA-256 autentificiranu usporedbu svih 10 vlasničkih originala za trenutačni PR head, bez skaliranja i bez izmišljanja korisničkog stanja
 - [ ] Dovršiti ostale razlike 3D ilustracija, obruba, tipografije, ekrana, modala, logotipa i launchera
