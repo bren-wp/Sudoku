@@ -42,5 +42,26 @@ if [[ "${1:-}" == "--reference-capture" ]]; then
     echo "::error::Invalid resume-state Home PNG"; exit 1;
   }
   count=$((count + 1))
+  # These are separate TEST-ONLY deterministic-state captures. They must
+  # never replace the ten authentic live-state reference screenshots.
+  for fixture in fixture-03-game fixture-06-statistics fixture-07-achievements; do
+    file="$OUT/$fixture.png"
+    test -s "$file" || { echo "::error::Missing isolated-state $fixture PNG"; exit 1; }
+    signature="$(od -An -N8 -tx1 "$file" | tr -d ' \\n')"
+    [[ "$signature" == "89504e470d0a1a0a" ]] || {
+      echo "::error::Invalid isolated-state PNG $fixture"; exit 1;
+    }
+    dimensions="$(python3 - "$file" <<'PY'
+import struct, sys
+with open(sys.argv[1], "rb") as handle:
+    handle.seek(16)
+    print("x".join(map(str, struct.unpack(">II", handle.read(8)))))
+PY
+)"
+    [[ "$dimensions" == "941x1672" ]] || {
+      echo "::error::Wrong isolated-state reference resolution: $fixture ($dimensions)"; exit 1;
+    }
+    count=$((count + 1))
+  done
 fi
 echo "Exported and verified $count real PNG screens from Android emulator"
