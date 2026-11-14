@@ -21,6 +21,11 @@ from home_pixel_qa import measure_regions
 REGIONS = {
     "whole": (0, 0, 941, 1672),
     "header": (0, 0, 941, 150),
+    # Buttons remain native controls; independent art ROI excludes the
+    # variable timer, error hearts, active board and selected digits.
+    "back_icon_control": (55, 58, 130, 142),
+    "pause_icon_control": (775, 58, 852, 142),
+    "settings_icon_control": (864, 58, 938, 142),
     "hud": (0, 140, 941, 250),
     "board": (40, 250, 890, 1110),
     "board_top": (40, 250, 890, 680),

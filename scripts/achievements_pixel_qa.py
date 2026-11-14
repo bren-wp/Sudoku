@@ -21,6 +21,12 @@ REGIONS = {
     "whole": (0, 0, 941, 1672),
     "header": (0, 0, 941, 160),
     "summary": (38, 160, 894, 319),
+    # Pixel-level art diagnostics: exclude reward values and progress text.
+    "summary_trophy_3d": (82, 188, 181, 290),
+    "first_trophy_3d": (76, 353, 198, 470),
+    "calendar_3d": (513, 351, 636, 470),
+    "brain_3d": (75, 672, 200, 786),
+    "lightning_3d": (512, 665, 629, 786),
     "first_award_row": (36, 333, 895, 642),
     "second_award_row": (36, 650, 895, 956),
     "third_award_row": (36, 974, 895, 1274),

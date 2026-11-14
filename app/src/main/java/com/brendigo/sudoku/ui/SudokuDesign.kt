@@ -477,7 +477,14 @@ fun ScenicBackdrop(modifier: Modifier = Modifier, bright: Boolean = false,
                 newGame -> .800f
                 gameplay -> .795f
                 settings -> .830f
-                else -> .730f
+                // Actual owner-PNG/Android comparison rejected the .790f
+                // placement on Home: bottom-region RGB MAE rose by 0.468.
+                // Preserve its previous, better .730f reference geometry.
+                home -> .730f
+                // The same real screenshot QA improved the bottom region
+                // on Daily (-.439), Statistics (-.538) and Achievements (-.658).
+                // Only those non-interactive decorative crops move lower.
+                else -> .790f
             }
             val height = 1f - y
             drawImage(

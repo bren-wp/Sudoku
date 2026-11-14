@@ -23,6 +23,11 @@ REGIONS = {
     "whole": (0, 0, 941, 1672),
     "header": (0, 0, 941, 185),
     "metric_cards": (30, 185, 909, 550),
+    # Stable vector/3D emblem geometry only, not played/best/streak figures.
+    "played_gamepad_3d": (82, 230, 180, 337),
+    "best_stopwatch_3d": (518, 230, 618, 337),
+    "total_stopwatch_3d": (82, 403, 180, 515),
+    "streak_flame_3d": (518, 403, 620, 520),
     "chart_row": (30, 550, 909, 1030),
     "history": (30, 1040, 909, 1320),
     "achievement_previews": (30, 1320, 909, 1550),

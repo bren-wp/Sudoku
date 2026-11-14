@@ -584,6 +584,7 @@ private fun StatTile(
             ) {
                 Box(
                     Modifier.size(if (compact) 35.dp else 46.dp)
+                        .testTag("stat-icon-$id")
                         .drawBehind {
                             val center = Offset(size.width * .5f, size.height * .5f)
                             drawCircle(
@@ -604,14 +605,17 @@ private fun StatTile(
                             color,
                         )
                     } else {
-                        BrandIcon(
-                            when (id) {
-                                "played" -> "gamepad"
-                                "best", "total" -> "timer"
-                                else -> "statistics"
-                            },
-                            Modifier.fillMaxSize(), color,
-                        )
+                        // The real reference emulator measured a
+                        // 0.41–0.68 RGB MAE regression when adding a second
+                        // offset contour. Preserve the original, sharper
+                        // single-vector icon until a genuinely better 3D
+                        // treatment passes the same native ROI comparison.
+                        val kind = when (id) {
+                            "played" -> "gamepad"
+                            "best", "total" -> "timer"
+                            else -> "statistics"
+                        }
+                        BrandIcon(kind, Modifier.fillMaxSize(), color)
                     }
                 }
                 Spacer(Modifier.width(if (compact) 13.dp else 14.dp))
