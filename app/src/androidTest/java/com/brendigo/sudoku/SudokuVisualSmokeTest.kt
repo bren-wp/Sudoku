@@ -1,5 +1,20 @@
 package com.brendigo.sudoku
 
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.SharedPreferences
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.brendigo.sudoku.data.Screen
+import com.brendigo.sudoku.data.SudokuController
+import com.brendigo.sudoku.ui.AchievementsPage
+import com.brendigo.sudoku.ui.GamePage
+import com.brendigo.sudoku.ui.ScenicBackdrop
+import com.brendigo.sudoku.ui.StatsPage
+import java.time.LocalDate
+import org.json.JSONArray
+import org.json.JSONObject
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -2218,5 +2233,175 @@ class SudokuVisualSmokeTest {
         shot("07-achievements")
         rule.onNodeWithTag("navigate-back").performScrollTo().performClick()
         waitFor("home-nova-igra")
+    }
+
+    /**
+     * Compare *real* Compose cards/3D awards/HUD using repeatable, plausible data.
+     *
+     * Never write reference numbers into the production UI or the player's
+     * "sudoku_state_v1" preferences. The isolated ContextWrapper has its own
+     * named SharedPreferences, cleared before/after this single instrumentation
+     * test. Screenshots are prefixed "fixture-" and never replace the ordinary
+     * ten live-state reference screenshots.
+     *
+     * The owner's artwork combines illustrative progress totals that may not
+     * satisfy the current scoring formula. This fixture deliberately uses
+     * internally consistent achievements, not invented 420 points / 8 badges.
+     */
+    @Test
+    fun captureReferenceLikeStatsAchievementsAndGameplayWithoutPlayerData() {
+        val base = InstrumentationRegistry.getInstrumentation().targetContext
+        val isolatedName = "sudoku_visual_fixture_" + System.nanoTime().toString()
+        val isolated = object : ContextWrapper(base) {
+            override fun getApplicationContext(): Context = this
+            override fun getSharedPreferences(name: String?, mode: Int): SharedPreferences =
+                base.getSharedPreferences(isolatedName, mode)
+        }
+        val prefs = isolated.getSharedPreferences("sudoku_state_v1", Context.MODE_PRIVATE)
+        check(prefs.edit().clear().commit())
+        try {
+            val day = LocalDate.now()
+            val sevenDays = JSONArray()
+            (6 downTo 0).forEach { offset ->
+                sevenDays.put(day.minusDays(offset.toLong()).toString())
+            }
+            val history = JSONArray().apply {
+                put(JSONObject().put("level", 0).put("size", 9).put("seconds", 138)
+                    .put("date", "2025-04-28").put("daily", false).put("hints", 0))
+                put(JSONObject().put("level", 1).put("size", 9).put("seconds", 332)
+                    .put("date", "2025-04-27").put("daily", false).put("hints", 1))
+                put(JSONObject().put("level", 2).put("size", 9).put("seconds", 603)
+                    .put("date", "2025-04-26").put("daily", false).put("hints", 1))
+                put(JSONObject().put("level", 3).put("size", 9).put("seconds", 745)
+                    .put("date", "2025-04-25").put("daily", false).put("hints", 0))
+            }
+            val fixtureStats = JSONObject().apply {
+                put("played", 124)
+                put("finished", 114)
+                put("totalSeconds", 50_000)
+                put("totalPlayedSeconds", 67_330)
+                put("best", 138)
+                put("streak", 7)
+                put("bestStreak", 7)
+                put("lastDaily", day.toString())
+                put("flawless", 2)
+                put("levels", JSONArray(listOf(39, 35, 28, 12, 0, 0)))
+                put("winsBySize", JSONArray(listOf(12, 18, 84)))
+                put("history", history)
+                put("dailyWins", 7)
+                put("dailyPoints", 350)
+                put("completedDailyDates", sevenDays)
+                put("noHintWins", 6)
+                put("fastWins", 2)
+                put("longWins", 1)
+            }
+
+            // Classic, uniquely soluble 9x9 test puzzle. Values are genuine
+            // session data, not rasterized Sudoku numbers or a screenshot.
+            val solution = "534678912" + "672195348" + "198342567" +
+                "859761423" + "426853791" + "713924856" +
+                "961537284" + "287419635" + "345286179"
+            val givens = "530070000" + "600195000" + "098000060" +
+                "800060003" + "400803001" + "700020006" +
+                "060000280" + "000419005" + "000080079"
+            check(solution.length == 81 && givens.length == 81 && givens[40] == '0')
+            val digits = JSONArray().apply {
+                solution.forEach { put(it.digitToInt()) }
+            }
+            val original = JSONArray().apply {
+                givens.forEach { put(it.digitToInt()) }
+            }
+            val emptyNotes = JSONArray().apply { repeat(81) { put(0) } }
+            val fixtureGame = JSONObject().apply {
+                put("size", 9)
+                put("boxRows", 3)
+                put("boxColumns", 3)
+                put("level", 2)
+                put("solution", digits)
+                put("givens", original)
+                put("board", original)
+                put("notes", emptyNotes)
+                put("selected", 40)
+                put("elapsed", 522)
+                put("mistakes", 1)
+                put("hints", 1)
+                put("notesMode", false)
+                put("paused", false)
+                put("daily", false)
+                put("completed", false)
+                put("failed", false)
+            }
+            check(prefs.edit()
+                .putString("stats", fixtureStats.toString())
+                .putString("stats_backup", fixtureStats.toString())
+                .putString("game", fixtureGame.toString())
+                .putString("regular_game", fixtureGame.toString())
+                .commit())
+            val controller = SudokuController(isolated)
+            check(controller.stats.played == 124 && controller.stats.finished == 114 &&
+                controller.currentStreak(day) == 7) {
+                "The real Statistics UI did not load the isolated fixture"
+            }
+            check(controller.game?.selected == 40 &&
+                controller.game?.elapsed == 522 &&
+                controller.game?.mistakes == 1 &&
+                controller.game?.size == 9) {
+                "The real GamePage did not load the 9×9 fixture"
+            }
+            rule.runOnUiThread {
+                controller.go(Screen.STATS)
+                rule.activity.setContent {
+                    SudokuTheme {
+                        Box(Modifier.fillMaxSize()) {
+                            ScenicBackdrop(
+                                Modifier.fillMaxSize(),
+                                bright = !controller.options.dark,
+                                stats = controller.page == Screen.STATS,
+                                gameplay = controller.page == Screen.GAME,
+                            )
+                            Column(Modifier.fillMaxSize()
+                                .statusBarsPadding().navigationBarsPadding()) {
+                                when (controller.page) {
+                                    Screen.STATS -> StatsPage(controller)
+                                    Screen.ACHIEVEMENTS -> AchievementsPage(controller)
+                                    Screen.GAME -> GamePage(controller)
+                                    else -> Unit
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            waitFor("stat-tile-played")
+            rule.onNode(hasContentDescription("Odigrane igre: 124")).assertIsDisplayed()
+            rule.onNode(hasContentDescription("Najbolje vrijeme: 02:18"))
+                .assertIsDisplayed()
+            rule.onNode(hasContentDescription("Dnevni niz: 7")).assertIsDisplayed()
+            rule.onNodeWithTag("stats-history-panel").assertExists()
+            shot("fixture-06-statistics")
+
+            rule.runOnUiThread { controller.go(Screen.ACHIEVEMENTS) }
+            waitFor("achievement-summary")
+            rule.onNodeWithTag("achievement-summary-3d-badge").assertExists()
+            rule.onNodeWithTag("achievement-prva-pobjeda").assertIsDisplayed()
+            rule.onNodeWithTag("achievement-sedam-dana-zaredom").assertIsDisplayed()
+            shot("fixture-07-achievements")
+
+            rule.runOnUiThread { controller.go(Screen.GAME) }
+            waitFor("sudoku-board")
+            rule.onNodeWithTag("sudoku-cell-40").assertExists()
+            rule.onNodeWithTag("game-hud").assertIsDisplayed()
+            rule.onNodeWithTag("game-tool-row").assertExists()
+            shot("fixture-03-game")
+
+            // The test UI reads seeded data but never performs a save or
+            // mutates the fixture, let alone the genuine player profile.
+            check(JSONObject(prefs.getString("stats", "{}")!!).getInt("played") == 124)
+            check(JSONObject(prefs.getString("game", "{}")!!).getInt("selected") == 40)
+        } finally {
+            check(prefs.edit().clear().commit())
+            // Remove the entire dedicated test preferences file.
+            check(base.deleteSharedPreferences(isolatedName))
+        }
     }
 }
