@@ -25,6 +25,8 @@ class VisualIterationTests(unittest.TestCase):
         result = measure_rgb(reference, actual)
         self.assertEqual(16, result["exact_rgb_pixels"])
         self.assertEqual(15, result["exact_rgba_pixels"])
+        self.assertGreater(result["alpha_mae_0_to_255"], 0)
+        self.assertGreater(result["rgba_mae_0_to_255"], 0)
         self.assertFalse(result["identical"])
 
     def test_region_reports_improvement_without_faking_full_match(self):
