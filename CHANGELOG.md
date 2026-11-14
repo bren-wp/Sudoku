@@ -1,3 +1,11 @@
+## 1.0.75 — izmjeriva 1:1 korekcija donje scenografije (kandidat)
+
+- **Home, Dnevni izazov, Statistika i Postignuća:** početak čisto dekorativnog pejzažnog sloja spušten je sa 73 % na 79 % visine zaslona radi usporedbe s izvornim cvjetovima/jezerom. Sve Compose kontrole, HUD, napredak i pristupačnost ostaju stvarni i nepromijenjeni.
+- **Pixel QA prije/poslije:** novi `scripts/compare_visual_iteration.py` strogo provjerava svih deset vlasnikovih originalnih SHA-256 PNG-ova i oba stvarna skupa Android snimaka; mjeri cijeli RGB MAE, donji ROI, RGB/RGBA jednakost i potpune SHA-256 rezultate. Dodani regresijski testovi, uključujući samo alfa razliku.
+- **Nedovršeno:** izmjera poslije zahvata, sva emulatorska testiranja, security/release provjere, potpuno poravnanje svih zaslona, dodatni 3D i tipografski zahvati. Nikakav 1:1 rezultat nije unaprijed proglašen.
+- **Izdanje:** `versionName=1.0.75`, `versionCode=76` samo na razvojnoj grani. Ne spajati ni objaviti prije potvrđenih CI, vizualnih i R8/OSV provjera. Bez publisher potpisa samo prerelease.
+- **Dokumentacija:** [evidencija i protokol](docs/visual-parity-v1.0.75.md).
+
 ## 1.0.74 — zaštita datuma dnevne partije i R8 release runtime gate (u razvoju)
 
 - **Dnevni izazov:** ponovna provjera lokalnog kalendarskog dana nakon suspendabilnog spremanja prethodne partije i prije aktiviranja nove. Time kasni checkpoint ne može objaviti jučerašnji izazov pod starim datumom.
