@@ -18,6 +18,15 @@ class VisualIterationTests(unittest.TestCase):
         self.assertFalse(result["identical"])
         self.assertGreater(result["mae_0_to_255"], 0)
 
+    def test_alpha_only_difference_is_not_claimed_pixel_identical(self):
+        reference = Image.new("RGBA", (4, 4), (0, 20, 80, 0))
+        actual = reference.copy()
+        actual.putpixel((2, 3), (0, 20, 80, 1))
+        result = measure_rgb(reference, actual)
+        self.assertEqual(16, result["exact_rgb_pixels"])
+        self.assertEqual(15, result["exact_rgba_pixels"])
+        self.assertFalse(result["identical"])
+
     def test_region_reports_improvement_without_faking_full_match(self):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root)
