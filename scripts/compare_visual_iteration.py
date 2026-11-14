@@ -23,14 +23,21 @@ def measure_rgb(reference: Image.Image, actual: Image.Image) -> dict:
     if reference.size != actual.size:
         raise ValueError(f"Different image dimensions: {reference.size} / {actual.size}")
     diff = ImageChops.difference(reference.convert("RGB"), actual.convert("RGB"))
+    alpha_diff = ImageChops.difference(
+        reference.convert("RGBA"), actual.convert("RGBA")
+    )
     mean = sum(ImageStat.Stat(diff).mean) / 3
     exact = sum(1 for pixel in diff.getdata() if pixel == (0, 0, 0))
+    exact_rgba = sum(1 for pixel in alpha_diff.getdata()
+                     if pixel == (0, 0, 0, 0))
     total = reference.width * reference.height
     return {
         "mae_0_to_255": mean,
         "exact_rgb_pixels": exact,
+        "exact_rgba_pixels": exact_rgba,
         "exact_rgb_percent": 100 * exact / total,
-        "identical": exact == total,
+        "exact_rgba_percent": 100 * exact_rgba / total,
+        "identical": exact_rgba == total,
     }
 
 
