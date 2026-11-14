@@ -78,8 +78,10 @@ jobs:
           else
             echo "SUDOKU_HAS_SIGNING=false" >> "$GITHUB_ENV"
           fi
-      - name: Build debug APK, release APK and AAB
-        run: gradle --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease
+      - name: Build debug APK, instrumented test APK, release APK and AAB
+        # Catch test-only Kotlin/Compose fixture compilation failures BEFORE
+        # the expensive 11-lane emulator workflow starts executing assertions.
+        run: gradle --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest :app:assembleRelease :app:bundleRelease
       - name: Release-only CycloneDX dependency inventory
         run: gradle --no-daemon :app:cyclonedxDirectBom
       - name: Verify compiled release permissions, R8 and dependency inventory
