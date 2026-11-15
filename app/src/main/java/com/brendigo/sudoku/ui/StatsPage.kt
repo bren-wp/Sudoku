@@ -370,58 +370,85 @@ private fun DifficultyChart(stats: Statistics, modifier: Modifier) {
     val colors = listOf(Ink.teal, Ink.blue, Ink.purple, Ink.gold)
     val names = listOf("Lako", "Srednje", "Teško", "Stručno")
     val ceiling = counts.maxOrNull()?.coerceAtLeast(1) ?: 1
+    val largeText = LocalDensity.current.fontScale >= 1.3f
     StatisticsSurface(
-        modifier.height(192.dp).testTag("stats-difficulty-chart")
+        modifier.heightIn(min = if (largeText) 228.dp else 192.dp)
+            .testTag("stats-difficulty-chart")
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 BrandIcon("statistics", Modifier.size(20.dp), Ink.cyan)
                 Spacer(Modifier.width(7.dp))
                 Text("Riješene igre po težini", color = Ink.white,
-                    fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 2)
+                    fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(10.dp))
-            Box(Modifier.fillMaxWidth().height(116.dp)) {
-                StatisticsChartGrid(Modifier.fillMaxSize().padding(bottom = 16.dp))
-                Row(
-                    Modifier.fillMaxSize().padding(horizontal = 5.dp),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    counts.forEachIndexed { index, count ->
-                        Column(Modifier.weight(1f),
-                            horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(count.toString(), color = Ink.white, fontSize = 11.sp, maxLines = 1)
-                            Spacer(Modifier.height(3.dp))
-                            val heightDp = if (count == 0) 2.dp else
-                                (10 + 61 * count / ceiling).dp
-                            Box(
-                                Modifier.fillMaxWidth(.73f).height(heightDp)
-                                    .then(if (count > 0) Modifier.shadow(
-                                        elevation = 3.dp,
-                                        shape = RoundedCornerShape(
-                                            topStart = 5.dp, topEnd = 5.dp),
-                                        ambientColor = colors[index].copy(alpha = .41f),
-                                        spotColor = colors[index].copy(alpha = .34f),
-                                    ) else Modifier)
-                                    .background(
-                                        Brush.verticalGradient(listOf(
-                                            colors[index].copy(alpha = .98f),
-                                            colors[index].copy(alpha = .52f),
-                                        )),
-                                        RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
-                                    )
-                                    // Narrow glossy lip, not a static chart image.
-                                    .border(
-                                        .6.dp,
-                                        colors[index].copy(alpha = .82f),
-                                        RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
-                                    )
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(names[index], color = Ink.muted, fontSize = 9.sp,
-                                maxLines = 1, textAlign = TextAlign.Center)
+            // Labels are measured in a separate native row. Previously they
+            // competed with the column and count inside a fixed-height slot
+            // and could be cropped at the lower edge of the chart.
+            Column(Modifier.fillMaxWidth().height(if (largeText) 146.dp else 116.dp)) {
+                Box(Modifier.fillMaxWidth().weight(1f)) {
+                    StatisticsChartGrid(Modifier.fillMaxSize())
+                    Row(
+                        Modifier.fillMaxSize().padding(horizontal = 5.dp),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        counts.forEachIndexed { index, count ->
+                            Column(
+                                Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(count.toString(), color = Ink.white,
+                                    fontSize = 11.sp, maxLines = 1)
+                                Spacer(Modifier.height(3.dp))
+                                val heightDp = if (count == 0) 2.dp else
+                                    (10 + 61 * count / ceiling).dp
+                                Box(
+                                    Modifier.fillMaxWidth(.73f).height(heightDp)
+                                        .then(if (count > 0) Modifier.shadow(
+                                            elevation = 3.dp,
+                                            shape = RoundedCornerShape(
+                                                topStart = 5.dp, topEnd = 5.dp),
+                                            ambientColor = colors[index].copy(alpha = .41f),
+                                            spotColor = colors[index].copy(alpha = .34f),
+                                        ) else Modifier)
+                                        .background(
+                                            Brush.verticalGradient(listOf(
+                                                colors[index].copy(alpha = .98f),
+                                                colors[index].copy(alpha = .52f),
+                                            )),
+                                            RoundedCornerShape(
+                                                topStart = 5.dp, topEnd = 5.dp),
+                                        )
+                                        .border(
+                                            .6.dp,
+                                            colors[index].copy(alpha = .82f),
+                                            RoundedCornerShape(
+                                                topStart = 5.dp, topEnd = 5.dp),
+                                        )
+                                )
+                            }
                         }
+                    }
+                }
+                Row(
+                    Modifier.fillMaxWidth().heightIn(
+                        min = if (largeText) 30.dp else 20.dp
+                    ).padding(horizontal = 5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    names.forEachIndexed { index, name ->
+                        Text(
+                            name,
+                            modifier = Modifier.weight(1f)
+                                .testTag("stats-chart-label-$index"),
+                            color = Ink.muted,
+                            fontSize = 9.sp,
+                            lineHeight = 11.sp,
+                            textAlign = TextAlign.Center,
+                        )
                     }
                 }
             }
@@ -435,7 +462,8 @@ private fun CompletionRing(stats: Statistics, modifier: Modifier) {
         (stats.finished.toFloat() / stats.played).coerceIn(0f, 1f)
     val percentage = (fraction * 100).toInt()
     StatisticsSurface(
-        modifier.height(192.dp).testTag("stats-completion-ring")
+        modifier.heightIn(min = if (LocalDensity.current.fontScale >= 1.3f)
+            240.dp else 192.dp).testTag("stats-completion-ring")
     ) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),
