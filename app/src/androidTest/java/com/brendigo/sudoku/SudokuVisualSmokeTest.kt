@@ -1022,13 +1022,16 @@ class SudokuVisualSmokeTest {
             firstDescription.bottom <= visibleFirst.bottom + 1f) {
             "Achievement description escapes its card on this viewport"
         }
-        // Owner's 941x1672 art shows two lines of copy in the first
-        // featured card. Guard against the prior cropped, single-line text.
-        if (contentWidthDp >= 375f &&
+        // The owner's 941x1672 reference uses two lines of featured
+        // copy. A wider tablet may show the *entire* description in one line
+        // without clipping; do not mistake that responsive wrap for a bug.
+        // On every viewport the bounds check above and the dedicated
+        // all-24-card geometry regression protect text/progress spacing.
+        val display = rule.activity.resources.displayMetrics
+        if (display.widthPixels == 941 && display.heightPixels == 1672 &&
             rule.activity.resources.configuration.fontScale < 1.3f) {
-            check(firstDescription.height >=
-                rule.activity.resources.displayMetrics.density * 26f) {
-                "Featured achievement description has only one clipped line: $firstDescription"
+            check(firstDescription.height >= display.density * 26f) {
+                "Reference-phone achievement description lost its second line: $firstDescription"
             }
         }
         val thirdAward = rule.onNodeWithTag("achievement-majstor-logike")

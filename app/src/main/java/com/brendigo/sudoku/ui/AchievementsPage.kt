@@ -117,7 +117,6 @@ fun AchievementsPage(controller: SudokuController) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("$points", fontSize = if (compactSummary) 22.sp else 29.sp,
                             color = Ink.gold, fontWeight = FontWeight.ExtraBold)
-                        Text(" / 1000", fontSize = if (compactSummary) 10.sp else 13.sp, color = Ink.muted)
                     }
                 }
                 Box(Modifier.width(1.dp).height(49.dp)
@@ -162,7 +161,7 @@ fun AchievementsPage(controller: SudokuController) {
                         rowIndex == 2 -> 137.dp
                         // The owner's last featured row ends well above the
                         // scenery; the old 137dp height extended it ~11px.
-                        // Small-screen accessible cards retain flexible mins.
+                        // Every card uses a minimum height; content may grow without being clipped.
                         rowIndex == 3 -> 125.dp
                         else -> 151.dp
                     }
@@ -181,10 +180,7 @@ fun AchievementsPage(controller: SudokuController) {
                         title = achievement.title,
                         tint = achievement.tint,
                         completed = unlocked,
-                        modifier = Modifier.weight(1f).then(
-                            if (compactCards) Modifier.heightIn(min = rowHeight)
-                            else Modifier.height(rowHeight)
-                        )
+                        modifier = Modifier.weight(1f).heightIn(min = rowHeight)
                         .testTag("achievement-" + achievement.title.lowercase().replace(" ", "-"))
                         .semantics {
                             contentDescription = achievement.title +
@@ -194,16 +190,12 @@ fun AchievementsPage(controller: SudokuController) {
                         .clickable { selectedAchievementTitle = achievement.title },
                     ) {
                         Column(
-                            Modifier.fillMaxWidth()
-                                .then(if (compactCards) Modifier.heightIn(min = rowHeight)
-                                      else Modifier.fillMaxHeight())
+                            Modifier.fillMaxWidth().heightIn(min = rowHeight)
                                 .padding(
                                     start = if (compactCards) 8.dp else 13.dp,
                                     end = if (compactCards) 8.dp else 13.dp,
                                     top = if (compactCards) 9.dp else 12.dp,
-                                    // The reference has two real description
-                                    // lines; the old 12dp bottom gutter left
-                                    // room unused while clipping line two.
+                                    // Keep intrinsic text height available on every device.
                                     bottom = if (compactCards) 9.dp else 4.dp,
                                 ),
                             verticalArrangement = Arrangement.spacedBy(
@@ -299,8 +291,7 @@ fun AchievementsPage(controller: SudokuController) {
                                     modifier = Modifier.weight(1f).testTag(
                                         "achievement-title-" + achievement.title.lowercase().replace(" ", "-")),
                                     fontWeight = FontWeight.Bold,
-                                    lineHeight = if (compactCards) 16.sp else 18.sp,
-                                    maxLines = if (compactCards) 3 else 2)
+                                    lineHeight = if (compactCards) 16.sp else 18.sp)
                                 if (unlocked) {
                                     Spacer(Modifier.width(4.dp))
                                     Box(
@@ -316,23 +307,19 @@ fun AchievementsPage(controller: SudokuController) {
                                 achievement.text, color = Ink.muted,
                                 fontSize = if (compactFeatured || compactCards) 11.sp else 12.sp,
                                 lineHeight = if (compactFeatured || compactCards) 13.sp else 14.sp,
-                                // The source artwork leaves deliberate open
-                                // space to the right of the description.
-                                // Let the five coloured badges wrap into two
-                                // short lines instead of one clipped long
-                                // line across the whole scenery panel.
-                                modifier = (if (compactCards) Modifier
-                                    else Modifier.weight(1f))
-                                    // Reserve two full line-heights on the
-                                    // fixed-height reference cards. Smaller
-                                    // viewports keep flexible growing cards.
-                                    .then(if (compactCards) Modifier else Modifier.heightIn(min = 28.dp))
-                                    .fillMaxWidth(
-                                        if (vividFeatured && !stackCards) .76f else 1f
-                                    ).testTag(
+                                // Never constrain text to two lines or give it a
+                                // weighted slice of a fixed card. This allows
+                                // accessibility fonts and translated text to
+                                // increase the intrinsic card height safely.
+                                // Preserve the illustrated reference card's
+                                // intentional right-side art gutter on normal
+                                // two-column layouts. Intrinsic height and
+                                // unrestricted lines still prevent truncation.
+                                modifier = Modifier
+                                    .fillMaxWidth(if (vividFeatured && !stackCards) .76f else 1f)
+                                    .testTag(
                                         "achievement-description-" +
                                             achievement.title.lowercase().replace(" ", "-")),
-                                maxLines = if (compactCards) 4 else 2,
                             )
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
@@ -344,8 +331,7 @@ fun AchievementsPage(controller: SudokuController) {
                                     )
                                     .semantics {
                                         contentDescription =
-                                            "${achievement.current.coerceAtMost(achievement.goal)}" +
-                                            " od ${achievement.goal}"
+                                            "Osvojeno ${achievement.current}; cilj ${achievement.goal}"
                                     }
                                     .background(Color(0xDD041B3B), RoundedCornerShape(12.dp))
                                 .border(.6.dp, achievement.tint.copy(alpha = .45f),
@@ -368,7 +354,7 @@ fun AchievementsPage(controller: SudokuController) {
                                         )
                                 )
                             }
-                            Text("${achievement.current.coerceAtMost(achievement.goal)} / ${achievement.goal}",
+                            Text("${achievement.current} / ${achievement.goal}",
                                 color = if (unlocked) achievement.tint else Ink.muted, fontSize = 11.sp)
                         }
                     }
@@ -404,7 +390,7 @@ fun AchievementsPage(controller: SudokuController) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(award.text, color = Ink.muted)
                     Text(
-                        "Napredak: ${award.current.coerceAtMost(award.goal)} / ${award.goal}",
+                        "Napredak: ${award.current} / ${award.goal}",
                         color = Ink.cyan,
                     )
                     Text(

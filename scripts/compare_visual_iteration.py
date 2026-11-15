@@ -28,9 +28,19 @@ def measure_rgb(reference: Image.Image, actual: Image.Image) -> dict:
     )
     mean = sum(ImageStat.Stat(diff).mean) / 3
     rgba_channel_means = ImageStat.Stat(alpha_diff).mean
-    exact = sum(1 for pixel in diff.getdata() if pixel == (0, 0, 0))
-    exact_rgba = sum(1 for pixel in alpha_diff.getdata()
-                     if pixel == (0, 0, 0, 0))
+    # Pillow Image.getdata() is deprecated. Raw RGB/RGBA bytes retain
+    # *exact* pixel boundaries, unlike overlapping byte-pattern counts.
+    rgb_bytes = diff.tobytes()
+    rgba_bytes = alpha_diff.tobytes()
+    exact = sum(
+        rgb_bytes[i] == 0 and rgb_bytes[i + 1] == 0 and rgb_bytes[i + 2] == 0
+        for i in range(0, len(rgb_bytes), 3)
+    )
+    exact_rgba = sum(
+        rgba_bytes[i] == 0 and rgba_bytes[i + 1] == 0 and
+        rgba_bytes[i + 2] == 0 and rgba_bytes[i + 3] == 0
+        for i in range(0, len(rgba_bytes), 4)
+    )
     total = reference.width * reference.height
     return {
         "mae_0_to_255": mean,

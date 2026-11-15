@@ -1,3 +1,12 @@
+## 1.0.76 — P0 Postignuća i Statistika bez rezanja teksta (kandidat)
+
+- **Postignuća:** svih 24 opisa sada može povećati kartice umjesto da ih sakrije ili prekrije traka napretka; broj ostvarenih bodova prikazuje se bez umjetnog ograničenja na cilj.
+- **Statistika:** oznake stupaca odvojene su od geometrije samih stupaca; visina panela prilagođava se povećanim fontovima.
+- **Nativni QA:** dva Android instrumentacijska testa mjere geometriju svih kartica, grafikona i fiksnog podnožja; testne podatke ne prenose u produkciju.
+- **Pixel QA:** uklonjen deprecated Pillow `getdata()` uz test da brojanje točnih RGB/RGBA piksela ostane ispravno.
+- **Status:** `versionName=1.0.76`, `versionCode=77` kao razvojni kandidat; stvarni prolazak 11 emulatora, sigurnosni nalaz, RGB MAE nakon izmjena i izdanje još nisu potvrđeni.
+- **Izvještaj:** [v1.0.76 QA](docs/layout-qa-v1.0.76.md).
+
 ## 1.0.75 — izmjeriva 1:1 korekcija donje scenografije (kandidat)
 
 - **Dnevni izazov, Statistika i Postignuća:** početak čisto dekorativnog pejzažnog sloja spušten je sa 73 % na 79 % visine zaslona. Stvarni referentni emulator prvi je potvrdio smanjenje donjeg RGB MAE za 0,439 / 0,538 / 0,658. **Naslovnica vraćena** na 73 % jer se donji regionalni MAE pogoršao za 0,468; potrebno je ponoviti snimanje nakon te korekcije. Sve Compose kontrole, HUD, napredak i pristupačnost ostaju stvarni i nepromijenjeni.

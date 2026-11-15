@@ -1,6 +1,7 @@
 """Regression of unscaled same-state pixel comparison: RGB exactness and MAE."""
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 
 from PIL import Image
@@ -17,6 +18,16 @@ class VisualIterationTests(unittest.TestCase):
         self.assertEqual(15, result["exact_rgb_pixels"])
         self.assertFalse(result["identical"])
         self.assertGreater(result["mae_0_to_255"], 0)
+
+    def test_exact_pixel_count_does_not_emit_pillow_deprecation(self):
+        reference = Image.new("RGB", (2, 2), (0, 0, 0))
+        actual = reference.copy()
+        actual.putpixel((0, 0), (1, 0, 0))
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            result = measure_rgb(reference, actual)
+        self.assertEqual(3, result["exact_rgb_pixels"])
+        self.assertEqual(3, result["exact_rgba_pixels"])
 
     def test_alpha_only_difference_is_not_claimed_pixel_identical(self):
         reference = Image.new("RGBA", (4, 4), (0, 20, 80, 0))
