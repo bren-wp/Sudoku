@@ -31,7 +31,11 @@ Spoj klasične Sudoku igre, modernog tamnoplavog dizajna i pažljivo oblikovanih
 | :--- | :--- | :--- |
 | 4×4, 6×6 ili klasični 9×9 Sudoku. Šest težina od *Vrlo lako* do *Majstor*. | Svaki dan zaseban izazov, kalendar, dnevni niz i lokalna rang-lista. | Statistika, povijest partija, bodovi i 24 postignuća. |
 
-## 🎯 Vizualna QA iteracija v1.0.75 (u razvoju)
+## 🎯 Vizualna QA iteracija v1.0.76 (u razvoju)
+
+U ovoj razvojnoj iteraciji prioritet su **Postignuća** (opisi bez rezanja i stvaran broj osvojenih bodova) i **Statistika** (pravilno izmjerene oznake grafikona te dostupnost donjih kartica). Dodani su automatizirani Android geometrijski testovi svih 24 postignuća i grafikona te uklonjen Pillow deprecation warning. **Rezultati novih emulatorskih testova i RGB/RGBA usporedbe još nisu potvrđeni.** [Izvještaj kandidata v1.0.76](docs/layout-qa-v1.0.76.md).
+
+## ✅ Arhivirani prikaz v1.0.75 (objavljeno testno izdanje)
 
 Uspoređujemo autentičnih 10 vlasnikovih PNG referenci sa stvarnim Android screenshotovima iste verzije i commita. Kod u razvojnom PR-u spušta samo dekorativni cvjetni/jezerski sloj na Dnevnom izazovu, Statistici i Postignućima, uz očuvanje svih Compose kontrola. Naslovnica je vraćena na stari položaj nakon potvrđenog regionalnog pogoršanja. Na prvim stvarnim snimkama donji ROI tih triju ekrana izmjereno se poboljšao, ali novi završni SHA i dalje zahtijeva provjeru. Za nultu 1:1 razliku potrebna je stvarna ponovljena RGBA usporedba; trenutačno **nije potvrđena**. Detalji: [QA v1.0.75](docs/visual-parity-v1.0.75.md). Tri zasebne **izolirane testne screenshot** snimke čuvaju produkcijske podatke i reproduciraju naprednog igrača: [Android fixture QA](docs/isolated-reference-fixture-qa-v1.0.75.md).
 
