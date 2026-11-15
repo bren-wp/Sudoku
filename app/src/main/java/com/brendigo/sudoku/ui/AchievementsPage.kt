@@ -311,9 +311,15 @@ fun AchievementsPage(controller: SudokuController) {
                                 // weighted slice of a fixed card. This allows
                                 // accessibility fonts and translated text to
                                 // increase the intrinsic card height safely.
-                                modifier = Modifier.fillMaxWidth().testTag(
-                                    "achievement-description-" +
-                                        achievement.title.lowercase().replace(" ", "-")),
+                                // Preserve the illustrated reference card's
+                                // intentional right-side art gutter on normal
+                                // two-column layouts. Intrinsic height and
+                                // unrestricted lines still prevent truncation.
+                                modifier = Modifier
+                                    .fillMaxWidth(if (vividFeatured && !stackCards) .76f else 1f)
+                                    .testTag(
+                                        "achievement-description-" +
+                                            achievement.title.lowercase().replace(" ", "-")),
                             )
                             val progress = (achievement.current.toFloat() /
                                 achievement.goal.toFloat()).coerceIn(0f, 1f)
