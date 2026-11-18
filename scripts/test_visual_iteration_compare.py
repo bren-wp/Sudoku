@@ -40,6 +40,64 @@ class VisualIterationTests(unittest.TestCase):
         self.assertGreater(result["rgba_mae_0_to_255"], 0)
         self.assertFalse(result["identical"])
 
+    def test_compare_one_preserves_branding_alpha_across_full_and_roi(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root)
+            original = Image.new("RGBA", (6, 6), (20, 40, 60, 0))
+            before = original.copy()
+            before.putpixel((2, 5), (20, 40, 60, 255))
+            for name, image in (
+                ("r.png", original), ("b.png", before), ("a.png", original)
+            ):
+                image.save(path / name)
+            report = compare_one(path / "r.png", path / "b.png",
+                                 path / "a.png", bottom_start=.5)
+            self.assertEqual(100, report["before_exact_rgb_percent"])
+            self.assertEqual(100, report["after_exact_rgb_percent"])
+            self.assertLess(report["before_exact_rgba_percent"], 100)
+            self.assertEqual(100, report["after_exact_rgba_percent"])
+            self.assertGreater(report["before_alpha_mae"], 0)
+            self.assertEqual(0, report["after_alpha_mae"])
+            self.assertLess(report["alpha_mae_delta"], 0)
+            self.assertFalse(report["before_exact_1_to_1"])
+            self.assertTrue(report["after_exact_1_to_1"])
+
+    def test_fixed_screen_regions_report_real_nonmasked_regressions(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root)
+            original = Image.new("RGB", (6, 6), (0, 0, 0))
+            before = original.copy()
+            after = original.copy()
+            before.putpixel((0, 0), (70, 0, 0))
+            after.putpixel((0, 0), (10, 0, 0))
+            after.putpixel((5, 5), (120, 0, 0))
+            for name, image in (
+                ("r.png", original), ("b.png", before), ("a.png", after)
+            ):
+                image.save(path / name)
+            report = compare_one(
+                path / "r.png", path / "b.png", path / "a.png",
+                bottom_start=.5,
+                regions={"header": (0, 0, 3, 3), "footer": (3, 3, 6, 6)},
+            )
+            sections = {row["region"]: row for row in report["region_rows"]}
+            self.assertLess(sections["header"]["rgb_mae_delta"], 0)
+            self.assertGreater(sections["footer"]["rgb_mae_delta"], 0)
+            self.assertEqual(2, len(report["region_rows"]))
+            self.assertFalse(report["after_exact_1_to_1"])
+
+    def test_invalid_region_coordinates_fail_instead_of_clipping(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root)
+            original = Image.new("RGB", (5, 5))
+            for name in ("r.png", "b.png", "a.png"):
+                original.save(path / name)
+            with self.assertRaises(ValueError):
+                compare_one(
+                    path / "r.png", path / "b.png", path / "a.png",
+                    bottom_start=.5, regions={"invalid": (0, 0, 6, 5)}
+                )
+
     def test_region_reports_improvement_without_faking_full_match(self):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root)
