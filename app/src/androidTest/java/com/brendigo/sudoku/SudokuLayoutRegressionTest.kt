@@ -1,5 +1,18 @@
 package com.brendigo.sudoku
 
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import com.brendigo.sudoku.ui.SectionTitle
+import com.brendigo.sudoku.ui.SolidAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -59,6 +72,59 @@ class SudokuLayoutRegressionTest {
                 "Achievement $slug overlaps/crops its description or progress: " +
                     "card=$bounds, description=$description, progress=$progress"
             }
+        }
+    }
+
+    @Test
+    fun commonHeadingsAndActionsDoNotCropAtAccessibilityFontScale() {
+        rule.waitUntil(20_000) {
+            rule.onAllNodesWithTag("home-nova-igra").fetchSemanticsNodes().isNotEmpty()
+        }
+        val density = rule.activity.resources.displayMetrics.density
+        rule.runOnUiThread {
+            rule.activity.setContent {
+                CompositionLocalProvider(LocalDensity provides Density(density, 1.8f)) {
+                    SudokuTheme {
+                        Column(Modifier.fillMaxSize().padding(20.dp)) {
+                            SectionTitle(
+                                title = "Dnevni izazov", description = "Današnji izazov",
+                                onBack = {}, centered = true,
+                            )
+                            SolidAction(
+                                title = "Pokreni dnevni izazov i osvoji nagradu",
+                                onClick = {},
+                                modifier = Modifier.fillMaxWidth(),
+                                tag = "accessible-primary-action",
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        rule.waitForIdle()
+        val header = rule.onNodeWithTag("screen-dnevni-izazov")
+            .fetchSemanticsNode().boundsInRoot
+        val back = rule.onNodeWithTag("navigate-back")
+            .fetchSemanticsNode().boundsInRoot
+        val button = rule.onNodeWithTag("accessible-primary-action")
+            .fetchSemanticsNode().boundsInRoot
+        val label = rule.onNodeWithText(
+            "Pokreni dnevni izazov i osvoji nagradu", useUnmergedTree = true
+        ).fetchSemanticsNode().boundsInRoot
+        val maxWidth = rule.activity.resources.displayMetrics.widthPixels
+        val slack = density * 2
+        check(header.width > 0 && header.left >= -slack &&
+            header.right <= maxWidth + slack &&
+            back.right <= header.left + slack) {
+            "Large-text centered title overlaps back or clips: $header, back=$back"
+        }
+        check(button.width > 0 && button.height >= density * 48f &&
+            label.width > 0 && label.height > 0 &&
+            label.left >= button.left - slack &&
+            label.right <= button.right + slack &&
+            label.top >= button.top - slack &&
+            label.bottom <= button.bottom + slack) {
+            "Large-font CTA label is clipped: button=$button, label=$label"
         }
     }
 
