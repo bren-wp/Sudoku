@@ -10,6 +10,8 @@ on:
       - "scripts/release_runtime_smoke.py"
       - "scripts/test_release_runtime_smoke.py"
       - ".github/scripts/export-emulator-screenshots.sh"
+      - "scripts/validate_android_capture.py"
+      - "scripts/test_capture_evidence.py"
       - ".github/workflows/visual-smoke.yml"
   pull_request:
     paths:
@@ -229,5 +231,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: screenshots/*.png
+          path: |
+            screenshots/*.png
+            screenshots/capture-evidence.json
           if-no-files-found: warn
