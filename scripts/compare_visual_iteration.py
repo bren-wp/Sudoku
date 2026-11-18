@@ -117,9 +117,20 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--bottom-start", type=float, default=.79)
     parser.add_argument("--home-resume", action="store_true")
+    parser.add_argument(
+        "--fail-on-regression", action="store_true",
+        help="Fail on raw full-screen or fixed-region RGB/alpha regression; "
+             "only use with truly identical deterministic screenshot states.",
+    )
+    parser.add_argument(
+        "--regression-tolerance", type=float, default=0.0,
+        help="Allowed MAE increase on any full screen or fixed region (default: 0).",
+    )
     args = parser.parse_args()
     if not .5 <= args.bottom_start < 1:
         parser.error("--bottom-start must be within [0.5, 1.0)")
+    if not 0 <= args.regression_tolerance <= 255:
+        parser.error("--regression-tolerance must be in [0, 255]")
 
     # Fail closed BEFORE writing any results: the original files must match
     # all known owner hashes. Capture alpha is not silently discarded.
@@ -170,6 +181,24 @@ def main() -> int:
                     "exact_matches": sum(r["after_exact_1_to_1"] for r in rows)},
                    indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+    if args.fail_on_regression:
+        regressions = []
+        for row in rows:
+            if row["full_mae_delta"] > args.regression_tolerance:
+                regressions.append(f'{row["screen"]} whole RGB: +{row["full_mae_delta"]:.6f}')
+            if row["alpha_mae_delta"] > args.regression_tolerance:
+                regressions.append(f'{row["screen"]} whole alpha: +{row["alpha_mae_delta"]:.6f}')
+        for region in per_region:
+            if region["rgb_mae_delta"] > args.regression_tolerance:
+                regressions.append(
+                    f'{region["screen"]}/{region["region"]} RGB: '
+                    f'+{region["rgb_mae_delta"]:.6f}'
+                )
+        for item in regressions:
+            print(f"REGRESSION: {item}")
+        if regressions:
+            print(f"FAIL: {len(regressions)} measured raw image regressions")
+            return 3
     return 0
 
 
