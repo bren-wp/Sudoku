@@ -113,13 +113,13 @@ class SudokuLayoutRegressionTest {
         ).fetchSemanticsNode().boundsInRoot
         val maxWidth = rule.activity.resources.displayMetrics.widthPixels
         val slack = density * 2
-        check(header.width > 0 && header.left >= -slack &&
+        check(header.width > 0f && header.left >= -slack &&
             header.right <= maxWidth + slack &&
             back.right <= header.left + slack) {
             "Large-text centered title overlaps back or clips: $header, back=$back"
         }
-        check(button.width > 0 && button.height >= density * 48f &&
-            label.width > 0 && label.height > 0 &&
+        check(button.width > 0f && button.height >= density * 48f &&
+            label.width > 0f && label.height > 0f &&
             label.left >= button.left - slack &&
             label.right <= button.right + slack &&
             label.top >= button.top - slack &&
