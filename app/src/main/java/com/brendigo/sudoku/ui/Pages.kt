@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
@@ -57,6 +58,7 @@ fun PageContent(
     // Footer occupies its own layout slot below the scroll viewport.
     // Keeping it outside the scrolling content prevents overlays on cards,
     // dialogs, settings actions and the "show all achievements" control.
+    val largeText = LocalDensity.current.fontScale > 1.3f
     Column(Modifier.fillMaxSize()) {
         Column(
             Modifier.weight(1f).fillMaxWidth()
@@ -74,7 +76,9 @@ fun PageContent(
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 13.dp)
                 .testTag("brand-footer"),
-            maxLines = 1,
+            // The reference keeps its single-line footer. Accessibility
+            // sizes must show all words instead of cropping with ellipsis.
+            maxLines = if (largeText) Int.MAX_VALUE else 1,
         )
     }
 }
@@ -103,7 +107,9 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
             }
         }
     } else {
-        Box(Modifier.fillMaxWidth().heightIn(min = 63.dp)) {
+        BoxWithConstraints(Modifier.fillMaxWidth().heightIn(min = 63.dp)) {
+            val compactHeader = maxWidth < 360.dp ||
+                LocalDensity.current.fontScale > 1.3f
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = 50.dp)
                     .offset(y = titleOffset).testTag("screen-" + title.lowercase().replace(" ", "-"))
@@ -116,7 +122,13 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
                         BrandIcon("statistics", Modifier.size(29.dp), Ink.cyan)
                         Spacer(Modifier.width(8.dp))
                     }
-                    AccentText(title, if (title == "Dnevni izazov") 46 else if (title.length > 16) 35 else 39)
+                    val referenceSize = if (title == "Dnevni izazov") 46
+                        else if (title.length > 16) 35 else 39
+                    // Keep the exact reference typography at 941px/320dpi
+                    // and normal font scale. Only constrained/accessibility
+                    // viewports get smaller headings, avoiding off-screen text.
+                    AccentText(title, if (compactHeader) minOf(referenceSize, 28)
+                        else referenceSize)
                 }
                 if (description.isNotBlank()) {
                     if (title == "Statistika" || title == "Postavke") {
@@ -156,6 +168,7 @@ fun SectionTitle(title: String, description: String = "", onBack: () -> Unit,
 fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifier,
                 enabled: Boolean = true, minHeight: androidx.compose.ui.unit.Dp = 49.dp,
                 tag: String = "primary-action") {
+    val largeText = LocalDensity.current.fontScale > 1.3f
     Box(
         modifier.testTag(tag)
             .semantics { contentDescription = title; role = Role.Button }
@@ -214,7 +227,11 @@ fun SolidAction(title: String, onClick: () -> Unit, modifier: Modifier = Modifie
             Text(
                 title.trimStart().removePrefix("▶").removePrefix("✓").trim(),
                 color = Ink.white, fontWeight = FontWeight.ExtraBold,
-                fontSize = 17.sp, maxLines = 1,
+                fontSize = 17.sp,
+                textAlign = TextAlign.Center,
+                // Do not cut off action labels when a larger system font is
+                // selected. The CTA remains a live, expandable Compose button.
+                maxLines = if (largeText) Int.MAX_VALUE else 1,
             )
         }
     }
