@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.brendigo.sudoku.ui.SectionTitle
 import com.brendigo.sudoku.ui.SolidAction
+import com.brendigo.sudoku.ui.SudokuTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
