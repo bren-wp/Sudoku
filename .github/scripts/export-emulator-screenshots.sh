@@ -64,4 +64,13 @@ PY
     count=$((count + 1))
   done
 fi
+# A separate, standard-library PNG verifier checks full chunk CRCs, SHA-256,
+# exact reference-screen geometry and transparent branding. The generated
+# capture-evidence.json lives beside the true Android screenshots in Actions.
+case "${1:-}" in
+  --splash-home-only) capture_mode=focused ;;
+  --reference-capture) capture_mode=reference ;;
+  *) capture_mode=full ;;
+esac
+python3 scripts/validate_android_capture.py --dir "$OUT" --mode "$capture_mode"
 echo "Exported and verified $count real PNG screens from Android emulator"
