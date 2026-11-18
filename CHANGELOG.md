@@ -1,10 +1,20 @@
+## 1.0.77 — vjerodostojna RGB/RGBA QA provjera svih zaslona (kandidat)
+
+- **P0 — točnost usporedbe:** alat prije/poslije više ne odbacuje alfa kanal transparentnog wordmarka i launchera; promjena samo u alfa kanalu više ne može biti proglašena identičnim prikazom.
+- **Svih 8 zaslona:** mjerenje prije/poslije svakog fiksnog ROI-ja; `visual-iteration-regions.csv` i JSON izvještaj, uz obavezne nemaskirane pune slike.
+- **QA gate:** opcionalni `--fail-on-regression` s tolerancijom samo za stvarno jednaka deterministička stanja.
+- **Stvarne Android snimke:** kontrola CRC-a PNG-a, rezolucije 941×1672 za reference, transparentnog 1254² brandinga, SHA-256 izvještaj `capture-evidence.json`.
+- **Automatski testovi:** testovi alpha-only razlika, regionalnih regresija, integriteta PNG-a, pogrešne rezolucije i izgubljene prozirnosti.
+- **Kandidat:** `versionName=1.0.77`, `versionCode=78`. Nema promjene podataka ili logike igre. Novi CI, emulatorske provjere i vlasnikove izvorne 1:1 usporedbe moraju se potvrditi prije izdanja.
+- [Dokumentacija vizualne provjere](docs/pixel-qa-v1.0.77.md).
+
 ## 1.0.76 — P0 Postignuća i Statistika bez rezanja teksta (kandidat)
 
 - **Postignuća:** svih 24 opisa sada može povećati kartice umjesto da ih sakrije ili prekrije traka napretka; broj ostvarenih bodova prikazuje se bez umjetnog ograničenja na cilj.
 - **Statistika:** oznake stupaca odvojene su od geometrije samih stupaca; visina panela prilagođava se povećanim fontovima.
 - **Nativni QA:** dva Android instrumentacijska testa mjere geometriju svih kartica, grafikona i fiksnog podnožja; testne podatke ne prenose u produkciju.
 - **Pixel QA:** uklonjen deprecated Pillow `getdata()` uz test da brojanje točnih RGB/RGBA piksela ostane ispravno.
-- **Status:** `versionName=1.0.76`, `versionCode=77` kao razvojni kandidat; stvarni prolazak 11 emulatora, sigurnosni nalaz, RGB MAE nakon izmjena i izdanje još nisu potvrđeni.
+- **Ishod:** v1.0.76 spojena i izdana kao testni prerelease; Android CI i svih 11 emulatorskih profila uspješno. Vlasnikova stroga 1:1 usporedba i dalje nije potvrđena.
 - **Izvještaj:** [v1.0.76 QA](docs/layout-qa-v1.0.76.md).
 
 ## 1.0.75 — izmjeriva 1:1 korekcija donje scenografije (kandidat)
