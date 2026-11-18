@@ -31,9 +31,13 @@ Spoj klasične Sudoku igre, modernog tamnoplavog dizajna i pažljivo oblikovanih
 | :--- | :--- | :--- |
 | 4×4, 6×6 ili klasični 9×9 Sudoku. Šest težina od *Vrlo lako* do *Majstor*. | Svaki dan zaseban izazov, kalendar, dnevni niz i lokalna rang-lista. | Statistika, povijest partija, bodovi i 24 postignuća. |
 
-## 🎯 Vizualna QA iteracija v1.0.76 (u razvoju)
+## 🎯 Vizualna QA iteracija v1.0.77 (kandidat)
 
-U ovoj razvojnoj iteraciji prioritet su **Postignuća** (opisi bez rezanja i stvaran broj osvojenih bodova) i **Statistika** (pravilno izmjerene oznake grafikona te dostupnost donjih kartica). Dodani su automatizirani Android geometrijski testovi svih 24 postignuća i grafikona te uklonjen Pillow deprecation warning. **Rezultati novih emulatorskih testova i RGB/RGBA usporedbe još nisu potvrđeni.** [Izvještaj kandidata v1.0.76](docs/layout-qa-v1.0.76.md).
+Svi osam glavnih Compose zaslona i oba branding PNG-a sada imaju precizniji mehanizam kontrole vizualnih odstupanja: izvorni RGB i RGBA pikseli zadržavaju se pri usporedbi, svaki definirani panel dobiva vlastiti regionalni izvještaj, a Android CI verificira potpune PNG snimke, njihove dimenzije, CRC i SHA-256 identitet. **Pikselna jednakost 1:1 nije potvrđena bez ponovne usporedbe s deset vlasnikovih originalnih PNG-ova.** [Tehnički QA izvještaj v1.0.77](docs/pixel-qa-v1.0.77.md).
+
+## ✅ v1.0.76 — testna predverzija
+
+Postignuća sada pokazuju potpune opise i stvarni napredak bez rezanja, a Statistika raspoređuje četiri oznake grafikona izvan stupaca. Android CI i svih 11 emulatorskih profila prošli su nakon spajanja [PR-a #83](https://github.com/bren-wp/Sudoku/pull/83). [Preuzmi v1.0.76 testno izdanje](https://github.com/bren-wp/Sudoku/releases/tag/v1.0.76). Ne predstavlja potvrđenu strogu 1:1 podudarnost.
 
 ## ✅ Arhivirani prikaz v1.0.75 (objavljeno testno izdanje)
 

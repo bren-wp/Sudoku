@@ -58,6 +58,7 @@ jobs:
           python -m pip install --disable-pip-version-check "Pillow>=11,<13"
           python -m unittest discover -s scripts -p 'test_pixel_compare.py' -v
           python -m unittest discover -s scripts -p 'test_visual_iteration_compare.py' -v
+          python -m unittest discover -s scripts -p 'test_capture_evidence.py' -v
       - name: Static analysis
         run: gradle --no-daemon :app:lintDebug
       - name: Configure optional publisher signature
