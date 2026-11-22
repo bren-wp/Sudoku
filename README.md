@@ -36,7 +36,7 @@ Spoj klasične Sudoku igre, modernog tamnoplavog dizajna i pažljivo oblikovanih
 U novoj razvojnoj verziji Sudoku rješavač koristi bit-maske retka, stupca i
 podmreže koje se ažuriraju tijekom pretraživanja, a validacija dovršene ploče
 više ne stvara privremene kolekcije za svaku kućicu. Prošireni Kotlin JUnit
-testovi provjeravaju 108 seed/veličina/težina kombinacija i slučajeve
+testovi provjeravaju 1.854 seed/veličina/težina kombinacije i slučajeve
 nevaljanih ploča. Postojeći offline način igre i format spremljenih partija
 ostaju nepromijenjeni.
 
