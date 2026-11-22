@@ -31,6 +31,20 @@ Spoj klasične Sudoku igre, modernog tamnoplavog dizajna i pažljivo oblikovanih
 | :--- | :--- | :--- |
 | 4×4, 6×6 ili klasični 9×9 Sudoku. Šest težina od *Vrlo lako* do *Majstor*. | Svaki dan zaseban izazov, kalendar, dnevni niz i lokalna rang-lista. | Statistika, povijest partija, bodovi i 24 postignuća. |
 
+## ⚡ Sudoku v1.0.78 — brži engine (kandidat izdanja)
+
+U novoj razvojnoj verziji Sudoku rješavač koristi bit-maske retka, stupca i
+podmreže koje se ažuriraju tijekom pretraživanja, a validacija dovršene ploče
+više ne stvara privremene kolekcije za svaku kućicu. Prošireni Kotlin JUnit
+testovi provjeravaju 108 seed/veličina/težina kombinacija i slučajeve
+nevaljanih ploča. Postojeći offline način igre i format spremljenih partija
+ostaju nepromijenjeni.
+
+**Status:** `versionName=1.0.78` i `versionCode=79` na razvojnoj grani.
+GitHub izdanje `v1.0.78` nije objavljeno dok se obvezni testovi i merge
+commit ne potvrde. Bez postojećeg izdavačkog ključa može biti objavljen samo
+testni prerelease. [Tehnički izvještaj](docs/engine-qa-v1.0.78.md).
+
 ## 🎯 Vizualna QA iteracija v1.0.77 (kandidat)
 
 Svi osam glavnih Compose zaslona i oba branding PNG-a sada imaju precizniji mehanizam kontrole vizualnih odstupanja: izvorni RGB i RGBA pikseli zadržavaju se pri usporedbi, svaki definirani panel dobiva vlastiti regionalni izvještaj, a Android CI verificira potpune PNG snimke, njihove dimenzije, CRC i SHA-256 identitet. **Pikselna jednakost 1:1 nije potvrđena bez ponovne usporedbe s deset vlasnikovih originalnih PNG-ova.** [Tehnički QA izvještaj v1.0.77](docs/pixel-qa-v1.0.77.md).
