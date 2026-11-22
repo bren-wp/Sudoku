@@ -18,9 +18,11 @@ gradle :app:bundleRelease
 ## CI i emulatorske provjere
 
 `android.yml` pokreće Kotlin/JUnit, Python testove pixel-compare metrike,
-Android Lint i APK/AAB buildove. `visual-smoke.yml` provjerava interakcije
-i ekran na 941×1672 i 720×1280 emulatorima. Potvrda prolaska funkcionalnog
-testa **nije** dokaz pixel-perfect 1:1 jednakosti.
+Android Lint i nepotpisane APK/AAB buildove. `visual-smoke.yml` izvršava
+11 emulatorskih QA profila (uključujući referentni 941×1672 i tablet
+shardove); za svaki commit na `main` potrebno je svih 11 uspješnih
+poslova za izdavanje. Potvrda prolaska funkcionalnog testa **nije** dokaz
+pixel-perfect 1:1 jednakosti.
 
 Snimke aplikacije u README nastaju iz stvarnog Android emulatora i osvježavaju
 se pomoću `marketing-screenshots.yml`.
@@ -38,10 +40,54 @@ Točne vrijednosti, izvori i preostala ograničenja: [završni QA](final-ten-scr
 
 ## Potpisivanje i izdanja
 
-Izdavačke ključeve nikada ne dodavati u repozitorij. Koristiti zaštićene
-GitHub Actions tajne koje release workflow prepoznaje. Ako nisu dostupne,
-AAB ostaje nepotpisan, a debug APK služi samo za testnu instalaciju.
+Sigurnost izdavačkih ključeva obvezna je. Na GitHubu konfigurirati
+`Settings → Environments → sudoku-release` s obveznim odobravateljima
+(required reviewers), ograničenim deployment granama i sljedećim tajnama
+**isključivo unutar tog zaštićenog environmenta**:
 
-Release workflow samostalno testira, lint-a i gradi aplikaciju prije objave ako oznaka verzije još ne postoji; nije serijski uvjetovan završetkom odvojenog Android CI push workflowa. Za novu Play verziju u pravilu je potreban nov, jedinstven `versionCode` i ispravan izdavački ključ.
+- `SUDOKU_KEYSTORE_BASE64` — sadržaj postojećeg izdavačkog keystorea.
+- `SUDOKU_SIGNING_KEY_ALIAS`
+- `SUDOKU_SIGNING_STORE_PASSWORD`
+- `SUDOKU_SIGNING_KEY_PASSWORD`
 
-Na izdanju [v1.0.48](https://github.com/bren-wp/Sudoku/releases/tag/v1.0.48) dostupni su samo testni APK i nepotpisani AAB. GitHub trenutno prikazuje stabilni release metapodatak za njih, što **ne znači** da su spremni za produkciju. Prije distribucije provjeriti potpis i oznaku izdanja.
+U istom environmentu postaviti varijablu
+`SUDOKU_EXPECTED_CERT_SHA256` na **provjereni SHA-256 otisak postojećeg
+Google Play upload certifikata**, ne na otisak Googleova zasebnog
+App Signing certifikata (ako je uključen Play App Signing). Otisak
+potvrditi u Play Console i prema važećem keystoreu. Nijedan privatni ključ
+ili lozinku ne smije se predati unutar PR-a.
+
+`android.yml` za PR i `main` nikad ne čita izdavačke tajne.
+`publish-release.yml` reagira na završetak Android CI i Android visual
+smoke workflowa ili ručno pokretanje na `main`. `gate` posao sa samo
+read pristupom provjerava da oba workflowa imaju **uspješan zaključak na
+istom aktualnom SHA-u** te da je svih 11 imenovanih emulatorskih poslova
+uspjelo. Zatim zaštićeni `publish` posao opet gradi i skenira stvarne
+release ovisnosti. Neposredno prije izdavanja ponovno provjerava aktualni
+`main`.
+
+Ako je dostupan odgovarajući postojeći ključ, nakon gradnje provjerava
+potpis APK-a i AAB-a te podudarnost oba otiska s pinanim certifikatom
+*prije* `gh release create`. Neusklađen, djelomičan ili nepotvrđen
+izdavački potpis blokira produkcijsku objavu. Ako izdavačkih tajni nema,
+može nastati samo jasno označen **testni prerelease** s debug APK-om i
+nepotpisanim AAB-om. Testni APK **nije** prikladan za Google Play objavu.
+
+Kontrolni offline testovi:
+
+```bash
+bash scripts/test_release_ci_gates.sh
+bash scripts/test_publisher_certificate.sh
+bash scripts/test_verify_release_assets.sh
+```
+
+Za stvarnu Android gradnju potreban je Gradle 9.6.0, Java 17 i Android SDK
+36. Verificirani Gradle wrapper još nije dodan: to je zaseban otvoreni
+zadak iz [audita #85](https://github.com/bren-wp/Sudoku/issues/85).
+Dodavanje environmenta samo po sebi **nije** dovoljno: vlasnik
+repozitorija mora stvarno uključiti zaštitna pravila i branch protection.
+Izdanje ne smije biti proglašeno spremnim za produkciju bez prođenog
+CI-ja, valjanog certifikata i stvarne Play provjere.
+
+Povijesni `v1.0.77` je testni prerelease; izmjena workflowa sama po
+sebi ne stvara novu produkcijsku verziju.
