@@ -41,6 +41,12 @@ jobs:
           bash -n scripts/verify-release-assets.sh
           bash -n scripts/test_verify_release_assets.sh
           bash scripts/test_verify_release_assets.sh
+          bash -n scripts/require-release-ci-gates.sh
+          bash -n scripts/test_release_ci_gates.sh
+          bash scripts/test_release_ci_gates.sh
+          bash -n scripts/verify-publisher-certificate.sh
+          bash -n scripts/test_publisher_certificate.sh
+          bash scripts/test_publisher_certificate.sh
           bash -n scripts/reconcile-release-classification.sh
           bash -n scripts/test_release_classification.sh
           bash scripts/test_release_classification.sh
@@ -61,24 +67,6 @@ jobs:
           python -m unittest discover -s scripts -p 'test_capture_evidence.py' -v
       - name: Static analysis
         run: gradle --no-daemon :app:lintDebug
-      - name: Configure optional publisher signature
-        shell: bash
-        env:
-          SUDOKU_KEYSTORE_BASE64: ${{ secrets.SUDOKU_KEYSTORE_BASE64 }}
-          SUDOKU_SIGNING_KEY_ALIAS: ${{ secrets.SUDOKU_SIGNING_KEY_ALIAS }}
-          SUDOKU_SIGNING_STORE_PASSWORD: ${{ secrets.SUDOKU_SIGNING_STORE_PASSWORD }}
-          SUDOKU_SIGNING_KEY_PASSWORD: ${{ secrets.SUDOKU_SIGNING_KEY_PASSWORD }}
-        run: |
-          if [[ -n "$SUDOKU_KEYSTORE_BASE64" && -n "$SUDOKU_SIGNING_KEY_ALIAS" && -n "$SUDOKU_SIGNING_STORE_PASSWORD" && -n "$SUDOKU_SIGNING_KEY_PASSWORD" ]]; then
-            printf "%s" "$SUDOKU_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/sudoku-publisher.jks"
-            echo "SUDOKU_SIGNING_STORE_FILE=$RUNNER_TEMP/sudoku-publisher.jks" >> "$GITHUB_ENV"
-            echo "SUDOKU_SIGNING_KEY_ALIAS=$SUDOKU_SIGNING_KEY_ALIAS" >> "$GITHUB_ENV"
-            echo "SUDOKU_SIGNING_STORE_PASSWORD=$SUDOKU_SIGNING_STORE_PASSWORD" >> "$GITHUB_ENV"
-            echo "SUDOKU_SIGNING_KEY_PASSWORD=$SUDOKU_SIGNING_KEY_PASSWORD" >> "$GITHUB_ENV"
-            echo "SUDOKU_HAS_SIGNING=true" >> "$GITHUB_ENV"
-          else
-            echo "SUDOKU_HAS_SIGNING=false" >> "$GITHUB_ENV"
-          fi
       - name: Build debug APK, instrumented test APK, release APK and AAB
         # Catch test-only Kotlin/Compose fixture compilation failures BEFORE
         # the expensive 11-lane emulator workflow starts executing assertions.
@@ -141,22 +129,7 @@ jobs:
           name: Sudoku-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-      - name: Upload signed APK
-        if: env.SUDOKU_HAS_SIGNING == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Sudoku-signed-release-apk
-          path: app/build/outputs/apk/release/*-release.apk
-          if-no-files-found: error
-      - name: Upload signed AAB
-        if: env.SUDOKU_HAS_SIGNING == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Sudoku-signed-release-aab
-          path: app/build/outputs/bundle/release/*.aab
-          if-no-files-found: error
       - name: Upload unsigned release AAB
-        if: env.SUDOKU_HAS_SIGNING != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Sudoku-unsigned-release-aab

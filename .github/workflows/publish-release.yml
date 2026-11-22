@@ -1,51 +1,103 @@
 name: Publish Sudoku release
 
-# Some GitHub App merges do not start a main push workflow. Build the trusted
-# merge commit after a merged PR, or publish manually from main.
-# Verified v1.0.38 all-screen visual-parity release; workflow self-checks version and artifacts.
+# Privileged workflow_run NEVER checks out or executes untrusted PR code.
+# Only publish the latest main SHA after BOTH full CI suites pass for that SHA.
 on:
-  push:
+  workflow_run:
+    workflows: ["Android CI", "Android visual smoke"]
+    types: [completed]
     branches: [main]
-    paths:
-      - ".github/workflows/publish-release.yml"
-      - "app/**"
-      - "gradle.properties"
-      - "build.gradle.kts"
-      - "settings.gradle.kts"
-      - ".github/workflows/android.yml"
-      - ".github/workflows/visual-smoke.yml"
-      - ".github/workflows/release-classification.yml"
-      - "scripts/verify-release-assets.sh"
-  pull_request:
-    types: [closed]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: sudoku-publish-${{ github.event.pull_request.merge_commit_sha || github.sha }}
+  # Two workflow_run completions must not publish the same version concurrently.
+  group: sudoku-publish-main
   cancel-in-progress: false
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+      sha: ${{ steps.check.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout trusted main for release gate
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Validate trigger and exact-SHA upstream quality gates
+        id: check
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_REF: ${{ github.ref }}
+          TRIGGER_SHA: ${{ github.event.workflow_run.head_sha }}
+          TRIGGER_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          TRIGGER_EVENT: ${{ github.event.workflow_run.event }}
+        run: |
+          set -euo pipefail
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            [[ "$DISPATCH_REF" == "refs/heads/main" ]] || {
+              echo "::notice::Manual publish must run from main"; exit 0;
+            }
+          elif [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            [[ "$TRIGGER_REPO" == "$REPO" && "$TRIGGER_EVENT" == "push" ]] || {
+              echo "::notice::Ignoring non-main / untrusted upstream workflow"; exit 0;
+            }
+          else
+            echo "::error::Unexpected release trigger" >&2
+            exit 1
+          fi
+          main_sha="$(gh api "repos/$REPO/branches/main" --jq '.commit.sha')"
+          [[ "$main_sha" =~ ^[a-f0-9]{40}$ ]]
+          if [[ "$(git rev-parse HEAD)" != "$main_sha" ]]; then
+            echo "::notice::main advanced during gate checkout; retry after the new CI run"
+            exit 0
+          fi
+          if [[ "$EVENT_NAME" == "workflow_run" && "$TRIGGER_SHA" != "$main_sha" ]]; then
+            echo "::notice::Ignoring an upstream run for an older main SHA"
+            exit 0
+          fi
+          if bash scripts/test_release_ci_gates.sh &&
+             bash scripts/require-release-ci-gates.sh "$REPO" "$main_sha"; then
+            echo "sha=$main_sha" >> "$GITHUB_OUTPUT"
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Release withheld until all required checks pass"
+          fi
   publish:
-    if: >-
-      ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-       github.ref == 'refs/heads/main') ||
-      (github.event_name == 'pull_request' &&
-       github.event.pull_request.merged == true &&
-       github.event.pull_request.base.ref == 'main' &&
-       github.event.pull_request.head.repo.full_name == github.repository)
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    # Configure required reviewers and publisher secrets for this environment
+    # under GitHub Settings -> Environments; it must not allow untrusted PRs.
+    environment: sudoku-release
+    permissions:
+      contents: write
+      actions: read
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
+      # Pin the existing Google Play UPLOAD certificate, not a generated key.
+      SUDOKU_EXPECTED_CERT_SHA256: ${{ vars.SUDOKU_EXPECTED_CERT_SHA256 }}
     steps:
       - name: Checkout merged, trusted source
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+          ref: ${{ needs.gate.outputs.sha }}
           persist-credentials: false
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -132,6 +184,10 @@ jobs:
           set -euo pipefail
           if [[ -n "$SUDOKU_KEYSTORE_BASE64" && -n "$SUDOKU_SIGNING_KEY_ALIAS" &&
                 -n "$SUDOKU_SIGNING_STORE_PASSWORD" && -n "$SUDOKU_SIGNING_KEY_PASSWORD" ]]; then
+            if [[ -z "${SUDOKU_EXPECTED_CERT_SHA256:-}" ]]; then
+              echo "::error::Publisher signing needs a pinned SUDOKU_EXPECTED_CERT_SHA256 environment variable" >&2
+              exit 1
+            fi
             printf '%s' "$SUDOKU_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/sudoku-publisher.jks"
             echo "SUDOKU_SIGNING_STORE_FILE=$RUNNER_TEMP/sudoku-publisher.jks" >> "$GITHUB_ENV"
             echo "SUDOKU_SIGNING_KEY_ALIAS=$SUDOKU_SIGNING_KEY_ALIAS" >> "$GITHUB_ENV"
@@ -139,6 +195,11 @@ jobs:
             echo "SUDOKU_SIGNING_KEY_PASSWORD=$SUDOKU_SIGNING_KEY_PASSWORD" >> "$GITHUB_ENV"
             echo "PUBLISHER_SIGNED=true" >> "$GITHUB_ENV"
           else
+            if [[ -n "$SUDOKU_KEYSTORE_BASE64" || -n "$SUDOKU_SIGNING_KEY_ALIAS" ||
+                  -n "$SUDOKU_SIGNING_STORE_PASSWORD" || -n "$SUDOKU_SIGNING_KEY_PASSWORD" ]]; then
+              echo "::error::Partial publisher signing configuration; refusing unverified downgrade" >&2
+              exit 1
+            fi
             echo "PUBLISHER_SIGNED=false" >> "$GITHUB_ENV"
           fi
       - name: Test, lint and build Android release from merge commit
@@ -158,6 +219,18 @@ jobs:
             --report app/build/reports/security/osv-release-report.json \
             --csv app/build/reports/security/osv-release-components.csv \
             --fail-on-findings
+      - name: Recheck main has not advanced before publishing
+        if: steps.version.outputs.exists != 'true'
+        shell: bash
+        env:
+          RELEASE_SOURCE_SHA: ${{ needs.gate.outputs.sha }}
+        run: |
+          set -euo pipefail
+          live_sha="$(gh api "repos/$REPO/branches/main" --jq '.commit.sha')"
+          [[ "$live_sha" == "$RELEASE_SOURCE_SHA" && "$(git rev-parse HEAD)" == "$RELEASE_SOURCE_SHA" ]] || {
+            echo "::error::main advanced since CI gates passed; refuse release" >&2
+            exit 1
+          }
       - name: Publish APK and AAB (signed only when publisher key is configured)
         if: steps.version.outputs.exists != 'true'
         shell: bash
@@ -171,6 +244,7 @@ jobs:
             APK="$(find app/build/outputs/apk/release -type f -name '*release.apk' | head -n 1)"
             AAB="$(find app/build/outputs/bundle/release -type f -name '*.aab' | head -n 1)"
             test -s "$APK" && test -s "$AAB"
+            bash scripts/verify-publisher-certificate.sh "$APK" "$AAB" "$SUDOKU_EXPECTED_CERT_SHA256"
             cp "$APK" "release-assets/Sudoku-$RELEASE_TAG.apk"
             cp "$AAB" "release-assets/Sudoku-$RELEASE_TAG.aab"
             (cd release-assets && sha256sum Sudoku-*.apk Sudoku-*.aab > SHA256SUMS)

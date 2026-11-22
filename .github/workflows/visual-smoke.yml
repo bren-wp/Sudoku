@@ -1,18 +1,9 @@
 name: Android visual smoke
 
 on:
+  # Unfiltered main pushes ensure every release SHA has the same 11-lane QA gate.
   push:
     branches: [main]
-    paths:
-      - "app/**"
-      - ".github/scripts/run-visual-smoke.sh"
-      - ".github/scripts/run-release-runtime-smoke.sh"
-      - "scripts/release_runtime_smoke.py"
-      - "scripts/test_release_runtime_smoke.py"
-      - ".github/scripts/export-emulator-screenshots.sh"
-      - "scripts/validate_android_capture.py"
-      - "scripts/test_capture_evidence.py"
-      - ".github/workflows/visual-smoke.yml"
   pull_request:
     paths:
       - "app/**"
@@ -20,12 +11,9 @@ on:
       - "settings.gradle.kts"
       - "gradle.properties"
       - "docs/screenshots/**"
-      - ".github/scripts/export-emulator-screenshots.sh"
-      - ".github/scripts/run-visual-smoke.sh"
-      - ".github/scripts/run-release-runtime-smoke.sh"
-      - "scripts/release_runtime_smoke.py"
-      - "scripts/test_release_runtime_smoke.py"
-      - ".github/workflows/visual-smoke.yml"
+      - ".github/scripts/**"
+      - ".github/workflows/**"
+      - "scripts/**"
   workflow_dispatch:
 
 concurrency:
