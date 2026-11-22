@@ -136,4 +136,38 @@ class SudokuEngineTest {
         assertArrayEquals(puzzle.solution, solved)
     }
 
+
+    @Test fun historicalSeedFixturesStayByteForByteCompatible() {
+        // Captured from the v1.0.77 generator/solver before the bit-mask
+        // optimization. Keep them stable for existing seeded daily games.
+        val expected4 = intArrayOf(
+            0, 1, 0, 3,
+            0, 2, 1, 4,
+            2, 0, 0, 1,
+            0, 3, 4, 2,
+        )
+        val expected6 = intArrayOf(
+            0, 0, 0, 5, 2, 6,
+            5, 6, 0, 0, 0, 0,
+            0, 1, 0, 4, 3, 5,
+            0, 0, 3, 0, 0, 0,
+            0, 0, 0, 0, 0, 2,
+            3, 2, 5, 0, 0, 4,
+        )
+        val expected9 = intArrayOf(
+            5, 1, 2, 0, 8, 0, 0, 0, 0,
+            0, 0, 0, 1, 5, 0, 3, 0, 6,
+            0, 0, 0, 0, 0, 9, 0, 0, 0,
+            9, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 4, 7, 0, 0, 1, 0, 9, 3,
+            0, 0, 1, 8, 0, 0, 0, 2, 0,
+            1, 2, 4, 0, 0, 0, 0, 0, 0,
+            0, 0, 5, 0, 7, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 6, 0, 5,
+        )
+        assertArrayEquals(expected4, SudokuEngine.create(4, 0, 4000).givens)
+        assertArrayEquals(expected6, SudokuEngine.create(6, 3, 6030).givens)
+        assertArrayEquals(expected9, SudokuEngine.create(9, 5, 9005).givens)
+    }
+
 }
