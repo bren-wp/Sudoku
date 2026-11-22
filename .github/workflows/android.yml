@@ -44,6 +44,9 @@ jobs:
           bash -n scripts/require-release-ci-gates.sh
           bash -n scripts/test_release_ci_gates.sh
           bash scripts/test_release_ci_gates.sh
+          bash -n scripts/verify-publisher-certificate.sh
+          bash -n scripts/test_publisher_certificate.sh
+          bash scripts/test_publisher_certificate.sh
           bash -n scripts/reconcile-release-classification.sh
           bash -n scripts/test_release_classification.sh
           bash scripts/test_release_classification.sh
