@@ -16,9 +16,12 @@ on:
       - "scripts/**"
   workflow_dispatch:
 
+# Never auto-cancel a trusted main test run halfway through its 11-lane
+# matrix. PR supersession can still cancel a stale PR run to save runners.
+# A cancelled main run is not a passing quality gate for publishing.
 concurrency:
   group: emulator-ui-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
