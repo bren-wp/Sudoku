@@ -1,3 +1,12 @@
+## 1.0.78 — brži Sudoku engine, dodatna regresijska pokrivenost i release kandidat
+
+- **Optimizacija rješavača:** pretraživanje jedinstvenosti Sudoku zagonetki sada koristi inkrementalne bit-maske zauzetih znamenki za retke, stupce i kanonske podmreže. Višestruko skeniranje istih jedinica za svakog kandidata zamijenjeno je konstantnim brojem operacija nad bitovima. Nema promjene vanjskog API-ja, seedova, formata spremljenih partija ni pravila igre.
+- **Validacija riješenih ploča:** provjera 4×4, 6×6 i 9×9 koristi kompaktne bit-maske umjesto privremenih listi i skupova. Nevažeće vrijednosti, ponavljanja i nekanonske dimenzije i dalje se odbacuju.
+- **Regresije i dijagnostika:** prošireni JUnit testovi provjeravaju 1.854 kombinacije seedova, formata i težina, uz bilježenje p50/p95/p99 trajanja generiranja, reproducibilnost, jedinstvenost, nemijenjanje ulaznih podataka i rubne slučajeve. Mjerenje ukupnog trajanja bilježi se u CI logovima bez nestabilnog vremenskog uvjeta za prolaz.
+- **Stabilnost izdanja:** nastavlja se zaštita uvedena u PR-ovima #86 i #87 — Android CI, svih 11 emulatorskih QA poslova na istom commitu, siguran izdavački environment te provjera potpisa. Produkcijsko izdanje ostaje blokirano ako bilo koja od obveznih provjera nije uspješna.
+- **Nova verzija:** `versionName=1.0.78`, `versionCode=79`. Ovo je kandidat koji se smije objaviti nakon uspješnih testova na završnom merge commitu. Bez odgovarajućeg postojećeg izdavačkog ključa dopušten je isključivo označeni testni prerelease.
+- **Ograničenja:** nisu potvrđeni izvorna 1:1 usporedba svih 10 vlasnikovih dizajnerskih PNG-ova, kalibracija svih šest razina stvarnim tehnikama rješavanja ni test na fizičkom uređaju. Nije tvrdnja o potpunoj sigurnosti ili odsutnosti svih grešaka.
+
 ## 1.0.77 — vjerodostojna RGB/RGBA QA provjera svih zaslona (kandidat)
 
 - **P0 — točnost usporedbe:** alat prije/poslije više ne odbacuje alfa kanal transparentnog wordmarka i launchera; promjena samo u alfa kanalu više ne može biti proglašena identičnim prikazom.

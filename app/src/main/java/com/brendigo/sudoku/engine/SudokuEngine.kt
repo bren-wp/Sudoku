@@ -63,83 +63,118 @@ object SudokuEngine {
         return Puzzle(size, br, bc, solution, board)
     }
 
+    /**
+     * Allocation-light, linear validation: every row, column and canonical box
+     * must contain each 1..size digit exactly once. Duplicate detection in a
+     * full house also proves no digits are missing.
+     */
     fun isValidCompleted(board: IntArray, size: Int, br: Int, bc: Int): Boolean {
-        if (!hasCanonicalBoxes(size, br, bc) ||
-            board.size != size * size) return false
-        val expected = (1..size).toSet()
-        for (r in 0 until size) {
-            if ((0 until size).map { board[r * size + it] }.toSet() != expected) return false
-        }
-        for (c in 0 until size) {
-            if ((0 until size).map { board[it * size + c] }.toSet() != expected) return false
-        }
-        for (r in 0 until size step br) for (c in 0 until size step bc) {
-            val values = (0 until br).flatMap { y ->
-                (0 until bc).map { x -> board[(r + y) * size + c + x] }
+        if (!hasCanonicalBoxes(size, br, bc) || board.size != size * size) return false
+        val rowUsed = IntArray(size)
+        val columnUsed = IntArray(size)
+        val boxUsed = IntArray(size)
+        val boxesPerRow = size / bc
+        for (index in board.indices) {
+            val value = board[index]
+            if (value !in 1..size) return false
+            val bit = 1 shl value
+            val row = index / size
+            val column = index % size
+            val box = (row / br) * boxesPerRow + column / bc
+            if ((rowUsed[row] or columnUsed[column] or boxUsed[box]) and bit != 0) {
+                return false
             }
-            if (values.toSet() != expected) return false
+            rowUsed[row] = rowUsed[row] or bit
+            columnUsed[column] = columnUsed[column] or bit
+            boxUsed[box] = boxUsed[box] or bit
         }
         return true
     }
 
-    /** Counts at most limit solutions, using a minimum-remaining-values search. */
+    /**
+     * Counts at most [limit] solutions using minimum-remaining-values
+     * backtracking and incremental row/column/box bit masks. Unlike rescanning
+     * every house for every candidate in the search tree, an availability mask
+     * now requires only three integer reads.
+     *
+     * Both successful and invalid searches leave [input] untouched. The
+     * generator's seeded order and the puzzle/save format are unchanged.
+     */
     fun countSolutions(input: IntArray, size: Int, br: Int, bc: Int, limit: Int = 2): Int {
-        if (!hasCanonicalBoxes(size, br, bc) ||
-            input.size != size * size || limit < 1) return 0
+        if (!hasCanonicalBoxes(size, br, bc) || input.size != size * size || limit < 1) {
+            return 0
+        }
         val board = input.clone()
-        var solutions = 0
-        fun candidates(index: Int): Int {
+        val fullMask = (1 shl (size + 1)) - 2
+        val rowUsed = IntArray(size)
+        val columnUsed = IntArray(size)
+        val boxUsed = IntArray(size)
+        val boxesPerRow = size / bc
+        val cellBox = IntArray(board.size) { index ->
+            (index / size / br) * boxesPerRow + (index % size) / bc
+        }
+
+        // Reject contradictory or corrupt givens before entering the search.
+        for (index in board.indices) {
+            val value = board[index]
+            if (value == 0) continue
+            if (value !in 1..size) return 0
+            val bit = 1 shl value
             val row = index / size
-            val col = index % size
-            var mask = ((1 shl (size + 1)) - 2)
-            for (i in 0 until size) {
-                val a = board[row * size + i]
-                val b = board[i * size + col]
-                if (a > 0) mask = mask and (1 shl a).inv()
-                if (b > 0) mask = mask and (1 shl b).inv()
+            val column = index % size
+            val box = cellBox[index]
+            if ((rowUsed[row] or columnUsed[column] or boxUsed[box]) and bit != 0) {
+                return 0
             }
-            val r0 = (row / br) * br
-            val c0 = (col / bc) * bc
-            for (r in r0 until r0 + br) for (c in c0 until c0 + bc) {
-                val v = board[r * size + c]
-                if (v > 0) mask = mask and (1 shl v).inv()
-            }
-            return mask
+            rowUsed[row] = rowUsed[row] or bit
+            columnUsed[column] = columnUsed[column] or bit
+            boxUsed[box] = boxUsed[box] or bit
         }
-        // Reject contradictory givens.
-        for (i in board.indices) if (board[i] != 0) {
-            val v = board[i]
-            if (v !in 1..size) return 0
-            board[i] = 0
-            val valid = candidates(i) and (1 shl v) != 0
-            board[i] = v
-            if (!valid) return 0
-        }
+
+        var solutions = 0
         fun search() {
             if (solutions >= limit) return
             var bestIndex = -1
             var bestMask = 0
             var bestCount = size + 1
-            for (i in board.indices) if (board[i] == 0) {
-                val mask = candidates(i)
-                val count = Integer.bitCount(mask)
-                if (count == 0) return
-                if (count < bestCount) {
-                    bestCount = count
-                    bestIndex = i
-                    bestMask = mask
-                    if (count == 1) break
+            for (index in board.indices) {
+                if (board[index] != 0) continue
+                val row = index / size
+                val column = index % size
+                val box = cellBox[index]
+                val available = fullMask and
+                    (rowUsed[row] or columnUsed[column] or boxUsed[box]).inv()
+                val candidateCount = Integer.bitCount(available)
+                if (candidateCount == 0) return
+                if (candidateCount < bestCount) {
+                    bestIndex = index
+                    bestCount = candidateCount
+                    bestMask = available
+                    if (candidateCount == 1) break
                 }
             }
-            if (bestIndex < 0) {
+            if (bestIndex == -1) {
                 solutions++
                 return
             }
-            for (value in 1..size) if (bestMask and (1 shl value) != 0) {
-                board[bestIndex] = value
+
+            val row = bestIndex / size
+            val column = bestIndex % size
+            val box = cellBox[bestIndex]
+            var choices = bestMask
+            while (choices != 0 && solutions < limit) {
+                val bit = choices and -choices
+                val digit = Integer.numberOfTrailingZeros(bit)
+                board[bestIndex] = digit
+                rowUsed[row] = rowUsed[row] or bit
+                columnUsed[column] = columnUsed[column] or bit
+                boxUsed[box] = boxUsed[box] or bit
                 search()
                 board[bestIndex] = 0
-                if (solutions >= limit) return
+                rowUsed[row] = rowUsed[row] and bit.inv()
+                columnUsed[column] = columnUsed[column] and bit.inv()
+                boxUsed[box] = boxUsed[box] and bit.inv()
+                choices = choices and (choices - 1)
             }
         }
         search()
