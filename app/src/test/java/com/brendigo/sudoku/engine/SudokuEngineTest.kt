@@ -66,11 +66,14 @@ class SudokuEngineTest {
 
     @Test fun seededStressCasesStayValidUniqueAndDoNotMutateInputs() {
         // Test many deterministic seeds without introducing a timing-sensitive gate.
-        val seeds = listOf(0, 1, 42, 2026, Int.MIN_VALUE, Int.MAX_VALUE)
+        val seeds = (-50..49).toList() + listOf(2026, Int.MIN_VALUE, Int.MAX_VALUE)
         var puzzles = 0
+        val creationNanos = ArrayList<Long>(3 * 6 * seeds.size)
         val startNanos = System.nanoTime()
         for (size in listOf(4, 6, 9)) for (difficulty in 0..5) for (seed in seeds) {
+            val generationStarted = System.nanoTime()
             val puzzle = SudokuEngine.create(size, difficulty, seed)
+            creationNanos.add(System.nanoTime() - generationStarted)
             assertTrue(
                 "Invalid solution for " + size + "/" + difficulty + "/" + seed,
                 SudokuEngine.isValidCompleted(
@@ -92,9 +95,14 @@ class SudokuEngineTest {
             )
             puzzles++
         }
+        val sorted = creationNanos.sorted()
+        fun percentileMs(pct: Int): Long = sorted[(sorted.lastIndex * pct) / 100] / 1_000_000
         println(
             "Sudoku engine regression: " + puzzles + " seeded puzzles in " +
-                ((System.nanoTime() - startNanos) / 1_000_000) + " ms"
+                ((System.nanoTime() - startNanos) / 1_000_000) + " ms" +
+                "; create p50=" + percentileMs(50) + "ms" +
+                ", p95=" + percentileMs(95) + "ms" +
+                ", p99=" + percentileMs(99) + "ms"
         )
     }
 
