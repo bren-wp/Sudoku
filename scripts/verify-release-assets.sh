@@ -88,6 +88,8 @@ if [[ "$actual_signed" == true ]]; then
   grep -Fq 'jar verified.' "$tmp/aab-signature.txt" || {
     echo '::error::Publisher-signed AAB failed signature verification' >&2; exit 1;
   }
+  bash "$(dirname "$0")/verify-publisher-certificate.sh" \
+    "$tmp/$apk" "$tmp/$aab" "${SUDOKU_EXPECTED_CERT_SHA256:?Missing pinned publisher certificate SHA-256}"
 else
   grep -Fq 'jar is unsigned.' "$tmp/aab-signature.txt" || {
     echo '::error::Test release AAB unexpectedly appears to be signed' >&2; exit 1;
