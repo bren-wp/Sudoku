@@ -91,6 +91,8 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
+      # Pin the existing Google Play UPLOAD certificate, not a generated key.
+      SUDOKU_EXPECTED_CERT_SHA256: ${{ vars.SUDOKU_EXPECTED_CERT_SHA256 }}
     steps:
       - name: Checkout merged, trusted source
         uses: actions/checkout@v4
@@ -182,6 +184,10 @@ jobs:
           set -euo pipefail
           if [[ -n "$SUDOKU_KEYSTORE_BASE64" && -n "$SUDOKU_SIGNING_KEY_ALIAS" &&
                 -n "$SUDOKU_SIGNING_STORE_PASSWORD" && -n "$SUDOKU_SIGNING_KEY_PASSWORD" ]]; then
+            if [[ -z "${SUDOKU_EXPECTED_CERT_SHA256:-}" ]]; then
+              echo "::error::Publisher signing needs a pinned SUDOKU_EXPECTED_CERT_SHA256 environment variable" >&2
+              exit 1
+            fi
             printf '%s' "$SUDOKU_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/sudoku-publisher.jks"
             echo "SUDOKU_SIGNING_STORE_FILE=$RUNNER_TEMP/sudoku-publisher.jks" >> "$GITHUB_ENV"
             echo "SUDOKU_SIGNING_KEY_ALIAS=$SUDOKU_SIGNING_KEY_ALIAS" >> "$GITHUB_ENV"
@@ -189,6 +195,11 @@ jobs:
             echo "SUDOKU_SIGNING_KEY_PASSWORD=$SUDOKU_SIGNING_KEY_PASSWORD" >> "$GITHUB_ENV"
             echo "PUBLISHER_SIGNED=true" >> "$GITHUB_ENV"
           else
+            if [[ -n "$SUDOKU_KEYSTORE_BASE64" || -n "$SUDOKU_SIGNING_KEY_ALIAS" ||
+                  -n "$SUDOKU_SIGNING_STORE_PASSWORD" || -n "$SUDOKU_SIGNING_KEY_PASSWORD" ]]; then
+              echo "::error::Partial publisher signing configuration; refusing unverified downgrade" >&2
+              exit 1
+            fi
             echo "PUBLISHER_SIGNED=false" >> "$GITHUB_ENV"
           fi
       - name: Test, lint and build Android release from merge commit
@@ -233,6 +244,7 @@ jobs:
             APK="$(find app/build/outputs/apk/release -type f -name '*release.apk' | head -n 1)"
             AAB="$(find app/build/outputs/bundle/release -type f -name '*.aab' | head -n 1)"
             test -s "$APK" && test -s "$AAB"
+            bash scripts/verify-publisher-certificate.sh "$APK" "$AAB" "$SUDOKU_EXPECTED_CERT_SHA256"
             cp "$APK" "release-assets/Sudoku-$RELEASE_TAG.apk"
             cp "$AAB" "release-assets/Sudoku-$RELEASE_TAG.aab"
             (cd release-assets && sha256sum Sudoku-*.apk Sudoku-*.aab > SHA256SUMS)
