@@ -7,7 +7,7 @@
 - `SudokuEngine.countSolutions`: postojeći minimum-remaining-values (MRV) solver sada održava bit-maske zauzetih znamenki za svaki redak, stupac i kanonsku podmrežu tijekom rekurzivnog pretraživanja. Prije svakog novog izbora ne prolazi ponovno kroz sve susjedne kućice.
 - `SudokuEngine.isValidCompleted`: provjera jednakosti sada koristi bit-maske i niti jedan privremeni Kotlin `List` / `Set` po redu, stupcu ili podmreži.
 - Ne mijenjaju se `SudokuEngine.create` javni argumenti, `Puzzle` struktura, generatorov redoslijed RNG poziva, identitet seedova niti format spremanja podataka.
-- JUnit regresije obuhvaćaju 108 reproducibilnih seed / veličina / težina kombinacija, validnost i jedinstvenost, nemijenjanje ulaza, prazne ploče i solver limit, oštećene znamenke, kratke ploče te puni završeni Sudoku.
+- JUnit regresije obuhvaćaju 1.854 reproducibilne seed / veličina / težina kombinacije, validnost i jedinstvenost, nemijenjanje ulaza, prazne ploče i solver limit, oštećene znamenke, kratke ploče te puni završeni Sudoku.
 
 ## Testiranje
 
