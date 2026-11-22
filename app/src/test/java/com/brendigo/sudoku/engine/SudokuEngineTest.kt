@@ -63,4 +63,77 @@ class SudokuEngineTest {
         assertEquals(0, SudokuEngine.countSolutions(nine.givens, 9, 1, 9))
     }
 
+
+    @Test fun seededStressCasesStayValidUniqueAndDoNotMutateInputs() {
+        // Test many deterministic seeds without introducing a timing-sensitive gate.
+        val seeds = listOf(0, 1, 42, 2026, Int.MIN_VALUE, Int.MAX_VALUE)
+        var puzzles = 0
+        val startNanos = System.nanoTime()
+        for (size in listOf(4, 6, 9)) for (difficulty in 0..5) for (seed in seeds) {
+            val puzzle = SudokuEngine.create(size, difficulty, seed)
+            assertTrue(
+                "Invalid solution for " + size + "/" + difficulty + "/" + seed,
+                SudokuEngine.isValidCompleted(
+                    puzzle.solution, size, puzzle.boxRows, puzzle.boxColumns
+                )
+            )
+            val givensBefore = puzzle.givens.clone()
+            assertEquals(
+                "Non-unique puzzle for " + size + "/" + difficulty + "/" + seed, 1,
+                SudokuEngine.countSolutions(
+                    puzzle.givens, size, puzzle.boxRows, puzzle.boxColumns
+                )
+            )
+            assertArrayEquals("Solver changed caller data", givensBefore, puzzle.givens)
+            assertArrayEquals(
+                "Seed changed output across identical invocations",
+                puzzle.givens,
+                SudokuEngine.create(size, difficulty, seed).givens
+            )
+            puzzles++
+        }
+        println(
+            "Sudoku engine regression: " + puzzles + " seeded puzzles in " +
+                ((System.nanoTime() - startNanos) / 1_000_000) + " ms"
+        )
+    }
+
+    @Test fun emptyBoardHasMultipleSolutionsAndObeysSearchLimit() {
+        val blank = IntArray(16)
+        assertEquals(1, SudokuEngine.countSolutions(blank, 4, 2, 2, limit = 1))
+        assertEquals(2, SudokuEngine.countSolutions(blank, 4, 2, 2, limit = 2))
+        assertEquals(3, SudokuEngine.countSolutions(blank, 4, 2, 2, limit = 3))
+        assertEquals(0, SudokuEngine.countSolutions(blank, 4, 2, 2, limit = 0))
+        assertArrayEquals(IntArray(16), blank)
+    }
+
+    @Test fun rejectCorruptDigitsAndDuplicateHousesForEverySize() {
+        for (size in listOf(4, 6, 9)) {
+            val br = if (size == 9) 3 else 2
+            val bc = size / br
+            val solved = SudokuEngine.create(size, 1, seed = size * 93).solution
+            val wrong = solved.clone()
+            wrong[0] = size + 1
+            assertFalse(SudokuEngine.isValidCompleted(wrong, size, br, bc))
+            assertEquals(0, SudokuEngine.countSolutions(wrong, size, br, bc))
+            wrong[0] = -1
+            assertFalse(SudokuEngine.isValidCompleted(wrong, size, br, bc))
+            assertEquals(0, SudokuEngine.countSolutions(wrong, size, br, bc))
+            wrong[0] = solved[1]
+            assertFalse(SudokuEngine.isValidCompleted(wrong, size, br, bc))
+            assertEquals(0, SudokuEngine.countSolutions(wrong, size, br, bc))
+            wrong[0] = 0
+            assertFalse(SudokuEngine.isValidCompleted(wrong, size, br, bc))
+            assertEquals(1, SudokuEngine.countSolutions(wrong, size, br, bc))
+            assertEquals(0, SudokuEngine.countSolutions(IntArray(size * size - 1), size, br, bc))
+        }
+    }
+
+    @Test fun solvedBoardsAreImmutableForSolutionCounter() {
+        val puzzle = SudokuEngine.create(9, 5, seed = 73422)
+        val solved = puzzle.solution.clone()
+        assertEquals(1, SudokuEngine.countSolutions(solved, 9, 3, 3))
+        assertArrayEquals(puzzle.solution, solved)
+    }
+
 }
